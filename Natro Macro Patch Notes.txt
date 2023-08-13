@@ -1,3 +1,9 @@
+0.7.2 Patch Notes
+
+Bugs
+-Fixed another issue with Daily Reconnect where an hours or minutes value of "00" did not function properly.  I also made it so it would not do this if the macro was not actively running.
+
+
 0.7.1 Patch Notes
 
 Bugs

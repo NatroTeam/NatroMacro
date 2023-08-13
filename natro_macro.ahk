@@ -25,12 +25,12 @@ OnMessage(0x4299, "nm_setLastHeartbeat")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.7.1"
+VersionID:="0.7.2"
 #include *i personal.ahk
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; DISABLE ROBLOX BETA APP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-RegWrite, REG_SZ, HKEY_CURRENT_USER\SOFTWARE\ROBLOX Corporation\Environments\roblox-player, LaunchExp, InBrowser
+;RegWrite, REG_SZ, HKEY_CURRENT_USER\SOFTWARE\ROBLOX Corporation\Environments\roblox-player, LaunchExp, InBrowser
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; NATRO ENHANCEMENT STUFF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4580,7 +4580,7 @@ nm_ReconnectTimeHelp(){
 	FormatTime, hourLOC, %A_Now%, HH
 	FormatTime, timeUTC, %A_NowUTC%, HH:mm
 	FormatTime, timeLOC, %A_Now%, HH:mm
-	timeDiff:=hourLOC-hourUTC
+	timeDiff:=hourUTC-hourLOC
 	convertedLocalHour:=ReconnectHour-timeDiff
 	if (convertedLocalHour>24)
 		convertedLocalHour:=convertedLocalHour-24
@@ -15842,14 +15842,15 @@ ba_harvestPlanter(planterNum){
 		}
 	}
 	sleep, 100
-	planterConfirm1:=nm_imgSearch("planterConfirm1.png",0,"center")
-	planterConfirm2:=nm_imgSearch("planterConfirm2.png",0,"center")
-	planterConfirm3:=nm_imgSearch("planterConfirm3.png",0,"center")
-	temp1:=planterConfirm1[1]
-	temp2:=planterConfirm2[1]
-	temp3:=planterConfirm3[1]
+	;planterConfirm1:=nm_imgSearch("planterConfirm1.png",0,"center")
+	;planterConfirm2:=nm_imgSearch("planterConfirm2.png",0,"center")
+	;planterConfirm3:=nm_imgSearch("planterConfirm3.png",0,"center")
+	;temp1:=planterConfirm1[1]
+	;temp2:=planterConfirm2[1]
+	;temp3:=planterConfirm3[1]
 	;msgbox 1=%temp1% 2=%temp2% 3=%temp3%
-	if (findPlanter && (planterConfirm1[1]=0 || planterConfirm2[1]=0 || planterConfirm3[1]=0)){
+	;if (findPlanter && (planterConfirm1[1]=0 || planterConfirm2[1]=0 || planterConfirm3[1]=0)){
+	if (findPlanter){
 		findPlanter := nm_imgSearch("e_button.png",10)
 		if (findPlanter[1] = 1){
 			return
@@ -16268,11 +16269,11 @@ if(bg)
 	bg:=0
 else
 	msgbox bakground task took too long
-global disableDayorNight, AFBrollingDice, BackpackPercentFiltered, ReconnectHour, ReconnectMin, DailyReconnect
+global disableDayorNight, AFBrollingDice, BackpackPercentFiltered, ReconnectHour, ReconnectMin, DailyReconnect, MacroRunning
 ;daily reconnect
 FormatTime, RChourUTC, %A_NowUTC%, HH
 FormatTime, RCminUTC, %A_Now%, mm
-if(!DailyReconnect && ReconnectHour && ReconnectMin && ReconnectHour=RChourUTC && ReconnectMin=RCminUTC) {
+if(MacroRunning && !DailyReconnect && ReconnectHour=RChourUTC && ReconnectMin=RCminUTC) {
 	DailyReconnect:=1
 	nm_setStatus("Closing", "Roblox, Daily Reconnect")
 	While(winexist("Roblox")){
