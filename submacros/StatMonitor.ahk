@@ -248,7 +248,7 @@ if FileExist("natro_macro.ahk")
 	; get version
 	Loop, Read, natro_macro.ahk
 	{
-		if (SubStr(A_LoopReadLine, 1, 11) = "VersionID:=")
+		if (SubStr(A_LoopReadLine, 1, 13) = "VersionID := ")
 		{
 			RegExMatch(A_LoopReadLine, "(?<="")(.*?)(?="")", natro_version)
 			break
@@ -267,7 +267,7 @@ if FileExist("natro_macro.ahk")
 	}
 	
 	; read information from settings\nm_config.ini
-	IniRead, EnablePlantersPlus, settings\nm_config.ini, gui, EnablePlantersPlus, 0
+	IniRead, PlanterMode, settings\nm_config.ini, gui, PlanterMode, 0
 	IniRead, MaxAllowedPlanters, settings\nm_config.ini, gui, MaxAllowedPlanters, 0
 }
 
@@ -291,7 +291,7 @@ message := "Hourly Reports will start sending in **" time "**\n"
 message .= (natro_version ? "\n\nMacro: **Natro v" natro_version "**\n"
 			. "Gather Fields: **" FieldName1 ", " FieldName2 ", " FieldName3 "**\n"
 			. "Consumables: **" ((StrLen(consumables) = 0) ? "None" : consumables) "**\n"
-			. "Planters+: **" (EnablePlantersPlus ? ("ON (" MaxAllowedPlanters " Planters)") : "OFF") "**\n"
+			. "Planters: **" ((PlanterMode = 2) ? ("ON (" MaxAllowedPlanters " Planters)") : (PlanterMode = 1) ? ("ON (MANUAL)") : "OFF") "**\n"
 			. "Hive Slot: **" HiveSlot "**"
 			: "")
 			
@@ -816,8 +816,8 @@ DetectHoney()
 	
 	; initialise array to store detected values and get bitmap and effect ready
 	detected := []
-	pBM := Gdip_BitmapFromScreen(_x+_w//2-243 "|" _y "|144|36")
-	pEffect := Gdip_CreateEffect(5,-90,25)
+	pBM := Gdip_BitmapFromScreen(_x+_w//2-241 "|" _y "|140|36")
+	pEffect := Gdip_CreateEffect(5,-80,30)
 	
 	; detect honey, enlarge image if necessary
 	Loop, 25
@@ -825,7 +825,7 @@ DetectHoney()
 		i := A_Index
 		Loop, 2
 		{
-			pBMNew := Gdip_ResizeBitmap(pBM, 480 + A_Index * i * 10, 60 + i * 2, 0, 2)
+			pBMNew := Gdip_ResizeBitmap(pBM, ((A_Index = 1) ? (300 + i * 15) : (700 - i * 15)), 36 + i * 3, 0, 2)
 			Gdip_BitmapApplyEffect(pBMNew, pEffect)
 			hBM := Gdip_CreateHBITMAPFromBitmap(pBMNew)
 			;Gdip_SaveBitmapToFile(pBMNew, i A_Index ".png")
@@ -1391,7 +1391,7 @@ SendHourlyReport()
 		}
 	}
 	
-	IniRead, MaxAllowedPlanters, settings\nm_config.ini, gui, MaxAllowedPlanters, 0	
+	planters := 0
 	Loop, 3
 	{
 		IniRead, PlanterName%A_Index%, settings\nm_config.ini, Planters, PlanterName%A_Index%, None
@@ -1399,6 +1399,8 @@ SendHourlyReport()
 		IniRead, PlanterHarvestTime%A_Index%, settings\nm_config.ini, Planters, PlanterHarvestTime%A_Index%, 20211106000000
 		IniRead, PlanterNectar%A_Index%, settings\nm_config.ini, Planters, PlanterNectar%A_Index%, None
 		IniRead, PlanterEstPercent%A_Index%, settings\nm_config.ini, Planters, PlanterEstPercent%A_Index%, 0
+		if (PlanterName%A_Index% && (PlanterName%A_Index% != "None"))
+			planters++
 	}
 	
 	for i,j in ["comforting","motivating","satisfying","refreshing","invigorating"]
@@ -1446,7 +1448,7 @@ SendHourlyReport()
 	; section 4: planters
 	Gdip_TextToGraphics(G, "PLANTERS", "s64 Center Bold cffffffff x" stat_regions["planters"][1]+stat_regions["planters"][3]//2 " y" stat_regions["planters"][2]+4, "Segoe UI")
 	
-	if MaxAllowedPlanters
+	if planters
 	{
 		i := 0
 		Loop, 3
@@ -1455,29 +1457,29 @@ SendHourlyReport()
 				continue
 				
 			i++	
-			Gdip_DrawImage(G, bitmaps["pBM" PlanterName%A_Index%], stat_regions["planters"][1]+stat_regions["planters"][3]//2-(110+220*(MaxAllowedPlanters-1))+(i-1)*440, stat_regions["planters"][2]+110, 220, 220)
+			Gdip_DrawImage(G, bitmaps["pBM" PlanterName%A_Index%], stat_regions["planters"][1]+stat_regions["planters"][3]//2-(110+220*(planters-1))+(i-1)*440, stat_regions["planters"][2]+110, 220, 220)
 			
-			pos := Gdip_TextToGraphics(G, PlanterField%A_Index%, "s52 Center Bold cffffffff x" stat_regions["planters"][1]+stat_regions["planters"][3]//2-(110+220*(MaxAllowedPlanters-1))+(i-1)*440+74 " y" stat_regions["planters"][2]+340, "Segoe UI")
+			pos := Gdip_TextToGraphics(G, PlanterField%A_Index%, "s52 Center Bold cffffffff x" stat_regions["planters"][1]+stat_regions["planters"][3]//2-(110+220*(planters-1))+(i-1)*440+74 " y" stat_regions["planters"][2]+340, "Segoe UI")
 			x := SubStr(pos, 1, InStr(pos, "|", , , 1)-1)+SubStr(pos, InStr(pos, "|", , , 2)+1, InStr(pos, "|", , , 3)-InStr(pos, "|", , , 2)-1)
 			Gdip_DrawImage(G, bitmaps["pBM" ((PlanterNectar%A_Index% = "None") ? "Unknown" : PlanterNectar%A_Index%)], x+6, stat_regions["planters"][2]+348, 60, 60)
 			
 			VarSetCapacity(duration,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",(PlanterHarvestTime%A_Index%-unix_now)*10000000,"wstr",(PlanterHarvestTime%A_Index%-unix_now > 360000) ? "N/A" : (PlanterHarvestTime%A_Index% > unix_now) ? (((PlanterHarvestTime%A_Index%-unix_now >= 3600) ? "h'h' m" : "") . ((PlanterHarvestTime%A_Index%-unix_now >= 60) ? "m'm' s" : "") . "s's'") : "'Ready'","str",duration,"int",256)
-			pos := Gdip_TextToGraphics(G, duration, "s46 Center Bold ccfffffff x" stat_regions["planters"][1]+stat_regions["planters"][3]//2-(110+220*(MaxAllowedPlanters-1))+(i-1)*440+130 " y" stat_regions["planters"][2]+406, "Segoe UI")
+			pos := Gdip_TextToGraphics(G, duration, "s46 Center Bold ccfffffff x" stat_regions["planters"][1]+stat_regions["planters"][3]//2-(110+220*(planters-1))+(i-1)*440+130 " y" stat_regions["planters"][2]+406, "Segoe UI")
 			x := SubStr(pos, 1, InStr(pos, "|", , , 1)-1)
 			Gdip_DrawImage(G, bitmaps["pBMTimer"], x-60, stat_regions["planters"][2]+410, 56, 56, , , , , 0.811765)
 			
-			if (i >= MaxAllowedPlanters)
+			if (i >= planters)
 				break
 		}
-		Loop % (MaxAllowedPlanters - i)
+		Loop % (planters - i)
 		{
-			Gdip_DrawImage(G, bitmaps["pBMUnknown"], stat_regions["planters"][1]+stat_regions["planters"][3]//2-(110+220*(MaxAllowedPlanters-1))+(i+A_Index-1)*440, stat_regions["planters"][2]+110, 220, 220)
+			Gdip_DrawImage(G, bitmaps["pBMUnknown"], stat_regions["planters"][1]+stat_regions["planters"][3]//2-(110+220*(planters-1))+(i+A_Index-1)*440, stat_regions["planters"][2]+110, 220, 220)
 			
-			pos := Gdip_TextToGraphics(G, "None", "s52 Center Bold cffffffff x" stat_regions["planters"][1]+stat_regions["planters"][3]//2-(110+220*(MaxAllowedPlanters-1))+(i+A_Index-1)*440+74 " y" stat_regions["planters"][2]+340, "Segoe UI")
+			pos := Gdip_TextToGraphics(G, "None", "s52 Center Bold cffffffff x" stat_regions["planters"][1]+stat_regions["planters"][3]//2-(110+220*(planters-1))+(i+A_Index-1)*440+74 " y" stat_regions["planters"][2]+340, "Segoe UI")
 			x := SubStr(pos, 1, InStr(pos, "|", , , 1)-1)+SubStr(pos, InStr(pos, "|", , , 2)+1, InStr(pos, "|", , , 3)-InStr(pos, "|", , , 2)-1)
 			Gdip_DrawImage(G, bitmaps["pBMUnknown"], x+6, stat_regions["planters"][2]+348, 60, 60)
 			
-			pos := Gdip_TextToGraphics(G, "N/A", "s46 Center Bold ccfffffff x" stat_regions["planters"][1]+stat_regions["planters"][3]//2-(110+220*(MaxAllowedPlanters-1))+(i+A_Index-1)*440+130 " y" stat_regions["planters"][2]+406, "Segoe UI")
+			pos := Gdip_TextToGraphics(G, "N/A", "s46 Center Bold ccfffffff x" stat_regions["planters"][1]+stat_regions["planters"][3]//2-(110+220*(planters-1))+(i+A_Index-1)*440+130 " y" stat_regions["planters"][2]+406, "Segoe UI")
 			x := SubStr(pos, 1, InStr(pos, "|", , , 1)-1)
 			Gdip_DrawImage(G, bitmaps["pBMTimer"], x-60, stat_regions["planters"][2]+410, 56, 56, , , , , 0.811765)
 		}
@@ -2070,8 +2072,8 @@ WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", Win
     local hWnd, RECT
     hWnd := WinExist(WinTitle, WinText, ExcludeTitle, ExcludeText)
     VarSetCapacity(RECT, 16, 0)
-    DllCall("user32\GetClientRect", Ptr,hWnd, Ptr,&RECT)
-    DllCall("user32\ClientToScreen", Ptr,hWnd, Ptr,&RECT)
+    DllCall("GetClientRect", "UPtr",hWnd, "Ptr",&RECT)
+    DllCall("ClientToScreen", "UPtr",hWnd, "Ptr",&RECT)
     X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
     Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
 }

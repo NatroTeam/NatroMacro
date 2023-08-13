@@ -1,62 +1,59 @@
 ﻿paths["pepper"] := "
 (LTrim Join`r`n
 ;gotoramp
-;gotocannon
-send {" RightKey " down}
-Walk(22.5)
+Send {space down}
+HyperSleep(300)
+Send {space up}
+" nm_Walk(36, RightKey) "
 send {space down}
+HyperSleep(300)
+send {space up}
+" nm_Walk(4, RightKey) "
+" nm_Walk(6, FwdKey) "
+" nm_Walk(3, RightKey) "
+send {space down}
+HyperSleep(300)
+send {space up}
+" nm_Walk(18, RightKey) "
+send {space down}
+HyperSleep(300)
+send {space up}
+" nm_Walk(19, FwdKey) "
+" nm_Walk(5, RightKey) "
+send {space down}
+HyperSleep(300)
+send {space up}
+" nm_Walk(4, RightKey) "
+send {space down}
+HyperSleep(300)
+send {space up}
+" nm_Walk(8, RightKey, FwdKey) "
+send {space down}
+HyperSleep(300)
+send {space up}
+" nm_Walk(14, FwdKey) "
+" nm_Walk(20, LeftKey) "
+send {space down}
+HyperSleep(300)
+send {space up}
+" nm_Walk(8, LeftKey) "
+Send {" FwdKey " down}{space down}
 HyperSleep(200)
 send {space up}
-Walk(2.25)
-send {" FwdKey " down}
-Walk(1.8)
-send {" FwdKey " up}
-Walk(3.375)
+Walk(20)
+Send {" RightKey " down}		
+Walk(9)
 send {space down}
-HyperSleep(200)
+HyperSleep(300)
 send {space up}
-Walk(4.5)
-send {" RightKey " up}{" FwdKey " down}
+Walk(1)
+Send {" FwdKey " up}	
+Walk(33)
 send {space down}
-HyperSleep(100)
+HyperSleep(300)
 send {space up}
-Walk(0.9)
-send {" RightKey " down}
-Walk(22.5)
-send {" FwdKey " up}
-Walk(4.5)
-send {space down}
-HyperSleep(100)
-send {space up}
-HyperSleep(800)
-send {" RightKey " up}{" FwdKey " down}{" LeftKey " down}{space down}
-HyperSleep(100)
-send {space up}
-Walk(15.75)
-send {" FwdKey " up}
-Walk(4.5)
-send {space down}
-HyperSleep(100)
-send {space up}
-HyperSleep(500)
-send {" LeftKey " up}{" FwdKey " down}
-HyperSleep(400)
-send {space down}
-HyperSleep(100)
-send {space up}
-Walk(4.5)
-send {" RightKey " down}
-Walk(11.25)
-send {space down}
-HyperSleep(100)
-send {space up}
-Walk(9.45)
-send {" FwdKey " up}
-Walk(4.05)
-send {space down}
-HyperSleep(100)
-send {space up}
-Walk(4.5)
-send {" RightKey " up}{" RotRight " 2}
-" nm_Walk(8.1, FwdKey) "
+Walk(4)
+send {" RightKey " up}{" FwdKey " up}{" RotRight " 2}
+" nm_Walk(9, FwdKey) "
+" nm_Walk(1.5, RightKey) "
 )"

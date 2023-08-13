@@ -12,6 +12,8 @@ send {" RightKey " up}{" BackKey " up}
 HyperSleep(800)
 send {space}{" RotRight " 2}
 Sleep, 2000
-" nm_Walk(20, FwdKey, RightKey) "
+" nm_Walk(10, FwdKey, RightKey) "
+" nm_Walk(15, RightKey) "
+" nm_Walk(15, FwdKey) "
 " nm_Walk(10, BackKey, LeftKey) "
 )"

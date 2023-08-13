@@ -1,48 +1,43 @@
 ﻿paths["pepper"] := "
 (LTrim Join`r`n
 ;gotoramp
-;gotocannon
-" nm_Walk(28, RightKey) "
-send {space down}{" RightKey " down}
-HyperSleep(200)
+Send {space down}
+HyperSleep(300)
+Send {space up}
+" nm_Walk(36, RightKey) "
+send {space down}
+HyperSleep(300)
 send {space up}
-Walk(5)
-Send {" FwdKey " down}
-Walk(4)
-Send {" RightKey " up}
-Walk(4)
-Send {" FwdKey " up}
-send {space down}{" FwdKey " down}
-HyperSleep(200)
+" nm_Walk(4, RightKey) "
+" nm_Walk(6, FwdKey) "
+" nm_Walk(3, RightKey) "
+send {space down}
+HyperSleep(300)
 send {space up}
-Walk(14)
-Send {" LeftKey " down}
-Walk(2)
-Send {" LeftKey " up}{" RightKey " down}
-Walk(10)
+" nm_Walk(6, FwdKey) "
+" nm_Walk(2, LeftKey, FwdKey) "
+" nm_Walk(8, FwdKey) "
+Send {" FwdKey " down}{" RightKey " down}
+Walk(11)
 send {space down}{" RightKey " up}
 HyperSleep(200)
 send {space up}
-HyperSleep(750)
+HyperSleep(1100)
 send {space down}
 HyperSleep(200)
 send {space up}
-HyperSleep(750)
-send {space down}
-HyperSleep(200)
-send {space up}
-Walk(15)
+Walk(18)
 send {space down}
 HyperSleep(200)
 send {space up}
 Walk(20)
-Send {" RightKey " down}		
-Walk(10)
+Send {" RightKey " down}
+Walk(9)
 send {space down}
 HyperSleep(300)
 send {space up}
 Walk(1)
-Send {" FwdKey " up}	
+Send {" FwdKey " up}
 Walk(33)
 send {space down}
 HyperSleep(300)
@@ -54,3 +49,4 @@ Send {" RightKey " up}
 " nm_Walk(10, FwdKey) "
 " nm_Walk(10, BackKey, LeftKey) "
 )"
+;path 230212 zaappiix

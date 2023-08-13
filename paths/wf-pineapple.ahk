@@ -13,8 +13,10 @@ send {space down}
 Hypersleep(50)
 send {space up}
 " nm_walk(4, rightkey) "
-Hypersleep(1000)
-send {e}
+Hypersleep(1100)
+send {e down}
+HyperSleep(100)
+send {e up}
 Hypersleep(3000)
 " nm_Walk(34, FwdKey, RightKey) "
 )"

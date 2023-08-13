@@ -1,43 +1,40 @@
 ﻿paths["coconut"] := "
 (LTrim Join`r`n
 ;gotoramp
-;gotocannon
-send {" RightKey " down}
-Walk(22.5)
+Send {space down}
+HyperSleep(300)
+Send {space up}
+" nm_Walk(36, RightKey) "
 send {space down}
-HyperSleep(200)
+HyperSleep(300)
 send {space up}
-Walk(2.25)
-send {" FwdKey " down}
-Walk(1.8)
-send {" FwdKey " up}
-Walk(3.375)
+" nm_Walk(4, RightKey) "
+" nm_Walk(6, FwdKey) "
+" nm_Walk(3, RightKey) "
 send {space down}
-HyperSleep(200)
+HyperSleep(300)
 send {space up}
-Walk(4.5)
-send {" RightKey " up}{" FwdKey " down}
+" nm_Walk(18, RightKey) "
 send {space down}
-HyperSleep(100)
+HyperSleep(300)
 send {space up}
-Walk(0.9)
-send {" RightKey " down}
-Walk(22.5)
-send {" FwdKey " up}
-Walk(4.5)
+" nm_Walk(19, FwdKey) "
+" nm_Walk(5, RightKey) "
 send {space down}
-HyperSleep(100)
+HyperSleep(300)
 send {space up}
-HyperSleep(800)
-send {" RightKey " up}{" FwdKey " down}{" LeftKey " down}{space down}
-HyperSleep(100)
-send {space up}
-Walk(15.75)
-send {" FwdKey " up}
-Walk(4.5)
+" nm_Walk(4, RightKey) "
 send {space down}
-HyperSleep(100)
+HyperSleep(300)
 send {space up}
-Walk(27)
-send {" LeftKey " up}
+" nm_Walk(8, RightKey, FwdKey) "
+send {space down}
+HyperSleep(300)
+send {space up}
+" nm_Walk(14, FwdKey) "
+" nm_Walk(20, LeftKey) "
+send {space down}
+HyperSleep(300)
+send {space up}
+" nm_Walk(27, LeftKey) "
 )"

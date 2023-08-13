@@ -1,31 +1,33 @@
 ﻿paths["coconut"] := "
 (LTrim Join`r`n
 ;gotoramp
-;gotocannon
-send {e down}
-HyperSleep(100)
-send {e up}{" FwdKey " down}{" RightKey " down}
-HyperSleep(500)
-send {space 2}
-HyperSleep(3800)
-send {" RightKey " up}
-HyperSleep(2050)
-send {" RightKey " down}
-HyperSleep(2000)
-send {" RightKey " up}{" FwdKey " up}
+Send {space down}
+HyperSleep(300)
+Send {space up}
+" nm_Walk(36, RightKey) "
 send {space down}
-HyperSleep(50)
+HyperSleep(300)
 send {space up}
-" nm_Walk(3, FwdKey) "
-HyperSleep(750)
+" nm_Walk(4, RightKey) "
+" nm_Walk(5, FwdKey) "
+" nm_Walk(3, RightKey) "
 send {space down}
-HyperSleep(50)
+HyperSleep(300)
 send {space up}
-" nm_Walk(3, FwdKey) "
-HyperSleep(750)
+" nm_Walk(6, FwdKey) "
+" nm_Walk(2, LeftKey, FwdKey) "
+" nm_Walk(8, FwdKey) "
+Send {" FwdKey " down}{" RightKey " down}
+Walk(11)
+send {space down}{" RightKey " up}
+HyperSleep(200)
+send {space up}
+HyperSleep(1100)
 send {space down}
-HyperSleep(50)
+HyperSleep(200)
 send {space up}
-" nm_Walk(13, FwdKey) "
+Walk(18)
+Send {" FwdKey " up}
 " nm_Walk(13.5, LeftKey) "
 )"
+;path 230212 zaappiix

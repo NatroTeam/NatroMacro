@@ -10,6 +10,6 @@ send {space 2}
 HyperSleep(2750)
 send {" LeftKey " up}{" BackKey " down}
 HyperSleep(1150)
-send {" BackKey " up}{space}{" RotLeft " 4}
+send {" BackKey " up}{space}{" RotRight " 4}
 Sleep, 2000
 )"

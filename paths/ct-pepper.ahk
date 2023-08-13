@@ -1,46 +1,50 @@
 ﻿paths["pepper"] := "
 (LTrim Join`r`n
 ;gotoramp
-;gotocannon
-send {e down}
-HyperSleep(100)
-send {e up}{" FwdKey " down}{" RightKey " down}
-HyperSleep(500)
-send {space 2}
-HyperSleep(3800)
-send {" RightKey " up}
-HyperSleep(2050)
-send {" RightKey " down}
-HyperSleep(2000)
-send {" RightKey " up}{" FwdKey " up}
+Send {space down}
+HyperSleep(300)
+Send {space up}
+" nm_Walk(36, RightKey) "
 send {space down}
-HyperSleep(50)
+HyperSleep(300)
 send {space up}
-" nm_Walk(3, FwdKey) "
-HyperSleep(750)
+" nm_Walk(4, RightKey) "
+" nm_Walk(6, FwdKey) "
+" nm_Walk(3, RightKey) "
 send {space down}
-HyperSleep(50)
+HyperSleep(300)
 send {space up}
-" nm_Walk(3, FwdKey) "
-HyperSleep(750)
+" nm_Walk(6, FwdKey) "
+" nm_Walk(2, LeftKey, FwdKey) "
+" nm_Walk(8, FwdKey) "
+Send {" FwdKey " down}{" RightKey " down}
+Walk(11)
+send {space down}{" RightKey " up}
+HyperSleep(200)
+send {space up}
+HyperSleep(1100)
 send {space down}
-HyperSleep(50)
+HyperSleep(200)
 send {space up}
-" nm_Walk(13, FwdKey) "
-send {" RightKey " down}{" FwdKey " down}{space down}
-HyperSleep(50)
-send {space up}
-Walk(5000*9/2000)
+Walk(18)
 send {space down}
-HyperSleep(100)
+HyperSleep(200)
 send {space up}
-Walk(1500*9/2000)
-send {" FwdKey " up}
-Walk(2000*9/2000)
+Walk(20)
+Send {" RightKey " down}
+Walk(9)
 send {space down}
-HyperSleep(100)
+HyperSleep(300)
 send {space up}
-Walk(1000*9/2000)
+Walk(1)
+Send {" FwdKey " up}
+Walk(33)
+send {space down}
+HyperSleep(300)
+send {space up}
+Walk(4)
 send {" RightKey " up}{" FwdKey " up}{" RotRight " 2}
-" nm_Walk(1900*9/2000, FwdKey) "
+" nm_Walk(9, FwdKey) "
+" nm_Walk(1.5, RightKey) "
 )"
+;path 230212 zaappiix

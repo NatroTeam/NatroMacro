@@ -21,15 +21,15 @@
 	" nm_Walk(3, FwdKey) "
 	" nm_Walk(8, LeftKey) "
 	" nm_Walk(3.6, RightKey) "
-	" nm_Walk(40, FwdKey) "
+	" nm_Walk(41, FwdKey) "
 	send {space down}
 	HyperSleep(100)
 	send {space up}
-	" nm_Walk(21.5, FwdKey) "
+	" nm_Walk(21, FwdKey) "
 	send {space down}
 	HyperSleep(100)
 	send {space up}
-	" nm_Walk(3.5, FwdKey) "
+	" nm_Walk(3, FwdKey) "
 	Sleep 1000
 	)"
 }
@@ -55,15 +55,16 @@ else
 	" nm_Walk(3, FwdKey) "
 	" nm_Walk(8, LeftKey) "
 	" nm_Walk(3.6, RightKey) "
-	" nm_Walk(40, FwdKey) "
+	" nm_Walk(41, FwdKey) "
 	send {space down}
 	HyperSleep(100)
 	send {space up}
-	" nm_Walk(21.5, FwdKey) "
+	" nm_Walk(21, FwdKey) "
 	send {space down}
 	HyperSleep(100)
 	send {space up}
-	" nm_Walk(3.5, FwdKey) "
+	" nm_Walk(3, FwdKey) "
 	Sleep 1000
 	)"
 }
+;path 230212 zaappiix

@@ -1,3 +1,39 @@
+0.9.1 Patch Notes
+
+New Features
+- Manual Planters have been reintroduced! Special thanks to Raychel (our new Dev Team member!) and El Gato for developing the functions involved.
+- Planter Timers has been updated to 3.0! New features include the ability to add your own planter and edit the timers for an existing planter.
+- Added the ability to detect planter progress if set to Harvest on Full Grown. This will allow the macro to account for Nectar Sipping!
+- Added 'Snowflake' hotbar option. This allows the option to use Snowflakes until a certain percentage of Cool Breeze has been reached.
+- Replaced 'Gifted Vicious Hive Bonus' checkbox with a customisable 'Monster Respawn Time' option, allowing a custom bonus.
+
+Bugs
+- Fixed a bug where the macro would not back-scroll properly if the full quest is not visible, which caused issues in quest log detection.
+- Fixed an issue where the macro would not move due to 64-bit AHK not interacting with the Roblox window.
+- Changed Mondo time conditions to use UTC time rather than local time, fixing the issue where Mondo time would be incorrect in certain timezones.
+- Fixed an issue where an invalid custom pattern would break pattern importing by adding a syntax check when importing each pattern.
+- Updated closing tab system on reconnect to work for all browsers, fixing the issue where the macro would launch several new tabs without closing them.
+- Fixed some issues with honey detection in StatMonitor.
+
+Other
+- Changed to a new system of keypresses to work identically for all keyboard layouts. Key Settings are no longer required to be set.
+- Implemented adding of reconnect duration to planter timers after a successful reconnect.
+- Reworked inventory searching to improve accuracy when Roblox window size is changed.
+- Added a loading indicator to show progress of creating GUI before the macro can show it.
+- Added "Natro so broke 😩" checkbox with the ability to enable/disable the message.
+- Added Walk Convert option when harvesting planters that fill up your bag.
+- Added option to disable "Fallback to Public Server" to prevent joining Public Servers in any case.
+- Increased BSS "Loading" timeout during reconnect to 4 minutes (previously 2).
+- Increased Vicious Bee battle timeout to 10 minutes (previously 5).
+- Changed Natro icon to use a transparent background instead of the previous black background.
+- Added disabling of >>Donate<< and Join Discord links while macro is running.
+- Updated several paths (thanks to Zaappiix for these!)
+- Added Roblox Group link in Settings tab in hope that we will acquire more members.
+- Added a custom tray menu (right click on Natro icon in system tray).
+- Reworked nm_claimHiveSlot() to dynamically detect free slots and claim a hive slot much faster.
+- Added a check for 'Disconnected' message during reconnect to allow the macro to try again immediately.
+
+
 0.9.0 Patch Notes
 
 Bugs

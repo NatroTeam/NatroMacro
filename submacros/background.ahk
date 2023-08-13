@@ -7,15 +7,17 @@ SetBatchLines -1
 SetWorkingDir %A_ScriptDir%
 
 RunWith(32)
-runWith(version){	
-	if (A_PtrSize=(version=32?4:8))
+RunWith(bits) {
+	If (A_IsUnicode && (A_PtrSize = (bits = 32 ? 4 : 8)))
 		Return
-	SplitPath,A_AhkPath,,ahkDir
-	if (!FileExist(correct := ahkDir "\AutoHotkeyU" version ".exe")){
-		MsgBox,0x10,"Error",% "Couldn't find the " version " bit Unicode version of Autohotkey in:`n" correct
-		ExitApp
-	}
-	Run,"%correct%" "%A_ScriptName%",%A_ScriptDir%
+	
+	SplitPath, A_AhkPath,, ahkDirectory
+
+	If (!FileExist(ahkPath := ahkDirectory "\AutoHotkeyU" bits ".exe"))
+		MsgBox, 0x10, "Error", % "Couldn't find the " bits "-bit Unicode version of Autohotkey in:`n" ahkPath
+	Else 
+		Run, "%ahkPath%" "%A_ScriptName%", %A_ScriptDir%
+
 	ExitApp
 }
 
@@ -154,7 +156,7 @@ nm_dayOrNight(){
 	static confirm:=0
 	if (disableDayorNight || StingerCheck=0)
 		return
-	if(((VBState=1) && ((nowUnix()-NightLastDetected)>400 || (nowUnix()-NightLastDetected)<0)) || ((VBState=2) && ((nowUnix()-VBLastKilled)>(400) || (nowUnix()-VBLastKilled)<0))) {
+	if(((VBState=1) && ((nowUnix()-NightLastDetected)>400 || (nowUnix()-NightLastDetected)<0)) || ((VBState=2) && ((nowUnix()-VBLastKilled)>(600) || (nowUnix()-VBLastKilled)<0))) {
 		VBState:=0
 		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
 			PostMessage, 0x5555, 3, 0
@@ -461,8 +463,8 @@ WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", Win
     local hWnd, RECT
     hWnd := WinExist(WinTitle, WinText, ExcludeTitle, ExcludeText)
     VarSetCapacity(RECT, 16, 0)
-    DllCall("user32\GetClientRect", Ptr,hWnd, Ptr,&RECT)
-    DllCall("user32\ClientToScreen", Ptr,hWnd, Ptr,&RECT)
+    DllCall("GetClientRect", "UPtr",hWnd, "Ptr",&RECT)
+    DllCall("ClientToScreen", "UPtr",hWnd, "Ptr",&RECT)
     X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
     Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
 }

@@ -15,5 +15,6 @@ HyperSleep(600)
 " nm_Walk(15, FwdKey, RightKey) "
 " nm_Walk(22, RightKey) "
 " nm_Walk(30, BackKey) "
-" nm_Walk(7, LeftKey) " 
+" nm_Walk(7, LeftKey) "
+send {" RotLeft " 4}
 )"
