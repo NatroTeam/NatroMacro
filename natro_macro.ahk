@@ -25,7 +25,7 @@ OnMessage(0x4299, "nm_setLastHeartbeat")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.7.0"
+VersionID:="0.7.1"
 #include *i personal.ahk
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; DISABLE ROBLOX BETA APP
@@ -4576,10 +4576,10 @@ nm_setReconnectMin(){
 }
 nm_ReconnectTimeHelp(){
 	global ReconnectHour, ReconnectMin
-	FormatTime, hourUTC, %A_NowUTC%, hh
-	FormatTime, hourLOC, %A_Now%, hh
-	FormatTime, timeUTC, %A_NowUTC%, hh:mm
-	FormatTime, timeLOC, %A_Now%, hh:mm
+	FormatTime, hourUTC, %A_NowUTC%, HH
+	FormatTime, hourLOC, %A_Now%, HH
+	FormatTime, timeUTC, %A_NowUTC%, HH:mm
+	FormatTime, timeLOC, %A_Now%, HH:mm
 	timeDiff:=hourLOC-hourUTC
 	convertedLocalHour:=ReconnectHour-timeDiff
 	if (convertedLocalHour>24)
@@ -16270,7 +16270,7 @@ else
 	msgbox bakground task took too long
 global disableDayorNight, AFBrollingDice, BackpackPercentFiltered, ReconnectHour, ReconnectMin, DailyReconnect
 ;daily reconnect
-FormatTime, RChourUTC, %A_NowUTC%, hh
+FormatTime, RChourUTC, %A_NowUTC%, HH
 FormatTime, RCminUTC, %A_Now%, mm
 if(!DailyReconnect && ReconnectHour && ReconnectMin && ReconnectHour=RChourUTC && ReconnectMin=RCminUTC) {
 	DailyReconnect:=1
