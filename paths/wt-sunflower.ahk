@@ -1,8 +1,7 @@
-﻿paths["sunflower"] := "
+﻿paths["dandelion"] := "
 (LTrim Join`r`n
 ;gotoramp
-" nm_Walk(9, BackKey) "
-" nm_Walk(6.75, BackKey, RightKey) "
-send {" RotRight " 2}
-" nm_Walk(27, RightKey) "
+" nm_Walk(40, BackKey, LeftKey) "
+" nm_Walk(10, LeftKey) "
+send {" RotLeft " 2}
 )"

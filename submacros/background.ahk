@@ -42,7 +42,6 @@ OnMessage(0x5554, "nm_setGlobalNum", 255)
 OnMessage(0x5555, "nm_setState", 255)
 
 loop {
-	Critical, On
 	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
 	nm_deathCheck()
 	nm_guidCheck()
@@ -52,13 +51,12 @@ loop {
 	nm_guidingStarDetect()
 	nm_dailyReconnect()
 	(Mod(A_Index, 10) = 0) ? nm_sendHeartbeat()
-	Critical, Off
 	sleep, 1000
 }
 
 nm_setGlobalNum(wParam, lParam){
-	global
-	local var
+	Critical
+	global resetTime, NightLastDetected, VBState, StingerCheck, VBLastKilled, DailyReconnect, LastHeartbeat
 	static arr:=["resetTime", "NightLastDetected", "VBState", "StingerCheck", "VBLastKilled", "DailyReconnect", "LastHeartbeat"]
 	
 	var := arr[wParam], %var% := lParam
@@ -66,7 +64,8 @@ nm_setGlobalNum(wParam, lParam){
 }
 
 nm_setState(wParam, lParam){
-	global
+	Critical
+	global state, lastState
 	state := wParam, LastState := lParam
 	return 0
 }
@@ -386,7 +385,7 @@ nm_dailyReconnect(){
 	if ((ReconnectHour = "") || (ReconnectMin = "") || (ReconnectInterval = ""))
 		return
 	FormatTime, RChourUTC, %A_NowUTC%, HH
-	FormatTime, RCminUTC, %A_Now%, mm
+	FormatTime, RCminUTC, %A_NowUTC%, mm
 	HourReady:=0
 	Loop % 24//ReconnectInterval
 	{
@@ -425,7 +424,7 @@ nm_sendHeartbeat(){
 				sleep, 1000
 			}
 			
-			Run, ..\natro_macro.ahk
+			run, "%A_AhkPath%" "..\natro_macro.ahk"
 			WinWait, Natro ahk_class AutoHotkeyGUI, , 300
 			if (success := !ErrorLevel) {
 				Sleep, 5000

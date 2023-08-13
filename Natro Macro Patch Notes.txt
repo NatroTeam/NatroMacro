@@ -1,3 +1,37 @@
+0.9.0 Patch Notes
+
+Bugs
+- Fixed Mondo loot path falling off Mountain Top Field.
+- Fixed infinite Bug Run when collecting Rage tokens for Riley Bee's Rampage quest.
+- Fixed an issue where an extra digit is detected in honey monitoring, sometimes causing a misread 10x greater than the actual amount.
+- Fixed an issue where reconnect would fail for very small window sizes.
+- Fixed Reconnect Interval input breaking if 0 is entered.
+- Fixed duplicate status updates after failed reconnect attempts.
+- Fixed an issue where StatMonitor would not detect Mondo buff amount correctly.
+- Fixed an issue where a quest would not be detected correctly if it is near a Beesmas quest.
+- Fixed an issue where the macro would not click during Stump Snail.
+- Fixed various issues with Daily Reconnect (only executing once, starting late, etc.)
+
+Other
+- Set external scripts to prefer 64-bit where applicable to improve performance.
+- Optimised the MoveSpeed Correction function to execute faster, detect more accurately, and apply trapezoidal rule for changes in haste.
+- Increased maximum time limit for patterns to 180 seconds (previously 90).
+- Adjusted hive convert function to start immediately on a successful walk back.
+- Reworked Reconnect Time helpbox to support offsets with varied minutes and calculate offset more accurately.
+- The macro will no longer close all other AHK scripts on exit, only those from a Natro Macro instance.
+- Added disconnect checking during a reset loop to increase speed of reconnects further.
+- Added some new convert interrupt status updates.
+- Reduced variation of some message bitmaps (e.g. to fix early detection of red cannon).
+- Changed Baby Love token wait location for King Beetle to increase chance of success.
+- Updated some paths to work with incorrect hive slot setting.
+- Implemented screenshot image .jpg compression to drastically reduce file size, resulting in faster sending and loading of screenshots.
+- Edited screenshot function to specifically capture Roblox window if it exists, and all monitor screens otherwise.
+- Added BSS Rejoin as an acceptable game for Private Server links in Settings tab.
+- Slightly adjusted Candles path and Glue Dispenser lair path to improve reliability.
+- Reduced width of hive images to allow detection even on the minimum window size.
+- Revamped in-game menu opening to make it more stable and less susceptible to game bugs.
+
+
 0.8.9 Patch Notes
 
 New Features

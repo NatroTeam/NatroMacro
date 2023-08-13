@@ -2,11 +2,11 @@
 (LTrim Join`r`n
 ;gotoramp
 Send {space down}
-HyperSleep(100)
+HyperSleep(300)
 Send {space up}
-" nm_Walk(32, RightKey) "
+" nm_Walk(36, RightKey) "
 send {space down}
-HyperSleep(100)
+HyperSleep(300)
 send {space up}
 " nm_Walk(6, RightKey) "
 Sleep 500

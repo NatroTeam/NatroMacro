@@ -559,7 +559,7 @@ DetectBuffs()
 	{
 		for k,v in buff_values
 		{
-			buff_values[v][i] := 0
+			v[i] := 0
 			string .= k ":" 0 "`n"
 		}
 		return string
@@ -578,21 +578,20 @@ DetectBuffs()
 	}
 	
 	; bear morphs
+	buff_values["bear"][i] := 0
 	for k,v in ["Brown","Black","Panda","Polar","Gummy","Science","Mother"]
 	{
-		if (Gdip_ImageSearch(pBMArea, buff_bitmaps["pBMBear" v], , , 43, , 45, 6, , 7) = 1)
+		if (Gdip_ImageSearch(pBMArea, buff_bitmaps["pBMBear" v], , , 43, , 45, 8, , 2) = 1)
 		{
 			buff_values["bear"][i] := 1
 			break
 		}
-	}
-	if !buff_values["bear"][i]
-		buff_values["bear"][i] := 0
+	}		
 	
 	; basic x1-x10
-	for k,v in ["focus","bombcombo","balloonaura","clock","precision","honeymark","pollenmark","mondo","reindeerfetch"]
+	for k,v in ["focus","bombcombo","balloonaura","clock","precision","honeymark","pollenmark","reindeerfetch"]
 	{
-		if (Gdip_ImageSearch(pBMArea, buff_bitmaps["pBM" v], list, , (InStr(v, "mark") || (v = "mondo")) ? 20 : 30, , 50, InStr(v, "mark") ? 6 : (v = "mondo") ? 21 : 0, , 7) != 1)
+		if (Gdip_ImageSearch(pBMArea, buff_bitmaps["pBM" v], list, , InStr(v, "mark") ? 20 : 30, , 50, InStr(v, "mark") ? 6 : 0, , 7) != 1)
 		{
 			buff_values[v][i] := 0
 			continue
@@ -603,6 +602,29 @@ DetectBuffs()
 		Loop, 9
 		{
 			if (Gdip_ImageSearch(pBMArea, buff_characters[10-A_Index], , x-20, 15, x, 50) = 1)
+			{
+				buff_values[v][i] := (A_Index = 9) ? 10 : 10 - A_Index
+				break
+			}
+			if (A_Index = 9)
+				buff_values[v][i] := 1
+		}
+	}
+	
+	; mondo
+	for k,v in ["mondo"]
+	{
+		if (Gdip_ImageSearch(pBMArea, buff_bitmaps["pBM" v], list, , 20, , 46, 21, , 7) != 1)
+		{
+			buff_values[v][i] := 0
+			continue
+		}
+			
+		x := SubStr(list, 1, InStr(list, ",")-1)
+			
+		Loop, 9
+		{
+			if (Gdip_ImageSearch(pBMArea, buff_characters[10-A_Index], , x+16, 20, x+36, 46) = 1)
 			{
 				buff_values[v][i] := (A_Index = 9) ? 10 : 10 - A_Index
 				break
@@ -794,23 +816,23 @@ DetectHoney()
 	
 	; initialise array to store detected values and get bitmap and effect ready
 	detected := []
-	pBM := Gdip_BitmapFromScreen(_x+_w//2-241 "|" _y+4 "|140|28")
-	pEffect := Gdip_CreateEffect(5,-80,30)
+	pBM := Gdip_BitmapFromScreen(_x+_w//2-243 "|" _y "|144|36")
+	pEffect := Gdip_CreateEffect(5,-90,25)
 	
 	; detect honey, enlarge image if necessary
-	Loop, 15
+	Loop, 25
 	{
 		i := A_Index
 		Loop, 2
 		{
-			pBMNew := Gdip_ResizeBitmap(pBM, ((A_Index = 1) ? (250 + i * 25) : (750 - i * 25)), 34 + i * 4, 0, 2)
+			pBMNew := Gdip_ResizeBitmap(pBM, 480 + A_Index * i * 10, 60 + i * 2, 0, 2)
 			Gdip_BitmapApplyEffect(pBMNew, pEffect)
 			hBM := Gdip_CreateHBITMAPFromBitmap(pBMNew)
 			;Gdip_SaveBitmapToFile(pBMNew, i A_Index ".png")
 			Gdip_DisposeImage(pBMNew)
 			pIRandomAccessStream := HBitmapToRandomAccessStream(hBM)
 			DllCall("DeleteObject", "Ptr", hBM)
-			try detected.Push((StrLen((n := RegExReplace(StrReplace(StrReplace(StrReplace(ocr(pIRandomAccessStream, ocr_language), "o", "0"), "i", "1"), "l", "1"), "\D"))) > 0) ? n : 0)
+			try detected[v := ((StrLen((n := RegExReplace(StrReplace(StrReplace(StrReplace(StrReplace(ocr(pIRandomAccessStream, ocr_language), "o", "0"), "i", "1"), "l", "1"), "a", "4"), "\D"))) > 0) ? n : 0)] := [ (detected[v][1] ? detected[v][1]+1 : 1), detected[v][2] . " " i . A_Index ]
 		}
 	}
 	
@@ -818,9 +840,19 @@ DetectHoney()
 	Gdip_DisposeImage(pBM), Gdip_DisposeEffect(pEffect)
 	DllCall("psapi.dll\EmptyWorkingSet", "ptr", -1)
 	
+	; evaluate current honey
+	for k in detected
+	{
+		i := detected.MaxIndex()
+		if (current_honey := (detected[i][1] > 2) ? i : 0)
+			break
+		else
+			detected.Delete(i)
+	}
+	
 	; update honey values array and write values to ini
 	index := (A_Min = "00") ? 60 : A_Min
-	if (current_honey := maxX(detected))
+	if current_honey
 	{
 		honey_values[index] := current_honey
 		if FileExist("settings\nm_config.ini")
@@ -896,7 +928,7 @@ SendHourlyReport()
 		if (honey_values[k+1] || (honey_values[k+1] = 0))
 			honey_gradients[k+1] := (honey_values[k+1]-honey_values[k])/60
 	honey_gradients[honey_gradients.MinIndex()-1] := honey_gradients[honey_gradients.MinIndex()], honey_gradients[honey_gradients.MaxIndex()+1] := honey_gradients[honey_gradients.MaxIndex()]
-	honey_12h.RemoveAt(0, 14)
+	honey_12h.RemoveAt(0, 15)
 	Loop, 15
 		honey_12h.Push(honey_values[4*A_Index])
 		
