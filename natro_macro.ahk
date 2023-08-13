@@ -25,7 +25,7 @@ OnMessage(0x4299, "nm_setLastHeartbeat")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.6.6"
+VersionID:="0.6.7"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; DISABLE ROBLOX BETA APP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -9279,56 +9279,45 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 		TCFBKey:=AFCFBKey
 		AFCFBKey:=temp
 		;;;;;;;;;;;;;;;;;;;;;;;;;
+		;183
 		send {%TCLRKey% down}
-		DllCall("Sleep",UInt,183*MoveSpeedFactor*(reps*2+1.25))
-		;sleep, 300*MoveSpeedFactor*(reps*2+1)
+		DllCall("Sleep",UInt,274*MoveSpeedFactor*(reps*2+1.25))
 		send {%AFCFBKey% down}
 		send {%TCLRKey% up}
 		DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
-		;sleep, 1000*MoveSpeedFactor*size
 		send {%AFCFBKey% up}
 		loop %reps% {
 			send {%AFCLRKey% down}
-			DllCall("Sleep",UInt,183*MoveSpeedFactor)
-			;sleep, 300*MoveSpeedFactor
+			DllCall("Sleep",UInt,274*MoveSpeedFactor)
 			send {%TCFBKey% down}
 			send {%AFCLRKey% up}
 			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
-			;sleep, 1000*MoveSpeedFactor*size
 			send {%AFCLRKey% down}
 			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,183*MoveSpeedFactor)
-			;sleep, 300*MoveSpeedFactor
+			DllCall("Sleep",UInt,274*MoveSpeedFactor)
 			send {%AFCLRKey% up}
 			send {%AFCFBKey% down}
 			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
-			;sleep, 1000*MoveSpeedFactor*size
 			send {%AFCFBKey% up}
 		}
 		send {%TCLRKey% down}
-		DllCall("Sleep",UInt,183*MoveSpeedFactor*(reps*2+1))
-		;sleep, 300*MoveSpeedFactor*(reps*2)
+		DllCall("Sleep",UInt,274*MoveSpeedFactor*(reps*2+1))
 		send {%TCFBKey% down}
 		send {%TCLRKey% up}
 		DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
-		;sleep, 1000*MoveSpeedFactor*size
 		send {%TCFBKey% up}
 		loop %reps% {
 			send {%AFCLRKey% down}
-			DllCall("Sleep",UInt,183*MoveSpeedFactor)
-			;sleep, 300*MoveSpeedFactor
+			DllCall("Sleep",UInt,274*MoveSpeedFactor)
 			send {%AFCFBKey% down}
 			send {%AFCLRKey% up}
 			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
-			;sleep, 1000*MoveSpeedFactor*size
 			send {%AFCLRKey% down}
 			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,183*MoveSpeedFactor)
-			;sleep, 300*MoveSpeedFactor
+			DllCall("Sleep",UInt,274*MoveSpeedFactor)
 			send {%TCFBKey% down}
 			send {%AFCLRKey% up}
 			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
-			;sleep, 1000*MoveSpeedFactor*size
 			send {%TCFBKey% up}
 		}
 	} else if(pattern="auryn"){

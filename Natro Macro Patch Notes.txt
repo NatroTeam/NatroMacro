@@ -1,3 +1,9 @@
+0.6.7 Patch Notes
+
+Bugs
+-Fixed another pattern inversion bug causing players to run off field.
+
+
 0.6.6 Patch Notes
 
 Bugs
