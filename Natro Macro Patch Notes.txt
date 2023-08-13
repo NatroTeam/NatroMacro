@@ -1,3 +1,9 @@
+0.6.6 Patch Notes
+
+Bugs
+-Fixed a typo causing planters plus to cause an error and stop macro.
+
+
 0.6.5 Patch Notes
 
 New Features

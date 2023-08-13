@@ -25,7 +25,7 @@ OnMessage(0x4299, "nm_setLastHeartbeat")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.6.5"
+VersionID:="0.6.6"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; DISABLE ROBLOX BETA APP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -9274,6 +9274,11 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 			send {%AFCLRKey% up}
 		}
 	} else if(pattern="typewriter"){
+		;;;;;; invert ;;;;;;;;;;;
+		temp:=TCFBKey
+		TCFBKey:=AFCFBKey
+		AFCFBKey:=temp
+		;;;;;;;;;;;;;;;;;;;;;;;;;
 		send {%TCLRKey% down}
 		DllCall("Sleep",UInt,183*MoveSpeedFactor*(reps*2+1.25))
 		;sleep, 300*MoveSpeedFactor*(reps*2+1)
@@ -15152,7 +15157,7 @@ PineapplePlanters=CandyPlanter, 1, 1.5, 2.67; PetalPlanter, 1.5, 1.45, 9.69; Pla
 PumpkinPlanters=PetalPlanter, 1.5, 1.29, 10.89; PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; RedClayPlanter, 1.2, 1.06, 5.69; TackyPlanter, 1.25, 1, 8; BlueClayPlanter, 1, 1.05, 5.7; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 RosePlanters=PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; RedClayPlanter, 1, 1.2, 4.98; CandyPlanter, 1.2, 1, 4; PetalPlanter, 1, 1.09, 12.84; PlasticPlanter, 1, 1, 2; BlueClayPlanter, 1, 1, 6; TackyPlanter, 1, 1, 8; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 SpiderPlanters=PesticidePlanter, 1.3, 1.6, 6.25; PetalPlanter, 1, 1.5, 9.33; PlanterOfPlenty, 1.5, 1, 16; CandyPlanter, 1.2, 1, 4; PlasticPlanter, 1, 1, 2; BlueClayPlanter, 1, 1, 6; RedClayPlanter, 1, 1, 6; TackyPlanter, 1, 1, 8; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
-StrawberryPlanters=PesticidePlanter, 1, 1.6, 6.25; CandyPlanter, 1, 1.5, 2.67; PlanterOfPlenty, 1.5, 1, 16;  BlueClayPlanter, 1.2, 1, 6; RedClayPlanter, 1, 1.17, 5.12; PetalPlanter, 1, 1.16, 12.12; PlasticPlanter, 1, 1, 2; TackyPlanter, 1, 1, 8; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+StrawberryPlanters=PesticidePlanter, 1, 1.6, 6.25; CandyPlanter, 1, 1.5, 2.67; PlanterOfPlenty, 1.5, 1, 16; BlueClayPlanter, 1.2, 1, 6; RedClayPlanter, 1, 1.17, 5.12; PetalPlanter, 1, 1.16, 12.12; PlasticPlanter, 1, 1, 2; TackyPlanter, 1, 1, 8; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 StumpPlanters=PlanterOfPlenty, 1.5, 1.5, 10.67; PesticidePlanter, 1.3, 1, 10; CandyPlanter, 1.2, 1, 4; BlueClayPlanter, 1, 1.19, 5.05; PetalPlanter, 1, 1.1, 12.79; RedClayPlanter, 1, 1.02, 5.91; PlasticPlanter, 1, 1, 2; TackyPlanter, 1, 1, 8; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 SunflowerPlanters=PetalPlanter, 1.5, 1.36, 10.33; TackyPlanter, 1.25, 1.5, 5.33; PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; RedClayPlanter, 1.2, 1.04, 5.8; BlueClayPlanter, 1, 1.04, 5.78; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 PlanterName1=None
