@@ -1,3 +1,15 @@
+0.6.8 Patch Notes
+
+Bugs
+-Fixed issue where boosters would not be used if no quests were enabled.
+-Added an extra click for the "Yes" button when placing planters.  There was an issue where the click would not always register.
+-Added 5 more seconds to the "inactive honey" convert abort.  It was previously 10 seconds and was sometimes not long enough for bees to get back to hive, rest, and then start converting.
+-Fixed issue where new Hiveslot was not being changed properly after a reconnect if your original hiveslot could not be found.
+
+Other
+-Updated some images that broke due to recent BSS GUI update. Specifically windowed mode detection and in-shop detection upon reset.
+
+
 0.6.7 Patch Notes
 
 Bugs

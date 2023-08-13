@@ -25,7 +25,7 @@ OnMessage(0x4299, "nm_setLastHeartbeat")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.6.7"
+VersionID:="0.6.8"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; DISABLE ROBLOX BETA APP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -274,12 +274,20 @@ global PausedRuntime:=0
 global LastHeartbeat:=nowUnix()
 state:="Startup"
 objective:="UI"
+IniRead, StartOnReload, nm_config.ini, gui, StartOnReload
 IniRead, GuiTheme, nm_config.ini, Settings, GuiTheme
 IniRead, GuiTransparency, nm_config.ini, Settings, GuiTransparency
 IniRead, AlwaysOnTop, nm_config.ini, Settings, AlwaysOnTop
 IniRead, GuiX, nm_config.ini, Settings, GuiX
 IniRead, GuiY, nm_config.ini, Settings, GuiY
 IniRead, MoveSpeedFactor, nm_config.ini, Settings, MoveSpeedFactor
+if(fileexist("nm_personal.ini")) {
+	IniRead, PFieldBoosted, nm_personal.ini, Personal, PFieldBoosted
+	IniRead, PWindShrine, nm_personal.ini, Personal, PWindShrine
+	IniRead, PWindShrineDonate, nm_personal.ini, Personal, PWindShrineDonate
+	IniRead, PWindShrineDonateNum, nm_personal.ini, Personal, PWindShrineDonateNum
+	IniRead, PMondoGuid, nm_personal.ini, Personal, PMondoGuid
+}
 ;ensure Gui will be visible
 SysGet, MonNum, MonitorCount
 loop %MonNum% {
@@ -359,7 +367,7 @@ Gui, Add, Text, x215 y240 w280 +left +BackgroundTrans vstate +border, %state%
 Gui, Font, s12 w700 Underline cBlue
 Gui, Add, Text, x432 y255 gDonateLink, Donate
 Gui, Font
-Gui, Add, Text, x442 y280, Ver. %versionID%
+Gui, Add, Text, x432 y280, Ver. %versionID%
 ;control buttons
 Gui, Add, Button, x10 y275 w60 h20 gf1, Start (F1)
 Gui, Add, Button, x75 y275 w60 h20 gf3, Stop (F3)
@@ -550,8 +558,8 @@ Gui, Font, w700
 Gui, Add, GroupBox, x3 y23 w160 h215, Development
 Gui, Add, GroupBox, x163 y23 w335 h215, Contributors
 Gui, Font
-Gui, Add, Text, x5 y38 w155 +wrap +backgroundtrans, Special Thanks for your contributions in the development and testing of this project.  Your feedback and ideas have been invaluable in the design process!`n`nzez#8710`nFHL09#4061`nLittleChurch#1631 (N00b)`nZaappiix#2372`nSP#0305`nZiz | Jake#9154
-Gui, Add, Text, x170 y38 w330 +wrap +backgroundtrans, Thank you for your donations to this project!`n`nFHL09#4061`nNick 9#9476`nwilalwil2#4175`nAshtonishing#4420`nTheRealXoli#1017`nK_Money#0001
+Gui, Add, Text, x5 y38 w155 +wrap +backgroundtrans, Special Thanks for your contributions in the development and testing of this project.  Your feedback and ideas have been invaluable in the design process!`n`nzez#8710`nFHL09#4061`nLittleChurch#1631 (N00b)`nZaappiix#2372`nSP#0305`nZiz | Jake#9154`nBlackBeard6#2691
+Gui, Add, Text, x170 y38 w330 +wrap +backgroundtrans, Thank you for your donations to this project!`n`nFHL09#4061`nNick 9#9476`nwilalwil2#4175`nAshtonishing#4420`nTheRealXoli#1017`nK_Money#0001`nHeat#9350
 
 
 
@@ -777,6 +785,9 @@ GuiControl, disable, MondoAction
 Gui, Add, Checkbox, x15 y85 +BackgroundTrans vAntPassCheck gnm_saveCollect Checked%AntPassCheck%, Ant
 GuiControl, disable, AntPassCheck
 Gui, Add, DropDownList, x50 y80 w70 vAntPassAction gnm_saveCollect, %AntPassAction%||Pass|Challenge
+if(PMondoGuid){
+	GuiControl,,MondoAction, Tag|Guid
+}
 GuiControl, disable, AntPassAction
 ;dispensers
 Gui, Add, Checkbox, x135 y45 +BackgroundTrans vHoneyDisCheck gnm_saveCollect Checked%HoneyDisCheck%, Honey
@@ -1020,6 +1031,14 @@ Gui, Add, DropDownList, x145 y137 w70 vHotkeyWhile6 gnm_HotkeyWhile6, %HotkeyWhi
 GuiControl, disable, HotkeyWhile6
 Gui, Add, DropDownList, x145 y157 w70 vHotkeyWhile7 gnm_HotkeyWhile7, %HotkeyWhile7%||Never|Always|At Hive|Gathering|Attacking|Microconverter|Whirligig|Enzymes
 GuiControl, disable, HotkeyWhile7
+if(PFieldBoosted){
+	GuiControl,,HotkeyWhile2, Glitter
+	GuiControl,,HotkeyWhile3, Glitter
+	GuiControl,,HotkeyWhile4, Glitter
+	GuiControl,,HotkeyWhile5, Glitter
+	GuiControl,,HotkeyWhile6, Glitter
+	GuiControl,,HotkeyWhile7, Glitter
+}
 Gui, Add, Text, x225 y61 cRED, <-- OFF
 Gui, Add, Text, x225 y81 cRED, <-- OFF
 Gui, Add, Text, x225 y101 cRED, <-- OFF
@@ -1390,7 +1409,7 @@ WinActivate, Roblox
 WinWaitActive, Roblox
 settimer, StartBackground, -5000
 ;settimer, Heartbeat, 10000
-run background.ahk, submacros
+run, background.ahk, submacros
 
 Prev_DetectHiddenWindows := A_DetectHiddenWindows
 Prev_TitleMatchMode := A_TitleMatchMode
@@ -1408,6 +1427,14 @@ if((myOS*1)>=10) {
 		Run, StatMonitor.ahk
 	}
 }
+;;; start on reload if enabled
+;sleep, 5000
+;msgbox StartOnReload=%StartOnReload%
+;if(StartOnReload) {
+;	StartOnReload:=0
+;	IniWrite, %StartOnReload%, nm_config.ini, Gui, StartOnReload
+;	Send {F1}
+;}
 return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; MAIN LOOP
@@ -1429,12 +1456,12 @@ nm_Start(){
 		nm_Mondo()
 		nm_Bugrun()
 		;planters
-		ba_planter()
+		;ba_planter()
 		;collect things
 		nm_toCollect()
 		nm_Mondo()
 		;planters
-		ba_planter()
+		;ba_planter()
 		;quests
 		nm_QuestRotate()
 		;booster
@@ -3196,19 +3223,39 @@ nm_FieldBooster3(){
 	IniWrite, %FieldBooster3%, nm_config.ini, Boost, FieldBooster3
 }
 nm_HotkeyWhile2(){
-	global HotkeyWhile2
+	global HotkeyWhile2, PFieldBoosted
 	GuiControlGet HotkeyWhile2
 	if(HotkeyWhile2="never") {
 		GuiControl,hide, HotkeyTime2
 		GuiControl,hide, HotkeyTimeUnits2
 		GuiControl, hide, HBText2
-	} else if(HotkeyWhile2="microconverter" || HotkeyWhile2="whirligig" || HotkeyWhile2="enzymes") {
-		if(HotkeyWhile2="microconverter")
-			GuiControl,,HBText2, @ Full Pack
-		else if (HotkeyWhile2="whirligig")
-			GuiControl,,HBText2, @ Hive Return
-		else if (HotkeyWhile2="enzymes")
-			GuiControl,,HBText2, @ Conv Balloon
+	} else if(HotkeyWhile2="microconverter" || HotkeyWhile2="whirligig" || HotkeyWhile2="enzymes" || HotkeyWhile2="glitter") {
+		if(HotkeyWhile2="microconverter") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText2, @ Boosted
+			} else {
+				GuiControl,,HBText2, @ Full Pack
+			}
+		}
+		else if (HotkeyWhile2="whirligig") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText2, @ Boosted
+			} else {
+				GuiControl,,HBText2, @ Hive Return
+			}
+		}
+		else if (HotkeyWhile2="enzymes") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText2, @ Boosted
+			} else {
+				GuiControl,,HBText2, @ Conv Balloon
+			}
+		}
+		else if (HotkeyWhile2="glitter") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText2, @ Boosted
+			}
+		}
 		GuiControl, show, HBText2
 		GuiControl,hide, HotkeyTime2
 		GuiControl,hide, HotkeyTimeUnits2
@@ -3220,19 +3267,39 @@ nm_HotkeyWhile2(){
 	IniWrite, %HotkeyWhile2%, nm_config.ini, Boost, HotkeyWhile2
 }
 nm_HotkeyWhile3(){
-	global HotkeyWhile3
+	global HotkeyWhile3, PFieldBoosted
 	GuiControlGet HotkeyWhile3
 	if(HotkeyWhile3="never") {
 		GuiControl,hide, HotkeyTime3
 		GuiControl,hide, HotkeyTimeUnits3
 		GuiControl, hide, HBText3
-	} else if(HotkeyWhile3="microconverter" || HotkeyWhile3="whirligig" || HotkeyWhile3="enzymes") {
-		if(HotkeyWhile3="microconverter")
-			GuiControl,,HBText3, @ Full Pack
-		else if (HotkeyWhile3="whirligig")
-			GuiControl,,HBText3, @ Hive Return
-		else if (HotkeyWhile3="enzymes")
-			GuiControl,,HBText3, @ Conv Balloon
+	} else if(HotkeyWhile3="microconverter" || HotkeyWhile3="whirligig" || HotkeyWhile3="enzymes" || HotkeyWhile3="glitter") {
+		if(HotkeyWhile3="microconverter") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText3, @ Boosted
+			} else {
+				GuiControl,,HBText3, @ Full Pack
+			}
+		}
+		else if (HotkeyWhile3="whirligig") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText3, @ Boosted
+			} else {
+				GuiControl,,HBText3, @ Hive Return
+			}
+		}
+		else if (HotkeyWhile3="enzymes") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText3, @ Boosted
+			} else {
+				GuiControl,,HBText3, @ Conv Balloon
+			}
+		}
+		else if (HotkeyWhile3="glitter") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText3, @ Boosted
+			}
+		}
 		GuiControl, show, HBText3
 		GuiControl,hide, HotkeyTime3
 		GuiControl,hide, HotkeyTimeUnits3
@@ -3244,19 +3311,39 @@ nm_HotkeyWhile3(){
 	IniWrite, %HotkeyWhile3%, nm_config.ini, Boost, HotkeyWhile3
 }
 nm_HotkeyWhile4(){
-	global HotkeyWhile4
+	global HotkeyWhile4, PFieldBoosted
 	GuiControlGet HotkeyWhile4
 	if(HotkeyWhile4="never") {
 		GuiControl,hide, HotkeyTime4
 		GuiControl,hide, HotkeyTimeUnits4
 		GuiControl, hide, HBText4
-	} else if(HotkeyWhile4="microconverter" || HotkeyWhile4="whirligig" || HotkeyWhile4="enzymes") {
-		if(HotkeyWhile4="microconverter")
-			GuiControl,,HBText4, @ Full Pack
-		else if (HotkeyWhile4="whirligig")
-			GuiControl,,HBText4, @ Hive Return
-		else if (HotkeyWhile4="enzymes")
-			GuiControl,,HBText4, @ Conv Balloon
+	} else if(HotkeyWhile4="microconverter" || HotkeyWhile4="whirligig" || HotkeyWhile4="enzymes" || HotkeyWhile4="glitter") {
+		if(HotkeyWhile4="microconverter") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText4, @ Boosted
+			} else {
+				GuiControl,,HBText4, @ Full Pack
+			}
+		}
+		else if (HotkeyWhile4="whirligig") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText4, @ Boosted
+			} else {
+				GuiControl,,HBText4, @ Hive Return
+			}
+		}
+		else if (HotkeyWhile4="enzymes") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText4, @ Boosted
+			} else {
+				GuiControl,,HBText4, @ Conv Balloon
+			}
+		}
+		else if (HotkeyWhile4="glitter") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText4, @ Boosted
+			}
+		}
 		GuiControl, show, HBText4
 		GuiControl,hide, HotkeyTime4
 		GuiControl,hide, HotkeyTimeUnits4
@@ -3268,19 +3355,39 @@ nm_HotkeyWhile4(){
 	IniWrite, %HotkeyWhile4%, nm_config.ini, Boost, HotkeyWhile4
 }
 nm_HotkeyWhile5(){
-	global HotkeyWhile5
+	global HotkeyWhile5, PFieldBoosted
 	GuiControlGet HotkeyWhile5
 	if(HotkeyWhile5="never") {
 		GuiControl,hide, HotkeyTime5
 		GuiControl,hide, HotkeyTimeUnits5
 		GuiControl, hide, HBText5
-	} else if(HotkeyWhile5="microconverter" || HotkeyWhile5="whirligig" || HotkeyWhile5="enzymes") {
-		if(HotkeyWhile5="microconverter")
-			GuiControl,,HBText5, @ Full Pack
-		else if (HotkeyWhile5="whirligig")
-			GuiControl,,HBText5, @ Hive Return
-		else if (HotkeyWhile5="enzymes")
-			GuiControl,,HBText5, @ Conv Balloon
+	} else if(HotkeyWhile5="microconverter" || HotkeyWhile5="whirligig" || HotkeyWhile5="enzymes" || HotkeyWhile5="glitter") {
+		if(HotkeyWhile5="microconverter") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText5, @ Boosted
+			} else {
+				GuiControl,,HBText5, @ Full Pack
+			}
+		}
+		else if (HotkeyWhile5="whirligig") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText5, @ Boosted
+			} else {
+				GuiControl,,HBText5, @ Hive Return
+			}
+		}
+		else if (HotkeyWhile5="enzymes") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText5, @ Boosted
+			} else {
+				GuiControl,,HBText5, @ Conv Balloon
+			}
+		}
+		else if (HotkeyWhile5="glitter") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText5, @ Boosted
+			}
+		}
 		GuiControl, show, HBText5
 		GuiControl,hide, HotkeyTime5
 		GuiControl,hide, HotkeyTimeUnits5
@@ -3292,19 +3399,39 @@ nm_HotkeyWhile5(){
 	IniWrite, %HotkeyWhile5%, nm_config.ini, Boost, HotkeyWhile5
 }
 nm_HotkeyWhile6(){
-	global HotkeyWhile6
+	global HotkeyWhile6, PFieldBoosted
 	GuiControlGet HotkeyWhile6
 	if(HotkeyWhile6="never") {
 		GuiControl,hide, HotkeyTime6
 		GuiControl,hide, HotkeyTimeUnits6
 		GuiControl, hide, HBText6
-	} else if(HotkeyWhile6="microconverter" || HotkeyWhile6="whirligig" || HotkeyWhile6="enzymes") {
-		if(HotkeyWhile6="microconverter")
-			GuiControl,,HBText6, @ Full Pack
-		else if (HotkeyWhile6="whirligig")
-			GuiControl,,HBText6, @ Hive Return
-		else if (HotkeyWhile6="enzymes")
-			GuiControl,,HBText6, @ Conv Balloon
+	} else if(HotkeyWhile6="microconverter" || HotkeyWhile6="whirligig" || HotkeyWhile6="enzymes" || HotkeyWhile6="glitter") {
+		if(HotkeyWhile6="microconverter") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText6, @ Boosted
+			} else {
+				GuiControl,,HBText6, @ Full Pack
+			}
+		}
+		else if (HotkeyWhile6="whirligig") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText6, @ Boosted
+			} else {
+				GuiControl,,HBText6, @ Hive Return
+			}
+		}
+		else if (HotkeyWhile6="enzymes") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText6, @ Boosted
+			} else {
+				GuiControl,,HBText6, @ Conv Balloon
+			}
+		}
+		else if (HotkeyWhile6="glitter") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText6, @ Boosted
+			}
+		}
 		GuiControl, show, HBText6
 		GuiControl,hide, HotkeyTime6
 		GuiControl,hide, HotkeyTimeUnits6
@@ -3316,19 +3443,39 @@ nm_HotkeyWhile6(){
 	IniWrite, %HotkeyWhile6%, nm_config.ini, Boost, HotkeyWhile6
 }
 nm_HotkeyWhile7(){
-	global HotkeyWhile7
+	global HotkeyWhile7, PFieldBoosted
 	GuiControlGet HotkeyWhile7
 	if(HotkeyWhile7="never") {
 		GuiControl,hide, HotkeyTime7
 		GuiControl,hide, HotkeyTimeUnits7
 		GuiControl, hide, HBText7
-	} else if(HotkeyWhile7="microconverter" || HotkeyWhile7="whirligig" || HotkeyWhile7="enzymes") {
-		if(HotkeyWhile7="microconverter")
-			GuiControl,,HBText7, @ Full Pack
-		else if (HotkeyWhile7="whirligig")
-			GuiControl,,HBText7, @ Hive Return
-		else if (HotkeyWhile7="enzymes")
-			GuiControl,,HBText7, @ Conv Balloon
+	} else if(HotkeyWhile7="microconverter" || HotkeyWhile7="whirligig" || HotkeyWhile7="enzymes" || HotkeyWhile7="glitter") {
+		if(HotkeyWhile7="microconverter") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText7, @ Boosted
+			} else {
+				GuiControl,,HBText7, @ Full Pack
+			}
+		}
+		else if (HotkeyWhile7="whirligig") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText7, @ Boosted
+			} else {
+				GuiControl,,HBText7, @ Hive Return
+			}
+		}
+		else if (HotkeyWhile7="enzymes") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText7, @ Boosted
+			} else {
+				GuiControl,,HBText7, @ Conv Balloon
+			}
+		}
+		else if (HotkeyWhile7="glitter") {
+			if(PFieldBoosted) {
+				GuiControl,,HBText7, @ Boosted
+			}
+		}
 		GuiControl, show, HBText7
 		GuiControl,hide, HotkeyTime7
 		GuiControl,hide, HotkeyTimeUnits7
@@ -4761,7 +4908,128 @@ nm_testButton(){
 	IniRead, MoveSpeedFactor, nm_config.ini, Settings, MoveSpeedFactor
 	GuiControlGet MoveMethod
 	
-	nm_walkFrom("pine tree")
+	;get ini data
+	IniRead, PWindShrineDonate, nm_personal.ini, Personal, PWindShrineDonate
+	IniRead, PWindShrineDonateNum, nm_personal.ini, Personal, PWindShrineDonateNum
+	
+	nm_Reset(0)
+	objective:="Wind Shrine"
+	nm_gotoRamp()
+	if(MoveMethod="walk"){
+		nm_walkTo("pepper")
+	} else if(MoveMethod="cannon"){
+		nm_gotoCannon()
+		nm_cannonTo("pepper")
+	}
+	nm_Move(5000*MoveSpeedFactor, FwdKey)
+	nm_Move(4000*MoveSpeedFactor, RightKey)
+	nm_Move(700*MoveSpeedFactor, LeftKey)
+	Send, {%RightKey% down}
+	DllCall("Sleep",UInt,150)
+	Send, {space down}
+	DllCall("Sleep",UInt,50)
+	Send, {space up}
+	DllCall("Sleep",UInt,150)
+	Send, {%RightKey% up}
+	nm_Move(2500*MoveSpeedFactor, RightKey)
+	nm_Move(2000*MoveSpeedFactor, BackKey)
+	;locate shrine platform
+	loop 10 {
+		if(A_Index>=10){
+			nm_setStatus("Canceling", "WindShrine Not Found")
+			return
+		}
+		searchRet := nm_imgSearch("e_button.png",30,"high")
+		If (searchRet[1] = 0 ) {
+			break
+		}
+		nm_Move(200*MoveSpeedFactor, BackKey)
+		sleep, 100
+	}
+	;open shrine donations
+	sleep, 500
+	Send, {e}
+	sleep, 1500
+	;click on pop-up box
+	dialog := nm_imgSearch("dialog.png",30,"center")
+	If (dialog[1] = 0) {
+		MouseMove, dialog[2],dialog[3]
+		click
+		sleep, 100
+		MouseMove, 350, (Roblox[3]+70)
+		sleep, 250
+	}
+	;check for shrine cooldown
+	imgFound := nm_imgSearch("cancel.png",30,"center")
+	If (imgFound[1] = 1) { ;shrine not ready, return
+		nm_setStatus("Canceling", "WindShrine on Cooldown")
+		return
+	}
+	nm_setStatus("Donating", PWindShrineDonateNum . " " . PWindShrineDonate)
+	;find item to donate
+	loop 100 {
+		if(A_Index>=100) {
+			nm_setStatus("Canceling", "Cannot locate Donation")
+			return
+		}
+		imgFound := nm_imgSearch("WS" . PWindShrineDonate . ".png",30,"center")
+		If (imgFound[1] = 0) {
+			break
+		}
+		ArrowFound := nm_imgSearch("WSright_arrow.png",30,"center")
+		If (ArrowFound[1] = 0) {
+			MouseMove, ArrowFound[2],ArrowFound[3]
+			click
+			sleep, 100
+			MouseMove, 350, (Roblox[3]+70)
+			sleep, 250
+		}
+	}
+	;set donation number
+	imgFound := nm_imgSearch("WSplus.png",30,"center")
+	If (imgFound[1] = 0) {
+		MouseMove, imgFound[2],imgFound[3]
+		sleep, 500
+	}
+	donateNum:=PWindShrineDonateNum-1
+	loop %donateNum% {
+		sleep, 100
+		click
+	}
+	sleep, 100
+	MouseMove, 350, (Roblox[3]+70)
+	sleep, 250
+	;donate
+	imgFound := nm_imgSearch("WSdonate.png",30,"center")
+	If (imgFound[1] = 0) {
+		MouseMove, imgFound[2],imgFound[3]
+		click
+		sleep, 100
+		MouseMove, 350, (Roblox[3]+70)
+		sleep, 250
+	}
+	loop 10 {
+		dialog := nm_imgSearch("dialog.png",30,"center")
+		If (dialog[1] = 0) {
+			MouseMove, dialog[2],dialog[3]
+			click
+			sleep, 100
+			MouseMove, 350, (Roblox[3]+70)
+			sleep, 250
+		} else {
+			break
+		}
+	}
+	;pickup tokens
+	global TCFBKey:=BackKey
+	global AFCFBKey:=FwdKey
+	global TCLRKey:=LeftKey
+	global AFCLRKey:=RightKey
+	sleep, 1000
+	nm_Move(1000*MoveSpeedFactor, RightKey)
+	nm_gather("snake", "M", 3)
+	
+	
 	;settimer, heartbeat, off
 	/*
 	;count hiveslot locations
@@ -4783,7 +5051,6 @@ nm_testButton(){
 		sleep, 100
 	}
 	*/
-	
 
 	
 	;run guidingStarDetect.ahk, submacros
@@ -4812,7 +5079,6 @@ nm_testButton(){
 		msgbox win does not exist
 	}
 	*/
-
 	
 	;OS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)   
 	;msgbox A_OSVersion=%A_OSVersion%`nOS=%OS%
@@ -4958,7 +5224,10 @@ nm_Reset(checkAll:=1, wait:=2000){
 				imgPos := nm_imgSearch("no.png",30)
 				If (imgPos[1] = 0){
 					MouseMove, (imgPos[2]), (imgPos[3])
-					Click
+					loop 2 {
+						Click
+						sleep 100
+					}
 					MouseMove, 350, (Roblox[3]+70)
 				}
 				;check to make sure you are not in feed window on accident
@@ -4981,8 +5250,9 @@ nm_Reset(checkAll:=1, wait:=2000){
 		searchRet := nm_imgSearch("e_button.png",30,"high")
 		If (searchRet[1] = 0) {
 			loop 2 {
-				dialog := nm_imgSearch("dialog.png",30,"right")
-				If (dialog[1] = 0) {
+				shopG := nm_imgSearch("shop_corner_G.png",30,"right")
+				shopR := nm_imgSearch("shop_corner_R.png",30,"right")
+				If (shopG[1] = 0 || shopR[1] = 0) {
 					send {e}
 					sleep, 1000
 				}
@@ -5253,11 +5523,13 @@ nm_gotoCannon(){
 nm_findHiveslot(slotnum:=0){
 	global RightKey, LeftKey, BackKey, RotRight, ZoomOut, MoveSpeedFactor, HiveSlot, KeyDelay
 	;check if already at hiveslot
+	sleep, 500
 	searchRet := nm_imgSearch("e_button.png",30,"high")
 	If (searchRet[1] = 0) {
 		return
 	}
 	;find hiveslot
+	nm_Move(500*MoveSpeedFactor, FwdKey)
 	nm_Move(750*MoveSpeedFactor, BackKey)
 	;if(slotnum>0){
 		SetKeyDelay , (100+KeyDelay)
@@ -5781,14 +6053,15 @@ nm_toAnyBooster(){
 	global MoveMethod
 	global LastBlueBoost, QuestBlueBoost
 	global LastRedBoost
-	global LastMountainBoost, QuestRedBoost, QuestGatherField
+	global LastMountainBoost, QuestRedBoost, QuestGatherField, LastWindShrine
 	global FieldBooster1
 	global FieldBooster2
 	global FieldBooster3
 	global FieldBoosterMins
 	global objective
-	if (QuestGatherField!="None")
+	if (QuestGatherField!="None" && QuestGatherField)
 		return
+	nm_WindShrine()
 	loop 3 {
 		if(FieldBooster%A_Index%="none")
 			break
@@ -5805,6 +6078,133 @@ nm_toAnyBooster(){
 		else if(FieldBooster%A_Index%="mount"  && (nowUnix()-LastMountainBoost)>3600 && (nowUnix()-LastBooster)>(FieldBoosterMins*60)){ ;1 hour
 			nm_toBooster("mount")
 		}
+	}
+}
+nm_WindShrine(){
+	global PWindShrine, PWindShrineDonate, PWindShrineDonateNum, LastWindShrine
+	if(!PWindShrine)
+		return
+	if((nowUnix()-LastWindShrine)>3630) {
+		nm_Reset(0)
+		objective:="Wind Shrine"
+		nm_gotoRamp()
+		if(MoveMethod="walk"){
+			nm_walkTo("pepper")
+		} else if(MoveMethod="cannon"){
+			nm_gotoCannon()
+			nm_cannonTo("pepper")
+		}
+		nm_Move(5000*MoveSpeedFactor, FwdKey)
+		nm_Move(4000*MoveSpeedFactor, RightKey)
+		nm_Move(700*MoveSpeedFactor, LeftKey)
+		Send, {%RightKey% down}
+		DllCall("Sleep",UInt,150)
+		Send, {space down}
+		DllCall("Sleep",UInt,50)
+		Send, {space up}
+		DllCall("Sleep",UInt,150)
+		Send, {%RightKey% up}
+		nm_Move(2500*MoveSpeedFactor, RightKey)
+		nm_Move(2000*MoveSpeedFactor, BackKey)
+		;locate shrine platform
+		loop 10 {
+			if(A_Index>=10){
+				nm_setStatus("Canceling", "WindShrine Not Found")
+				return
+			}
+			searchRet := nm_imgSearch("e_button.png",30,"high")
+			If (searchRet[1] = 0 ) {
+				break
+			}
+			nm_Move(200*MoveSpeedFactor, BackKey)
+			sleep, 100
+		}
+		;open shrine donations
+		sleep, 500
+		Send, {e}
+		sleep, 1000
+		;click on pop-up box
+		dialog := nm_imgSearch("dialog.png",30,"center")
+		If (dialog[1] = 0) {
+			MouseMove, dialog[2],dialog[3]
+			click
+			sleep, 100
+			MouseMove, 350, (Roblox[3]+70)
+			sleep, 100
+		}
+		;check for shrine cooldown
+		imgFound := nm_imgSearch("cancel.png",30,"center")
+		If (imgFound[1] = 1) { ;shrine not ready, return
+			nm_setStatus("Canceling", "WindShrine on Cooldown")
+			return
+		}
+		nm_setStatus("Donating", PWindShrineDonateNum . " " . PWindShrineDonate)
+		;find item to donate
+		loop 100 {
+			if(A_Index>=100) {
+				nm_setStatus("Canceling", "Cannot locate Donation")
+				;LastWindShrine:=nowUnix()
+				;IniWrite, %LastWindShrine%, nm_config.ini, Boost, LastWindShrine
+				return
+			}
+			imgFound := nm_imgSearch("WS" . PWindShrineDonate . ".png",30,"center")
+			If (imgFound[1] = 0) {
+				break
+			}
+			ArrowFound := nm_imgSearch("WSright_arrow.png",30,"center")
+			If (ArrowFound[1] = 0) {
+				MouseMove, ArrowFound[2],ArrowFound[3]
+				click
+				sleep, 100
+				MouseMove, 350, (Roblox[3]+70)
+				sleep, 100
+			}
+		}
+		;set donation number
+		imgFound := nm_imgSearch("WSplus.png",30,"center")
+		If (imgFound[1] = 0) {
+			MouseMove, imgFound[2],imgFound[3]
+			sleep, 500
+		}
+		donateNum:=PWindShrineDonateNum-1
+		loop %donateNum% {
+			sleep, 100
+			click
+		}
+		sleep, 100
+		MouseMove, 350, (Roblox[3]+70)
+		sleep, 250
+		;donate
+		imgFound := nm_imgSearch("WSdonate.png",30,"center")
+		If (imgFound[1] = 0) {
+			MouseMove, imgFound[2],imgFound[3]
+			click
+			sleep, 100
+			MouseMove, 350, (Roblox[3]+70)
+			sleep, 100
+			LastWindShrine:=nowUnix()
+			IniWrite, %LastWindShrine%, nm_config.ini, Boost, LastWindShrine
+		}
+		loop 10 {
+			dialog := nm_imgSearch("dialog.png",30,"center")
+			If (dialog[1] = 0) {
+				MouseMove, dialog[2],dialog[3]
+				click
+				sleep, 100
+				MouseMove, 350, (Roblox[3]+70)
+				sleep, 100
+			} else {
+				break
+			}
+		}
+		;pickup tokens
+		global TCFBKey:=BackKey
+		global AFCFBKey:=FwdKey
+		global TCLRKey:=LeftKey
+		global AFCLRKey:=RightKey
+		sleep, 1000
+		nm_Move(1100*MoveSpeedFactor, RightKey)
+		nm_gather("snake", "M", 3)
 	}
 }
 nm_toCollect(){
@@ -5858,7 +6258,10 @@ nm_walkToCollect(){
 				imgPos := nm_imgSearch("no.png",30)
 				If (imgPos[1] = 0){
 					MouseMove, (imgPos[2]), (imgPos[3])
-					Click
+					loop 2 {
+						Click
+						sleep 100
+					}
 					MouseMove, 350, (Roblox[3]+70)
 				}
 				;check to make sure you are not in bear dialog on accident
@@ -7371,9 +7774,8 @@ nm_Mondo(){
 	global youDied
 	global VBState
 	;mondo buff
-	global MondoBuffCheck
-	global LastMondoBuff
-	if(MondoBuffCheck  && A_Min>=0 && A_Min<14 && (nowUnix()-LastMondoBuff)>960){
+	global MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff, PMondoGuidComplete
+	if((MondoBuffCheck  && A_Min>=0 && A_Min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck  && A_Min>=0 && A_Min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck  && (A_Min>=0 && A_Min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag")){
 		mondobuff := nm_imgSearch("mondobuff.png",50,"buff")
 		If (mondobuff[1] = 0) {
 			LastMondoBuff:=nowUnix()
@@ -7423,6 +7825,28 @@ nm_Mondo(){
 					nm_autoFieldBoost(CurrentField)
 					if(youDied || AFBrollingDice || AFBuseGlitter || AFBuseBooster)
 						break
+					sleep, 1000
+				}
+			}
+			else if(MondoAction="Tag"){
+				repeat:=0
+				loop 30 { ;30 sec
+					if(youDied)
+						break
+					sleep, 1000
+				}
+			} 
+			else if(MondoAction="Guid" && PMondoGuid=1 && PMondoGuidComplete=0){
+				repeat:=0
+				PMondoGuidComplete:=1
+				while ((nowUnix()-LastGuid)<=210 && A_Min<15 && A_Index<210) { ;3.5 mins since guid
+					if(youDied)
+						break
+					;check for mondo death here
+					mondo := nm_imgSearch("mondo3.png",50,"lowright")
+					If (mondo[1] = 0) {
+						break
+					}
 					sleep, 1000
 				}
 			} else if(MondoAction="Kill"){
@@ -8404,7 +8828,7 @@ nm_walkFrom(field:="none")
 			DllCall("Sleep",UInt,350)
 			send {space}
 			send {%FwdKey% down}
-			DllCall("Sleep",UInt,6000)
+			DllCall("Sleep",UInt,6100)
 			send {%FwdKey% up}
 			DllCall("Sleep",UInt,250)
 			searchRet := nm_imgSearch("e_button.png",30,"high")
@@ -8566,7 +8990,7 @@ nm_GoGather(){
 	global BackpackPercentFiltered
 	global MicroConverterKey
 	global PackFilterArray
-	global WhirligigKey
+	global WhirligigKey, PFieldBoosted, GlitterKey, GatherFieldBoosted, GatherFieldBoostedStart, LastGlitter, PMondoGuidComplete
 	global LastWhirligig
 	global BoostChaserCheck, LastBlueBoost, LastRedBoost, LastMountainBoost, FieldBooster3, FieldBooster2, FieldBooster1, FieldDefault, LastMicroConverter
 	GuiControlGet, FieldName1
@@ -8605,7 +9029,7 @@ nm_GoGather(){
 	GuiControlGet, FieldSprinklerDist3
 	GuiControlGet, FieldRotateDirection3
 	GuiControlGet, FieldRotateTimes3
-	global MondoBuffCheck
+	global MondoBuffCheck, MondoAction
 	global StingerCheck
 	GuiControlGet, gotoPlanterField
 	GuiControlGet, EnablePlantersPlus
@@ -8760,6 +9184,68 @@ nm_GoGather(){
 	;reset
 	if(fieldOverrideReason="None") {
 		nm_Reset(2)
+		;check if gathering field is boosted
+		blueBoosterFields:=["Pine Tree", "Bamboo", "Blue Flower"]
+		redBoosterFields:=["Rose", "Strawberry", "Mushroom"]
+		mountainBoosterfields:=["Cactus", "Pumpkin", "Pineapple", "Spider", "Clover", "Dandelion", "Sunflower"]
+		otherFields:=["Stump", "Coconut", "Mountain Top", "Pepper"]
+		loop 1 {
+			GatherFieldBoosted:=0
+			;blue
+			for key, value in blueBoosterFields {
+				if(nm_fieldBoostCheck(value, 1) && FieldName%CurrentFieldNum%=value) {
+					if((nowUnix()-GatherFieldBoostedStart)>2700 && nm_fieldBoostCheck(value, 0)) {
+						GatherFieldBoostedStart:=nowUnix()
+					}
+					if((nowUnix()-GatherFieldBoostedStart)<1800) {
+						GatherFieldBoosted:=1
+						break
+					}
+				}
+			}
+			if(GatherFieldBoosted)
+				break
+			;mountain
+			for key, value in mountainBoosterFields {
+				if(nm_fieldBoostCheck(value, 1) && FieldName%CurrentFieldNum%=value) {
+					if((nowUnix()-GatherFieldBoostedStart)>2700  && nm_fieldBoostCheck(value, 0)) {
+						GatherFieldBoostedStart:=nowUnix()
+					}
+					if((nowUnix()-GatherFieldBoostedStart)<1800) {
+						GatherFieldBoosted:=1
+						break
+					}
+				}
+			}
+			if(GatherFieldBoosted)
+				break
+			;red
+			for key, value in redBoosterFields {
+				if(nm_fieldBoostCheck(value, 1) && FieldName%CurrentFieldNum%=value) {
+					if((nowUnix()-GatherFieldBoostedStart)>2700  && nm_fieldBoostCheck(value, 0)) {
+						GatherFieldBoostedStart:=nowUnix()
+					}
+					if((nowUnix()-GatherFieldBoostedStart)<1800) {
+						GatherFieldBoosted:=1
+						break
+					}
+				}
+			}
+			if(GatherFieldBoosted)
+				break
+			;other
+			for key, value in otherFields {
+				if(nm_fieldBoostCheck(value, 1) && FieldName%CurrentFieldNum%=value) {
+					if((nowUnix()-GatherFieldBoostedStart)>2700 && nm_fieldBoostCheck(value, 0)) {
+						GatherFieldBoostedStart:=nowUnix()
+					}
+					if((nowUnix()-GatherFieldBoostedStart)<1800) {
+						GatherFieldBoosted:=1
+						break
+					}
+				}
+			}
+		}
 	} else {
 		nm_Reset()
 	}
@@ -8778,7 +9264,7 @@ nm_GoGather(){
 	nm_fieldBoostGlitter()
 	;set sprinkler
 	if(fieldOverrideReason="None") {
-		nm_setStatus("Gathering", FieldName%CurrentFieldNum%)
+		nm_setStatus("Gathering", FieldName%CurrentFieldNum% . " " . GatherFieldBoosted)
 	} else if(fieldOverrideReason="Quest") {
 		nm_setStatus("Gathering", RotateQuest . " " . fieldOverrideReason . " - " . FieldName%CurrentFieldNum%)
 	} else {
@@ -8823,10 +9309,15 @@ nm_GoGather(){
 	while(((nowUnix()-gatherStart)<(FieldUntilMins%CurrentFieldNum%*60))){
 		nm_gather(FieldPattern%CurrentFieldNum%, FieldPatternSize%CurrentFieldNum%, FieldPatternReps%CurrentFieldNum%)
 		nm_autoFieldBoost(FieldName%CurrentFieldNum%)
-		nm_fieldBoostGlitter()
 		nm_fieldDriftCompensation()
+		nm_fieldBoostGlitter()
+		if(PFieldBoosted && (nowUnix()-GatherFieldBoostedStart)>525 && (nowUnix()-GatherFieldBoostedStart)<900 && (nowUnix()-LastGlitter)>900 && GlitterKey!="none" && fieldOverrideReason="None") { ;between 9 and 15 mins (-minus an extra 15 seconds)
+			Send {%GlitterKey%}
+			LastGlitter:=nowUnix()
+			IniWrite, %LastGlitter%, nm_config.ini, Boost, LastGlitter
+		}
 		;interrupt if...
-		if(DisconnectCheck() || youDied || VBState=1) {
+		if(DisconnectCheck() || youDied || VBState=1 || PMondoGuidComplete) {
 			bypass:=1
 			if(DisconnectCheck())
 				nm_setStatus("Interupted", "Disconnect")
@@ -8834,9 +9325,11 @@ nm_GoGather(){
 				nm_setStatus("Interupted", "You Died!")
 			else if (VBState=1)
 				nm_setStatus("Interupted", "Vicious Bee")
+			else if (PMondoGuidComplete)
+				PMondoGuidComplete:=0
 			break
 		}
-		if(MondoBuffCheck && A_Min>=0 && A_Min<14 && (nowUnix()-LastMondoBuff)>960){
+		if((MondoBuffCheck && A_Min>=0 && A_Min<14 && (nowUnix()-LastMondoBuff)>960) && (MondoAction="Buff" || MondoAction="Kill")){
 			nm_setStatus("Interupted", "Mondo")
 			break
 		}
@@ -8846,7 +9339,7 @@ nm_GoGather(){
 			break
 		}
 		;special hotkeys
-		if(BackpackPercentFiltered>=95 && MicroConverterKey!="none" && (nowUnix()-LastMicroConverter)>30) { ;30 seconds cooldown
+		if(BackpackPercentFiltered>=95 && (nowUnix()-LastMicroConverter)>30 && ((MicroConverterKey!="none" && !PFieldBoosted) || (MicroConverterKey!="none" && PFieldBoosted && GatherFieldBoosted))) { ;30 seconds cooldown
 			send {%MicroConverterKey%}
 			PackFilterArray:=[]
 			sleep, 500
@@ -8924,11 +9417,7 @@ nm_GoGather(){
 		}
 		;whirligig
 		if(FieldReturnType%CurrentFieldNum%="walk") { ;walk back
-			if(WhirligigKey="none" && (nowUnix()-LastWhirligig)>300){
-				;walk to hive
-				nm_walkFrom(FieldName%CurrentFieldNum%)
-				nm_findHiveslot()
-			} else {
+			if((WhirligigKey!="none" && (nowUnix()-LastWhirligig)>300 && !PFieldBoosted) || (WhirligigKey!="none" && (nowUnix()-LastWhirligig)>300 && PFieldBoosted && GatherFieldBoosted)){
 				if(FieldName%CurrentFieldNum%="sunflower"){
 					loop 2 {
 						send, {%RotLeft%}
@@ -8995,7 +9484,12 @@ nm_GoGather(){
 					}
 				}
 				send {%WhirligigKey%}
+				LastWhirligig:=nowUnix()
+				IniWrite, %LastWhirligig%, nm_config.ini, Boost, LastWhirligig
 				sleep, 1000
+			} else { ;walk to hive
+				nm_walkFrom(FieldName%CurrentFieldNum%)
+				nm_findHiveslot()
 			}
 			;convert
 			nm_convert(1)
@@ -9009,7 +9503,7 @@ nm_GoGather(){
 			sleep, 5000
 			return
 		} else { ;reset back
-			if (WhirligigKey!="none" && (nowUnix()-LastWhirligig)>300) {
+			if ((WhirligigKey!="none" && (nowUnix()-LastWhirligig)>300 && !PFieldBoosted) || (WhirligigKey!="none" && (nowUnix()-LastWhirligig)>300 && PFieldBoosted && GatherFieldBoosted)) {
 				if(FieldName%CurrentFieldNum%="sunflower"){
 					loop 2 {
 						send, {%RotLeft%}
@@ -9076,6 +9570,8 @@ nm_GoGather(){
 					}
 				}
 				send {%WhirligigKey%}
+				LastWhirligig:=nowUnix()
+				IniWrite, %LastWhirligig%, nm_config.ini, Boost, LastWhirligig
 				sleep, 1000
 				;convert
 				nm_convert(1)
@@ -9159,7 +9655,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 		;toward center
 		loop %reps% {
 			send {%TCFBKey% down}
-			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
 			;sleep, 2000*MoveSpeedFactor*size
 			send {%TCLRKey% down}
 			send {%TCFBKey% up}
@@ -9167,7 +9663,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 			;sleep, 200*MoveSpeedFactor
 			send {%AFCFBKey% down}
 			send {%TCLRKey% up}
-			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
 			;sleep, 2000*MoveSpeedFactor*size
 			send {%TCLRKey% down}
 			send {%AFCFBKey% up}
@@ -9178,7 +9674,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 		;away from center
 		loop %reps% {
 			send {%TCFBKey% down}
-			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
 			;sleep, 2000*MoveSpeedFactor*size
 			send {%AFCLRKey% down}
 			send {%TCFBKey% up}
@@ -9186,7 +9682,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 			;sleep, 200*MoveSpeedFactor
 			send {%AFCFBKey% down}
 			send {%AFCLRKey% up}
-			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
 			;sleep, 2000*MoveSpeedFactor*size
 			send {%AFCLRKey% down}
 			send {%AFCFBKey% up}
@@ -9198,7 +9694,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 		;toward center
 		loop %reps% {
 			send {%TCLRKey% down}
-			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
 			;sleep, 2000*MoveSpeedFactor*size
 			send {%TCFBKey% down}
 			send {%TCLRKey% up}
@@ -9206,7 +9702,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 			;sleep, 200*MoveSpeedFactor
 			send {%AFCLRKey% down}
 			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
 			;sleep, 2000*MoveSpeedFactor*size
 			send {%TCFBKey% down}
 			send {%AFCLRKey% up}
@@ -9217,7 +9713,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 		;away from center
 		loop %reps% {
 			send {%TCLRKey% down}
-			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
 			;sleep, 2000*MoveSpeedFactor*size
 			send {%AFCFBKey% down}
 			send {%TCLRKey% up}
@@ -9225,7 +9721,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 			;sleep, 200*MoveSpeedFactor
 			send {%AFCLRKey% down}
 			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
 			;sleep, 2000*MoveSpeedFactor*size
 			send {%AFCFBKey% down}
 			send {%AFCLRKey% up}
@@ -9274,47 +9770,48 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 			send {%AFCLRKey% up}
 		}
 	} else if(pattern="typewriter"){
-		;;;;;; invert ;;;;;;;;;;;
+		;;;;;; invert pattern ;;;;;;;;;;;
 		temp:=TCFBKey
 		TCFBKey:=AFCFBKey
 		AFCFBKey:=temp
-		;;;;;;;;;;;;;;;;;;;;;;;;;
-		;183
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		spacingDelay:=274 ;183
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		send {%TCLRKey% down}
-		DllCall("Sleep",UInt,274*MoveSpeedFactor*(reps*2+1.25))
+		DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor*(reps*2+1.25))
 		send {%AFCFBKey% down}
 		send {%TCLRKey% up}
 		DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
 		send {%AFCFBKey% up}
 		loop %reps% {
 			send {%AFCLRKey% down}
-			DllCall("Sleep",UInt,274*MoveSpeedFactor)
+			DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor)
 			send {%TCFBKey% down}
 			send {%AFCLRKey% up}
 			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
 			send {%AFCLRKey% down}
 			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,274*MoveSpeedFactor)
+			DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor)
 			send {%AFCLRKey% up}
 			send {%AFCFBKey% down}
 			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
 			send {%AFCFBKey% up}
 		}
 		send {%TCLRKey% down}
-		DllCall("Sleep",UInt,274*MoveSpeedFactor*(reps*2+1))
+		DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor*(reps*2+1))
 		send {%TCFBKey% down}
 		send {%TCLRKey% up}
 		DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
 		send {%TCFBKey% up}
 		loop %reps% {
 			send {%AFCLRKey% down}
-			DllCall("Sleep",UInt,274*MoveSpeedFactor)
+			DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor)
 			send {%AFCFBKey% down}
 			send {%AFCLRKey% up}
 			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
 			send {%AFCLRKey% down}
 			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,274*MoveSpeedFactor)
+			DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor)
 			send {%TCFBKey% down}
 			send {%AFCLRKey% up}
 			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
@@ -9497,7 +9994,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 }
 nm_convert(hiveConfirm:=0)
 {
-	global KeyDelay, HiveVariation, RotRight, ZoomOut, AFBrollingDice, AFBuseGlitter, AFBuseBooster, CurrentField, HiveConfirmed, EnzymesKey,  LastEnzymes, ConvertStartTime, TotalConvertTime, SessionConvertTime, BackpackPercent
+	global KeyDelay, HiveVariation, RotRight, ZoomOut, AFBrollingDice, AFBuseGlitter, AFBuseBooster, CurrentField, HiveConfirmed, EnzymesKey,  LastEnzymes, ConvertStartTime, TotalConvertTime, SessionConvertTime, BackpackPercent, PFieldBoosted, GatherFieldBoosted
 	GuiControlGet ConvertBalloon
 	GuiControlGet ConvertMins
 	IniRead, LastConvertBalloon, nm_config.ini, Settings, LastConvertBalloon
@@ -9595,7 +10092,7 @@ nm_convert(hiveConfirm:=0)
 					while(searchRet[1]=0 && AIndex<=600) { ;10 mins
 						if(A_Index=1) {
 							nm_setStatus("Converting", "Balloon")
-							if(EnzymesKey!="none" && (nowUnix()-LastEnzymes)>600 && nm_activeHoney()) {
+							if(((EnzymesKey!="none" && !PFieldBoosted) || (EnzymesKey!="none" && PFieldBoosted && GatherFieldBoosted)) && (nowUnix()-LastEnzymes)>540 && nm_activeHoney()) {
 								send {%EnzymesKey%}
 								LastEnzymes:=nowUnix()
 								IniWrite, %LastEnzymes%, nm_config.ini, Boost, LastEnzymes
@@ -9606,7 +10103,7 @@ nm_convert(hiveConfirm:=0)
 							break
 						if(not nm_activeHoney()){
 							inactiveHoney:=inactiveHoney+1
-							if(inactiveHoney>10) { ;10 consecutive seconds of inactive honey
+							if(inactiveHoney>15) { ;15 consecutive seconds of inactive honey
 								nm_setStatus("Interupted", "Inactive Honey")
 								break
 							}
@@ -9948,8 +10445,8 @@ DisconnectCheck(){
 	global MoveSpeedFactor
 	global LastClock
 	global KeyDelay
-	global WindowedScreen
-	global Roblox
+	global WindowedScreen, HiveSlot
+	global Roblox, StartOnReload
 	GuiControlGet, PrivServer
 	if(not RegExMatch(PrivServer, "i)^((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\?privateServerLinkCode=\d{32}$")){
 		;null out the private server link for this disconnect
@@ -9965,7 +10462,13 @@ DisconnectCheck(){
 		}
 		if (!ReloadRobloxSecs || ReloadRobloxSecs=0)
 			ReloadRobloxSecs:=60
-		nm_setStatus("Disconnected", "Reconnecting")
+		nm_setStatus("Disconnected", "Reconnecting: " . A_Index)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;StartOnReload:=1
+;IniWrite, %StartOnReload%, nm_config.ini, Gui, StartOnReload
+;sleep, 1000
+;Reload
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		if(A_Index=1){
 			TotalDisconnects:=TotalDisconnects+1
 			SessionDisconnects:=SessionDisconnects+1
@@ -9975,9 +10478,9 @@ DisconnectCheck(){
 		}
 		browsers := ["msedge.exe","chrome.exe","ieplore.exe","firefox.exe","opera.exe","brave.exe"]
 		for i, value in browsers {
-			if (WinExist("ahk_exe "value)){
-				winclose, ahk_exe %value%
-				winwaitclose, ahk_exe %value%
+			if (WinExist("ahk_exe " . value)){
+				WinKill, ahk_exe %value%
+				;winwaitclose, ahk_exe %value%
 			}
 		}
 		StringLen, linklen, PrivServer
@@ -9997,15 +10500,16 @@ DisconnectCheck(){
 		;if (linklen > 0){
 			browsers := ["msedge.exe","chrome.exe","ieplore.exe","firefox.exe","opera.exe","brave.exe"]
 			for i, value in browsers {
-				if (WinExist("ahk_exe "value)){
+				if (WinExist("ahk_exe " . value)){
 					winactivate, ahk_exe %value%
-					winwaitactive, ahk_exe %value%
+					;winwaitactive, ahk_exe %value%
 					send ^w
 				}
 			}
 		;}
 		sleep, 3000
 		if WinExist("Roblox"){
+			nm_setStatus("Detected", "Roblox Open")
 			WinActivate, Roblox
 			WinWaitActive, Roblox
 			send {LWin down}
@@ -10023,6 +10527,8 @@ DisconnectCheck(){
 				}
 			}
 			break
+		} else {
+			nm_setStatus("Error", "No Roblox Found, Retry: " . A_Index)
 		}
 	}
 	halt:=0
@@ -10054,6 +10560,13 @@ DisconnectCheck(){
 			HiveSlot:=slotnum
 			GuiControl,,HiveSlot, %HiveSlot%
 			IniWrite, %HiveSlot%, nm_config.ini, Settings, HiveSlot
+			;;;;; Natro so broke :weary:
+			send, /
+			sleep 200
+			Send {Text} [%A_Hour%:%A_Min%] Natro so broke :weary:
+			sleep 200
+			send, {Enter}
+			sleep 250
 			break
 		}
 		if(A_Index=10){
@@ -10903,7 +11416,7 @@ nm_locateVB(){
 		}
 	}
 }
-nm_hotbar(){
+nm_hotbar(boost:=0){
 	global state
 	global ActiveHotkeys
 	;whileNames:=["Always", "Attacking", "Gathering", "At Hive"]
@@ -11379,7 +11892,7 @@ nm_QuestRotate(){
 	;honey bee quest
 	nm_HoneyQuest()
 	;planters
-	ba_planter()
+	;ba_planter()
 }
 nm_Feed(food){
 	global Roblox
@@ -12711,7 +13224,10 @@ nm_gotoQuestgiver(giver){
 				imgPos := nm_imgSearch("no.png",30)
 				If (imgPos[1] = 0){
 					MouseMove, (imgPos[2]), (imgPos[3])
-					Click
+					loop 2 {
+						Click
+						sleep 100
+					}
 					MouseMove, 350, (Roblox[3]+70)
 				}
 				dialog := nm_imgSearch("dialog.png",30,"center")
@@ -12876,6 +13392,7 @@ nm_resetConfig(){
     (
 [Gui]
 dayOrNight=Day
+StartOnReload=0
 
 [Settings]
 GuiTheme=MacLion3
@@ -13089,9 +13606,12 @@ LastHotkey6=1
 LastHotkey7=1
 LastWhirligig=1
 LastEnzymes=1
+LastGlitter=1
 LastBlueBoost=1
 LastRedBoost=1
 LastMountainBoost=1
+LastWindShrine=1
+LastGuid=1
 AutoFieldBoostActive=0
 AutoFieldBoostRefresh=12.5
 AFBDiceEnable=0
@@ -14680,7 +15200,10 @@ ba_placeInventoryPlanter(planterName, planterNum){
 		If (imgPos[1] = 0){
 			;MouseMove, (imgPos[2] + 10), (imgPos[3] + 10)
 			MouseMove, (imgPos[2]), (imgPos[3])
-			Click
+			loop 3 {
+				Click
+				sleep 100
+			}
 			MouseMove, 350, (Roblox[3]+70)
 			sleep, 750
 			loop, 3{
@@ -14712,7 +15235,10 @@ ba_placeInventoryPlanter(planterName, planterNum){
 				sleep, 500
 			}
 			MouseMove, 30, (Roblox[2]+100)
-			Click
+			loop 2 {
+				Click
+				sleep 100
+			}
 			MouseMove, 350, (Roblox[3]+70)
 			return 1
 		}	
@@ -14745,7 +15271,10 @@ ba_placeInventoryPlanter(planterName, planterNum){
 				If (imgPos[1] = 0){
 					;MouseMove, (imgPos[2] + 10), (imgPos[3] + 10)
 					MouseMove, (imgPos[2]), (imgPos[3])
-					Click
+					loop 3 {
+						Click
+						sleep 100
+					}
 					MouseMove, 350, (Roblox[3]+70)
 					sleep, 750
 					loop, 3{
@@ -14776,7 +15305,10 @@ ba_placeInventoryPlanter(planterName, planterNum){
 						}
 					}
 					MouseMove, 30, (Roblox[2]+100)
-					Click
+					loop 2 {
+						Click
+						sleep 100
+					}
 					MouseMove, 350, (Roblox[3]+70)
 					return 1
 				}
@@ -14917,13 +15449,19 @@ ba_harvestPlanter(planterNum){
 				imgPos := nm_imgSearch("no.png",30)
 				If (imgPos[1] = 0){
 					MouseMove, (imgPos[2]), (imgPos[3])
-					Click
+					loop 2 {
+						Click
+						sleep, 100
+					}
 					MouseMove, 350, (Roblox[3]+70)
 				}
 			}
             ;MouseMove, (imgPos[2] + 10), (imgPos[3] + 10)
 			MouseMove, (imgPos[2]), (imgPos[3])
-            Click
+			loop 2 {
+				Click
+				sleep, 100
+			}
 			MouseMove, 350, (Roblox[3]+70)
         }
 		sleep, 500
@@ -15142,7 +15680,7 @@ MountainTopPlanters=PlanterOfPlenty, 1.5, 1.5, 10.67; BlueClayPlanter, 1, 1.13, 
 MushroomPlanters=TackyPlanter, 1, 1.5, 5.33; PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; CandyPlanter, 1.2, 1, 4; RedClayPlanter, 1, 1.19, 5.11; PetalPlanter, 1, 1.15, 12.17; PlasticPlanter, 1, 1, 2; BlueClayPlanter, 1, 1, 6; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 PepperPlanters=PlanterOfPlenty, 1.5, 1.5, 10.67; RedClayPlanter, 1.2, 1.23, 4.88; PetalPlanter, 1, 1.04, 13.46; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; BlueClayPlanter, 1, 1, 6; TackyPlanter, 1, 1, 8; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 PineTreePlanters=PetalPlanter, 1.5, 1.08, 12.96; PlanterOfPlenty, 1.5, 1, 16; BlueClayPlanter, 1.2, 1.21, 4.96; TackyPlanter, 1.25, 1, 8; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; RedClayPlanter, 1, 1, 6; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
-PineapplePlanters=CandyPlanter, 1, 1.5, 2.67; PetalPlanter, 1.5, 1.45, 9.69; PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; TackyPlanter, 1.25, 1, 8; RedClayPlanter, 1.2, 1.02, 5.91; BlueClayPlanter, 1, 1.01, 5.93; PlasticPlanter, 1, 1, 2; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+PineapplePlanters=PetalPlanter, 1.5, 1.45, 9.69; CandyPlanter, 1, 1.5, 2.67; PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; TackyPlanter, 1.25, 1, 8; RedClayPlanter, 1.2, 1.02, 5.91; BlueClayPlanter, 1, 1.01, 5.93; PlasticPlanter, 1, 1, 2; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 PumpkinPlanters=PetalPlanter, 1.5, 1.29, 10.89; PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; RedClayPlanter, 1.2, 1.06, 5.69; TackyPlanter, 1.25, 1, 8; BlueClayPlanter, 1, 1.05, 5.7; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 RosePlanters=PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; RedClayPlanter, 1, 1.2, 4.98; CandyPlanter, 1.2, 1, 4; PetalPlanter, 1, 1.09, 12.84; PlasticPlanter, 1, 1, 2; BlueClayPlanter, 1, 1, 6; TackyPlanter, 1, 1, 8; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 SpiderPlanters=PesticidePlanter, 1.3, 1.6, 6.25; PetalPlanter, 1, 1.5, 9.33; PlanterOfPlenty, 1.5, 1, 16; CandyPlanter, 1.2, 1, 4; PlasticPlanter, 1, 1, 2; BlueClayPlanter, 1, 1, 6; RedClayPlanter, 1, 1, 6; TackyPlanter, 1, 1, 8; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
@@ -15329,7 +15867,11 @@ if (AFBrollingDice && not disableDayorNight&& state!="Disconnected")
 ;	nm_backpackPercentFilter()
 ;} 
 ;use/check hotbar boosts
-nm_hotbar()
+if(PFieldBoosted) {
+	nm_hotbar(1)
+} else {
+	nm_hotbar()
+}
 ;bug death check
 if(state="Gathering" || state="Searching" || (VBState=2 && state="Attacking"))
 	nm_bugDeathCheck()
@@ -15376,7 +15918,7 @@ nm_TabPlantersPlusLock()
 nm_TabSettingsLock()
 GuiControl, show, LockedText
 ;set globals
-nm_setStatus(0, "Setting Globals")
+nm_setStatus("Startup", "Setting Globals")
 global SessionRuntime:=0
 global TotalGatherTime
 global SessionGatherTime:=0
@@ -15412,6 +15954,7 @@ global DisableToolUse, AnnounceGuidingStar
 global ClockCheck
 global MondoBuffCheck
 global MondoAction
+global PMondoGuidComplete:=0
 global AntPassCheck, AntPassAction
 global HoneyDisCheck
 global TreatDisCheck
@@ -15464,7 +16007,7 @@ global LastRoyalJellyDis
 global LastGlueDis
 global LastBlueBoost
 global LastRedBoost
-global LastMountainBoost
+global LastMountainBoost, LastWindShrine, LastGuid
 global LastStockings
 global LastWreath
 global LastFeast
@@ -15538,7 +16081,7 @@ global HotkeyWhile6
 global HotkeyWhile7
 global LastMicroConverter
 global LastWhirligig
-global LastEnzymes
+global LastEnzymes, LastGlitter
 global AutoFieldBoostActive
 global FieldLastBoosted
 global FieldLastBoostedBy
@@ -15583,6 +16126,7 @@ global MyField:=None
 global ReloadRobloxSecs
 global Webhook
 global BoostChaserCheck
+global GatherFieldBoostedStart:=nowUnix()-3600
 GuiControlGet, CurrentField
 GuiControlGet, MoveMethod
 GuiControlGet, FwdKey
@@ -15662,6 +16206,7 @@ loop 3 {
 	GuiControlGet, FieldRotateTimes%A_Index%
 	GuiControlGet, FieldDriftCheck%A_Index%
 }
+IniRead, StartOnReload, nm_config.ini, Gui, StartOnReload
 IniRead, StingerPepperCheck, nm_config.ini, Collect, StingerPepperCheck
 IniRead, StingerMountainTopCheck, nm_config.ini, Collect, StingerMountainTopCheck
 IniRead, StingerRoseCheck, nm_config.ini, Collect, StingerRoseCheck
@@ -15683,6 +16228,8 @@ IniRead, LastGlueDis, nm_config.ini, Collect, LastGlueDis
 IniRead, LastBlueBoost, nm_config.ini, Boost, LastBlueBoost
 IniRead, LastRedBoost, nm_config.ini, Boost, LastRedBoost
 IniRead, LastMountainBoost, nm_config.ini, Boost, LastMountainBoost
+IniRead, LastWindShrine, nm_config.ini, Boost, LastWindShrine
+IniRead, LastGuid, nm_config.ini, Boost, LastGuid
 IniRead, LastStockings, nm_config.ini, Collect, LastStockings
 IniRead, LastWreath, nm_config.ini, Collect, LastWreath
 IniRead, LastFeast, nm_config.ini, Collect, LastFeast
@@ -15746,6 +16293,7 @@ IniRead, LastHotkey7, nm_config.ini, Boost, LastHotkey7
 IniRead, LastMicroConverter, nm_config.ini, Boost, LastMicroConverter
 IniRead, LastWhirligig, nm_config.ini, Boost, LastWhirligig
 IniRead, LastEnzymes, nm_config.ini, Boost, LastEnzymes
+IniRead, LastGlitter, nm_config.ini, Boost, LastGlitter
 IniRead, TotalGatherTime, nm_config.ini, Status, TotalGatherTime
 IniRead, TotalConvertTime, nm_config.ini, Status, TotalConvertTime
 IniRead, TotalViciousKills, nm_config.ini, Status, TotalViciousKills
@@ -15803,6 +16351,16 @@ loop 6 {
 	slot:=A_Index+1
 	if(HotkeyWhile%slot%="Enzymes") {
 		EnzymesKey:=slot
+		break
+	}
+}
+;GlitterKey
+global GlitterKey
+GlitterKey:="None"
+loop 6 {
+	slot:=A_Index+1
+	if(HotkeyWhile%slot%="Glitter") {
+		GlitterKey:=slot
 		break
 	}
 }
@@ -15932,7 +16490,7 @@ loop, 1000 {
 return
 
 nm_WM_COPYDATA(wParam, lParam){
-	global youDied
+	global youDied, LastGuid, PMondoGuid, MondoAction, MondoBuffCheck
 	StringSize := NumGet(lParam + A_PtrSize)  ; Retrieves the CopyDataStruct's lpData member.
 	StringAddress := NumGet(lParam + 2*A_PtrSize)  ; Retrieves the CopyDataStruct's lpData member.
     StringText := StrGet(StringAddress)  ; Copy the string out of the structure.
@@ -15953,7 +16511,7 @@ nm_WM_COPYDATA(wParam, lParam){
 		;Announce Guiding Star
 		;calculate mins
 		if(A_Min>=50) {
-			GSMins:=50-A_Min+10
+			GSMins:=A_Min-50
 			if(GSMins<10)
 				GSMins:=("0" . GSMins)
 		} else {
@@ -15967,18 +16525,25 @@ nm_WM_COPYDATA(wParam, lParam){
 		sleep 200
 		send, {Enter}
 		sleep 250
-		;SetKeyDelay 5
-		;unpause
-		if(FwdKeyState)
-		send {%FwdKey% down}
-		if(BackKeyState)
-			send {%BackKey% down}
-		if(LeftKeyState)
-			send {%LeftKey% down}
-		if(RightKeyState)
-			send {%RightKey% down}
-		if(SpaceKeyState)
-			send {space down}
+		;set LastGuid
+		LastGuid:=nowUnix()
+		IniWrite, %LastGuid%, nm_config.ini, Boost, LastGuid
+		if(PMondoGuid && MondoBuffCheck && MondoAction="Guid") {
+			nm_mondo()
+			return
+		} else {
+			;unpause
+			if(FwdKeyState)
+			send {%FwdKey% down}
+			if(BackKeyState)
+				send {%BackKey% down}
+			if(LeftKeyState)
+				send {%LeftKey% down}
+			if(RightKeyState)
+				send {%RightKey% down}
+			if(SpaceKeyState)
+				send {space down}
+		}
 	}
 }
 nm_setLastHeartbeat(wParam, lParam){
