@@ -16,12 +16,15 @@ runWith(version){
 	Run,"%correct%" "%A_ScriptName%",%A_ScriptDir%
 	ExitApp
 }
+
+OnMessage(0x004A, "nm_WM_COPYDATA")
+OnMessage(0x4201, "nm_backgroundEvent")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; CONFIG FILE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.6.3"
+VersionID:="0.6.4"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; NATRO ENHANCEMENT STUFF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -44,7 +47,7 @@ global MoveSpeedFactorNum:=1
 global MoveSpeed
 global MoveSpeedNum
 global DayOrNight:=Day
-global disableDayorNight:=0
+;global disableDayorNight:=0
 ;global StingerCheck:=0
 global StatusLogReverse:=0
 global FieldDriftCompensation:=0
@@ -239,7 +242,7 @@ global RileyBee:={"Abilities":[[1,"Collect","Any"]], "Booster":[[2,"Get","RedBoo
 ;key:="Aromatic Pie"
 ;msgbox % PolarBear["Aromatic Pie"][1][2]
 global FieldBooster:={"pine tree":{booster:"blue", stacks:1}, "bamboo":{booster:"blue", stacks:1}, "blue flower":{booster:"blue", stacks:3}, "rose":{booster:"red", stacks:1}, "strawberry":{booster:"red", stacks:1}, "mushroom":{booster:"red", stacks:3}, "sunflower":{booster:"mountain", stacks:3}, "dandelion":{booster:"mountain", stacks:3}, "spider":{booster:"mountain", stacks:2}, "clover":{booster:"mountain", stacks:2}, "pineapple":{booster:"mountain", stacks:2}, "pumpkin":{booster:"mountain", stacks:1}, "cactus":{booster:"mountain", stacks:1}, "stump":{booster:"none", stacks:0}, "mountain top":{booster:"none", stacks:0}, "coconut":{booster:"none", stacks:0}, "pepper":{booster:"none", stacks:0}}
-global FieldDefault:={"Sunflower":{pattern:["Snake","M", 2],camera:["None",1],sprinkler:["Right",8]}, "Dandelion":{pattern:["Lines","M",2],camera:["None",1],sprinkler:["Upper Right",9]}, "Mushroom":{pattern:["Snake","M",1],camera:["None",1], sprinkler:["Right",10]}, "Blue Flower":{pattern:["Lines","M",2],camera:["None",1],sprinkler:["Center",1]}, "Clover":{pattern:["Lines","S",1],camera:["None",1],sprinkler:["Upper",10]}, "Spider":{pattern:["Lines","M",2],camera:["None",1],sprinkler:["Left",6]}, "Strawberry":{pattern:["Snake","S",2],camera:["Right",10],sprinkler:["Lower Left",2]}, "Bamboo":{pattern:["Lines","M",2],camera:["None",1],sprinkler:["Upper Left",3]}, "Pineapple":{pattern:["Snake","M",2],camera:["None",1],sprinkler:["Lower Right",2]}, "Stump":{pattern:["Stationary","S",1],camera:["Right",2],sprinkler:["Center",1]}, "Cactus":{pattern:["Squares","S",1],camera:["None",1],sprinkler:["Lower",5]}, "Pumpkin":{pattern:["Snake","M",2],camera:["None",1],sprinkler:["Right",7]},"Pine Tree":{pattern:["Snake","M",2],camera:["Left",2],sprinkler:["Upper",6]}, "Rose":{pattern:["Lines","M",2],camera:["None",1],sprinkler:["Upper Right",5]}, "Mountain Top":{pattern:["Snake","S",2],camera:["Right",2],sprinkler:["Right",5]}, "Coconut":{pattern:["Snake","M",2],camera:["None",1],sprinkler:["Right",10]}, "Pepper":{pattern:["Snake","M",2],camera:["None",1],sprinkler:["Right",6]}}
+global FieldDefault:={"Sunflower":{pattern:["Snake","M", 2],camera:["None",1],sprinkler:["Right",8]}, "Dandelion":{pattern:["Lines","M",2],camera:["None",1],sprinkler:["Upper Right",9]}, "Mushroom":{pattern:["Snake","M",1],camera:["None",1], sprinkler:["Right",10]}, "Blue Flower":{pattern:["Lines","M",2],camera:["None",1],sprinkler:["Center",1]}, "Clover":{pattern:["Lines","S",1],camera:["None",1],sprinkler:["Upper",10]}, "Spider":{pattern:["Lines","M",2],camera:["None",1],sprinkler:["Left",6]}, "Strawberry":{pattern:["Snake","S",2],camera:["Right",2],sprinkler:["Right",5]}, "Bamboo":{pattern:["Lines","M",2],camera:["None",1],sprinkler:["Upper Left",3]}, "Pineapple":{pattern:["Snake","M",2],camera:["None",1],sprinkler:["Lower Right",2]}, "Stump":{pattern:["Stationary","S",1],camera:["Right",2],sprinkler:["Center",1]}, "Cactus":{pattern:["Squares","S",1],camera:["None",1],sprinkler:["Lower",5]}, "Pumpkin":{pattern:["Snake","M",2],camera:["None",1],sprinkler:["Right",7]},"Pine Tree":{pattern:["Snake","M",2],camera:["Left",2],sprinkler:["Upper",6]}, "Rose":{pattern:["Lines","M",2],camera:["None",1],sprinkler:["Upper Right",5]}, "Mountain Top":{pattern:["Snake","S",2],camera:["Right",2],sprinkler:["Right",5]}, "Coconut":{pattern:["Snake","M",2],camera:["None",1],sprinkler:["Right",7]}, "Pepper":{pattern:["Snake","M",2],camera:["None",1],sprinkler:["Right",6]}}
 ;msgbox % FieldDefault["sunflower"]["pattern"][1]
 ;msgbox % FieldDefault["blue flower"]["pattern"][1]
 ;global BambooPlanters:={"PetalPlanter":{nectar:1.5, speed:1.16, growth:12.12}, "PlentyPlanter":{nectar:1.5, speed:1, growth:16}, "BlueClayPlanter":{nectar:1.2, speed:1.17, growth:5.12}, "PesticidePlanter":{nectar:1, speed:1.3, growth:7.69}, "TackyPlanter":{nectar:1.25, speed:1, growth:8}, "PlasticPlanter":{nectar:1, speed:1, growth:2}, "CandyPlanter":{nectar:1, speed:1, growth:4}, "RedClayPlanter":{nectar:1, speed:1, growth:6}, "PaperPlanter":{nectar:.75, speed:1, growth:1}, "TicketPlanter":{nectar:2, speed:1, growth:2}}
@@ -319,7 +322,7 @@ If(Roblox[3]>30)
 else
 	WindowedScreen:=0
 global PackFilterArray:=[]
-global BackpackPercentFiltered
+global BackpackPercent, BackpackPercentFiltered
 global ActiveHotkeys:=[]
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -540,8 +543,8 @@ Gui, Font, w700
 Gui, Add, GroupBox, x3 y23 w160 h215, Development
 Gui, Add, GroupBox, x163 y23 w335 h215, Contributors
 Gui, Font
-Gui, Add, Text, x5 y38 w155 +wrap +backgroundtrans, Special Thanks for your contributions in the development and testing of this project.  Your feedback and ideas have been invaluable in the design process!`n`nzez#8710`nFHL09#4061`nLittleChurch#1631 (N00b)`nZaappiix#2372`nSP#0305
-Gui, Add, Text, x170 y38 w330 +wrap +backgroundtrans, Thank you for your donations to this project!`n`nFHL09#4061`nNick 9#9476
+Gui, Add, Text, x5 y38 w155 +wrap +backgroundtrans, Special Thanks for your contributions in the development and testing of this project.  Your feedback and ideas have been invaluable in the design process!`n`nzez#8710`nFHL09#4061`nLittleChurch#1631 (N00b)`nZaappiix#2372`nSP#0305`nZiz | Jake#9154
+Gui, Add, Text, x170 y38 w330 +wrap +backgroundtrans, Thank you for your donations to this project!`n`nFHL09#4061`nNick 9#9476`nwilalwil2#4175`nAshtonishing#4420
 
 
 
@@ -592,7 +595,7 @@ nm_setStats()
 ;------------------------
 Gui, Tab, Settings
 GuiControl,focus, Tab
-;Gui, Add, Button, x290 y25 w43 h15 gnm_testButton, Test
+Gui, Add, Button, x290 y25 w43 h15 gnm_testButton, Test
 Gui, Add, Checkbox, x15 y25 vAlwaysOnTop gnm_AlwaysOnTop Checked%AlwaysOnTop%, Always On Top
 Gui, Add, Text, x5 y50 w60 +Right +BackgroundTrans,GUI Theme:
 Gui, Add, DropDownList, x70 y45 w80 h100 vGuiTheme gnm_guiThemeSelect, %GuiTheme%||Allure|Ayofe|BluePaper|Concaved|Core|Cosmo|Fanta|GrayGray|Hana|Invoice|Lakrits|Luminous|MacLion3|Minimal|Museo|Panther|PaperAGV|PINK|Relapse|Simplex3|SNAS|Stomp|VS7|WhiteGray|Woodwork
@@ -650,6 +653,7 @@ IniRead, HiveSlot, nm_config.ini, Settings, HiveSlot
 IniRead, HiveVariation, nm_config.ini, Settings, HiveVariation
 IniRead, HiveBees, nm_config.ini, Settings, HiveBees
 IniRead, DisableToolUse, nm_config.ini, Settings, DisableToolUse
+IniRead, AnnounceGuidingStar, nm_config.ini, Settings, AnnounceGuidingStar
 Gui, Add, Text, x175 y42 w110 +left +BackgroundTrans,Movement Speed:
 Gui, Font, s6
 Gui, Add, Text, x175 y57 w80 +right +BackgroundTrans,(WITHOUT HASTE)
@@ -671,6 +675,7 @@ Gui, Add, Edit, x252 y130 w25 r1 number +BackgroundTrans vConvertMins gnm_saveCo
 GuiControl, disable, ConvertMins
 Gui, Add, Text, x282 y135, Mins
 Gui, Add, CheckBox, x175 y155 vDisableToolUse gnm_saveConfig +BackgroundTrans Checked%DisableToolUse%, Disable Tool Use
+Gui, Add, CheckBox, x175 y170 vAnnounceGuidingStar gnm_saveConfig +BackgroundTrans Checked%AnnounceGuidingStar%, Announce Guiding Star
 
 ;hive settings
 Gui, Add, Text, x10 y95 w110 +left +BackgroundTrans,HIVE SETTINGS
@@ -1107,11 +1112,11 @@ Gui, Add, Edit, x100 y185 w25 h17 limit3 number vQuestGatherMins gnm_savequest, 
 Gui, Add, Text, x126 y188 +BackgroundTrans, Mins
 Gui, Add, Checkbox, x235 y23 vBlackQuestCheck gnm_savequest Checked%BlackQuestCheck%, Enable
 Gui, Add, Text, x163 y38 w158 h92 vBlackQuestProgress, %BlackQuestProgress%
-Gui, Add, Checkbox, x410 y23 vBuckoQuestCheck gnm_savequest Checked%BuckoQuestCheck%, Enable
-Gui, Add, Checkbox, x340 y37 vBuckoQuestGatherInterruptCheck gnm_savequest Checked%BuckoQuestGatherInterruptCheck%, Allow Gather Interrupt
+Gui, Add, Checkbox, x410 y23 vBuckoQuestCheck gnm_BuckoQuestCheck Checked%BuckoQuestCheck%, Enable
+Gui, Add, Checkbox, x340 y37 vBuckoQuestGatherInterruptCheck gnm_BuckoQuestCheck Checked%BuckoQuestGatherInterruptCheck%, Allow Gather Interrupt
 Gui, Add, Text, x333 y51 w158 h78 vBuckoQuestProgress, %BuckoQuestProgress%
-Gui, Add, Checkbox, x410 y131 vRileyQuestCheck gnm_savequest Checked%RileyQuestCheck%, Enable
-Gui, Add, Checkbox, x340 y145 vRileyQuestGatherInterruptCheck gnm_savequest Checked%RileyQuestGatherInterruptCheck%, Allow Gather Interrupt
+Gui, Add, Checkbox, x410 y131 vRileyQuestCheck gnm_RileyQuestCheck Checked%RileyQuestCheck%, Enable
+Gui, Add, Checkbox, x340 y145 vRileyQuestGatherInterruptCheck gnm_RileyQuestCheck Checked%RileyQuestGatherInterruptCheck%, Allow Gather Interrupt
 Gui, Add, Text, x333 y159 w158 h78 vRileyQuestProgress, %RileyQuestProgress%
 Gui, Font, w700
 Gui, Add, Text, x5 y25 w490 h210 vQuestTabEasyMode +border +center,`n`nThis Tab Unavailable in Easy Mode
@@ -1374,6 +1379,9 @@ nm_TabSettingsUnLock()
 WinActivate, Roblox
 WinWaitActive, Roblox
 settimer, StartBackground, -5000
+run background.ahk, submacros
+if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$"))
+	Run, StatMonitor.ahk
 return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; MAIN LOOP
@@ -1392,9 +1400,13 @@ nm_Start(){
 		;kill things
 		nm_Mondo()
 		nm_Bugrun()
+		;planters
+		ba_planter()
 		;collect things
 		nm_toCollect()
 		nm_Mondo()
+		;planters
+		ba_planter()
 		;quests
 		nm_QuestRotate()
 		;booster
@@ -1737,6 +1749,7 @@ nm_guiModeButton(toggle:=1){
 }
 nm_setState(newState){
 	global state
+	/*
 	global disableDayOrNight
 	if (newState="traveling") {
 		disableDayOrNight:=1
@@ -1744,6 +1757,7 @@ nm_setState(newState){
 	}
 	else
 		disableDayOrNight:=0
+	*/
 	state:=newState
 	GuiControl, text, state, %state%
 }
@@ -1782,14 +1796,16 @@ nm_setStatus(newState:=0, newObjective:=0){
 	global state
 	global objective
 	global stateString
-	global disableDayOrNight
+	;global disableDayOrNight
 	if(newState){
+		/*
 		if (newState="traveling") {
 			disableDayOrNight:=1
 			GuiControl, Text, TimeofDay, Travel
 		}
 		else
 			disableDayOrNight:=0
+		*/
 		state:=newState
 	}
 	if(newObjective){
@@ -1843,6 +1859,8 @@ nm_setStatus(newState:=0, newObjective:=0){
 	global TotalRuntime, SessionRuntime, MacroStartTime, TotalGatherTime, SessionGatherTime, GatherStartTime, TotalConvertTime, SessionConvertTime, ConvertStartTime, TotalViciousKills, SessionViciousKills, TotalBossKills, SessionBossKills, TotalBugKills, SessionBugKills, TotalPlantersCollected, SessionPlantersCollected, TotalQuestsComplete, SessionQuestsComplete, TotalDisconnects, SessionDisconnects
 	if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$"))
 	{		
+		; update status
+		newState ? Send_WM_COPYDATA("status " . ((newState = "gathering") ? "1" : (newState = "converting") ? "2" : "0"), "StatMonitor.ahk ahk_class AutoHotkey")
 		if(GatherStartTime)
 			SessionGatherTimeWHT:=(SessionGatherTime+(nowUnix()-GatherStartTime))
 		else
@@ -1915,6 +1933,7 @@ nm_setStatus(newState:=0, newObjective:=0){
 				}
 			}
 		}
+		/*
 		; check if it is time for hourly update
 		timeBetween := nowUnix() - lastHourlyUpdate
 		if ((timeBetween >= 3600) && !InStr(stateString, "Startup"))
@@ -2102,7 +2121,23 @@ nm_setStatus(newState:=0, newObjective:=0){
 				wr.WaitForResponse()
 			}
 		}
+		*/
 	}
+}
+Send_WM_COPYDATA(ByRef StringToSend, ByRef TargetScriptTitle)
+{
+    VarSetCapacity(CopyDataStruct, 3*A_PtrSize, 0)
+    SizeInBytes := (StrLen(StringToSend) + 1) * (A_IsUnicode ? 2 : 1)
+    NumPut(SizeInBytes, CopyDataStruct, A_PtrSize)
+    NumPut(&StringToSend, CopyDataStruct, 2*A_PtrSize)
+    Prev_DetectHiddenWindows := A_DetectHiddenWindows
+    Prev_TitleMatchMode := A_TitleMatchMode
+    DetectHiddenWindows On
+    SetTitleMatchMode 2
+    SendMessage, 0x004A, 0, &CopyDataStruct,, %TargetScriptTitle%
+    DetectHiddenWindows %Prev_DetectHiddenWindows%
+    SetTitleMatchMode %Prev_TitleMatchMode%
+    return ErrorLevel
 }
 nm_StatusLogReverseCheck(){
 	global StatusLogReverse
@@ -2857,6 +2892,16 @@ nm_saveCollect(){
 	IniWrite, %TunnelBearBabyCheck%, nm_config.ini, Collect, TunnelBearBabyCheck
 	IniWrite, %KingBeetleCheck%, nm_config.ini, Collect, KingBeetleCheck
 	IniWrite, %KingBeetleBabyCheck%, nm_config.ini, Collect, KingBeetleBabyCheck
+	;send StingerCheck to background.ahk
+	Prev_DetectHiddenWindows := A_DetectHiddenWindows
+	Prev_TitleMatchMode := A_TitleMatchMode
+	DetectHiddenWindows On
+	SetTitleMatchMode 2
+	if WinExist("background.ahk ahk_class AutoHotkey") {
+		SendMessage, 0x4200, 4, StingerCheck
+	}
+	DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+	SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 }
 nm_BugrunCheck(){
 	GuiControlGet, BugrunCheck
@@ -3261,20 +3306,36 @@ nm_savequest(){
 	GuiControlGet, PolarQuestGatherInterruptCheck
 	GuiControlGet, HoneyQuestCheck
 	GuiControlGet, BlackQuestCheck
-	GuiControlGet, BuckoQuestCheck
-	GuiControlGet, BuckoQuestGatherInterruptCheck
-	GuiControlGet, RileyQuestCheck
-	GuiControlGet, RileyQuestGatherInterruptCheck
 	GuiControlGet, QuestGatherMins
 	IniWrite, %PolarQuestCheck%, nm_config.ini, Quests, PolarQuestCheck
 	IniWrite, %PolarQuestGatherInterruptCheck%, nm_config.ini, Quests, PolarQuestGatherInterruptCheck
 	IniWrite, %HoneyQuestCheck%, nm_config.ini, Quests, HoneyQuestCheck
 	IniWrite, %BlackQuestCheck%, nm_config.ini, Quests, BlackQuestCheck
+	IniWrite, %QuestGatherMins%, nm_config.ini, Quests, QuestGatherMins
+}
+nm_BuckoQuestCheck(){
+	GuiControlGet, BuckoQuestCheck
+	GuiControlGet, BuckoQuestGatherInterruptCheck
 	IniWrite, %BuckoQuestCheck%, nm_config.ini, Quests, BuckoQuestCheck
 	IniWrite, %BuckoQuestGatherInterruptCheck%, nm_config.ini, Quests, BuckoQuestGatherInterruptCheck
+	if(BuckoQuestCheck) {
+		GuiControl,,AntPassCheck, 1
+		GuiControl,ChooseString, AntPassAction, Pass
+		nm_saveCollect()
+		msgbox,0,Bucko Bee Quest, Ant Pass collection has been automatically enabled so the passes can be stockpiled for the "Picnic" quest.
+	}
+}
+nm_RileyQuestCheck(){
+	GuiControlGet, RileyQuestCheck
+	GuiControlGet, RileyQuestGatherInterruptCheck
 	IniWrite, %RileyQuestCheck%, nm_config.ini, Quests, RileyQuestCheck
 	IniWrite, %RileyQuestGatherInterruptCheck%, nm_config.ini, Quests, RileyQuestGatherInterruptCheck
-	IniWrite, %QuestGatherMins%, nm_config.ini, Quests, QuestGatherMins
+	if(RileyQuestCheck) {
+		GuiControl,,AntPassCheck, 1
+		GuiControl,ChooseString, AntPassAction, Pass
+		nm_saveCollect()
+		msgbox,0,Riley Bee Quest, Ant Pass collection has been automatically enabled so the passes can be stockpiled for the "Picnic" quest.
+	}
 }
 nm_ResetTotalStats(){
 	global TotalRuntime:=0
@@ -4018,7 +4079,7 @@ nm_saveConfig(){
 	global SprinklerType
 	global ConvertMins
 	global ReloadRobloxSecs
-	global DisableToolUse
+	global DisableToolUse, AnnounceGuidingStar
 	global Webhook
 	GuiControlGet HiveSlot
 	GuiControlGet HiveBees
@@ -4027,6 +4088,7 @@ nm_saveConfig(){
 	GuiControlGet, ConvertMins
 	GuiControlGet, ReloadRobloxSecs
 	GuiControlGet, DisableToolUse
+	GuiControlGet, AnnounceGuidingStar
 	GuiControlGet, Webhook
 	IniWrite, %HiveSlot%, nm_config.ini, Settings, HiveSlot
 	IniWrite, %HiveBees%, nm_config.ini, Settings, HiveBees
@@ -4035,6 +4097,7 @@ nm_saveConfig(){
 	IniWrite, %ConvertMins%, nm_config.ini, Settings, ConvertMins
 	IniWrite, %ReloadRobloxSecs%, nm_config.ini, Settings, ReloadRobloxSecs
 	IniWrite, %DisableToolUse%, nm_config.ini, Settings, DisableToolUse
+	IniWrite, %AnnounceGuidingStar%, nm_config.ini, Settings, AnnounceGuidingStar
 	IniWrite, %Webhook%, nm_config.ini, Status, Webhook
 }
 nm_webhookcheck(){
@@ -4272,6 +4335,7 @@ nm_TabSettingsLock(){
 	GuiControl, disable, ConvertBalloon
 	GuiControl, disable, ConvertMins
 	GuiControl, disable, DisableToolUse
+	GuiControl, disable, AnnounceGuidingStar
 	GuiControl, disable, HiveSlot
 	GuiControl, disable, HiveVariation
 	GuiControl, disable, HiveBees
@@ -4301,6 +4365,7 @@ nm_TabSettingsUnLock(){
 	if(ConvertBalloon="every")
 		GuiControl, enable, ConvertMins
 	GuiControl, enable, DisableToolUse
+	GuiControl, enable, AnnounceGuidingStar
 	GuiControl, enable, HiveSlot
 	GuiControl, enable, HiveVariation
 	GuiControl, enable, HiveBees
@@ -4653,122 +4718,52 @@ nm_testButton(){
 	GuiControlGet KeyDelay
 	IniRead, MoveSpeedFactor, nm_config.ini, Settings, MoveSpeedFactor
 	GuiControlGet MoveMethod
-	;Auryn Gathering Path
-	AurynDelay:=125
-	loop 5 {
-		;infinity
-		send {%FwdKey% down}
-		sleep AurynDelay*MoveSpeedFactor
-		send {%LeftKey% down}
-		sleep AurynDelay*MoveSpeedFactor*1.4
-		send {%FwdKey% up}
-		sleep AurynDelay*MoveSpeedFactor
-		send {%BackKey% down}
-		sleep AurynDelay*MoveSpeedFactor*3*1.4
-		send {%BackKey% up}
-		sleep AurynDelay*MoveSpeedFactor
-		send {%FwdKey% down}
-		sleep AurynDelay*MoveSpeedFactor*1.4
-		send {%LeftKey% up}
-		sleep AurynDelay*MoveSpeedFactor
-		send {%RightKey% down}
-		sleep AurynDelay*MoveSpeedFactor*1.4
-		send {%FwdKey% up}
-		sleep AurynDelay*MoveSpeedFactor
-		send {%BackKey% down}
-		sleep AurynDelay*MoveSpeedFactor*3*1.4
-		send {%BackKey% up}
-		sleep AurynDelay*MoveSpeedFactor
-		send {%FwdKey% down}
-		sleep AurynDelay*MoveSpeedFactor*1.4
-		send {%RightKey% up}
-		;big circle
-		sleep AurynDelay*MoveSpeedFactor*2
-		send {%LeftKey% down}
-		sleep AurynDelay*MoveSpeedFactor*2*1.4
-		send {%FwdKey% up}
-		sleep AurynDelay*MoveSpeedFactor*2
-		send {%BackKey% down}
-		sleep AurynDelay*MoveSpeedFactor*2*1.4
-		send {%LeftKey% up}
-		sleep AurynDelay*MoveSpeedFactor*2
-		send {%RightKey% down}
-		sleep AurynDelay*MoveSpeedFactor*2*1.4
-		send {%BackKey% up}
-		sleep AurynDelay*MoveSpeedFactor*2
-		send {%FwdKey% down}
-		sleep AurynDelay*MoveSpeedFactor*2*1.4
-		send {%RightKey% up}
-		;FLIP!!
-		;move to other side (half circle)
-		sleep AurynDelay*MoveSpeedFactor*2
-		send {%LeftKey% down}
-		sleep AurynDelay*MoveSpeedFactor*2*1.4
-		send {%FwdKey% up}
-		sleep AurynDelay*MoveSpeedFactor*2
-		send {%BackKey% down}
-		sleep AurynDelay*MoveSpeedFactor*2*1.4
-		send {%LeftKey% up}
-		send {%BackKey% up}
-		;pause here
-		sleep 50
-		;reverse infinity
-		send {%BackKey% down}
-		sleep AurynDelay*MoveSpeedFactor
-		send {%RightKey% down}
-		sleep AurynDelay*MoveSpeedFactor*1.4
-		send {%BackKey% up}
-		sleep AurynDelay*MoveSpeedFactor
-		send {%FwdKey% down}
-		sleep AurynDelay*MoveSpeedFactor*3*1.4
-		send {%FwdKey% up}
-		sleep AurynDelay*MoveSpeedFactor
-		send {%BackKey% down}
-		sleep AurynDelay*MoveSpeedFactor*1.4
-		send {%RightKey% up}
-		sleep AurynDelay*MoveSpeedFactor
-		send {%LeftKey% down}
-		sleep AurynDelay*MoveSpeedFactor*1.4
-		send {%BackKey% up}
-		sleep AurynDelay*MoveSpeedFactor
-		send {%FwdKey% down}
-		sleep AurynDelay*MoveSpeedFactor*3*1.4
-		send {%FwdKey% up}
-		sleep AurynDelay*MoveSpeedFactor
-		send {%BackKey% down}
-		sleep AurynDelay*MoveSpeedFactor*1.4
-		send {%LeftKey% up}
-		;big circle
-		sleep AurynDelay*MoveSpeedFactor*2
-		send {%RightKey% down}
-		sleep AurynDelay*MoveSpeedFactor*2*1.4
-		send {%BackKey% up}
-		sleep AurynDelay*MoveSpeedFactor*2
-		send {%FwdKey% down}
-		sleep AurynDelay*MoveSpeedFactor*2*1.4
-		send {%RightKey% up}
-		sleep AurynDelay*MoveSpeedFactor*2
-		send {%LeftKey% down}
-		sleep AurynDelay*MoveSpeedFactor*2*1.4
-		send {%FwdKey% up}
-		sleep AurynDelay*MoveSpeedFactor*2
-		send {%BackKey% down}
-		sleep AurynDelay*MoveSpeedFactor*2*1.4
-		send {%LeftKey% up}
-		;FLIP!!
-		;move to other side (half circle)
-		sleep AurynDelay*MoveSpeedFactor*2
-		send {%RightKey% down}
-		sleep AurynDelay*MoveSpeedFactor*2*1.4
-		send {%BackKey% up}
-		sleep AurynDelay*MoveSpeedFactor*2
-		send {%FwdKey% down}
-		sleep AurynDelay*MoveSpeedFactor*2*1.4
-		send {%RightKey% up}
-		send {%FwdKey% up}
-		sleep 2000
-	}
 	
+	
+	;calculate mins
+		if(A_Min>=50) {
+			GSMins:=50-A_Min+10
+			if(GSMins<10)
+				GSMins:=("0" . GSMins)
+		 } else {
+			GSMins:=A_Min+10
+			if(GSMins<10)
+				GSMins:=("0" . GSMins)
+		}
+		send, /
+		sleep 200
+		Send {Blind}{Text} <<Guiding Star>> in .PineTree. until __:%GSMins%
+		sleep 200
+		send, {Enter}
+	
+	
+	;run guidingStarDetect.ahk, submacros
+	/*
+	DetectHiddenWindows On
+	SetTitleMatchMode 2
+	testString:=["test"]
+	for key, value in testString {
+		StringToSend:=value
+	}
+	if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+		;StringToSend:=string
+		VarSetCapacity(CopyDataStruct, 3*A_PtrSize, 0)  ; Set up the structure's memory area.
+		SizeInBytes := (StrLen(StringToSend) + 1) * (A_IsUnicode ? 2 : 1)
+		NumPut(SizeInBytes, CopyDataStruct, A_PtrSize)  ; OS requires that this be done.
+		NumPut(&StringToSend, CopyDataStruct, 2*A_PtrSize)  ; Set lpData to point to the string itself.
+		;SendMessage, 0x4242, 1, &CopyDataStruct
+	StringSize := NumGet(&CopyDataStruct + A_PtrSize)  ; Retrieves the CopyDataStruct's lpData member.
+	StringAddress := NumGet(&CopyDataStruct + 2*A_PtrSize)  ; Retrieves the CopyDataStruct's lpData member.
+	msgbox StringSize=%StringSize% StringAddress=%StringAddress%
+		
+		
+		
+		SendMessage, 0x004A, 1, &CopyDataStruct
+	} else {
+		msgbox win does not exist
+	}
+	*/
+
 	
 	;OS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)   
 	;msgbox A_OSVersion=%A_OSVersion%`nOS=%OS%
@@ -4875,10 +4870,25 @@ nm_Reset(checkAll:=1, wait:=2000){
 	}
 	while (1){
 		resetTime:=nowUnix()
+		;send reset time to background.ahk
+		Prev_DetectHiddenWindows := A_DetectHiddenWindows
+		Prev_TitleMatchMode := A_TitleMatchMode
+		DetectHiddenWindows On
+		SetTitleMatchMode 2
+		if WinExist("background.ahk ahk_class AutoHotkey") {
+			SendMessage, 0x4200, 1, nowUnix()
+		}
+		DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+		SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 		;failsafe game frozen
 		if(A_Index>10) {
-			WinClose, Roblox
-			sleep, 8000
+			nm_setStatus("Closing", "and Re-Open Roblox")
+			While(winexist("Roblox")){
+				;WinClose, Roblox
+				WinKill, Roblox
+				WinWaitClose, Roblox
+				sleep, 8000
+			}
 			DisconnectCheck()
 		}
 		;check to make sure you are not in dialog before reset
@@ -4983,7 +4993,7 @@ nm_Reset(checkAll:=1, wait:=2000){
 		sleep, (remaining*1000) ;miliseconds
 	}
 }
-
+/*
 nm_backpackPercent(){
 	global WindowedScreen
 	WinGetPos , windowX, windowY, windowWidth, windowHeight, Roblox
@@ -5087,15 +5097,6 @@ nm_backpackPercent(){
 				if((backpackColor & 0xFF0000 <= Format("{:d}",0xD30000)) && (backpackColor & 0x00FFFF <= Format("{:d}",0x004A37)) && (backpackColor & 0x00FFFF > Format("{:d}",0x00322E))) { ;less or equal to 95%
 					BackpackPercent:=90
 				} else { ;greater than 95%
-					/*
-					if((backpackColor = Format("{:d}",0xF70017))) { ;is equal to 100%
-						BackpackPercent:=100
-					} else if((backpackColor & 0x00FFFF <= Format("{:d}",0x00342E))){
-						BackpackPercent:=95
-					} else {
-						BackpackPercent:=0
-					}
-					*/
 					if((backpackColor = Format("{:d}",0xF70017)) || ((backpackColor & 0xFF0000 >= Format("{:d}",0xE00000)) && (backpackColor & 0x00FFFF <= Format("{:d}",0x002427)) && (backpackColor & 0x00FFFF > Format("{:d}",0x001000)))) { ;is equal to 100%
 						BackpackPercent:=100
 					} else if((backpackColor & 0x00FFFF <= Format("{:d}",0x00342E))){
@@ -5129,6 +5130,7 @@ nm_backpackPercentFilter(){
 	BackpackPercentFiltered:=sum/PackFilterArray.length()
 	return BackpackPercentFiltered
 }
+*/
 nm_gotoRamp(){
 	global FwdKey
 	global RightKey
@@ -5144,17 +5146,17 @@ nm_gotoCannon(){
 	global RightKey
 	while (1) {
 		send, {%RightKey% down}
-		sleep, 200
+		DllCall("Sleep",UInt,200)
 		send, {space down}
-		sleep, 200
+		DllCall("Sleep",UInt,200)
 		send, {space up}
-		sleep, 200
+		DllCall("Sleep",UInt,200)
 		send, {%RightKey% up}
 		repeat:=1
 		loop 10 {
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
-				sleep, 100
+				DllCall("Sleep",UInt,100)
 				searchRet := nm_imgSearch("e_button.png",30,"high")
 				If (searchRet[1] = 0) {
 					repeat:=0
@@ -5274,11 +5276,11 @@ nm_walkTo(location){
 		nm_Move(13000*MoveSpeedFactor, FwdKey)
 		nm_Move(4000*MoveSpeedFactor, RightKey)
 		send, {%FwdKey% down}
-		sleep, 200
+		DllCall("Sleep",UInt,200)
 		send, {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100)
 		send, {space up}
-		sleep 800
+		DllCall("Sleep",UInt,800)
 		send, {%FwdKey% up}
 		loop 2 {
 			send, {%RotLeft%}
@@ -5297,11 +5299,11 @@ nm_walkTo(location){
 		nm_Move(13000*MoveSpeedFactor, FwdKey)
 		nm_Move(4000*MoveSpeedFactor, RightKey)
 		send, {%FwdKey% down}
-		sleep, 200
+		DllCall("Sleep",UInt,200)
 		send, {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100)
 		send, {space up}
-		sleep 800
+		DllCall("Sleep",UInt,800)
 		send, {%FwdKey% up}
 		loop 2 {
 			send, {%RotLeft%}
@@ -5398,63 +5400,76 @@ nm_walkTo(location){
 		send {%RightKey% down}
 		sleep, 5000*MovespeedFactor
 		send {space down}
-		sleep, 200
+		DllCall("Sleep",UInt,200)
 		send {space up}
-		sleep 500*MovespeedFactor
+		DllCall("Sleep",UInt,500*MovespeedFactor)
+		;sleep 500*MovespeedFactor
 		send {%FwdKey% down}
-		sleep 400*MovespeedFactor
+		DllCall("Sleep",UInt,400*MovespeedFactor)
+		;sleep 400*MovespeedFactor
 		send {%FwdKey% up}
-		sleep 750*MovespeedFactor
+		DllCall("Sleep",UInt,750*MovespeedFactor)
+		;sleep 750*MovespeedFactor
 		send {space down}
-		sleep, 200
+		DllCall("Sleep",UInt,200)
 		send {space up}
 		sleep 1000*MovespeedFactor
 		send {%RightKey% up}
 		send {%FwdKey% down}
 		send {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100)
 		send {space up}
-		sleep, 200*MovespeedFactor
+		DllCall("Sleep",UInt,200*MovespeedFactor)
+		;sleep, 200*MovespeedFactor
 		send {%RightKey% down}
-		sleep 5000*MovespeedFactor
+		DllCall("Sleep",UInt,5000*MovespeedFactor)
+		;sleep 5000*MovespeedFactor
 		send {%FwdKey% up}
-		sleep 1000*MovespeedFactor
+		DllCall("Sleep",UInt,1000*MovespeedFactor)
+		;sleep 1000*MovespeedFactor
 		send {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100*MovespeedFactor)
 		send {space up}
-		sleep 800
+		DllCall("Sleep",UInt,800*MovespeedFactor)
 		send {%RightKey% up}
 		send {%FwdKey% down}
 		send {%LeftKey% down}
 		send {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100*MovespeedFactor)
 		send {space up}
-		sleep 3500*MovespeedFactor
+		DllCall("Sleep",UInt,3500*MovespeedFactor)
+		;sleep 3500*MovespeedFactor
 		send {%FwdKey% up}
-		sleep 1000*MovespeedFactor
+		DllCall("Sleep",UInt,1000*MovespeedFactor)
+		;sleep 1000*MovespeedFactor
 		send {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100*MovespeedFactor)
 		send {space up}
-		sleep 500
+		DllCall("Sleep",UInt,500)
 		send {%LeftKey% up}
 		send {%FwdKey% down}
-		sleep 400
+		DllCall("Sleep",UInt,400)
 		send {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100)
 		send {space up}
-		sleep 1000*MovespeedFactor
+		DllCall("Sleep",UInt,1000*MovespeedFactor)
+		;sleep 1000*MovespeedFactor
 		send {%RightKey% down}
-		sleep 2500*MovespeedFactor
+		DllCall("Sleep",UInt,2500*MovespeedFactor)
+		;sleep 2500*MovespeedFactor
 		send {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100)
 		send {space up}
-		sleep 2100*MovespeedFactor
+		DllCall("Sleep",UInt,2100*MovespeedFactor)
+		;sleep 2100*MovespeedFactor
 		send {%FwdKey% up}
-		sleep 900*MovespeedFactor
+		DllCall("Sleep",UInt,900*MovespeedFactor)
+		;sleep 900*MovespeedFactor
 		send {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100)
 		send {space up}
-		sleep 1000*MovespeedFactor
+		DllCall("Sleep",UInt,1000*MovespeedFactor)
+		;sleep 1000*MovespeedFactor
 		send {%RightKey% up}
 		loop 2 {
 			send {%RotRight%}
@@ -5466,44 +5481,54 @@ nm_walkTo(location){
 		send {%RightKey% down}
 		sleep, 5000*MovespeedFactor
 		send {space down}
-		sleep, 200
+		DllCall("Sleep",UInt,200)
 		send {space up}
-		sleep 500*MovespeedFactor
+		DllCall("Sleep",UInt,500*MovespeedFactor)
+		;sleep 500*MovespeedFactor
 		send {%FwdKey% down}
-		sleep 400*MovespeedFactor
+		DllCall("Sleep",UInt,400*MovespeedFactor)
+		;sleep 400*MovespeedFactor
 		send {%FwdKey% up}
-		sleep 750*MovespeedFactor
+		DllCall("Sleep",UInt,750*MovespeedFactor)
+		;sleep 750*MovespeedFactor
 		send {space down}
-		sleep, 200
+		DllCall("Sleep",UInt,200)
 		send {space up}
-		sleep 1000*MovespeedFactor
+		DllCall("Sleep",UInt,1000*MovespeedFactor)
+		;sleep 1000*MovespeedFactor
 		send {%RightKey% up}
 		send {%FwdKey% down}
 		send {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100)
 		send {space up}
-		sleep, 200*MovespeedFactor
+		DllCall("Sleep",UInt,200*MovespeedFactor)
+		;sleep, 200*MovespeedFactor
 		send {%RightKey% down}
-		sleep 5000*MovespeedFactor
+		DllCall("Sleep",UInt,5000*MovespeedFactor)
+		;sleep 5000*MovespeedFactor
 		send {%FwdKey% up}
-		sleep 1000*MovespeedFactor
+		DllCall("Sleep",UInt,1000*MovespeedFactor)
+		;sleep 1000*MovespeedFactor
 		send {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100)
 		send {space up}
-		sleep 800
+		DllCall("Sleep",UInt,800)
 		send {%RightKey% up}
 		send {%FwdKey% down}
 		send {%LeftKey% down}
 		send {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100)
 		send {space up}
-		sleep 3500*MovespeedFactor
+		DllCall("Sleep",UInt,3500*MovespeedFactor)
+		;sleep 3500*MovespeedFactor
 		send {%FwdKey% up}
-		sleep 1000*MovespeedFactor
+		DllCall("Sleep",UInt,1000*MovespeedFactor)
+		;sleep 1000*MovespeedFactor
 		send {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100)
 		send {space up}
-		sleep, 6000*MovespeedFactor
+		DllCall("Sleep",UInt,6000*MovespeedFactor)
+		;sleep, 6000*MovespeedFactor
 		send {%LeftKey% up}
 	}
 	else {
@@ -5535,26 +5560,26 @@ nm_toBooster(location){
 			} else if(MoveMethod="cannon"){
 				nm_gotoCannon()
 				send, {e}
-				sleep, 50
+				DllCall("Sleep",UInt,50)
 				send {%LeftKey% down}
-				sleep, 700
+				DllCall("Sleep",UInt,700)
 				send {space}
 				send {space}
-				sleep, 4450
+				DllCall("Sleep",UInt,4450)
 				send {%LeftKey% up}
 				send {space}
-				sleep, 1000
+				DllCall("Sleep",UInt,1000)
 				loop 2 {
 					send, {%RotLeft%}
 				}
 			}
 			nm_Move(10000*MoveSpeedFactor, FwdKey)
 			send {%FwdKey% down}
-			sleep, 200
+			DllCall("Sleep",UInt,200)
 			send, {space down}
-			sleep 200
+			DllCall("Sleep",UInt,200)
 			send, {space up}
-			sleep, 500
+			DllCall("Sleep",UInt,500)
 			send {%FwdKey% up}
 			nm_Move(4000*MoveSpeedFactor, RightKey)
 			nm_Move(6000*MoveSpeedFactor, BackKey)
@@ -5563,7 +5588,7 @@ nm_toBooster(location){
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
 				send {e}
-				sleep, 1000
+				DllCall("Sleep",UInt,1000)
 				break
 			}
 		}
@@ -5590,7 +5615,7 @@ nm_toBooster(location){
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
 				send {e}
-				sleep, 1000
+				DllCall("Sleep",UInt,1000)
 				break
 			}
 		}
@@ -5747,16 +5772,16 @@ nm_walkToCollect(){
 			nm_Move(9000*MoveSpeedFactor, LeftKey)
 			send {%FwdKey% down}
 			send {space down}
-			sleep, 200
+			DllCall("Sleep",UInt,200)
 			send {%FwdKey% up}
 			send {space up}
-			sleep, 800
+			DllCall("Sleep",UInt,800)
 			send {%FwdKey% down}
 			send {space down}
-			sleep, 200
+			DllCall("Sleep",UInt,200)
 			send {%FwdKey% up}
 			send {space up}
-			sleep, 800
+			DllCall("Sleep",UInt,800)
 			nm_Move(40*MoveSpeedFactor, FwdKey, RightKey)
 			nm_Move(7000*MoveSpeedFactor, FwdKey)
 			nm_Move(10000*MoveSpeedFactor, LeftKey)
@@ -5816,16 +5841,16 @@ nm_walkToCollect(){
 			nm_Move(11000*MoveSpeedFactor, LeftKey)
 			send {%LeftKey% down}
 			send {space down}
-			sleep, 200
+			DllCall("Sleep",UInt,200)
 			send {%LeftKey% up}
 			send {space up}
-			sleep, 800
+			DllCall("Sleep",UInt,800)
 			nm_Move(2000*MoveSpeedFactor, LeftKey)
 			nm_Move(750*MoveSpeedFactor, BackKey)
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
 				send {e}
-				sleep, 1000
+				DllCall("Sleep",UInt,1000)
 				break
 			}
 		}
@@ -5852,11 +5877,11 @@ nm_walkToCollect(){
 			nm_Move(13000*MoveSpeedFactor, FwdKey)
 			nm_Move(4000*MoveSpeedFactor, RightKey)
 			send, {%FwdKey% down}
-			sleep, 200
+			DllCall("Sleep",UInt,200)
 			send, {space down}
-			sleep, 100
+			DllCall("Sleep",UInt,100)
 			send, {space up}
-			sleep 800
+			DllCall("Sleep",UInt,800)
 			send, {%FwdKey% up}
 			loop 2 {
 				send, {%RotLeft%}
@@ -5866,7 +5891,7 @@ nm_walkToCollect(){
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
 				send {e}
-				sleep, 1000
+				DllCall("Sleep",UInt,1000)
 				break
 			}
 		}
@@ -5887,7 +5912,7 @@ nm_walkToCollect(){
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
 				send {e}
-				sleep, 1000
+				DllCall("Sleep",UInt,1000)
 				break
 			}
 		}
@@ -5912,7 +5937,7 @@ nm_walkToCollect(){
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
 				send {e}
-				sleep, 1000
+				DllCall("Sleep",UInt,1000)
 				break
 			}
 		}
@@ -5952,17 +5977,17 @@ nm_walkToCollect(){
 			SetKeyDelay, 1
 			nm_Move(9000*MoveSpeedFactor, LeftKey)
 			send {%FwdKey% down}
-			sleep, 50
+			DllCall("Sleep",UInt,50)
 			send {space down}
-			sleep, 400
+			DllCall("Sleep",UInt,400)
 			send {%FwdKey% up}
 			send {space up}
-			sleep, 600
+			DllCall("Sleep",UInt,600)
 			send {%FwdKey% down}
 			send {space down}
-			sleep, 200
+			DllCall("Sleep",UInt,200)
 			send {space up}
-			sleep, 600
+			DllCall("Sleep",UInt,600)
 			send {%FwdKey% up}
 			nm_Move(200*MoveSpeedFactor, FwdKey, RightKey)
 			nm_Move(7000*MoveSpeedFactor, FwdKey)
@@ -5976,12 +6001,12 @@ nm_walkToCollect(){
 			nm_Move(500*MoveSpeedFactor, RightKey)
 			;jump onto gummy bee
 			send {space down}
-			sleep, 10
+			DllCall("Sleep",UInt,10)
 			send {space up}
 			send {%RightKey% down}
-			sleep 500
+			DllCall("Sleep",UInt,500)
 			send {%RightKey% up}
-			sleep, 500
+			DllCall("Sleep",UInt,500)
 			;on top of gummy bee
 			;locate gumdrops
 			imgPos := nm_imgSearch("ItemMenu.png",10, "left")
@@ -6002,7 +6027,7 @@ nm_walkToCollect(){
 				MouseMove, 30, (Roblox[3]+225), 5
 				Loop, 50 {
 					send, {WheelUp 1}
-					Sleep, 50
+					DllCall("Sleep",UInt,50)
 				}
 				Loop, 50 {
 					;search for Gumdrops
@@ -6016,7 +6041,7 @@ nm_walkToCollect(){
 					}
 					loop, 2 {
 						send, {WheelDown 1}
-						Sleep, 50
+						DllCall("Sleep",UInt,50)
 					}
 					sleep, 350
 				}
@@ -6041,7 +6066,8 @@ nm_walkToCollect(){
 }
 nm_Bugrun(){
 	global youDied
-	global disableDayOrNight, VBState
+	;global disableDayOrNight
+	global VBState
 	global FwdKey
 	global LeftKey
 	global BackKey
@@ -6120,6 +6146,7 @@ nm_Bugrun(){
 			IniWrite, %LastBugrunSpider%, nm_config.ini, Collect, LastBugrunSpider
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 			if(BugrunSpiderLoot){
@@ -6200,6 +6227,8 @@ nm_Bugrun(){
 				}
 				TotalBugKills:=TotalBugKills+2
 				SessionBugKills:=SessionBugKills+2
+				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
+				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 				if(BugrunLadybugsLoot){
@@ -6267,6 +6296,7 @@ nm_Bugrun(){
 			}
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 			if(BugrunLadybugsLoot){
@@ -6358,6 +6388,8 @@ nm_Bugrun(){
 			IniWrite, %LastBugrunLadybugs%, nm_config.ini, Collect, LastBugrunLadybugs
 			TotalBugKills:=TotalBugKills+2
 			SessionBugKills:=SessionBugKills+2
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 			;loot
@@ -6432,6 +6464,7 @@ nm_Bugrun(){
 			}
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 			;loot
@@ -6495,6 +6528,8 @@ nm_Bugrun(){
 				}
 				TotalBugKills:=TotalBugKills+2
 				SessionBugKills:=SessionBugKills+2
+				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
+				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 				;loot
@@ -6539,11 +6574,11 @@ nm_Bugrun(){
 					nm_Move(4000*MoveSpeedFactor, RightKey)
 				}
 				send, {%FwdKey% down}
-				sleep, 200
+				DllCall("Sleep",UInt,200)
 				send, {space down}
-				sleep, 100
+				DllCall("Sleep",UInt,100)
 				send, {space up}
-				sleep 800
+				DllCall("Sleep",UInt,800)
 				send, {%FwdKey% up}
 				loop 2 {
 					send, {%RotLeft%}
@@ -6583,7 +6618,7 @@ nm_Bugrun(){
 				if(!DisableToolUse)
 					click, down
 				nm_setStatus("Attacking")
-				disableDayOrNight:=1
+				;disableDayOrNight:=1
 				loop 20 { ;wait to kill
 					if(A_Index=20)
 						success:=1
@@ -6607,7 +6642,7 @@ nm_Bugrun(){
 					sleep, 1000
 				}
 				click, up
-				disableDayOrNight:=0
+				;disableDayOrNight:=0
 				if(VBState=1)
 					break
 			}
@@ -6621,6 +6656,8 @@ nm_Bugrun(){
 			}
 			TotalBugKills:=TotalBugKills+2
 			SessionBugKills:=SessionBugKills+2
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 			;loot
@@ -6714,13 +6751,14 @@ nm_Bugrun(){
 				IniWrite, %LastBugrunWerewolf%, nm_config.ini, Collect, LastBugrunWerewolf
 				TotalBugKills:=TotalBugKills+1
 				SessionBugKills:=SessionBugKills+1
+				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 				if(BugrunWerewolfLoot){
 					if(!DisableToolUse)
 						click, down
 					nm_setStatus("Looting")
-					nm_Move(1500*MoveSpeedFactor, BackKey, RightKey)
+					nm_Move(2000*MoveSpeedFactor, BackKey, RightKey)
 					nm_loot(3000, 5, "left")
 					click, up
 				}
@@ -6791,6 +6829,8 @@ nm_Bugrun(){
 				IniWrite, %LastBugrunMantis%, nm_config.ini, Collect, LastBugrunMantis
 				TotalBugKills:=TotalBugKills+2
 				SessionBugKills:=SessionBugKills+2
+				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
+				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 				;loot
@@ -6847,6 +6887,8 @@ nm_Bugrun(){
 						else {
 							nm_gotoCannon()
 							nm_cannonTo(BugRunField)
+							nm_Move(1000*MoveSpeedFactor, BackKey)
+							nm_Move(1500*MoveSpeedFactor, RightKey)
 						}
 					}
 					bypass:=0
@@ -6902,6 +6944,8 @@ nm_Bugrun(){
 				IniWrite, %LastBugrunScorpions%, nm_config.ini, Collect, LastBugrunScorpions
 				TotalBugKills:=TotalBugKills+2
 				SessionBugKills:=SessionBugKills+2
+				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
+				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 				;loot
@@ -6931,21 +6975,21 @@ nm_Bugrun(){
 				} else {
 					nm_gotoCannon()
 					send, {e}
-					sleep, 50
+					DllCall("Sleep",UInt,50)
 					send {%LeftKey% down}
-					sleep, 1150
+					DllCall("Sleep",UInt,1150)
 					send {space}
 					send {space}
-					sleep, 4500
+					DllCall("Sleep",UInt,4500)
 					send {%LeftKey% up}
 					send {space}
-					sleep, 1000
+					DllCall("Sleep",UInt,1000)
 					nm_Move(1500*MoveSpeedFactor, RightKey, BackKey)
 					loop 4 {
 						send {%RotLeft%}
 					}
 					nm_Move(2500*MoveSpeedFactor, FwdKey)
-					sleep, 2000
+					DllCall("Sleep",UInt,2000)
 				}
 				;confirm tunnel
 				if (nm_imgSearch("tunnel.png",25,"high")[1] = 1){
@@ -6955,15 +6999,15 @@ nm_Bugrun(){
 					send {%RotLeft%}
 				}
 				;wait for baby love
-				sleep, 2000
+				DllCall("Sleep",UInt,2000)
 				if (TunnelBearBabyCheck){
 					nm_setStatus("Waiting", "BabyLove Buff")
-					sleep 1500
+					DllCall("Sleep",UInt,1500)
 					loop 30{
 						if (nm_imgSearch("blove.png",25,"buff")[1] = 0){
 							break
 						}
-						sleep 1000
+						DllCall("Sleep",UInt,1000)
 					}
 				}
 				;search for tunnel bear
@@ -6971,15 +7015,15 @@ nm_Bugrun(){
 				nm_Move(6000*MoveSpeedFactor, BackKey)
 				found:=0
 				loop 3 {
-					sleep 1000
+					DllCall("Sleep",UInt,1000)
 					if(nm_imgSearch("planterConfirm3.png",10,"high")[1] = 0){
 						found:=1
 						break
 					} else {
 						nm_Move(250*MoveSpeedFactor, FwdKey)
-						sleep 150
+						DllCall("Sleep",UInt,150)
 						loop 3{
-							sleep 1000
+							DllCall("Sleep",UInt,1000)
 							if(nm_imgSearch("planterConfirm3.png",10,"high")[1] = 0){
 								found:=1
 								break
@@ -7017,6 +7061,7 @@ nm_Bugrun(){
 				if(TBdead) {
 					TotalBossKills:=TotalBossKills+1
 					SessionBossKills:=SessionBossKills+1
+					Send_WM_COPYDATA("incrementstat Total Boss Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 					IniWrite, %TotalBossKills%, nm_config.ini, Status, TotalBossKills
 					IniWrite, %SessionBossKills%, nm_config.ini, Status, SessionBossKills
 					nm_setStatus("Looting")
@@ -7049,29 +7094,29 @@ nm_Bugrun(){
 				} else {
 					nm_gotoCannon()
 					send, {e}
-					sleep, 50
+					DllCall("Sleep",UInt,50)
 					send {%LeftKey% down}
-					sleep, 675
+					DllCall("Sleep",UInt,675)
 					send {space}
 					send {space}
-					sleep, 4600
+					DllCall("Sleep",UInt,4600)
 					send {%LeftKey% up}
 					send {space}
-					sleep, 1000
+					DllCall("Sleep",UInt,1000)
 					nm_Move(3000*MoveSpeedFactor, LeftKey, FwdKey)
 					nm_Move(1500*MoveSpeedFactor, RightKey, BackKey)
 					nm_Move(1700*MoveSpeedFactor, RightKey, FwdKey)
 				}
 				;wait for baby love
-				sleep, 1000
+				DllCall("Sleep",UInt,1000)
 				if (KingBeetleBabyCheck){
 					nm_setStatus("Waiting", "BabyLove Buff")
-					sleep 1500
+					DllCall("Sleep",UInt,1500)
 					loop 30{
 						if (nm_imgSearch("blove.png",25,"buff")[1] = 0){
 							break
 						}
-						sleep 1000
+						DllCall("Sleep",UInt,1000)
 					}
 				}
 				lairConfirmed:=0
@@ -7188,6 +7233,7 @@ nm_Bugrun(){
 					}
 					TotalBossKills:=TotalBossKills+1
 					SessionBossKills:=SessionBossKills+1
+					Send_WM_COPYDATA("incrementstat Total Boss Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 					IniWrite, %TotalBossKills%, nm_config.ini, Status, TotalBossKills
 					IniWrite, %SessionBossKills%, nm_config.ini, Status, SessionBossKills
 					LastKingBeetle:=nowUnix()
@@ -7236,15 +7282,15 @@ nm_Mondo(){
 			} else {
 				nm_gotoCannon()
 				send, {e}
-				sleep, 50
+				DllCall("Sleep",UInt,50)
 				send {%BackKey% down}
-				sleep, 1725
+				DllCall("Sleep",UInt,1725)
 				send {space}
 				send {space}
-				sleep, 650
+				DllCall("Sleep",UInt,650)
 				send {%BackKey% up}
 				send {space}
-				sleep, 1500
+				DllCall("Sleep",UInt,1500)
 			}
 			global MyField:="Mountain Top"
 			nm_setStatus("Attacking")
@@ -7314,26 +7360,26 @@ nm_cannonToCollect(){
 			nm_gotoRamp()
 			nm_gotoCannon()
 			send, {e}
-			sleep, 50
+			DllCall("Sleep",UInt,50)
 			send {%LeftKey% down}
 			send {%FwdKey% down}
-			sleep, 825
+			DllCall("Sleep",UInt,825)
 			send {space}
 			send {space}
-			sleep, 2400
+			DllCall("Sleep",UInt,2400)
 			send {%FwdKey% up}
-			sleep, 500
+			DllCall("Sleep",UInt,500)
 			send {%LeftKey% up}
-			sleep, 3500
+			DllCall("Sleep",UInt,3500)
 			send {space}
-			sleep, 1000
+			DllCall("Sleep",UInt,1000)
 			send, {%LeftKey% down}
-			sleep, 1000
+			DllCall("Sleep",UInt,1000)
 			send, {%LeftKey% up}
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
 				send {e}
-				sleep, 500
+				DllCall("Sleep",UInt,500)
 				break
 			}
 		}
@@ -7364,7 +7410,7 @@ nm_cannonToCollect(){
 				MouseMove, 30, (Roblox[3]+225), 5
 				Loop, 50 {
 					send, {WheelUp 1}
-					Sleep, 50
+					DllCall("Sleep",UInt,50)
 				}
 				Loop, 50 {
 					;search for Ant Pass
@@ -7381,7 +7427,7 @@ nm_cannonToCollect(){
 					}
 					loop, 2 {
 						send, {WheelDown 1}
-						Sleep, 50
+						DllCall("Sleep",UInt,50)
 					}
 					sleep, 350
 				}
@@ -7400,27 +7446,27 @@ nm_cannonToCollect(){
 			nm_gotoRamp()
 			nm_gotoCannon()
 			send, {e}
-			sleep, 50
+			DllCall("Sleep",UInt,50)
 			send {%FwdKey% down}
 			send {%LeftKey% down}
-			sleep, 1100
+			DllCall("Sleep",UInt,1100)
 			send {space}
 			send {space}
-			sleep, 1500
+			DllCall("Sleep",UInt,1500)
 			send {%LeftKey% up}
-			sleep, 4300
+			DllCall("Sleep",UInt,4300)
 			send {%LeftKey% down}
-			sleep, 1400
+			DllCall("Sleep",UInt,1400)
 			send {%FwdKey% up}
 			send {%LeftKey% up}
 			send {space}
-			sleep, 1400
+			DllCall("Sleep",UInt,1400)
 			newAntPass:=0
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
 				newAntPass:=1
 				send {e}
-				sleep, 1000
+				DllCall("Sleep",UInt,1000)
 				break
 			}
 		}
@@ -7472,10 +7518,10 @@ nm_cannonToCollect(){
 			nm_Move(11000*MoveSpeedFactor, LeftKey)
 			send {%LeftKey% down}
 			send {space down}
-			sleep, 200
+			DllCall("Sleep",UInt,200)
 			send {%LeftKey% up}
 			send {space up}
-			sleep, 800
+			DllCall("Sleep",UInt,800)
 			nm_Move(2000*MoveSpeedFactor, LeftKey)
 			nm_Move(750*MoveSpeedFactor, BackKey)
 			searchRet := nm_imgSearch("e_button.png",30,"high")
@@ -7498,18 +7544,18 @@ nm_cannonToCollect(){
 			nm_gotoRamp()
 			nm_gotoCannon()
 			send, {e}
-			sleep, 50
+			DllCall("Sleep",UInt,50)
 			send {%LeftKey% down}
-			sleep, 1800
+			DllCall("Sleep",UInt,1800)
 			send {space}
 			send {space}
-			sleep, 1900
+			DllCall("Sleep",UInt,1900)
 			send {%LeftKey% up}
 			send {space}
 			loop 4 {
 				send, {%RotRight%}
 			}
-			sleep, 1500
+			DllCall("Sleep",UInt,1500)
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
 				send {e}
@@ -7530,15 +7576,15 @@ nm_cannonToCollect(){
 			nm_gotoRamp()
 			nm_gotoCannon()
 			send, {e}
-			sleep, 50
+			DllCall("Sleep",UInt,50)
 			send {%LeftKey% down}
-			sleep, 700
+			DllCall("Sleep",UInt,700)
 			send {space}
 			send {space}
-			sleep, 4450
+			DllCall("Sleep",UInt,4450)
 			send {%LeftKey% up}
 			send {space}
-			sleep, 1000
+			DllCall("Sleep",UInt,1000)
 			loop 2 {
 				send, {%RotLeft%}
 			}
@@ -7564,21 +7610,21 @@ nm_cannonToCollect(){
 			nm_gotoRamp()
 			nm_gotoCannon()
 			send, {e}
-			sleep, 50
+			DllCall("Sleep",UInt,50)
 			send {%FwdKey% down}
 			send {%RightKey% down}
-			sleep, 400
+			DllCall("Sleep",UInt,400)
 			send {space}
 			send {space}
-			sleep, 1800
+			DllCall("Sleep",UInt,1800)
 			send {%FwdKey% up}
-			sleep, 1150
+			DllCall("Sleep",UInt,1150)
 			send {%RightKey% up}
 			send {space}
 			loop 2 {
 				send, {%RotRight%}
 			}
-			sleep, 1000
+			DllCall("Sleep",UInt,1000)
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
 				send {e}
@@ -7623,19 +7669,19 @@ nm_cannonToCollect(){
 			nm_gotoRamp()
 			nm_gotoCannon()
 			send, {e}
-			sleep, 50
+			DllCall("Sleep",UInt,50)
 			send {%LeftKey% down}
-			sleep, 800
+			DllCall("Sleep",UInt,800)
 			send {space}
 			send {space}
-			sleep, 1860
+			DllCall("Sleep",UInt,1860)
 			send {%FwdKey% down}
-			sleep, 1000
+			DllCall("Sleep",UInt,1000)
 			send {%LeftKey% up}
-			sleep, 3750
+			DllCall("Sleep",UInt,3750)
 			send {%FwdKey% up}
 			send {%RightKey% down}
-			sleep, 200
+			DllCall("Sleep",UInt,200)
 			send {%RightKey% up}
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
@@ -7657,17 +7703,17 @@ nm_cannonToCollect(){
 			nm_gotoRamp()
 			nm_gotoCannon()
 			send, {e}
-			sleep, 50
+			DllCall("Sleep",UInt,50)
 			send {%FwdKey% down}
-			sleep, 1100
+			DllCall("Sleep",UInt,1100)
 			send {space}
 			send {space}
-			sleep, 6000
+			DllCall("Sleep",UInt,6000)
 			send {%FwdKey% up}
-			sleep, 1000
+			DllCall("Sleep",UInt,1000)
 			nm_Move(4000*MoveSpeedFactor, FwdKey)
 			nm_Move(2000*MoveSpeedFactor, LeftKey)
-			sleep, 500
+			DllCall("Sleep",UInt,500)
 			;on top of gummy bee
 			;locate gumdrops
 			imgPos := nm_imgSearch("ItemMenu.png",10, "left")
@@ -7688,7 +7734,7 @@ nm_cannonToCollect(){
 				MouseMove, 30, (Roblox[3]+225), 5
 				Loop, 50 {
 					send, {WheelUp 1}
-					Sleep, 50
+					DllCall("Sleep",UInt,50)
 				}
 				Loop, 50 {
 					;search for Gumdrops
@@ -7702,7 +7748,7 @@ nm_cannonToCollect(){
 					}
 					loop, 2 {
 						send, {WheelDown 1}
-						Sleep, 50
+						DllCall("Sleep",UInt,50)
 					}
 					sleep, 350
 				}
@@ -7736,226 +7782,226 @@ nm_cannonTo(location){
 	SetKeyDelay, 10
 	if(location="sunflower"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%RightKey% down}
-		sleep, 425
+		DllCall("Sleep",UInt,425)
 		send {space}
 		send {space}
-		sleep, 900
+		DllCall("Sleep",UInt,900)
 		send {%RightKey% up}
 		send {space}
-		sleep, 1000
+		DllCall("Sleep",UInt,1000)
 		loop 2 {
 			send, {%RotRight%}
 		}
 	}
 	else if(location="dandelion"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%LeftKey% down}
-		sleep, 275
+		DllCall("Sleep",UInt,275)
 		send {space}
 		send {space}
-		sleep, 1750
+		DllCall("Sleep",UInt,1750)
 		send {%LeftKey% up}
 		send {space}
 		loop 2 {
 			send, {%RotLeft%}
 		}
-		sleep, 1500
+		DllCall("Sleep",UInt,1500)
 	}
 	else if(location="mushroom"){
 		send, {e}
-		sleep, 50	
+		DllCall("Sleep",UInt,50)	
 		send {%FwdKey% down}
-		sleep, 725
+		DllCall("Sleep",UInt,725)
 		send {space}
 		send {space}
-		sleep, 150
+		DllCall("Sleep",UInt,150)
 		send {%FwdKey% up}
 		send {space}
-		sleep, 2000
+		DllCall("Sleep",UInt,2000)
 		loop 4 {
 			send, {%RotLeft%}
 		}
 	}
 	else if(location="blue flower"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%LeftKey% down}
-		sleep, 675
+		DllCall("Sleep",UInt,675)
 		send {space}
 		send {space}
-		sleep, 3250
+		DllCall("Sleep",UInt,3250)
 		send {%LeftKey% up}
 		send {space}
-		sleep, 1000
+		DllCall("Sleep",UInt,1000)
 		loop 2 {
 			send, {%RotLeft%}
 		}
 	}
 	else if(location="clover"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%LeftKey% down}
 		send {%FwdKey% down}
-		sleep, 575
+		DllCall("Sleep",UInt,575)
 		send {space}
 		send {space}
-		sleep, 1250
+		DllCall("Sleep",UInt,1250)
 		send {%FwdKey% up}
-		sleep, 2750
+		DllCall("Sleep",UInt,2750)
 		send {%LeftKey% up}
 		send {space}
-		sleep, 1000
+		DllCall("Sleep",UInt,1000)
 	}
 	else if(location="spider"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%BackKey% down}
-		sleep, 1050
+		DllCall("Sleep",UInt,1050)
 		send {space}
 		send {space}
-		sleep, 150
+		DllCall("Sleep",UInt,150)
 		send {%BackKey% up}
 		send {space}
-		sleep, 1500
+		DllCall("Sleep",UInt,1500)
 		loop 4 {
 			send, {%RotLeft%}
 		}
 	}
 	else if(location="strawberry"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%RightKey% down}
 		send {%BackKey% down}
-		sleep, 750
+		DllCall("Sleep",UInt,750)
 		send {space}
 		send {space}
-		sleep, 1700
+		DllCall("Sleep",UInt,1700)
 		send {%RightKey% up}
 		send {%BackKey% up}
 		send {space}
-		sleep, 2000
+		DllCall("Sleep",UInt,2000)
 		loop 2 {
 			send, {%RotRight%}
 		}
 	}
 	else if(location="bamboo"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%LeftKey% down}
-		sleep, 1250
+		DllCall("Sleep",UInt,1250)
 		send {space}
 		send {space}
-		sleep, 2000
+		DllCall("Sleep",UInt,2000)
 		send {%LeftKey% up}
 		send {space}
 		loop 2 {
 			send, {%RotLeft%}
 		}
-		sleep, 2000
+		DllCall("Sleep",UInt,2000)
 	}
 	else if(location="pineapple"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%LeftKey% down}
-		sleep, 1850
+		DllCall("Sleep",UInt,1850)
 		send {space}
 		send {space}
-		sleep, 2750
+		DllCall("Sleep",UInt,2750)
 		send {%LeftKey% up}
 		send {%BackKey% down}
-		sleep, 1150
+		DllCall("Sleep",UInt,1150)
 		send {%BackKey% up}
 		send {space}
 		loop 4 {
 			send, {%RotLeft%}
 		}
-		sleep, 2000
+		DllCall("Sleep",UInt,2000)
 	}
 	else if(location="stump"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%LeftKey% down}
-		sleep, 1850
+		DllCall("Sleep",UInt,1850)
 		send {space}
 		send {space}
-		sleep, 2750
+		DllCall("Sleep",UInt,2750)
 		send {%LeftKey% up}
 		loop 2 {
 			send, {%RotLeft%}
 		}
 		send {%FwdKey% down}
 		send {%LeftKey% down}
-		sleep, 900
+		DllCall("Sleep",UInt,900)
 		send {%LeftKey% up}
-		sleep, 1500
+		DllCall("Sleep",UInt,1500)
 		send {%FwdKey% up}
 		send {space}
-		sleep, 1000
+		DllCall("Sleep",UInt,1000)
 	}
 	else if(location="cactus"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%RightKey% down}
 		send {%BackKey% down}
-		sleep, 940
+		DllCall("Sleep",UInt,940)
 		send {space}
 		send {space}
-		sleep, 2600
+		DllCall("Sleep",UInt,2600)
 		send {%RightKey% up}
 		send {%BackKey% up}
 		send {space}
-		sleep, 2000
+		DllCall("Sleep",UInt,2000)
 	}
 	else if(location="pumpkin"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%RightKey% down}
 		send {%BackKey% down}
-		sleep, 940
+		DllCall("Sleep",UInt,940)
 		send {space}
 		send {space}
-		sleep, 2600
+		DllCall("Sleep",UInt,2600)
 		send {%RightKey% up}
-		sleep, 1100
+		DllCall("Sleep",UInt,1100)
 		send {%BackKey% up}
 		send {space}
 		loop 4 {
 			send, {%RotLeft%}
 		}
-		sleep, 1500
+		DllCall("Sleep",UInt,1500)
 	}
 	else if(location="pine tree"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%RightKey% down}
 		send {%BackKey% down}
-		sleep, 940 
+		DllCall("Sleep",UInt,940)
 		send {space}
 		send {space}
-		sleep, 4500 ;4250
+		DllCall("Sleep",UInt,4500)
 		send {%BackKey% up}
-		sleep, 500 ;750
+		DllCall("Sleep",UInt,500)
 		send {%RightKey% up}
 		send {space}
 		loop 4 {
 			send, {%RotLeft%}
 		}
-		sleep, 2000
+		DllCall("Sleep",UInt,2000)
 	}
 	else if(location="rose"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%RightKey% down}
-		sleep, 600
+		DllCall("Sleep",UInt,600)
 		send {space}
 		send {space}
-		sleep, 3000
+		DllCall("Sleep",UInt,3000)
 		send {%RightKey% up}
 		send {space}
-		sleep, 1000
+		DllCall("Sleep",UInt,1000)
 		loop 2 {
 			send, {%RotRight%}
 		}
@@ -7963,60 +8009,65 @@ nm_cannonTo(location){
 	}
 	else if(location="mountain top"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%LeftKey% down}
 		send {%BackKey% down}
-		sleep, 1500
+		DllCall("Sleep",UInt,1500)
 		send {space}
 		send {space}
-		sleep, 1100
+		DllCall("Sleep",UInt,1100)
 		send {%LeftKey% up}
-		sleep, 350
+		DllCall("Sleep",UInt,350)
 		send {%BackKey% up}
 		send {space}
-		sleep, 1500
+		DllCall("Sleep",UInt,1500)
 	}
 	else if(location="pepper"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%FwdKey% down}
-		sleep 500
+		DllCall("Sleep",UInt,500)
 		send {space}
 		send {space}
 		send {%RightKey% down}
-		sleep 3900
+		DllCall("Sleep",UInt,3900)
 		send {%RightKey% up}
-		sleep 2000
+		DllCall("Sleep",UInt,2000)
 		send {%RightKey% down}
-		sleep 1000
+		DllCall("Sleep",UInt,1000)
 		send {%RightKey% up}
 		send {space down}
-		sleep 50
+		DllCall("Sleep",UInt,50)
 		send {space up}
-		sleep 750
+		DllCall("Sleep",UInt,750)
 		send {space down}
-		sleep 50
+		DllCall("Sleep",UInt,50)
 		send {space up}
-		sleep 750
+		DllCall("Sleep",UInt,750)
 		send {space down}
-		sleep 50
+		DllCall("Sleep",UInt,50)
 		send {space up}
-		sleep 3000*MovespeedFactor
+		DllCall("Sleep",UInt,3000*MovespeedFactor)
+		;sleep 3000*MovespeedFactor
 		send {%RightKey% down}
 		send {space down}
-		sleep 50
+		DllCall("Sleep",UInt,50)
 		send {space up}
-		sleep 5000*MovespeedFactor
+		DllCall("Sleep",UInt,5000*MovespeedFactor)
+		;sleep 5000*MovespeedFactor
 		send {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100)
 		send {space up}
-		sleep 1500*MovespeedFactor
+		DllCall("Sleep",UInt,1500*MovespeedFactor)
+		;sleep 1500*MovespeedFactor
 		send {%FwdKey% up}
-		sleep 2000*MovespeedFactor
+		DllCall("Sleep",UInt,2000*MovespeedFactor)
+		;sleep 2000*MovespeedFactor
 		send {space down}
-		sleep, 100
+		DllCall("Sleep",UInt,100)
 		send {space up}
-		sleep 1000*MovespeedFactor
+		DllCall("Sleep",UInt,1000*MovespeedFactor)
+		;sleep 1000*MovespeedFactor
 		send {%RightKey% up}
 		send {%FwdKey% up}
 		loop 2 {
@@ -8026,33 +8077,35 @@ nm_cannonTo(location){
 	}
 	else if(location="coconut"){
 		send, {e}
-		sleep, 50
+		DllCall("Sleep",UInt,50)
 		send {%FwdKey% down}
-		sleep 500
+		DllCall("Sleep",UInt,500)
 		send {space}
 		send {space}
 		send {%RightKey% down}
-		sleep 3900
+		DllCall("Sleep",UInt,3900)
 		send {%RightKey% up}
-		sleep 2000
+		DllCall("Sleep",UInt,2000)
 		send {%RightKey% down}
-		sleep 1000
+		DllCall("Sleep",UInt,1000)
 		send {%RightKey% up}
 		send {space down}
-		sleep 50
+		DllCall("Sleep",UInt,50)
 		send {space up}
-		sleep 750
+		DllCall("Sleep",UInt,750)
 		send {space down}
-		sleep 50
+		DllCall("Sleep",UInt,50)
 		send {space up}
-		sleep 750
+		DllCall("Sleep",UInt,750)
 		send {space down}
-		sleep 50
+		DllCall("Sleep",UInt,50)
 		send {space up}
-		sleep 3000*MovespeedFactor
+		DllCall("Sleep",UInt,3000*MovespeedFactor)
+		;sleep 3000*MovespeedFactor
 		send {%FwdKey% up}
 		send {%LeftKey% down}
-		sleep 3000*MovespeedFactor
+		DllCall("Sleep",UInt,3000*MovespeedFactor)
+		;sleep 3000*MovespeedFactor
 		send {%LeftKey% up}
 	}
 	SetKeyDelay, 5
@@ -8106,11 +8159,11 @@ nm_walkFrom(field:="none")
 		nm_Move(5000*MoveSpeedFactor, BackKey)
 		send, {%BackKey% down}
 		send, {%LeftKey% down}
-		sleep, 2000
+		DllCall("Sleep",UInt,2000)
 		send, {space down}
-		sleep,200
+		DllCall("Sleep",UInt,200)
 		send, {space up}
-		sleep, 2000
+		DllCall("Sleep",UInt,2000)
 		send, {%BackKey% up}
 		send, {%LeftKey% up}
 		nm_Move(8000*MoveSpeedFactor, FwdKey)
@@ -8136,11 +8189,13 @@ nm_walkFrom(field:="none")
 	else if (field = "coconut"){
 		nm_Move(4500*MoveSpeedFactor, RightKey)
 		send {%Backkey% down}
-		sleep, (5000*MoveSpeedFactor)
+		DllCall("Sleep",UInt,5000*MoveSpeedFactor)
+		;sleep, (5000*MoveSpeedFactor)
 		send {space down}
-		sleep 50
+		DllCall("Sleep",UInt,50)
 		send {space up}
-		sleep, (7000*MoveSpeedFactor)
+		DllCall("Sleep",UInt,7000*MoveSpeedFactor)
+		;sleep, (7000*MoveSpeedFactor)
 		send {%BackKey% up}
 		nm_Move(7500*MoveSpeedFactor, LeftKey)
 		nm_Move(3000*MoveSpeedFactor, FwdKey)
@@ -8217,16 +8272,16 @@ nm_walkFrom(field:="none")
 			loop 4 {
 				send, {%RotLeft%}
 			}
-			sleep 250
+			DllCall("Sleep",UInt,250)
 			send {space down}
-			sleep 50
+			DllCall("Sleep",UInt,50)
 			send {space up}
-			sleep 400
+			DllCall("Sleep",UInt,400)
 			send {space}
-			sleep 4500
+			DllCall("Sleep",UInt,4500)
 			send {%FwdKey% down}
 			send {%RightKey% down}
-			sleep 4500
+			DllCall("Sleep",UInt,4500)
 			send {%FwdKey% up}
 			send {%RightKey% up}
 		}
@@ -8240,11 +8295,11 @@ nm_walkFrom(field:="none")
 		nm_Move(18000*MoveSpeedFactor, FwdKey)
 		nm_Move(4000*MoveSpeedFactor, RightKey)
 		send, {%RightKey% down}
-		Sleep, 200
+		DllCall("Sleep",UInt,200)
 		send, {space down}
-		sleep, 200
+		DllCall("Sleep",UInt,200)
 		send, {space up}
-		sleep, 800
+		DllCall("Sleep",UInt,800)
 		send, {%RightKey% up}
 		nm_Move(10000*MoveSpeedFactor, FwdKey)
 		nm_Move(1000*MoveSpeedFactor, BackKey)
@@ -8264,11 +8319,11 @@ nm_walkFrom(field:="none")
 		nm_Move(2000*MoveSpeedFactor, BackKey)
 		send, {%BackKey% down}
 		send, {%LeftKey% down}
-		sleep, 2000
+		DllCall("Sleep",UInt,2000)
 		send, {space down}
-		sleep,200
+		DllCall("Sleep",UInt,200)
 		send, {space up}
-		sleep, 2000
+		DllCall("Sleep",UInt,2000)
 		send, {%BackKey% up}
 		send, {%LeftKey% up}
 		nm_Move(8000*MoveSpeedFactor, FwdKey)
@@ -8333,11 +8388,11 @@ nm_walkFrom(field:="none")
 		nm_Move(9000*MoveSpeedFactor, FwdKey)
 		nm_Move(4000*MoveSpeedFactor, RightKey)
 		send, {%RightKey% down}
-		Sleep, 200
+		DllCall("Sleep",UInt,200)
 		send, {space down}
-		sleep, 200
+		DllCall("Sleep",UInt,200)
 		send, {space up}
-		sleep, 800
+		DllCall("Sleep",UInt,800)
 		send, {%RightKey% up}
 		nm_Move(10000*MoveSpeedFactor, FwdKey)
 		nm_Move(1000*MoveSpeedFactor, BackKey)
@@ -8434,7 +8489,7 @@ nm_GoGather(){
 	global QuestWerewolf
 	global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, BugrunInterruptCheck, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BlackQuestCheck, BlackQuestComplete, QuestGatherField, BuckoQuestCheck, RileyQuestCheck, RotateQuest, QuestGatherMins, BuckoRhinoBeetles, BuckoMantis, RileyLadybugs, RileyScorpions, RileyAll
 	global GatherStartTime, TotalGatherTime, SessionGatherTime, ConvertStartTime, TotalConvertTime, SessionConvertTime
-	nm_backpackPercentFilter()
+	;nm_backpackPercentFilter()
 	;BUGS GatherInterruptCheck
 	if((PolarQuestGatherInterruptCheck || BuckoQuestGatherInterruptCheck || RileyQuestGatherInterruptCheck || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck || BuckoRhinoBeetles || RileyAll) && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1830*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck || RileyScorpions || RileyAll) && (nowUnix()-LastBugrunScorpions)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck || RileyAll) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
 		return
@@ -8633,7 +8688,7 @@ nm_GoGather(){
 	GatherStartTime:=nowUnix() ; used to track total and session gathering time metrics
 	if(FieldPatternShift%CurrentFieldNum%)
 		send, {shift}
-	BackpackPercentFiltered:=0
+	;BackpackPercentFiltered:=0
 	while(((nowUnix()-gatherStart)<(FieldUntilMins%CurrentFieldNum%*60))){
 		nm_gather(FieldPattern%CurrentFieldNum%, FieldPatternSize%CurrentFieldNum%, FieldPatternReps%CurrentFieldNum%)
 		nm_autoFieldBoost(FieldName%CurrentFieldNum%)
@@ -8910,31 +8965,39 @@ nm_loot(length, reps, direction){
 	if(direction="left") {
 		loop %reps% {
 			send {%FwdKey% down}
-			sleep, length*MoveSpeedFactor
+			DllCall("Sleep",UInt,length*MoveSpeedFactor)
+			;sleep, length*MoveSpeedFactor
 			send {%LeftKey% down}
 			send {%FwdKey% up}
-			sleep, 200*MoveSpeedFactor
+			DllCall("Sleep",UInt,200*MoveSpeedFactor)
+			;sleep, 200*MoveSpeedFactor
 			send {%BackKey% down}
 			send {%LeftKey% up}
-			sleep, length*MoveSpeedFactor
+			DllCall("Sleep",UInt,length*MoveSpeedFactor)
+			;sleep, length*MoveSpeedFactor
 			send {%LeftKey% down}
 			send {%BackKey% up}
-			sleep, 200*MoveSpeedFactor
+			DllCall("Sleep",UInt,200*MoveSpeedFactor)
+			;sleep, 200*MoveSpeedFactor
 			send {%LeftKey% up}
 		}
 	}else if(direction="right") {
 		loop %reps% {
 			send {%FwdKey% down}
-			sleep, length*MoveSpeedFactor
+			DllCall("Sleep",UInt,length*MoveSpeedFactor)
+			;sleep, length*MoveSpeedFactor
 			send {%RightKey% down}
 			send {%FwdKey% up}
-			sleep, 200*MoveSpeedFactor
+			DllCall("Sleep",UInt,200*MoveSpeedFactor)
+			;sleep, 200*MoveSpeedFactor
 			send {%BackKey% down}
 			send {%RightKey% up}
-			sleep, length*MoveSpeedFactor
+			DllCall("Sleep",UInt,length*MoveSpeedFactor)
+			;sleep, length*MoveSpeedFactor
 			send {%RightKey% down}
 			send {%BackKey% up}
-			sleep, 200*MoveSpeedFactor
+			DllCall("Sleep",UInt,200*MoveSpeedFactor)
+			;sleep, 200*MoveSpeedFactor
 			send {%RightKey% up}
 		}
 	}
@@ -8965,135 +9028,171 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 		;toward center
 		loop %reps% {
 			send {%TCFBKey% down}
-			sleep, 2000*MoveSpeedFactor*size
+			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			;sleep, 2000*MoveSpeedFactor*size
 			send {%TCLRKey% down}
 			send {%TCFBKey% up}
-			sleep, 200*MoveSpeedFactor
+			DllCall("Sleep",UInt,200*MoveSpeedFactor)
+			;sleep, 200*MoveSpeedFactor
 			send {%AFCFBKey% down}
 			send {%TCLRKey% up}
-			sleep, 2000*MoveSpeedFactor*size
+			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			;sleep, 2000*MoveSpeedFactor*size
 			send {%TCLRKey% down}
 			send {%AFCFBKey% up}
-			sleep, 200*MoveSpeedFactor
+			DllCall("Sleep",UInt,200*MoveSpeedFactor)
+			;sleep, 200*MoveSpeedFactor
 			send {%TCLRKey% up}
 		}
 		;away from center
 		loop %reps% {
 			send {%TCFBKey% down}
-			sleep, 2000*MoveSpeedFactor*size
+			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			;sleep, 2000*MoveSpeedFactor*size
 			send {%AFCLRKey% down}
 			send {%TCFBKey% up}
-			sleep, 200*MoveSpeedFactor
+			DllCall("Sleep",UInt,200*MoveSpeedFactor)
+			;sleep, 200*MoveSpeedFactor
 			send {%AFCFBKey% down}
 			send {%AFCLRKey% up}
-			sleep, 2000*MoveSpeedFactor*size
+			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			;sleep, 2000*MoveSpeedFactor*size
 			send {%AFCLRKey% down}
 			send {%AFCFBKey% up}
-			sleep, 200*MoveSpeedFactor
+			DllCall("Sleep",UInt,200*MoveSpeedFactor)
+			;sleep, 200*MoveSpeedFactor
 			send {%AFCLRKey% up}
 		}
 	} else if(pattern="snake"){
 		;toward center
 		loop %reps% {
 			send {%TCLRKey% down}
-			sleep, 2000*MoveSpeedFactor*size
+			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			;sleep, 2000*MoveSpeedFactor*size
 			send {%TCFBKey% down}
 			send {%TCLRKey% up}
-			sleep, 200*MoveSpeedFactor
+			DllCall("Sleep",UInt,200*MoveSpeedFactor)
+			;sleep, 200*MoveSpeedFactor
 			send {%AFCLRKey% down}
 			send {%TCFBKey% up}
-			sleep, 2000*MoveSpeedFactor*size
+			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			;sleep, 2000*MoveSpeedFactor*size
 			send {%TCFBKey% down}
 			send {%AFCLRKey% up}
-			sleep, 200*MoveSpeedFactor
+			DllCall("Sleep",UInt,200*MoveSpeedFactor)
+			;sleep, 200*MoveSpeedFactor
 			send {%TCFBKey% up}
 		}
 		;away from center
 		loop %reps% {
 			send {%TCLRKey% down}
-			sleep, 2000*MoveSpeedFactor*size
+			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			;sleep, 2000*MoveSpeedFactor*size
 			send {%AFCFBKey% down}
 			send {%TCLRKey% up}
-			sleep, 200*MoveSpeedFactor
+			DllCall("Sleep",UInt,200*MoveSpeedFactor)
+			;sleep, 200*MoveSpeedFactor
 			send {%AFCLRKey% down}
 			send {%AFCFBKey% up}
-			sleep, 2000*MoveSpeedFactor*size
+			DllCall("Sleep",UInt,2000*MoveSpeedFactor*size)
+			;sleep, 2000*MoveSpeedFactor*size
 			send {%AFCFBKey% down}
 			send {%AFCLRKey% up}
-			sleep, 200*MoveSpeedFactor
+			DllCall("Sleep",UInt,200*MoveSpeedFactor)
+			;sleep, 200*MoveSpeedFactor
 			send {%AFCFBKey% up}
 		}
 	} else if(pattern="diamonds"){
 		loop %reps% {
 			send {%TCFBKey% down}
 			send {%TCLRKey% down}
-			sleep, 500*MoveSpeedFactor*size+A_Index*200
+			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
+			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%TCLRKey% up}
 			send {%AFCLRKey% down}
-			sleep, 500*MoveSpeedFactor*size+A_Index*200
+			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
+			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%TCFBKey% up}
 			send {%AFCFBKey% down}
-			sleep, 500*MoveSpeedFactor*size+A_Index*200
+			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
+			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%AFCLRKey% up}
 			send {%TCLRKey% down}
-			sleep, 500*MoveSpeedFactor*size+A_Index*200
+			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
+			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%TCLRKey% up}
 			send {%AFCFBKey% up}
 		}
 	} else if(pattern="squares"){
 		loop %reps% {
 			send {%TCFBKey% down}
-			sleep, 500*MoveSpeedFactor*size+A_Index*200
+			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
+			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%TCLRKey% down}
 			send {%TCFBKey% up}
-			sleep, 500*MoveSpeedFactor*size+A_Index*200
+			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
+			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%AFCFBKey% down}
 			send {%TCLRKey% up}
-			sleep, 500*MoveSpeedFactor*size+A_Index*200
+			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
+			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%AFCLRKey% down}
 			send {%AFCFBKey% up}
-			sleep, 500*MoveSpeedFactor*size+A_Index*200
+			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
+			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%AFCLRKey% up}
 		}
 	} else if(pattern="typewriter"){
 		send {%TCLRKey% down}
-		sleep, 300*MoveSpeedFactor*(reps*2+1)
+		DllCall("Sleep",UInt,300*MoveSpeedFactor*(reps*2+1))
+		;sleep, 300*MoveSpeedFactor*(reps*2+1)
 		send {%AFCFBKey% down}
 		send {%TCLRKey% up}
-		sleep, 1000*MoveSpeedFactor*size
+		DllCall("Sleep",UInt,1000*MoveSpeedFactor*size)
+		;sleep, 1000*MoveSpeedFactor*size
 		send {%AFCFBKey% up}
 		loop %reps% {
 			send {%AFCLRKey% down}
-			sleep, 300*MoveSpeedFactor
+			DllCall("Sleep",UInt,300*MoveSpeedFactor)
+			;sleep, 300*MoveSpeedFactor
 			send {%TCFBKey% down}
 			send {%AFCLRKey% up}
-			sleep, 1000*MoveSpeedFactor*size
+			DllCall("Sleep",UInt,1000*MoveSpeedFactor*size)
+			;sleep, 1000*MoveSpeedFactor*size
 			send {%AFCLRKey% down}
 			send {%TCFBKey% up}
-			sleep, 300*MoveSpeedFactor
+			DllCall("Sleep",UInt,300*MoveSpeedFactor)
+			;sleep, 300*MoveSpeedFactor
 			send {%AFCLRKey% up}
 			send {%AFCFBKey% down}
-			sleep, 1000*MoveSpeedFactor*size
+			DllCall("Sleep",UInt,1000*MoveSpeedFactor*size)
+			;sleep, 1000*MoveSpeedFactor*size
 			send {%AFCFBKey% up}
 		}
 		send {%TCLRKey% down}
-		sleep, 300*MoveSpeedFactor*(reps*2)
+		DllCall("Sleep",UInt,300*MoveSpeedFactor*(reps*2))
+		;sleep, 300*MoveSpeedFactor*(reps*2)
 		send {%TCFBKey% down}
 		send {%TCLRKey% up}
-		sleep, 1000*MoveSpeedFactor*size
+		DllCall("Sleep",UInt,1000*MoveSpeedFactor*size)
+		;sleep, 1000*MoveSpeedFactor*size
 		send {%TCFBKey% up}
 		loop %reps% {
 			send {%AFCLRKey% down}
-			sleep, 300*MoveSpeedFactor
+			DllCall("Sleep",UInt,300*MoveSpeedFactor)
+			;sleep, 300*MoveSpeedFactor
 			send {%AFCFBKey% down}
 			send {%AFCLRKey% up}
-			sleep, 1000*MoveSpeedFactor*size
+			DllCall("Sleep",UInt,1000*MoveSpeedFactor*size)
+			;sleep, 1000*MoveSpeedFactor*size
 			send {%AFCLRKey% down}
 			send {%AFCFBKey% up}
-			sleep, 300*MoveSpeedFactor
+			DllCall("Sleep",UInt,300*MoveSpeedFactor)
+			;sleep, 300*MoveSpeedFactor
 			send {%TCFBKey% down}
 			send {%AFCLRKey% up}
-			sleep, 1000*MoveSpeedFactor*size
+			DllCall("Sleep",UInt,1000*MoveSpeedFactor*size)
+			;sleep, 1000*MoveSpeedFactor*size
 			send {%TCFBKey% up}
 		}
 	} else if(pattern="auryn"){
@@ -9102,112 +9201,160 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 		loop %reps% {
 			;infinity
 			send {%TCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%TCLRKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%TCFBKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%AFCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4
 			send {%AFCFBKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%TCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%TCLRKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%AFCLRKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%TCFBKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%AFCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4
 			send {%AFCFBKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%TCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%AFCLRKey% up}
 			;big circle
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%TCLRKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%TCFBKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%AFCFBKey% down}
-			sleep AurynDelay*MoveSpeedFacto*sizer*(A_Index*1.1)*2*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
+			;sleep AurynDelay*MoveSpeedFacto*sizer*(A_Index*1.1)*2*1.4
 			send {%TCLRKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%AFCLRKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%AFCFBKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%TCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%AFCLRKey% up}
 			;FLIP!!
 			;move to other side (half circle)
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%TCLRKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%TCFBKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%AFCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%TCLRKey% up}
 			send {%AFCFBKey% up}
 			;pause here
-			sleep 50
+			DllCall("Sleep",UInt,50)
 			;reverse infinity
 			send {%AFCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%AFCLRKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%AFCFBKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%TCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4
 			send {%TCFBKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%AFCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%AFCLRKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%TCLRKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%AFCFBKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%TCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4
 			send {%TCFBKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%AFCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%TCLRKey% up}
 			;big circle
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%AFCLRKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%AFCFBKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%TCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%AFCLRKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%TCLRKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%TCFBKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%AFCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%TCLRKey% up}
 			;FLIP!!
 			;move to other side (half circle)
-			sleep AurynDelay*MoveSpeedFactor*size*size*(A_Index*1.1)*2
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
+			;sleep AurynDelay*MoveSpeedFactor*size*size*(A_Index*1.1)*2
 			send {%AFCLRKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%AFCFBKey% up}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%TCFBKey% down}
-			sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
+			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
+			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%AFCLRKey% up}
 			send {%TCFBKey% up}
 		}
@@ -9221,7 +9368,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 }
 nm_convert(hiveConfirm:=0)
 {
-	global KeyDelay, HiveVariation, RotRight, ZoomOut, AFBrollingDice, AFBuseGlitter, AFBuseBooster, CurrentField, HiveConfirmed, EnzymesKey,  LastEnzymes, ConvertStartTime, TotalConvertTime, SessionConvertTime
+	global KeyDelay, HiveVariation, RotRight, ZoomOut, AFBrollingDice, AFBuseGlitter, AFBuseBooster, CurrentField, HiveConfirmed, EnzymesKey,  LastEnzymes, ConvertStartTime, TotalConvertTime, SessionConvertTime, BackpackPercent
 	GuiControlGet ConvertBalloon
 	GuiControlGet ConvertMins
 	IniRead, LastConvertBalloon, nm_config.ini, Settings, LastConvertBalloon
@@ -9258,13 +9405,15 @@ nm_convert(hiveConfirm:=0)
 			ConvertStartTime:=nowUnix()
 			;empty pack
 			loop 300 { ;5 mins
-				If (nm_backpackPercent()>0 && A_Index=1)
+				;If (nm_backpackPercent()>0 && A_Index=1)
+				If (BackpackPercent>0 && A_Index=1)
 					nm_setStatus("Converting", "Backpack")
 				sleep, 1000
 				nm_AutoFieldBoost(currentField)
 				if(AFBuseGlitter || AFBuseBooster)
 					break
-				If (nm_backpackPercent() = 0) {
+				;If (nm_backpackPercent() = 0) {
+				If (BackpackPercent = 0) {
 					break
 				}
 				If (disconnectcheck()) {
@@ -9513,12 +9662,12 @@ nm_setSprinkler(quest:=0){
 		} else {
 			nm_Move(1000*MoveSpeedFactor, FwdKey)
 		}
-		sleep, 500
+		DllCall("Sleep",UInt,500)
 		send {space down}
-		sleep, 200
+		DllCall("Sleep",UInt,200)
 		send {1}
 		send {space up}
-		sleep, 900
+		DllCall("Sleep",UInt,900)
 	}
 	if(SprinklerType="Silver") {
 		if(InStr(FieldSprinklerLoc%CurrentFieldNum%, "Upper")){
@@ -9533,12 +9682,12 @@ nm_setSprinkler(quest:=0){
 		} else {
 			nm_Move(1000*MoveSpeedFactor, LeftKey)
 		}
-		sleep, 500
+		DllCall("Sleep",UInt,500)
 		send {space down}
-		sleep, 200
+		DllCall("Sleep",UInt,200)
 		send {1}
 		send {space up}
-		sleep, 900
+		DllCall("Sleep",UInt,900)
 	}
 	if(SprinklerType="Golden") {
 		if(InStr(FieldSprinklerLoc%CurrentFieldNum%, "Upper")){
@@ -9561,12 +9710,12 @@ nm_setSprinkler(quest:=0){
 		} else {
 			nm_Move(1000*MoveSpeedFactor, BackKey)
 		}
-		sleep, 500
+		DllCall("Sleep",UInt,500)
 		send {space down}
-		sleep, 200
+		DllCall("Sleep",UInt,200)
 		send {1}
 		send {space up}
-		sleep, 900
+		DllCall("Sleep",UInt,900)
 		if(InStr(FieldSprinklerLoc%CurrentFieldNum%, "Left")){
 			nm_Move(1000*MoveSpeedFactor, LeftKey)
 		} else {
@@ -9621,7 +9770,8 @@ nm_fieldDriftCompensation(){
 				} else if (saturatorFinder[3] > winDown){
 					send {%BackKey% down}
 				}
-				sleep, 200*MoveSpeedFactor
+				DllCall("Sleep",UInt,200*MoveSpeedFactor)
+				;sleep, 200*MoveSpeedFactor
 				send {%LeftKey% up}
 				send {%RightKey% up}
 				send {%FwdKey% up}
@@ -9640,7 +9790,8 @@ nm_Move(MoveTime, MoveKey1, MoveKey2:="None"){
 	send, {%MoveKey1% down}
 	if(MoveKey2!="None")
 		send, {%MoveKey2% down}
-	sleep, %MoveTime%
+	DllCall("Sleep",UInt,MoveTime)
+	;sleep, %MoveTime%
 	send, {%MoveKey1% up}
 	if(MoveKey2!="None")
 		send, {%MoveKey2% up}
@@ -9689,15 +9840,25 @@ DisconnectCheck(){
 		if(A_Index=1){
 			TotalDisconnects:=TotalDisconnects+1
 			SessionDisconnects:=SessionDisconnects+1
+			Send_WM_COPYDATA("incrementstat Disconnects", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalDisconnects%, nm_config.ini, Status, TotalDisconnects
 			IniWrite, %SessionDisconnects%, nm_config.ini, Status, SessionDisconnects
 		}
+		browsers := ["msedge.exe","chrome.exe","ieplore.exe","firefox.exe","opera.exe","brave.exe"]
+		for i, value in browsers {
+			if (WinExist("ahk_exe "value)){
+				winclose, ahk_exe %value%
+				winwaitclose, ahk_exe %value%
+			}
+		}
 		StringLen, linklen, PrivServer
 		if (linklen > 0 && A_Index<10){
-			WinClose, Roblox
+			;WinClose, Roblox
+			WinKill, Roblox
 			run, %PrivServer%
 		} else {
-			WinClose, Roblox
+			;WinClose, Roblox
+			WinKill, Roblox
 			run, %PublicServer%
 			sleep, ReloadRobloxSecs * 1000
 		}
@@ -9771,7 +9932,6 @@ nm_deathCheck(){
 			nm_setStatus("You Died")
 		}
 	}
-	
 }
 nm_activeHoney(){
 	global HiveBees
@@ -9815,14 +9975,14 @@ nm_searchForE(){
 		size:=size+1
 		loop %size% {
 			nm_Move(dist*MoveSpeedFactor, FwdKey)
-			sleep, 100
+			DllCall("Sleep",UInt,100)
 			If (nm_imgSearch("e_button.png",30,"high")[1] = 0) {
 				return 1
 			}
 		}
 		loop %size% {
 			nm_Move(dist*MoveSpeedFactor, LeftKey)
-			sleep, 100
+			DllCall("Sleep",UInt,100)
 			If (nm_imgSearch("e_button.png",30,"high")[1] = 0) {
 				return 1
 			}
@@ -9830,14 +9990,14 @@ nm_searchForE(){
 		size:=size+1
 		loop %size% {
 			nm_Move(dist*MoveSpeedFactor, BackKey)
-			sleep, 100
+			DllCall("Sleep",UInt,100)
 			If (nm_imgSearch("e_button.png",30,"high")[1] = 0) {
 				return 1
 			}
 		}
 		loop %size% {
 			nm_Move(dist*MoveSpeedFactor, RightKey)
-			sleep, 100
+			DllCall("Sleep",UInt,100)
 			If (nm_imgSearch("e_button.png",30,"high")[1] = 0) {
 				return 1
 			}
@@ -9845,6 +10005,7 @@ nm_searchForE(){
 	}
 	return 0
 }
+/*
 nm_dayOrNight(){
 	global confirm
 	global dayOrNight
@@ -9858,6 +10019,16 @@ nm_dayOrNight(){
 		return
 	if(((VBState=1) && ((nowUnix()-NightLastDetected)>(6*60) || (nowUnix()-NightLastDetected)<0)) || ((VBState=2) && ((nowUnix()-VBLastKilled)>(5*60) || (nowUnix()-VBLastKilled)<0))) {
 		VBState:=0
+		;send VBState to background.ahk
+		Prev_DetectHiddenWindows := A_DetectHiddenWindows
+		Prev_TitleMatchMode := A_TitleMatchMode
+		DetectHiddenWindows On
+		SetTitleMatchMode 2
+		if WinExist("background.ahk ahk_class AutoHotkey") {
+			SendMessage, 0x4200, 3, VBState
+		}
+		DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+		SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 	}
 	searchRet := nm_imgSearch("grassD.png",5,"low")
 	If (searchRet[1] = 0) {
@@ -9880,6 +10051,16 @@ nm_dayOrNight(){
 		if((nowUnix()-NightLastDetected)>(5*60) || (nowUnix()-NightLastDetected)<0) { ;at least 5 minutes since last time it was night
 			NightLastDetected:=nowUnix()
 			IniWrite, %NightLastDetected%, nm_config.ini, Collect, NightLastDetected
+			;send nightLastDetected time to background.ahk
+			Prev_DetectHiddenWindows := A_DetectHiddenWindows
+			Prev_TitleMatchMode := A_TitleMatchMode
+			DetectHiddenWindows On
+			SetTitleMatchMode 2
+			if WinExist("background.ahk ahk_class AutoHotkey") {
+				SendMessage, 0x4200, 2, nowUnix()
+			}
+			DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+			SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 			if(StingerCheck && VBState=0)
 				VBState:=1 ;0=no VB, 1=searching for VB, 2=VB found
 		}
@@ -9888,6 +10069,7 @@ nm_dayOrNight(){
 	if(winexist("Timers"))
 		IniWrite, %dayOrNight%, nm_config.ini, gui, DayOrNight
 }
+*/
 nm_ViciousCheck(){
 	global VBState ;0=no VB, 1=searching for VB, 2=VB found
 	global VBLastKilled
@@ -9900,6 +10082,17 @@ nm_ViciousCheck(){
 			VBState:=2
 			VBLastKilled:=nowUnix()
 			IniWrite, %VBLastKilled%, nm_config.ini, Collect, VBLastKilled
+			;send VBState to background.ahk
+			Prev_DetectHiddenWindows := A_DetectHiddenWindows
+			Prev_TitleMatchMode := A_TitleMatchMode
+			DetectHiddenWindows On
+			SetTitleMatchMode 2
+			if WinExist("background.ahk ahk_class AutoHotkey") {
+				SendMessage, 0x4200, 3, VBState
+				SendMessage, 0x4200, 5, VBLastKilled
+			}
+			DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+			SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 			nm_setStatus("Attacking")
 		}
 		;check if VB was already killed by someone else
@@ -9908,6 +10101,17 @@ nm_ViciousCheck(){
 			nm_setStatus("Defeated")
 			VBLastKilled:=nowUnix()
 			IniWrite, %VBLastKilled%, nm_config.ini, Collect, VBLastKilled
+			;send VBState to background.ahk
+			Prev_DetectHiddenWindows := A_DetectHiddenWindows
+			Prev_TitleMatchMode := A_TitleMatchMode
+			DetectHiddenWindows On
+			SetTitleMatchMode 2
+			if WinExist("background.ahk ahk_class AutoHotkey") {
+				SendMessage, 0x4200, 3, VBState
+				SendMessage, 0x4200, 5, VBLastKilled
+			}
+			DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+			SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 		}
 	}
 	if(VBState=2){
@@ -9917,13 +10121,35 @@ nm_ViciousCheck(){
 				nm_setStatus("Defeated")
 				VBLastKilled:=nowUnix()
 				IniWrite, %VBLastKilled%, nm_config.ini, Collect, VBLastKilled
+				;send VBState to background.ahk
+				Prev_DetectHiddenWindows := A_DetectHiddenWindows
+				Prev_TitleMatchMode := A_TitleMatchMode
+				DetectHiddenWindows On
+				SetTitleMatchMode 2
+				if WinExist("background.ahk ahk_class AutoHotkey") {
+					SendMessage, 0x4200, 3, VBState
+					SendMessage, 0x4200, 5, VBLastKilled
+				}
+				DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+				SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 				TotalViciousKills:=TotalViciousKills+1
 				SessionViciousKills:=SessionViciousKills+1
+				Send_WM_COPYDATA("incrementstat Total Vic Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 				IniWrite, %TotalViciousKills%, nm_config.ini, Status, TotalViciousKills
 				IniWrite, %SessionViciousKills%, nm_config.ini, Status, SessionViciousKills
 			}
 		} else if((nowUnix()-VBLastKilled)>(5*60)) { ;it has been greater than 5 minutes since VB was found
 				VBState:=0
+				;send VBState to background.ahk
+				Prev_DetectHiddenWindows := A_DetectHiddenWindows
+				Prev_TitleMatchMode := A_TitleMatchMode
+				DetectHiddenWindows On
+				SetTitleMatchMode 2
+				if WinExist("background.ahk ahk_class AutoHotkey") {
+					SendMessage, 0x4200, 3, VBState
+				}
+				DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+				SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 				nm_setStatus("Timed-Out")
 		}
 	}
@@ -9932,8 +10158,18 @@ nm_ViciousCheck(){
 nm_locateVB(){
 	global VBState
 	global StingerCheck
-	if(not StingerCheck) {
+	if(StingerCheck=0) {
 		VBState:=0
+		;send VBState to background.ahk
+		Prev_DetectHiddenWindows := A_DetectHiddenWindows
+		Prev_TitleMatchMode := A_TitleMatchMode
+		DetectHiddenWindows On
+		SetTitleMatchMode 2
+		if WinExist("background.ahk ahk_class AutoHotkey") {
+			SendMessage, 0x4200, 3, VBState
+		}
+		DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+		SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 		return
 	}
 	global StingerPepperCheck
@@ -10467,12 +10703,32 @@ nm_locateVB(){
 		}
 		click, up
 		VBState:=0 ;0=no VB, 1=searching for VB, 2=VB found
+		;send VBState to background.ahk
+		Prev_DetectHiddenWindows := A_DetectHiddenWindows
+		Prev_TitleMatchMode := A_TitleMatchMode
+		DetectHiddenWindows On
+		SetTitleMatchMode 2
+		if WinExist("background.ahk ahk_class AutoHotkey") {
+			SendMessage, 0x4200, 3, VBState
+		}
+		DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+		SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 		stopTime:=nowUnix()
 		cycleTime:=stopTime-startTime
 		return
 	} else { ;it has been more than 5 minutes since NightLastDetected
-		if((nowUnix()-VBLastKilled)>(5*60) || (nowUnix()-VBLastKilled)<0) { ;more than 5 minutes since VBLastKilled
+		if((nowUnix()-VBLastKilled)>(300) || (nowUnix()-VBLastKilled)<0) { ;more than 5 minutes since VBLastKilled
 			VBState:=0
+			;send VBState to background.ahk
+			Prev_DetectHiddenWindows := A_DetectHiddenWindows
+			Prev_TitleMatchMode := A_TitleMatchMode
+			DetectHiddenWindows On
+			SetTitleMatchMode 2
+			if WinExist("background.ahk ahk_class AutoHotkey") {
+				SendMessage, 0x4200, 3, VBState
+			}
+			DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+			SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 			return
 		}
 	}
@@ -10557,7 +10813,7 @@ nm_HoneyQuest(){
 		MouseMove, 30, (Roblox[3]+225), 5
 		Loop, 30 {
 			send, {WheelUp 1}
-			Sleep, 50
+			DllCall("Sleep",UInt,50)
 		}
 		Loop, 25 {
 			;search for Honey Bee Quest
@@ -10568,7 +10824,7 @@ nm_HoneyQuest(){
 			}
 			loop, 2 {
 				send, {WheelDown 1}
-				Sleep, 50
+				DllCall("Sleep",UInt,50)
 			}
 			sleep, 350
 		}
@@ -10706,7 +10962,7 @@ nm_PolarQuestProg(){
 		MouseMove, 30, (Roblox[3]+225), 5
 		Loop, 30 {
 			send, {WheelUp 1}
-			Sleep, 50
+			DllCall("Sleep",UInt,50)
 		}
 		Loop, 25 {
 			;search for Polar Quest
@@ -10725,7 +10981,7 @@ nm_PolarQuestProg(){
 				break
 			loop, 2 {
 				send, {WheelDown 1}
-				Sleep, 50
+				DllCall("Sleep",UInt,50)
 			}
 			sleep, 350
 		}
@@ -10817,8 +11073,7 @@ nm_PolarQuestProg(){
 						MouseMove, 30, (Roblox[3]+225)
 						Sleep, 50
 						send, {WheelDown 1}
-						Sleep, 50
-					} else {
+						DllCall("Sleep",UInt,50)
 						MouseMove, 350, (Roblox[3]+70)
 						break
 					}
@@ -10900,6 +11155,7 @@ nm_PolarQuest(){
 			nm_setStatus("Starting", "Polar Quest: " . PolarQuest)
 			TotalQuestsComplete:=TotalQuestsComplete+1
 			SessionQuestsComplete:=SessionQuestsComplete+1
+			Send_WM_COPYDATA("incrementstat Quests Done", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
 			IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
 		}
@@ -10919,6 +11175,7 @@ nm_PolarQuest(){
 				nm_setStatus("Starting", "Polar Quest: " . PolarQuest)
 				TotalQuestsComplete:=TotalQuestsComplete+1
 				SessionQuestsComplete:=SessionQuestsComplete+1
+				Send_WM_COPYDATA("incrementstat Quests Done", "StatMonitor.ahk ahk_class AutoHotkey")
 				IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
 				IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
 			}
@@ -10951,7 +11208,8 @@ nm_QuestRotate(){
 	}
 	;honey bee quest
 	nm_HoneyQuest()
-	
+	;planters
+	ba_planter()
 }
 nm_Feed(food){
 	global Roblox
@@ -10993,13 +11251,13 @@ nm_Feed(food){
 		MouseMove, 30, (Roblox[2]+200), 5
 	    Loop, 50 {
 			send, {WheelUp 1}
-			Sleep, 50
+			DllCall("Sleep",UInt,50)
 		}
 		MouseMove, 30, (Roblox[2]+200), 5
 		Loop, 50 {
 			itemPos := nm_imgSearch(food . ".png", 50, "left")
 			If (itemPos[1]=0){
-				MouseClickDrag, Left, (itemPos[2]-60), (itemPos[3]+40), (windowWidth/2), (windowHeight/2), 5
+				MouseClickDrag, Left, 30, (itemPos[3]+30), (windowWidth/2), (windowHeight/2), 5
 				sleep, 1000
 				imgPos := nm_imgSearch("feeder.png",30)
 				If (imgPos[1]=0){
@@ -11021,7 +11279,7 @@ nm_Feed(food){
 			}
 			loop, 2 {
 				send, {WheelDown 1}
-				Sleep, 50
+				DllCall("Sleep",UInt,50)
 			}
 			sleep, 350
 		}
@@ -11067,7 +11325,7 @@ nm_RileyQuestProg(){
 		MouseMove, 5, (Roblox[3]+225), 5
 		Loop, 30 {
 			send, {WheelUp 1}
-			Sleep, 50
+			DllCall("Sleep",UInt,50)
 		}
 		Loop, 25 {
 			;search for Riley Quest
@@ -11087,7 +11345,7 @@ nm_RileyQuestProg(){
 			}
 			loop, 2 {
 				send, {WheelDown 1}
-				Sleep, 50
+				DllCall("Sleep",UInt,50)
 			}
 			sleep, 750
 		}
@@ -11180,7 +11438,7 @@ nm_RileyQuestProg(){
 						MouseMove, 30, (Roblox[3]+225)
 						Sleep, 50
 						send, {WheelDown 1}
-						Sleep, 50
+						DllCall("Sleep",UInt,50)
 					} else {
 						MouseMove, 350, (Roblox[3]+70)
 						break
@@ -11296,6 +11554,7 @@ nm_RileyQuest(){
 			nm_setStatus("Starting", "Riley Quest: " . RileyQuest)
 			TotalQuestsComplete:=TotalQuestsComplete+1
 			SessionQuestsComplete:=SessionQuestsComplete+1
+			Send_WM_COPYDATA("incrementstat Quests Done", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
 			IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
 		}
@@ -11318,6 +11577,7 @@ nm_RileyQuest(){
 				nm_setStatus("Starting", "Riley Quest: " . RileyQuest)
 				TotalQuestsComplete:=TotalQuestsComplete+1
 				SessionQuestsComplete:=SessionQuestsComplete+1
+				Send_WM_COPYDATA("incrementstat Quests Done", "StatMonitor.ahk ahk_class AutoHotkey")
 				IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
 				IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
 			}
@@ -11364,7 +11624,7 @@ nm_BuckoQuestProg(){
 		MouseMove, 5, (Roblox[3]+225), 5
 		Loop, 30 {
 			send, {WheelUp 1}
-			Sleep, 50
+			DllCall("Sleep",UInt,50)
 		}
 		Loop, 25 {
 			;search for Bucko Quest
@@ -11384,7 +11644,7 @@ nm_BuckoQuestProg(){
 			}
 			loop, 2 {
 				send, {WheelDown 1}
-				Sleep, 50
+				DllCall("Sleep",UInt,50)
 			}
 			sleep, 750
 		}
@@ -11477,7 +11737,7 @@ nm_BuckoQuestProg(){
 						MouseMove, 30, (Roblox[3]+225)
 						Sleep, 50
 						send, {WheelDown 1}
-						Sleep, 50
+						DllCall("Sleep",UInt,50)
 					} else {
 						MouseMove, 350, (Roblox[3]+70)
 						break
@@ -11495,6 +11755,7 @@ nm_BuckoQuestProg(){
 		BuckoMantis:=0
 		QuestGatherField:="None"
 		QuestGatherFieldSlot:=0
+		QuestAnt:=0
 		newLine:="`n"
 		buckoProgress:=""
 		num:=BuckoBee[BuckoQuest].length()
@@ -11594,6 +11855,7 @@ nm_BuckoQuest(){
 			nm_setStatus("Starting", "Bucko Quest: " . BuckoQuest)
 			TotalQuestsComplete:=TotalQuestsComplete+1
 			SessionQuestsComplete:=SessionQuestsComplete+1
+			Send_WM_COPYDATA("incrementstat Quests Done", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
 			IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
 		}
@@ -11616,6 +11878,7 @@ nm_BuckoQuest(){
 				nm_setStatus("Starting", "Bucko Quest: " . BuckoQuest)
 				TotalQuestsComplete:=TotalQuestsComplete+1
 				SessionQuestsComplete:=SessionQuestsComplete+1
+				Send_WM_COPYDATA("incrementstat Quests Done", "StatMonitor.ahk ahk_class AutoHotkey")
 				IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
 				IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
 			}
@@ -11665,7 +11928,7 @@ nm_BlackQuestProg(){
 		MouseMove, 5, (Roblox[3]+225), 5
 		Loop, 30 {
 			send, {WheelUp 1}
-			Sleep, 50
+			DllCall("Sleep",UInt,50)
 		}
 		Loop, 25 {
 			;search for Black Quest
@@ -11693,7 +11956,7 @@ nm_BlackQuestProg(){
 			}
 			loop, 2 {
 				send, {WheelDown 1}
-				Sleep, 50
+				DllCall("Sleep",UInt,50)
 			}
 			sleep, 750
 		}
@@ -11788,7 +12051,7 @@ nm_BlackQuestProg(){
 						MouseMove, 30, (Roblox[3]+225)
 						Sleep, 50
 						send, {WheelDown 1}
-						Sleep, 50
+						DllCall("Sleep",UInt,50)
 					} else {
 						MouseMove, 350, (Roblox[3]+70)
 						break
@@ -11890,6 +12153,7 @@ nm_BlackQuest(){
 			nm_setStatus("Starting", "Black Bear Quest: " . BlackQuest)
 			TotalQuestsComplete:=TotalQuestsComplete+1
 			SessionQuestsComplete:=SessionQuestsComplete+1
+			Send_WM_COPYDATA("incrementstat Quests Done", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
 			IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
 		}
@@ -12036,21 +12300,21 @@ nm_gotoQuestgiver(giver){
 			} else if (MoveMethod="Cannon"){
 				nm_gotoCannon()
 				send, {e}
-				sleep, 50
+				DllCall("Sleep",UInt,50)
 				send {%RightKey% down}
 				send {%BackKey% down}
-				sleep, 1200 
+				DllCall("Sleep",UInt,1200)
 				send {space}
 				send {space}
-				sleep, 1250
+				DllCall("Sleep",UInt,1250)
 				send {space}
 				send {%RightKey% up}
 				send {%BackKey% up}
 				loop 4 {
 					send {%RotLeft%}
 				}
-				sleep, 2500 ;4250
-				nm_Move(1500*MoveSpeedFactor, BackKey, LeftKey)
+				DllCall("Sleep",UInt,2500)
+				nm_Move(2000*MoveSpeedFactor, BackKey, LeftKey)
 				nm_Move(500*MoveSpeedFactor, FwdKey, RightKey)
 			} else {
 				msgbox GotoQuestGiver: MoveMethod undefined!
@@ -12070,23 +12334,24 @@ nm_gotoQuestgiver(giver){
 				nm_Move(500*MoveSpeedFactor, BackKey, LeftKey)
 				nm_Move(8000*MoveSpeedFactor, LeftKey)
 				send, {%LeftKey% down}
-				sleep, 200
+				DllCall("Sleep",UInt,200)
 				send, {space down}
-				sleep, 200
+				DllCall("Sleep",UInt,200)
 				send, {space up}
-				sleep, 800
+				DllCall("Sleep",UInt,800)
 				send, {%FwdKey% down}
-				sleep, 200
+				DllCall("Sleep",UInt,200)
 				send, {space down}
-				sleep, 200
+				DllCall("Sleep",UInt,200)
 				send, {space up}
-				sleep, 5000*MoveSpeedFactor
+				DllCall("Sleep",UInt,5000*MoveSpeedFactor)
+				;sleep, 5000*MoveSpeedFactor
 				send, {%LeftKey% up}
-				sleep, 200
+				DllCall("Sleep",UInt,200)
 				send, {space down}
-				sleep, 200
+				DllCall("Sleep",UInt,200)
 				send, {space up}
-				sleep, 800
+				DllCall("Sleep",UInt,800)
 				send, {%FwdKey% up}
 				nm_Move(5000*MoveSpeedFactor, FwdKey)
 				nm_Move(500*MoveSpeedFactor, BackKey)
@@ -12106,34 +12371,34 @@ nm_gotoQuestgiver(giver){
 			} else if (MoveMethod="Cannon"){
 				nm_gotoCannon()
 				send {e}
-				sleep, 50
+				DllCall("Sleep",UInt,50)
 				send {%RightKey% down}
 				send {%BackKey% down}
-				sleep, 1200 
+				DllCall("Sleep",UInt,1200)
 				send {space}
 				send {space}
-				sleep, 4000
+				DllCall("Sleep",UInt,4000)
 				send {%BackKey% up}
-				sleep 4000
+				DllCall("Sleep",UInt,4000)
 				send {%RightKey% up}
 				send {space}
 				loop 2 {
 					send, {%RotRight%}
 				}
-				sleep, 2000
+				DllCall("Sleep",UInt,2000)
 				;walk to honey bee platform
 				send, {%FwdKey% down}
-				sleep, 200
+				DllCall("Sleep",UInt,200)
 				send, {space down}
-				sleep, 200
+				DllCall("Sleep",UInt,200)
 				send, {space up}
-				sleep, 200
+				DllCall("Sleep",UInt,200)
 				send, {%FwdKey% up}
 				repeat:=1
 				loop 10 {
 					searchRet := nm_imgSearch("e_button.png",30,"high")
 					If (searchRet[1] = 0) {
-						sleep, 200
+						DllCall("Sleep",UInt,200)
 						searchRet := nm_imgSearch("e_button.png",30,"high")
 						If (searchRet[1] = 0) {
 							repeat:=0
@@ -12153,7 +12418,7 @@ nm_gotoQuestgiver(giver){
 			loop 10 {
 				searchRet := nm_imgSearch("e_button.png",30,"high")
 				If (searchRet[1] = 0) {
-					sleep, 200
+					DllCall("Sleep",UInt,200)
 					searchRet := nm_imgSearch("e_button.png",30,"high")
 					If (searchRet[1] = 0) {
 						repeat:=0
@@ -12170,26 +12435,26 @@ nm_gotoQuestgiver(giver){
 			} else if(MoveMethod="cannon"){
 				nm_gotoCannon()
 				send, {e}
-				sleep, 50
+				DllCall("Sleep",UInt,50)
 				send {%LeftKey% down}
-				sleep, 700
+				DllCall("Sleep",UInt,700)
 				send {space}
 				send {space}
-				sleep, 4450
+				DllCall("Sleep",UInt,4450)
 				send {%LeftKey% up}
 				send {space}
-				sleep, 1000
+				DllCall("Sleep",UInt,1000)
 				loop 2 {
 					send, {%RotLeft%}
 				}
 			}
 			nm_Move(10000*MoveSpeedFactor, FwdKey)
 			send {%FwdKey% down}
-			sleep, 200
+			DllCall("Sleep",UInt,200)
 			send, {space down}
-			sleep 200
+			DllCall("Sleep",UInt,200)
 			send, {space up}
-			sleep, 500
+			DllCall("Sleep",UInt,500)
 			send {%FwdKey% up}
 			nm_Move(4000*MoveSpeedFactor, RightKey)
 			nm_Move(6000*MoveSpeedFactor, BackKey)
@@ -12197,12 +12462,12 @@ nm_gotoQuestgiver(giver){
 			nm_Move(1600*MoveSpeedFactor, LeftKey)
 			nm_Move(2000*MoveSpeedFactor, FwdKey)
 			send, {%FwdKey% down}
-			sleep, 200
+			DllCall("Sleep",UInt,200)
 			send, {space down}
-			sleep, 200
+			DllCall("Sleep",UInt,200)
 			send, {space up}
 			send, {%FwdKey% up}
-			sleep 800
+			DllCall("Sleep",UInt,800)
 			loop 5 {
 				searchRet := nm_imgSearch("e_button.png",30,"high")
 				If (searchRet[1] = 0) {
@@ -12225,12 +12490,12 @@ nm_gotoQuestgiver(giver){
 				nm_Move(4500*MoveSpeedFactor, RightKey)
 				nm_Move(1000*MoveSpeedFactor, FwdKey)
 				send, {%FwdKey% down}
-				sleep, 200
+				DllCall("Sleep",UInt,200)
 				send, {space down}
-				sleep, 200
+				DllCall("Sleep",UInt,200)
 				send, {space up}
 				send, {%FwdKey% up}
-				sleep 800
+				DllCall("Sleep",UInt,800)
 				loop 5 {
 					searchRet := nm_imgSearch("e_button.png",50,"high")
 					If (searchRet[1] = 0) {
@@ -12242,21 +12507,21 @@ nm_gotoQuestgiver(giver){
 			} else if(MoveMethod="cannon"){
 				nm_gotoCannon()
 				send, {e}
-				sleep, 50
+				DllCall("Sleep",UInt,50)
 				send {%FwdKey% down}
 				send {%RightKey% down}
-				sleep, 600
+				DllCall("Sleep",UInt,600)
 				send {space}
 				send {space}
-				sleep, 1750
+				DllCall("Sleep",UInt,1750)
 				send {%FwdKey% up}
-				sleep, 2250
+				DllCall("Sleep",UInt,2250)
 				send {%RightKey% up}
 				send {space}
 				loop 2 {
 					send, {%RotRight%}
 				}
-				sleep, 1500
+				DllCall("Sleep",UInt,1500)
 				searchRet := nm_imgSearch("e_button.png",50,"high")
 				If (searchRet[1] = 0) {
 					repeat:=0
@@ -12311,6 +12576,7 @@ nm_bugDeathCheck(){
 			IniWrite, %LastBugrunLadybugs%, nm_config.ini, Collect, LastBugrunLadybugs
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 		}
@@ -12325,9 +12591,12 @@ nm_bugDeathCheck(){
 			if(InStr(objective,"bamboo")) {
 				TotalBugKills:=TotalBugKills+2
 				SessionBugKills:=SessionBugKills+2
+				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
+				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			} else {
 				TotalBugKills:=TotalBugKills+1
 				SessionBugKills:=SessionBugKills+1
+				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			}
 			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
@@ -12342,6 +12611,7 @@ nm_bugDeathCheck(){
 			IniWrite, %LastBugrunSpider%, nm_config.ini, Collect, LastBugrunSpider
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 		}
@@ -12355,6 +12625,7 @@ nm_bugDeathCheck(){
 			IniWrite, %LastBugrunMantis%, nm_config.ini, Collect, LastBugrunMantis
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 		}
@@ -12366,6 +12637,7 @@ nm_bugDeathCheck(){
 			IniWrite, %LastBugrunRhinoBeetles%, nm_config.ini, Collect, LastBugrunRhinoBeetles
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 		}
@@ -12379,6 +12651,8 @@ nm_bugDeathCheck(){
 			IniWrite, %LastBugrunMantis%, nm_config.ini, Collect, LastBugrunMantis
 			TotalBugKills:=TotalBugKills+2
 			SessionBugKills:=SessionBugKills+2
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 		}
@@ -12389,6 +12663,7 @@ nm_bugDeathCheck(){
 			IniWrite, %LastBugrunWerewolf%, nm_config.ini, Collect, LastBugrunWerewolf
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 		}
@@ -12402,6 +12677,7 @@ nm_bugDeathCheck(){
 			IniWrite, %LastBugrunWerewolf%, nm_config.ini, Collect, LastBugrunWerewolf
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 		}
@@ -12415,6 +12691,7 @@ nm_bugDeathCheck(){
 			IniWrite, %LastBugrunScorpions%, nm_config.ini, Collect, LastBugrunScorpions
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
+			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
 			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 		}
@@ -12442,6 +12719,7 @@ ConvertBalloon=Always
 ConvertMins=30
 LastConvertBalloon=1
 DisableToolUse=0
+AnnounceGuidingStar=0
 HiveSlot=6
 HiveVariation=20
 HiveBees=25
@@ -14276,7 +14554,7 @@ ba_placeInventoryPlanter(planterName, planterNum){
 				;MouseMove, 30, (Roblox[2]+200), 5
 			;SendEvent, {Click, WheelDown, 500}
 			send, {WheelDown 1}
-			Sleep, 50
+			DllCall("Sleep",UInt,50)
 		}
 		MouseMove, 30, (Roblox[2]+200), 5
 		Loop, 25 {
@@ -14335,7 +14613,7 @@ ba_placeInventoryPlanter(planterName, planterNum){
 			;SendEvent, {Click, WheelUp, 200}
 			loop, 2 {
 				send, {WheelUp 1}
-				Sleep, 50
+				DllCall("Sleep",UInt,50)
 			}
 			sleep, 350
 		}
@@ -14411,7 +14689,7 @@ ba_harvestPlanter(planterNum){
 		MouseMove, 30, (Roblox[2]+200), 5
 	    Loop, 100 {
 			send, {WheelDown 1}
-			Sleep, 50
+			DllCall("Sleep",UInt,50)
 		}
 		MouseMove, 30, (Roblox[2]+200), 5
 		Loop, 25 {
@@ -14435,7 +14713,7 @@ ba_harvestPlanter(planterNum){
 			}
 			loop, 2 {
 				send, {WheelUp 1}
-				Sleep, 50
+				DllCall("Sleep",UInt,50)
 			}
 			sleep, 350
 		}
@@ -14502,6 +14780,7 @@ ba_harvestPlanter(planterNum){
 			IniRead, PlanterEstPercent%planterNum%, ba_config.ini, Planters, PlanterEstPercent%planterNum%
 			TotalPlantersCollected:=TotalPlantersCollected+1
 			SessionPlantersCollected:=SessionPlantersCollected+1
+			Send_WM_COPYDATA("incrementstat Total Planters", "StatMonitor.ahk ahk_class AutoHotkey")
 			IniWrite, %TotalPlantersCollected%, nm_config.ini, Status, TotalPlantersCollected
 			IniWrite, %SessionPlantersCollected%, nm_config.ini, Status, SessionPlantersCollected
 			;gather loot
@@ -14835,6 +15114,15 @@ if(fileexist("ba_config.ini"))
     pass:=1
 }
 nm_SaveGui()
+Prev_DetectHiddenWindows := A_DetectHiddenWindows
+Prev_TitleMatchMode := A_TitleMatchMode
+DetectHiddenWindows On
+SetTitleMatchMode 2
+WinClose guidingStarDetect.ahk
+WinClose background.ahk
+WinClose StatMonitor.ahk
+DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 ExitApp
 
 StartBackground:
@@ -14850,14 +15138,17 @@ global disableDayorNight, AFBrollingDice, BackpackPercentFiltered
 if (AFBrollingDice && not disableDayorNight&& state!="Disconnected")
     nm_fieldBoostDice()
 ;death check
-if(state="Gathering" || state="Attacking" || state="Searching")
-	nm_deathCheck()
+;-->moved to background.ahk
+;if(state="Gathering" || state="Attacking" || state="Searching")
+;	nm_deathCheck()
 ;day or night check
-nm_dayOrNight()
+;-->moved to background.ahk
+;nm_dayOrNight()
 ;backpack percent
-if(state="Gathering" || state="Converting") {
-	nm_backpackPercentFilter()
-} 
+;-->moved to background.ahk
+;if(state="Gathering" || state="Converting") {
+;	nm_backpackPercentFilter()
+;} 
 ;use/check hotbar boosts
 nm_hotbar()
 ;bug death check
@@ -14936,7 +15227,7 @@ global ZoomOut
 global MoveMethod
 global HiveVariation
 global HiveSlot
-global DisableToolUse
+global DisableToolUse, AnnounceGuidingStar
 global ClockCheck
 global MondoBuffCheck
 global MondoAction
@@ -15126,6 +15417,7 @@ IniRead, MoveSpeedFactor, nm_config.ini, Settings, MoveSpeedFactor
 GuiControlGet, HiveVariation
 GuiControlGet, HiveSlot
 GuiControlGet, DisableToolUse
+GuiControlGet, AnnounceGuidingStar
 GuiControlGet, ClockCheck
 GuiControlGet, MondoBuffCheck
 GuiControlGet, MondoAction
@@ -15354,9 +15646,11 @@ if(AutoFieldBoostActive){
         return
     }
 }
-
+;start ancillary macros
+if(AnnounceGuidingStar){
+	run guidingStarDetect.ahk, submacros
+}
 ;start main loop
-;nm_setObjective("Main Loop")
 nm_setStatus(0, "Main Loop")
 nm_Start()
 return
@@ -15390,6 +15684,7 @@ IniWrite, %SessionGatherTime%, nm_config.ini, Status, SessionGatherTime
 IniWrite, %TotalConvertTime%, nm_config.ini, Status, TotalConvertTime
 IniWrite, %SessionConvertTime%, nm_config.ini, Status, SessionConvertTime
 nm_setStatus("End", "Macro")
+WinClose guidingStarDetect.ahk
 Reload
 return
 ;PAUSE MACRO
@@ -15448,3 +15743,80 @@ loop, 1000 {
 }
 return
 
+nm_WM_COPYDATA(wParam, lParam){
+	global youDied
+	StringSize := NumGet(lParam + A_PtrSize)  ; Retrieves the CopyDataStruct's lpData member.
+	StringAddress := NumGet(lParam + 2*A_PtrSize)  ; Retrieves the CopyDataStruct's lpData member.
+    StringText := StrGet(StringAddress)  ; Copy the string out of the structure.
+	if(wParam=1){ ;guiding star detected
+		nm_setStatus("Detected", "Guiding Star in " . StringText)
+		;pause
+		FwdKeyState:=GetKeyState(FwdKey)
+		BackKeyState:=GetKeyState(BackKey)
+		LeftKeyState:=GetKeyState(LeftKey)
+		RightKeyState:=GetKeyState(RightKey)
+		SpaceKeyState:=GetKeyState(Space)
+		send {%FwdKey% up}
+		send {%BackKey% up}
+		send {%LeftKey% up}
+		send {%RightKey% up}
+		send {space up}
+		click up
+		;Announce Guiding Star
+		;calculate mins
+		if(A_Min>=50) {
+			GSMins:=50-A_Min+10
+			if(GSMins<10)
+				GSMins:=("0" . GSMins)
+		} else {
+			GSMins:=A_Min+10
+			if(GSMins<10)
+				GSMins:=("0" . GSMins)
+		}
+		send, /
+		sleep 200
+		Send {Blind}{Text} <<Guiding Star>> in %StringText% until __:%GSMins%
+		sleep 200
+		send, {Enter}
+		sleep 250
+		;SetKeyDelay 5
+		;unpause
+		if(FwdKeyState)
+		send {%FwdKey% down}
+		if(BackKeyState)
+			send {%BackKey% down}
+		if(LeftKeyState)
+			send {%LeftKey% down}
+		if(RightKeyState)
+			send {%RightKey% down}
+		if(SpaceKeyState)
+			send {space down}
+	}
+}
+nm_backgroundEvent(wParam, lParam){
+	global youDied, NightLastDetected, VBState, BackpackPercent, BackpackPercentFiltered
+	
+	;You Died Indication
+	if(wParam=1){ ;You Died
+		nm_setStatus("You Died")
+		youDied:=1
+	}
+	;Set NightLastDetected
+	else if(wParam=2){
+		NightLastDetected:=lParam
+	}
+	;Set VBState
+	else if(wParam=3){
+		
+		VBState:=lParam
+	}
+	;Set BackpackPercent
+	else if(wParam=6){
+		
+		BackpackPercent:=lParam
+	}
+	;Set BackpackPercentFiltered
+	else if(wParam=7){
+		BackpackPercentFiltered:=lParam
+	}
+}
