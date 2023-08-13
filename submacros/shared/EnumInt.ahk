@@ -220,4 +220,7 @@
 	, "NightAnnouncementCheck"
 	, "PublicJoined"
 	, "DebugLogEnabled"
-	, "StingerDailyBonusCheck"]
+	, "StingerDailyBonusCheck"
+	, "GatherDoubleReset"
+	, "HoneystormCheck"
+	, "LastHoneystorm"]

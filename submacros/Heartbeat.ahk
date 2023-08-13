@@ -23,6 +23,7 @@ OnMessage(0x5556, "nm_SetHeartbeat")
 
 LastRobloxWindow := LastStatusHeartbeat := LastMainHeartbeat := LastBackgroundHeartbeat := nowUnix()
 MacroState := 0
+path := A_ScriptDir "\..\natro_macro.ahk"
 
 Loop
 {
@@ -48,9 +49,6 @@ Loop
 		
 		|| ((MacroState = 1) && (((time - LastMainHeartbeat > 120) && (reason := "Macro Unresponsive Timeout!"))
 		|| ((time - LastBackgroundHeartbeat > 120) && (reason := "Background Script Timeout!"))
-		|| ((time - LastStatusHeartbeat > 120) && (reason := "Status Script Timeout!"))))
-		
-		|| ((MacroState = 0) && (((time - LastMainHeartbeat > 120) && (reason := "Macro Unresponsive Timeout!"))
 		|| ((time - LastStatusHeartbeat > 120) && (reason := "Status Script Timeout!"))))) {
 		Prev_MacroState := MacroState, MacroState := 0
 		Loop
@@ -64,7 +62,8 @@ Loop
 				Process, Close, % p.ProcessID
 			
 			ForceStart := (Prev_MacroState = 2)
-			run, "%A_AhkPath%" "..\natro_macro.ahk" "%ForceStart%" "%A_ScriptHwnd%"
+			
+			run, "%A_AhkPath%" "%path%" "%ForceStart%" "%A_ScriptHwnd%"
 			WinWait, Natro ahk_class AutoHotkeyGUI, , 300
 			if (success := !ErrorLevel)
 			{

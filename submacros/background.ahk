@@ -14,24 +14,14 @@ You should have received a copy of the GNU General Public License along with Nat
 #NoEnv
 #NoTrayIcon
 #SingleInstance force
-#InputLevel 1
 #MaxThreads 255
 
 SetBatchLines -1
 SetWorkingDir %A_ScriptDir%
 
-RunWith(32)
-RunWith(bits) {
-	If (A_IsUnicode && (A_PtrSize = (bits = 32 ? 4 : 8)))
-		Return
-	
-	SplitPath, A_AhkPath,, ahkDirectory
-
-	If (!FileExist(ahkPath := ahkDirectory "\AutoHotkeyU" bits ".exe"))
-		MsgBox, 0x10, "Error", % "Couldn't find the " bits "-bit Unicode version of Autohotkey in:`n" ahkPath
-	Else 
-		Run, "%ahkPath%" "%A_ScriptName%", %A_ScriptDir%
-
+if (A_Args.Length() = 0)
+{
+	msgbox, This script needs to be run by Natro Macro! You are not supposed to run it manually.
 	ExitApp
 }
 
@@ -40,15 +30,16 @@ global imgfolder:="..\nm_image_assets"
 resetTime:=LastState:=LastConvertBalloon:=nowUnix()
 DailyReconnect:=VBState:=state:=0
 MacroState:=2
-IniRead, NightLastDetected, ..\settings\nm_config.ini, Collect, NightLastDetected
-IniRead, VBLastKilled, ..\settings\nm_config.ini, Collect, VBLastKilled
-IniRead, StingerCheck, ..\settings\nm_config.ini, Collect, StingerCheck
-IniRead, StingerDailyBonusCheck, ..\settings\nm_config.ini, Collect, StingerDailyBonusCheck
-IniRead, AnnounceGuidingStar, ..\settings\nm_config.ini, Settings, AnnounceGuidingStar
-IniRead, ReconnectInterval, ..\settings\nm_config.ini, Settings, ReconnectInterval
-IniRead, ReconnectHour, ..\settings\nm_config.ini, Settings, ReconnectHour
-IniRead, ReconnectMin, ..\settings\nm_config.ini, Settings, ReconnectMin
-IniRead, EmergencyBalloonPingCheck, ..\settings\nm_config.ini, Status, EmergencyBalloonPingCheck
+NightLastDetected := A_Args[1]
+VBLastKilled := A_Args[2]
+StingerCheck := A_Args[3]
+StingerDailyBonusCheck := A_Args[4]
+AnnounceGuidingStar := A_Args[5]
+ReconnectInterval := A_Args[6]
+ReconnectHour := A_Args[7]
+ReconnectMin := A_Args[8]
+EmergencyBalloonPingCheck := A_Args[9]
+ConvertBalloon := A_Args[10]
 
 CoordMode, Pixel, Client
 DetectHiddenWindows On
@@ -57,6 +48,7 @@ SetTitleMatchMode 2
 ;OnMessages
 OnExit("ExitFunc")
 OnMessage(0x5552, "nm_setGlobalInt", 255)
+OnMessage(0x5553, "nm_setGlobalStr", 255)
 OnMessage(0x5554, "nm_setGlobalNum", 255)
 OnMessage(0x5555, "nm_setState", 255)
 OnMessage(0x5556, "nm_sendHeartbeat")
@@ -205,7 +197,7 @@ nm_dayOrNight(){
 				PostMessage, 0x5555, 2, %NightLastDetected%
 				Send_WM_COPYDATA("Detected: Night", "natro_macro.ahk ahk_class AutoHotkey")
 			}
-			if(StingerCheck && (!StingerDailyBonusCheck || (nowUnix()-VBLastKilled)>86400) && VBState=0) {
+			if((StingerCheck=1) && ((StingerDailyBonusCheck=0) || (nowUnix()-VBLastKilled)>79200) && VBState=0) {
 				VBState:=1 ;0=no VB, 1=searching for VB, 2=VB found
 				if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
 					PostMessage, 0x5555, 3, 1
@@ -372,7 +364,7 @@ nm_guidingStarDetect(){
 	global AnnounceGuidingStar, windowX, windowY, windowWidth, windowHeight
 	static LastGuidDetected:=0, fieldnames := ["PineTree", "Stump", "Bamboo", "BlueFlower", "MountainTop", "Cactus", "Coconut", "Pineapple", "Spider", "Pumpkin", "Dandelion", "Sunflower", "Clover", "Pepper", "Rose", "Strawberry", "Mushroom"]
 	
-	if (!AnnounceGuidingStar || (nowUnix()-LastGuidDetected<10))
+	if ((AnnounceGuidingStar=0) || (nowUnix()-LastGuidDetected<10))
 		return
 	
 	xi:=windowWidth/2
@@ -402,7 +394,7 @@ nm_guidingStarDetect(){
 }
 
 nm_dailyReconnect(){
-	global ReconnectHour, ReconnectMin, ReconnectInterval, DailyReconnect
+	global ReconnectHour, ReconnectMin, ReconnectInterval, DailyReconnect, MacroState
 	if ((ReconnectHour = "") || (ReconnectMin = "") || (ReconnectInterval = ""))
 		return
 	FormatTime, RChourUTC, %A_NowUTC%, HH
@@ -427,13 +419,13 @@ nm_dailyReconnect(){
 }
 
 nm_EmergencyBalloon(){
-	global EmergencyBalloonPingCheck, LastConvertBalloon
+	global EmergencyBalloonPingCheck, LastConvertBalloon, ConvertBalloon
 	static LastEmergency:=0
-	if ((EmergencyBalloonPingCheck = 1) && ((time := nowUnix() - LastConvertBalloon) > 3000) && (nowUnix() - LastEmergency > 300))
+	if ((EmergencyBalloonPingCheck = 1) && (ConvertBalloon != "Never") && (nowUnix() - LastEmergency > 60) && ((time := nowUnix() - LastConvertBalloon) > 2700) && (time < 3600))
 	{
 		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
 			VarSetCapacity(duration,256), DllCall("GetDurationFormatEx","Ptr",0,"UInt",0,"Ptr",0,"Int64",time*10000000,"WStr",((time >= 60) ? "m'm' s" : "") "s's'","Str",duration,"Int",256)
-			Send_WM_COPYDATA("Emergency: No Balloon Convert in " duration, "natro_macro.ahk ahk_class AutoHotkey")
+			Send_WM_COPYDATA("Detected: No Balloon Convert in " duration, "natro_macro.ahk ahk_class AutoHotkey")
 			LastEmergency := nowUnix()
 		}
 	}
@@ -458,9 +450,22 @@ nm_setGlobalInt(wParam, lParam)
 	Critical
 	local var
 	; enumeration
-	static arr := {23: "MacroState"}
+	#Include %A_ScriptDir%\shared\EnumInt.ahk
 	
 	var := arr[wParam], %var% := lParam
+	return 0
+}
+nm_setGlobalStr(wParam, lParam)
+{
+	global
+	Critical
+	local var
+	; enumeration
+	#Include %A_ScriptDir%\shared\EnumStr.ahk
+	static sections := ["Boost","Collect","Gather","Gui","Planters","Quests","Settings","Status"]
+	
+	var := arr[wParam], section := sections[lParam]
+	IniRead, %var%, %A_ScriptDir%\..\settings\nm_config.ini, %section%, %var%
 	return 0
 }
 Send_WM_COPYDATA(ByRef StringToSend, ByRef TargetScriptTitle, wParam:=0)

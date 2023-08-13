@@ -1643,6 +1643,7 @@ SendHourlyReport()
 			wr.SetRequestHeader("Authorization", "Bot " bottoken)
 		}
 		wr.SetRequestHeader("Content-Type", contentType)
+		wr.SetTimeouts(0, 60000, 120000, 30000)
 		wr.Send(retData)
 	}
 	catch e

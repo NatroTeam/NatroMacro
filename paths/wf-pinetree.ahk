@@ -1,31 +1,35 @@
 ﻿paths["pine tree"] := "
 (LTrim Join`r`n
 if (" HiveBees " < 25) {
-	" nm_Walk(33, FwdKey) "
-	" nm_Walk(13, FwdKey, RightKey) "
-	" nm_Walk(78, RightKey) "
-	" nm_Walk(42, BackKey) "
-	" nm_Walk(6, BackKey, LeftKey) "
-	" nm_Walk(3, LeftKey) "
-	" nm_Walk(4, BackKey) "
-	send {" RotLeft " 4}{space down}
+	" nm_Walk(31, FwdKey) "
+	" nm_Walk(75, RightKey) "
+	send {" RotLeft " 4}
+	" nm_Walk(42, FwdKey) "
+	" nm_Walk(6, FwdKey, RightKey) "
+	" nm_Walk(4, RightKey) "
+	send {" FwdKey " down}
+	Walk(6)
+	send {" SC_Space " down}
 	HyperSleep(200)
-	send {space up}
-	" nm_Walk(108, FwdKey) "
+	send {" SC_Space " up}
+	Walk(108)
+	send {" FwdKey " up}
 }
 else {
-	" nm_Walk(35, FwdKey) "
+	" nm_Walk(31, FwdKey) "
 	" nm_Walk(75, RightKey) "
-	" nm_Walk(42, BackKey) "
-	" nm_Walk(6, BackKey, LeftKey) "
-	" nm_Walk(3, LeftKey) "
-	" nm_Walk(4, BackKey) "
-	send {" RotLeft " 4}{space down}
-	HyperSleep(100)
-	send {" SC_Space " up}{" FwdKey " down}
-	HyperSleep(250)
+	send {" RotLeft " 4}
+	" nm_Walk(42, FwdKey) "
+	" nm_Walk(6, FwdKey, RightKey) "
+	" nm_Walk(4, RightKey) "
+	send {" FwdKey " down}
+	Walk(6)
 	send {" SC_Space " down}
-	HyperSleep(100)
+	HyperSleep(200)
+	send {" SC_Space " up}
+	HyperSleep(150)
+	send {" SC_Space " down}
+	HyperSleep(200)
 	send {" SC_Space " up}
 	HyperSleep(3000)
 	send {" FwdKey " up}
@@ -43,4 +47,5 @@ default:
 " nm_Walk(2, FwdKey) "
 }
 )"
+;slightly altered tile measurements and optimised glider deployment SP 230405
 ;path with and without glider zaappiix 230212

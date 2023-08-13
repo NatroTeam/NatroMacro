@@ -44,7 +44,7 @@
 		Walk(" 8 * size ")
 		send {" AFCLRKey " up}{" AFCFBKey " down}
 		Walk(" 3 * size ")		
-		send {" AFCFBKey " up}{" TCLRKey " down}
+		send {" AFCFBKey " up}{" TCLRKey " down}}
 		Walk(" 8 * size ")
 		send {" TCLRKey " up}{" TCFBKey " down}{" AFCLRKey " down}
 		Walk(" Sqrt( ( ( 4 * size ) ** 2 ) + ( ( 4 * size ) ** 2 )) ")

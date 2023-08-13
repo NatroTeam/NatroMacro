@@ -22,6 +22,12 @@ SetBatchLines -1
 SetWorkingDir %A_ScriptDir%\..
 CoordMode, Mouse, Client
 
+if (A_Args.Length() = 0)
+{
+	msgbox, This script needs to be run by Natro Macro! You are not supposed to run it manually.
+	ExitApp
+}
+
 ; initialisation
 MacroState := PublicJoined := 0
 global buffer := [], command_buffer := []
@@ -105,15 +111,16 @@ timers.mobs.values[9] := {"varname": "Commando", "name": "Commando", "cooldown":
 timers.mobs.values[10] := {"varname": "CocoCrab", "name": "Coco Crab", "cooldown": 129600, "regex": "i)^(coco(nut)?)?crab"}
 timers.mobs.values[11] := {"varname": "StumpSnail", "name": "Stump Snail", "cooldown": 345600, "regex": "i)^(stump|snail|stumpsnail)"}
 timers.machines.values[1] := {"varname": "Clock", "name": "Wealth Clock", "cooldown": 3600, "regex": "i)^(wealth|clock|wealthclock)"}
-timers.machines.values[2] := {"varname": "HoneyDis", "name": "Honey Dispenser", "cooldown": 3600, "regex": "i)^honey"}
+timers.machines.values[2] := {"varname": "HoneyDis", "name": "Honey Dispenser", "cooldown": 3600, "regex": "i)^honey(dis(penser)?)?$"}
 timers.machines.values[3] := {"varname": "TreatDis", "name": "Treat Dispenser", "cooldown": 3600, "regex": "i)^treat"}
 timers.machines.values[4] := {"varname": "AntPass", "name": "Ant Pass", "cooldown": 7200, "regex": "i)^ant(pass)?"}
 timers.machines.values[5] := {"varname": "BlueberryDis", "name": "Blueberry Dispenser", "cooldown": 14400, "regex": "i)^blueberry"}
 timers.machines.values[6] := {"varname": "StrawberryDis", "name": "Strawberry Dispenser", "cooldown": 14400, "regex": "i)^strawberry"}
-timers.machines.values[7] := {"varname": "CoconutDis", "name": "Coconut Dispenser", "cooldown": 14400, "regex": "i)^coco(nut)?(?!crab)"}
-timers.machines.values[8] := {"varname": "GlueDis", "name": "Glue Dispenser", "cooldown": 79200, "regex": "i)^glue"}
-timers.machines.values[9] := {"varname": "RoyalJellyDis", "name": "Royal Jelly Dispenser", "cooldown": 79200, "regex": "i)^(rj|royaljelly)"}
-timers.machines.values[10] := {"varname": "RoboPass", "name": "Robo Pass", "cooldown": 79200, "regex": "i)^robo(pass)?"}
+timers.machines.values[7] := {"varname": "Honeystorm", "name": "Honeystorm", "cooldown": 14400, "regex": "i)^honeystorm"}
+timers.machines.values[8] := {"varname": "CoconutDis", "name": "Coconut Dispenser", "cooldown": 14400, "regex": "i)^coco(nut)?(?!crab)"}
+timers.machines.values[9] := {"varname": "GlueDis", "name": "Glue Dispenser", "cooldown": 79200, "regex": "i)^glue"}
+timers.machines.values[10] := {"varname": "RoyalJellyDis", "name": "Royal Jelly Dispenser", "cooldown": 79200, "regex": "i)^(rj|royaljelly)"}
+timers.machines.values[11] := {"varname": "RoboPass", "name": "Robo Pass", "cooldown": 79200, "regex": "i)^robo(pass)?"}
 timers.beesmas.values[1] := {"varname": "Wreath", "name": "Honey Wreath", "cooldown": 1800, "regex": "i)^(honey)?wreath"}
 timers.beesmas.values[2] := {"varname": "Stockings", "name": "Stockings", "cooldown": 3600, "regex": "i)^stocking(s)?"}
 timers.beesmas.values[3] := {"varname": "Feast", "name": "Beesmas Feast", "cooldown": 5400, "regex": "i)^(beesmas)?feast"}
@@ -402,6 +409,9 @@ settings["NightAnnouncementCheck"] := {"enum": 220, "type": "int", "section": "S
 ;settings["PublicJoined"] := {"enum": 221, "type": "int", "regex": "i)^(0|1)$"} dangerous
 settings["DebugLogEnabled"] := {"enum": 222, "type": "int", "section": "Status", "regex": "i)^(0|1)$"}
 settings["StingerDailyBonusCheck"] := {"enum": 223, "type": "int", "section": "Collect", "regex": "i)^(0|1)$"}
+settings["GatherDoubleReset"] := {"enum": 224, "type": "int", "section": "Settings", "regex": "i)^(0|1)$"}
+settings["HoneystormCheck"] := {"enum": 225, "type": "int", "section": "Collect", "regex": "i)^(0|1)$"}
+settings["LastHoneystorm"] := {"enum": 226, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
 
 bitmaps := {}
 bitmaps["moon"] := Gdip_BitmapFromBase64("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")
@@ -419,7 +429,7 @@ nm_status(status)
 {
 	global
 	static colorIndex:=0
-	local stateString, state, objective, log, color, content, message, pBM, x, y, w, h, timestamp, payload_json, postData, contentType
+	local stateString, state, objective, log, color, content, message, channel, pBM, x, y, w, h, timestamp, payload_json, postData, contentType
 
 	stateString := SubStr(status, InStr(status, "] ")+2)
 	state := SubStr(stateString, 1, InStr(stateString, ": ")-1), objective := SubStr(stateString, InStr(stateString, ": ")+2)
@@ -445,7 +455,7 @@ nm_status(status)
 		}
 		else
 		{
-			color := ((state = "Disconnected") || (state = "You Died") || (state = "Failed") || (state = "Error") || (state = "Emergency") || (state = "Aborting") || (state = "Missing") || (state = "Canceling") || InStr(objective, "Phantom")) ? 15085139 ; red - error
+			color := ((state = "Disconnected") || (state = "You Died") || (state = "Failed") || (state = "Error") || (state = "Aborting") || (state = "Missing") || (state = "Canceling") || InStr(objective, "Phantom") || InStr(objective, "No Balloon Convert")) ? 15085139 ; red - error
 			: (InStr(objective, "Tunnel Bear") || InStr(objective, "King Beetle") || InStr(objective, "Vicious Bee") || InStr(objective, "Snail") || InStr(objective, "Crab") || InStr(objective, "Mondo") || InStr(objective, "Commando")) ? 7036559 ; purple - boss / attacking
 			: (InStr(objective, "Planter") || (state = "Placing") || (state = "Collecting")) ? 48355 ; blue - planters
 			: ((state = "Interupted") || (state = "Reporting")) ? 14408468 ; yellow - alert
@@ -464,7 +474,7 @@ nm_status(status)
 			|| ((GameFrozenPingCheck = 1) && (InStr(stateString, "Resetting: Character") && (Mod(SubStr(objective, InStr(objective, " ")+1), 10) = 5)))
 			|| ((PhantomPingCheck = 1) && InStr(stateString, "Phantom"))
 			|| ((UnexpectedDeathPingCheck = 1) && (state = "You Died"))
-			|| ((EmergencyBalloonPingCheck = 1) && (state = "Emergency"))
+			|| ((EmergencyBalloonPingCheck = 1) && InStr(stateString, "No Balloon Convert"))
 			|| ((state = "Obtained") && InStr(stateString, "Amulet"))))
 			? ("<@" discordUID ">") : ""
 		
@@ -480,7 +490,7 @@ nm_status(status)
 			|| ((ViciousSSCheck = 1) && InStr(stateString, "Completed: Vicious Bee"))
 			|| ((DeathSSCheck = 1) && (state = "You Died"))
 			|| ((PlanterSSCheck = 1) && ((state = "Detected") && InStr(stateString, "Planter")))
-			|| ((HoneySSCheck = 1) && InStr(stateString, "Reporting: Daily Honey LB"))
+			|| ((HoneySSCheck = 1) && InStr(stateString, "Reporting: Daily Honey LB") && ((discordMode = 0) || (channel := (StrLen(ReportChannelID) < 17) ? MainChannelID : ReportChannelID)))
 			|| ((ssDebugging = 1) && ((state = "Placing") || (state = "Collecting") || (state = "Failed") || InStr(stateString, "Next Quest Step")))))
 		{
 			WinGetClientPos(x, y, w, h, "Roblox ahk_exe RobloxPlayerBeta.exe")
@@ -488,13 +498,13 @@ nm_status(status)
 		}
 		
 		buffer.RemoveAt(1)
-		discord.SendEmbed(message, color, content, pBM), pBM ? Gdip_DisposeImage(pBM)
+		discord.SendEmbed(message, color, content, pBM, channel), pBM ? Gdip_DisposeImage(pBM)
 	}
 	else
 		buffer.RemoveAt(1)
 		
 	; extra: night detection announcement
-	if ((NightAnnouncementCheck = 1) && (PublicJoined = 0) && (stateString  = "Detected: Night") && (StrLen(NightAnnouncementWebhook) > 0))
+	if ((NightAnnouncementCheck = 1) && (PublicJoined = 0) && (stateString  = "Detected: Night") && !InStr(PrivServer, "/4189852503?") && (StrLen(NightAnnouncementWebhook) > 0))
 	{
 		FormatTime, timestamp, %A_NowUTC%, yyyy-MM-ddTHH:mm:ssZ
 		payload_json := "
@@ -1357,24 +1367,53 @@ nm_command(command)
 		
 		
 		case "set":
-		Loop, 1
+		switch % params[2]
 		{
-			for k,v in settings
+			case "bugrun":
+			switch % params[3]
 			{
-				if (k = params[2])
-				{
-					value := Trim(SubStr(command.content, InStr(command.content, params[2])+StrLen(params[2])))
-					if (value ~= v.regex)
-					{
-						(v.type = "str") ? UpdateStr(k, value, v.section) : UpdateInt(k, value, v.section)
-						discord.SendEmbed("Set ``" k "`` to ``" value "``!", 5066239, , , , id)
-					}
-					else
-						discord.SendEmbed("``" ((StrLen(value) > 0) ? value : "<blank>") "`` is not an acceptable value for ``" k "``!", 16711731, , , , id)
-					break 2
-				}
+				case "on",1:
+				UpdateInt("BugrunLadybugsCheck", 1, "Collect")
+				UpdateInt("BugrunRhinoBeetlesCheck", 1, "Collect")
+				UpdateInt("BugrunSpiderCheck", 1, "Collect")
+				UpdateInt("BugrunMantisCheck", 1, "Collect")
+				UpdateInt("BugrunScorpionsCheck", 1, "Collect")
+				UpdateInt("BugrunWerewolfCheck", 1, "Collect")
+				discord.SendEmbed("Set ``BugrunLadybugsCheck``, ``BugrunRhinoBeetlesCheck``, ``BugrunSpiderCheck``, ``BugrunMantisCheck``, ``BugrunScorpionCheck``, ``BugrunWerewolfCheck``, to ``1``!", 5066239, , , , id)
+				
+				case "off",0:
+				UpdateInt("BugrunLadybugsCheck", 0, "Collect")
+				UpdateInt("BugrunRhinoBeetlesCheck", 0, "Collect")
+				UpdateInt("BugrunSpiderCheck", 0, "Collect")
+				UpdateInt("BugrunMantisCheck", 0, "Collect")
+				UpdateInt("BugrunScorpionsCheck", 0, "Collect")
+				UpdateInt("BugrunWerewolfCheck", 0, "Collect")
+				discord.SendEmbed("Set ``BugrunLadybugsCheck``, ``BugrunRhinoBeetlesCheck``, ``BugrunSpiderCheck``, ``BugrunMantisCheck``, ``BugrunScorpionCheck``, ``BugrunWerewolfCheck``, to ``0``!", 5066239, , , , id)
+				
+				default:
+				discord.SendEmbed("``" ((StrLen(params[3]) > 0) ? params[3] : "<blank>") "`` is not a valid setting!\n``?set bugrun`` must be followed by ``on``, ``off``, ``1``, or ``0``", 16711731, , , , id)
 			}
-			discord.SendEmbed("``" ((StrLen(params[2]) > 0) ? params[2] : "<blank>") "`` is not a valid setting!\nUse ``?help set`` for a list of settings.", 16711731, , , , id)
+			
+			default:
+			Loop, 1
+			{
+				for k,v in settings
+				{
+					if (k = params[2])
+					{
+						value := Trim(SubStr(command.content, InStr(command.content, params[2])+StrLen(params[2])))
+						if (value ~= v.regex)
+						{
+							(v.type = "str") ? UpdateStr(k, value, v.section) : UpdateInt(k, value, v.section)
+							discord.SendEmbed("Set ``" k "`` to ``" value "``!", 5066239, , , , id)
+						}
+						else
+							discord.SendEmbed("``" ((StrLen(value) > 0) ? value : "<blank>") "`` is not an acceptable value for ``" k "``!", 16711731, , , , id)
+						break 2
+					}
+				}
+				discord.SendEmbed("``" ((StrLen(params[2]) > 0) ? params[2] : "<blank>") "`` is not a valid setting!\nUse ``?help set`` for a list of settings.", 16711731, , , , id)
+			}
 		}
 		
 		
@@ -1638,6 +1677,7 @@ class discord
 				wr.SetRequestHeader("Authorization", "Bot " bottoken)
 			}
 			wr.SetRequestHeader("Content-Type", contentType)
+			wr.SetTimeouts(0, 60000, 120000, 30000)
 			wr.Send(postdata)
 			wr.WaitForResponse()
 		}
@@ -1738,7 +1778,7 @@ class discord
 			{
 				DllCall("shlwapi\SHCreateStreamOnFileEx", "WStr", field["file"], "Int", 0, "UInt", 0x80, "Int", 0, "Ptr", 0, "PtrP", pFileStream:=0)
 				DllCall("shlwapi\IStream_Size", "Ptr", pFileStream, "UInt64P", size:=0, "UInt")
-				DllCall("shlwapi\IStream_Copy", "Ptr", pFileStream , "Ptr", pStream, "UInt", size, "UInt")
+				DllCall("shlwapi\IStream_Copy", "Ptr", pFileStream, "Ptr", pStream, "UInt", size, "UInt")
 				ObjRelease(pFileStream)
 			}
 		}
@@ -1953,6 +1993,8 @@ UpdateStr(var, value, section)
 	SetTitleMatchMode, 2
 	if WinExist("natro_macro.ahk ahk_class AutoHotkey")
 		PostMessage, 0x5553, settings[var].enum, sections[section]
+	if WinExist("background.ahk ahk_class AutoHotkey")
+		PostMessage, 0x5553, settings[var].enum, sections[section]
 }
 
 UpdateInt(var, value, section)
@@ -1963,20 +2005,8 @@ UpdateInt(var, value, section)
 	SetTitleMatchMode, 2
 	if WinExist("natro_macro.ahk ahk_class AutoHotkey")
 		PostMessage, 0x5552, settings[var].enum, value
-}
-
-nm_setGlobalStr(wParam, lParam)
-{
-	global
-	Critical
-	local var
-	; enumeration
-	#Include %A_ScriptDir%\shared\StrEnum.ahk
-	static sections := ["Boost","Collect","Gather","Gui","Planters","Quests","Settings","Status"]
-	
-	var := arr[wParam], section := sections[lParam]
-	IniRead, %var%, settings\nm_config.ini, %section%, %var%
-	return 0
+	if WinExist("background.ahk ahk_class AutoHotkey")
+		PostMessage, 0x5552, settings[var].enum, value
 }
 
 nm_setGlobalInt(wParam, lParam)
@@ -1985,9 +2015,23 @@ nm_setGlobalInt(wParam, lParam)
 	Critical
 	local var
 	; enumeration
-	#Include %A_ScriptDir%\shared\IntEnum.ahk
+	#Include %A_ScriptDir%\shared\EnumInt.ahk
 	
 	var := arr[wParam], %var% := lParam
+	return 0
+}
+
+nm_setGlobalStr(wParam, lParam)
+{
+	global
+	Critical
+	local var
+	; enumeration
+	#Include %A_ScriptDir%\shared\EnumStr.ahk
+	static sections := ["Boost","Collect","Gather","Gui","Planters","Quests","Settings","Status"]
+	
+	var := arr[wParam], section := sections[lParam]
+	IniRead, %var%, %A_ScriptDir%\..\settings\nm_config.ini, %section%, %var%
 	return 0
 }
 

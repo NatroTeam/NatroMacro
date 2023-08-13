@@ -1,179 +1,211 @@
-0.9.2 Patch Notes
+0.9.3 Patch Notes
 
 New Features
-- Remote Control has been implemented to the macro! This will allow you to control the macro through Discord with a wide range of commands. This is an advanced feature, a full documentation made by Zaappiix is in the Natro Macro Discord server to use as a reference for setup and usage.
-- Added the Misc tab which will include various tools independent from the macro, such as Gifted Basic Bee Hatcher and the detection of your bee list for import into Hive Builder.
-- Added a custom GUI for Discord Integration settings to make space for many more options, including remote control and the customisation of screenshots and pings.
-- Added the ability to change Start/Stop/Pause and other hotkeys in Misc tab.
-- Added the option to leave amulets on screen instead of always doing Keep Old.
-- Added the option to disable the gathering of Planter Loot.
-- Added a feature to announce Night Detection to a specific Discord Webhook for stinger farming.
-- Rearranged Gather tab and introduced the option to overwrite field defaults using the Save button. This allows you to change the settings used automatically for Quests. These settings can be reset in the Settings tab.
-- Added an option to run Vicious Bee cycle only for the Daily Bonus.
+-Added option to collect and loot Honeystorm.
 
 Bugs
-- Fixed misdetection of default browser in some edge cases, most notably fixing the issues of incorrect browser being used and the 'Choose default browser' popup.
-- Fixed the issue where Glitter was not used for Manual Planters due to a typo in the code.
-- Fixed a bug where Session Stats would show incorrectly in the GUI.
-- Altered Cactus walk back path to increase reliability and reduce occurrences of walking into Werewolf cave.
-- Fixed some infinite loops when encountering an error when harvesting Planters.
-- Fixed the issue where duplicate status updates would be sent by introducing a new system to process messages.
-- Reworked 'Confirming: Night' to reduce false negatives (i.e. aborting night when it is night) and increase accuracy.
-- Fixed a potential memory leak when using the Snowflake Boost option.
+-Fixed Daily Reconnect not working due to an error in variable scope.
+-Changed all natro_macro.ahk path references to specify full paths, fixing the '..\natro_macro.ahk' error.
+-Made changes to the reconnect function so that the browser will not be wrongly elevated.
+-Fixed infinite looping when doing Tunnel Bear (previously caused cases of spending hours at Tunnel Bear without interrupt).
+-Altered nm_Reset() function to retain functionality even if health bar (top right) cannot be detected.
 
 Other
-- The macro is now licensed under GNU GPLv3 to give us protection against some shameless actions.
-- All Discord links can now launch in the app directly instead of opening browser. You can now click on members of the Dev and Tester teams to view their profiles.
-- Implemented upload (Discord) of images/screenshots directly from memory stream instead of saving to hard disk, hugely increasing speed and reducing the chance of error.
-- Added Discord Integration features to warn and ping if balloon has not been converted in over 50 minutes and send a screenshot of Daily Honey Leaderboard.
-- Changed Hotbar Options time settings to accept a wider range and display the time clearly in 'hms' format.
-- Added option to disable debug log writing in Misc tab.
-- Reworked tab closing further to analyse window stack for browser more reliably.
-- Easy/Advanced Mode has been removed from the GUI, and the bottom of GUI has been redesigned.
-- Added a subtab system to separate Collect/Kill tab to make more space for future options.
-- Pausing the macro now automatically activates the Natro window.
-- Updated nm_Reset() (and all other reset functions) to dynamically wait for reset instead of a fixed time, improving speed and reliability during server lag (slow resets).
-- Reworked Heartbeat function to work separately from background scripts and ensure that all necessary scripts for the current state are running.
-- Added Mondo interrupt for Stump Snail and Commando Chick.
-- Added small wait time before traveling to harvest Rose, Spider, Cactus, Pumpkin, Pine Tree Planters.
-- Fixed some typos in status updates and GUI dialog boxes.
+-Reworked Hive Tool functions (Basic Egg Hatcher, Bitterberry Feeder) to detect items in inventory and have a clear kill switch.
+-Tweaked entering of number of bitterberries in Bitterberry Feeder so that digits are not missed.
+-Updated background.ahk to remove reliance on IniRead initialisation and introduce support for ?set remote control commands.
+-Changed Vicious Bee Daily Bonus cooldown to 22 hours (previously 24 hours, in-game cooldown is 22 hours).
+-Renamed 'Daily Reset Honey' to 'Daily Honey LB' in Webhook GUI to eliminate ambiguity.
+-Added option to disable activating Natro Macro window on Pause (with Change Hotkeys).
+-Changed Emergency Balloon to ping every minute (previously every 5) between 45 and 60 minutes (previously 50+ minutes).
+-Emergency Balloon no longer activates when Convert Balloon is set to "Never".
+-Night Announcement no longer sends to webhook if the initial Private Server link was for BSS Rejoin.
+-Reworked pattern importing code: errors inside patterns are now detected at launch and general error reporting has been improved.
+-Increased Send Timeout to 120s (previously default 30s) for Discord requests to increase compatibility with extremely slow upload speeds.
+-Added detection and MsgBox for being unable to send inputs to Roblox when it is elevated (most common cause for "nothing happens").
+-Added option to disable double reset before Gathering.
+-Made some additional stability changes to 'wf-pinetree' path.
+-Moved "Daily Honey LB" reporting to Report Channel ID, if applicable.
+
+
+0.9.2 Patch Notes
+
+R.I.P. Jet. Thank you to those who have donated to the cause, your names are now permanently engraved in blue in the Contributors tab.
+
+New Features
+-Remote Control has been implemented to the macro! This will allow you to control the macro through Discord with a wide range of commands. This is an advanced feature, a full documentation made by Zaappiix is in the Natro Macro Discord server to use as a reference for setup and usage. This is a new feature built into Natro Macro, it is completely unrelated to any unofficial remote control implementations before the release of v0.9.2!
+-Added the Misc tab which will include various tools independent from the macro, such as Gifted Basic Bee Hatcher and the detection of your bee list for import into Hive Builder.
+-Added a custom GUI for Discord Integration settings to make space for many more options, including remote control and the customisation of screenshots and pings.
+-Added the ability to change Start/Stop/Pause and other hotkeys in Misc tab.
+-Added the option to leave amulets on screen instead of always doing Keep Old.
+-Added the option to disable the gathering of Planter Loot.
+-Added a feature to announce Night Detection to a specific Discord Webhook for stinger farming.
+-Rearranged Gather tab and introduced the option to overwrite field defaults using the Save button. This allows you to change the settings used automatically for Quests. These settings can be reset in the Settings tab.
+-Added an option to run Vicious Bee cycle only for the Daily Bonus.
+
+Bugs
+-Fixed misdetection of default browser in some edge cases, most notably fixing the issues of incorrect browser being used and the 'Choose default browser' popup.
+-Fixed the issue where Glitter was not used for Manual Planters due to a typo in the code.
+-Fixed a bug where Session Stats would show incorrectly in the GUI.
+-Altered Cactus walk back path to increase reliability and reduce occurrences of walking into Werewolf cave.
+-Fixed some infinite loops when encountering an error when harvesting Planters.
+-Fixed the issue where duplicate status updates would be sent by introducing a new system to process messages.
+-Reworked 'Confirming: Night' to reduce false negatives (i.e. aborting night when it is night) and increase accuracy.
+-Fixed a potential memory leak when using the Snowflake Boost option.
+
+Other
+-The macro is now licensed under GNU GPLv3 to give us protection against some shameless actions.
+-All Discord links can now launch in the app directly instead of opening browser. You can now click on members of the Dev and Tester teams to view their profiles.
+-Implemented upload (Discord) of images/screenshots directly from memory stream instead of saving to hard disk, hugely increasing speed and reducing the chance of error.
+-Added Discord Integration features to warn and ping if balloon has not been converted in over 50 minutes and send a screenshot of Daily Honey Leaderboard.
+-Changed Hotbar Options time settings to accept a wider range and display the time clearly in 'hms' format.
+-Added option to disable debug log writing in Misc tab.
+-Reworked tab closing further to analyse window stack for browser more reliably.
+-Easy/Advanced Mode has been removed from the GUI, and the bottom of GUI has been redesigned.
+-Added a subtab system to separate Collect/Kill tab to make more space for future options.
+-Pausing the macro now automatically activates the Natro window.
+-Updated nm_Reset() (and all other reset functions) to dynamically wait for reset instead of a fixed time, improving speed and reliability during server lag (slow resets).
+-Reworked Heartbeat function to work separately from background scripts and ensure that all necessary scripts for the current state are running.
+-Added Mondo interrupt for Stump Snail and Commando Chick.
+-Added small wait time before traveling to harvest Rose, Spider, Cactus, Pumpkin, Pine Tree Planters.
+-Fixed some typos in status updates and GUI dialog boxes.
 
 
 0.9.1 Patch Notes
 
 New Features
-- Manual Planters have been reintroduced! Special thanks to Raychel (our new Dev Team member!) and El Gato for developing the functions involved.
-- Planter Timers has been updated to 3.0! New features include the ability to add your own planter and edit the timers for an existing planter.
-- Added the ability to detect planter progress if set to Harvest on Full Grown. This will allow the macro to account for Nectar Sipping!
-- Added 'Snowflake' hotbar option. This allows the option to use Snowflakes until a certain percentage of Cool Breeze has been reached.
-- Replaced 'Gifted Vicious Hive Bonus' checkbox with a customisable 'Monster Respawn Time' option, allowing a custom bonus.
+-Manual Planters have been reintroduced! Special thanks to Raychel (our new Dev Team member!) and El Gato for developing the functions involved.
+-Planter Timers has been updated to 3.0! New features include the ability to add your own planter and edit the timers for an existing planter.
+-Added the ability to detect planter progress if set to Harvest on Full Grown. This will allow the macro to account for Nectar Sipping!
+-Added 'Snowflake' hotbar option. This allows the option to use Snowflakes until a certain percentage of Cool Breeze has been reached.
+-Replaced 'Gifted Vicious Hive Bonus' checkbox with a customisable 'Monster Respawn Time' option, allowing a custom bonus.
 
 Bugs
-- Fixed a bug where the macro would not back-scroll properly if the full quest is not visible, which caused issues in quest log detection.
-- Fixed an issue where the macro would not move due to 64-bit AHK not interacting with the Roblox window.
-- Changed Mondo time conditions to use UTC time rather than local time, fixing the issue where Mondo time would be incorrect in certain timezones.
-- Fixed an issue where an invalid custom pattern would break pattern importing by adding a syntax check when importing each pattern.
-- Updated closing tab system on reconnect to work for all browsers, fixing the issue where the macro would launch several new tabs without closing them.
-- Fixed some issues with honey detection in StatMonitor.
+-Fixed a bug where the macro would not back-scroll properly if the full quest is not visible, which caused issues in quest log detection.
+-Fixed an issue where the macro would not move due to 64-bit AHK not interacting with the Roblox window.
+-Changed Mondo time conditions to use UTC time rather than local time, fixing the issue where Mondo time would be incorrect in certain timezones.
+-Fixed an issue where an invalid custom pattern would break pattern importing by adding a syntax check when importing each pattern.
+-Updated closing tab system on reconnect to work for all browsers, fixing the issue where the macro would launch several new tabs without closing them.
+-Fixed some issues with honey detection in StatMonitor.
 
 Other
-- Changed to a new system of keypresses to work identically for all keyboard layouts. Key Settings are no longer required to be set.
-- Implemented adding of reconnect duration to planter timers after a successful reconnect.
-- Reworked inventory searching to improve accuracy when Roblox window size is changed.
-- Added a loading indicator to show progress of creating GUI before the macro can show it.
-- Added "Natro so broke 😩" checkbox with the ability to enable/disable the message.
-- Added Walk Convert option when harvesting planters that fill up your bag.
-- Added option to disable "Fallback to Public Server" to prevent joining Public Servers in any case.
-- Increased BSS "Loading" timeout during reconnect to 4 minutes (previously 2).
-- Increased Vicious Bee battle timeout to 10 minutes (previously 5).
-- Changed Natro icon to use a transparent background instead of the previous black background.
-- Added disabling of >>Donate<< and Join Discord links while macro is running.
-- Updated several paths (thanks to Zaappiix for these!)
-- Added Roblox Group link in Settings tab in hope that we will acquire more members.
-- Added a custom tray menu (right click on Natro icon in system tray).
-- Reworked nm_claimHiveSlot() to dynamically detect free slots and claim a hive slot much faster.
-- Added a check for 'Disconnected' message during reconnect to allow the macro to try again immediately.
+-Changed to a new system of keypresses to work identically for all keyboard layouts. Key Settings are no longer required to be set.
+-Implemented adding of reconnect duration to planter timers after a successful reconnect.
+-Reworked inventory searching to improve accuracy when Roblox window size is changed.
+-Added a loading indicator to show progress of creating GUI before the macro can show it.
+-Added "Natro so broke 😩" checkbox with the ability to enable/disable the message.
+-Added Walk Convert option when harvesting planters that fill up your bag.
+-Added option to disable "Fallback to Public Server" to prevent joining Public Servers in any case.
+-Increased BSS "Loading" timeout during reconnect to 4 minutes (previously 2).
+-Increased Vicious Bee battle timeout to 10 minutes (previously 5).
+-Changed Natro icon to use a transparent background instead of the previous black background.
+-Added disabling of >>Donate<< and Join Discord links while macro is running.
+-Updated several paths (thanks to Zaappiix for these!)
+-Added Roblox Group link in Settings tab in hope that we will acquire more members.
+-Added a custom tray menu (right click on Natro icon in system tray).
+-Reworked nm_claimHiveSlot() to dynamically detect free slots and claim a hive slot much faster.
+-Added a check for 'Disconnected' message during reconnect to allow the macro to try again immediately.
 
 
 0.9.0 Patch Notes
 
 Bugs
-- Fixed Mondo loot path falling off Mountain Top Field.
-- Fixed infinite Bug Run when collecting Rage tokens for Riley Bee's Rampage quest.
-- Fixed an issue where an extra digit is detected in honey monitoring, sometimes causing a misread 10x greater than the actual amount.
-- Fixed an issue where reconnect would fail for very small window sizes.
-- Fixed Reconnect Interval input breaking if 0 is entered.
-- Fixed duplicate status updates after failed reconnect attempts.
-- Fixed an issue where StatMonitor would not detect Mondo buff amount correctly.
-- Fixed an issue where a quest would not be detected correctly if it is near a Beesmas quest.
-- Fixed an issue where the macro would not click during Stump Snail.
-- Fixed various issues with Daily Reconnect (only executing once, starting late, etc.)
+-Fixed Mondo loot path falling off Mountain Top Field.
+-Fixed infinite Bug Run when collecting Rage tokens for Riley Bee's Rampage quest.
+-Fixed an issue where an extra digit is detected in honey monitoring, sometimes causing a misread 10x greater than the actual amount.
+-Fixed an issue where reconnect would fail for very small window sizes.
+-Fixed Reconnect Interval input breaking if 0 is entered.
+-Fixed duplicate status updates after failed reconnect attempts.
+-Fixed an issue where StatMonitor would not detect Mondo buff amount correctly.
+-Fixed an issue where a quest would not be detected correctly if it is near a Beesmas quest.
+-Fixed an issue where the macro would not click during Stump Snail.
+-Fixed various issues with Daily Reconnect (only executing once, starting late, etc.)
 
 Other
-- Set external scripts to prefer 64-bit where applicable to improve performance.
-- Optimised the MoveSpeed Correction function to execute faster, detect more accurately, and apply trapezoidal rule for changes in haste.
-- Increased maximum time limit for patterns to 180 seconds (previously 90).
-- Adjusted hive convert function to start immediately on a successful walk back.
-- Reworked Reconnect Time helpbox to support offsets with varied minutes and calculate offset more accurately.
-- The macro will no longer close all other AHK scripts on exit, only those from a Natro Macro instance.
-- Added disconnect checking during a reset loop to increase speed of reconnects further.
-- Added some new convert interrupt status updates.
-- Reduced variation of some message bitmaps (e.g. to fix early detection of red cannon).
-- Changed Baby Love token wait location for King Beetle to increase chance of success.
-- Updated some paths to work with incorrect hive slot setting.
-- Implemented screenshot image .jpg compression to drastically reduce file size, resulting in faster sending and loading of screenshots.
-- Edited screenshot function to specifically capture Roblox window if it exists, and all monitor screens otherwise.
-- Added BSS Rejoin as an acceptable game for Private Server links in Settings tab.
-- Slightly adjusted Candles path and Glue Dispenser lair path to improve reliability.
-- Reduced width of hive images to allow detection even on the minimum window size.
-- Revamped in-game menu opening to make it more stable and less susceptible to game bugs.
+-Set external scripts to prefer 64-bit where applicable to improve performance.
+-Optimised the MoveSpeed Correction function to execute faster, detect more accurately, and apply trapezoidal rule for changes in haste.
+-Increased maximum time limit for patterns to 180 seconds (previously 90).
+-Adjusted hive convert function to start immediately on a successful walk back.
+-Reworked Reconnect Time helpbox to support offsets with varied minutes and calculate offset more accurately.
+-The macro will no longer close all other AHK scripts on exit, only those from a Natro Macro instance.
+-Added disconnect checking during a reset loop to increase speed of reconnects further.
+-Added some new convert interrupt status updates.
+-Reduced variation of some message bitmaps (e.g. to fix early detection of red cannon).
+-Changed Baby Love token wait location for King Beetle to increase chance of success.
+-Updated some paths to work with incorrect hive slot setting.
+-Implemented screenshot image .jpg compression to drastically reduce file size, resulting in faster sending and loading of screenshots.
+-Edited screenshot function to specifically capture Roblox window if it exists, and all monitor screens otherwise.
+-Added BSS Rejoin as an acceptable game for Private Server links in Settings tab.
+-Slightly adjusted Candles path and Glue Dispenser lair path to improve reliability.
+-Reduced width of hive images to allow detection even on the minimum window size.
+-Revamped in-game menu opening to make it more stable and less susceptible to game bugs.
 
 
 0.8.9 Patch Notes
 
 New Features
-- Added Webhook Screenshots! This will send additional screenshots to your webhook after certain non-critical events! Click '?' next to Webhook Settings to learn more.
+-Added Webhook Screenshots! This will send additional screenshots to your webhook after certain non-critical events! Click '?' next to Webhook Settings to learn more.
 
 Bugs
-- Fixed planters regarded as "Missing" because planter scrolling does not initiate.
-- Fixed an issue where items other than planters would be dragged while searching the inventory.
-- Fixed quest progress detection issues caused by Quest Log not opening or the quests being covered by a Beesmas quest.
-- Fixed an issue where the environment would confuse the macro into misdetecting quest completion (Cactus, Rose).
-- Improved quest dialog search to increase speed and also prevent accidental present gifting.
-- Fixed an issue where the red vignette effect from the character receiving damage caused the macro to miss planters.
-- Fixed an issue where Robo Pass Dispenser was repetitively checked by adding cooldown detection.
-- Fixed some issues with "Traveling" status update not being sent.
-- Fixed an issue where camera would not be rotated back after Confirming Night returned daytime.
-- Fixed an issue where Status in GUI would not be cleared before writing a new one.
-- Fixed Bag Full and Inactive Honey check not applying when field is boosted.
+-Fixed planters regarded as "Missing" because planter scrolling does not initiate.
+-Fixed an issue where items other than planters would be dragged while searching the inventory.
+-Fixed quest progress detection issues caused by Quest Log not opening or the quests being covered by a Beesmas quest.
+-Fixed an issue where the environment would confuse the macro into misdetecting quest completion (Cactus, Rose).
+-Improved quest dialog search to increase speed and also prevent accidental present gifting.
+-Fixed an issue where the red vignette effect from the character receiving damage caused the macro to miss planters.
+-Fixed an issue where Robo Pass Dispenser was repetitively checked by adding cooldown detection.
+-Fixed some issues with "Traveling" status update not being sent.
+-Fixed an issue where camera would not be rotated back after Confirming Night returned daytime.
+-Fixed an issue where Status in GUI would not be cleared before writing a new one.
+-Fixed Bag Full and Inactive Honey check not applying when field is boosted.
 
 Other
-- Updated StatMonitor to v2.3! The main new features are improved honey detection and new graphs!
-- Added Gather Interrupt for Beesmas collections! This is useful if you want to collect Beesmas machines as fast as possible.
-- Significant reconnect rework to improve stability and speed, as well as improved reporting and splitting users into a selection of Public Server rejoin links.
-- Added shift-lock detection and dynamic setting throughout the code! This will trim down shift-lock issues to improper keyboard layouts.
-- Revamped contributors tab to allow space for more names and rework the design.
-- Added implementation of a 'Reconnect Interval' to reconnect more than once daily.
-- Altered the delay after conversion to be set according to the value of Hive Bees (Settings tab). With the correct settings, this will fix incomplete conversion.
-- Added the ability to change AutoClicker Options in the Settings tab.
-- Added images for hive detection in Snowstorm and Honeystorm.
-- Migrated Mondo path to the new movement system.
-- Reworked nm_feed() function to improve reliability.
-- Planters+ options are now disabled if main switch is disabled.
-- Added a jump when placing first sprinkler if sprinkler type is not Supreme or Basic.
-- Reduced the default number of attempts for a Phantom Planter check from 10 to 5 and ensured clearing out of planter on failure.
-- Reworked emergency macro restart function with a Force Start, in case F1 is blocked by another program.
-- Reworked priorities of some tasks such as Vicious Bee run and Mondo Chick by adding a return to other tasks.
-- Changed Stockings token collection movement to collect tokens more reliably for some animation packs.
-- Increased minimum delay at hive before killing Scorpions and Mantis by 10 seconds.
-- Adjusted path from Cactus to Spider (Vicious Bee) to avoid running into a cactus.
-- Fixed fields counter in Vicious Bee cycle reporting stating extra fields if the cycle was aborted.
-- Updated many paths (thanks Zaappiix for these!)
-- Updated Hydroponic and Heat-Treated Planter speed and nectar bonuses to match the information given in-game.
-- Increased reliability and speed of camera realignment in confirming nighttime.
-- Added limit to Number of Bees in Settings tab to prevent inputs over 50.
-- Introduced validation of Private Server Link with a new error message before storing an invalid link.
+-Updated StatMonitor to v2.3! The main new features are improved honey detection and new graphs!
+-Added Gather Interrupt for Beesmas collections! This is useful if you want to collect Beesmas machines as fast as possible.
+-Significant reconnect rework to improve stability and speed, as well as improved reporting and splitting users into a selection of Public Server rejoin links.
+-Added shift-lock detection and dynamic setting throughout the code! This will trim down shift-lock issues to improper keyboard layouts.
+-Revamped contributors tab to allow space for more names and rework the design.
+-Added implementation of a 'Reconnect Interval' to reconnect more than once daily.
+-Altered the delay after conversion to be set according to the value of Hive Bees (Settings tab). With the correct settings, this will fix incomplete conversion.
+-Added the ability to change AutoClicker Options in the Settings tab.
+-Added images for hive detection in Snowstorm and Honeystorm.
+-Migrated Mondo path to the new movement system.
+-Reworked nm_feed() function to improve reliability.
+-Planters+ options are now disabled if main switch is disabled.
+-Added a jump when placing first sprinkler if sprinkler type is not Supreme or Basic.
+-Reduced the default number of attempts for a Phantom Planter check from 10 to 5 and ensured clearing out of planter on failure.
+-Reworked emergency macro restart function with a Force Start, in case F1 is blocked by another program.
+-Reworked priorities of some tasks such as Vicious Bee run and Mondo Chick by adding a return to other tasks.
+-Changed Stockings token collection movement to collect tokens more reliably for some animation packs.
+-Increased minimum delay at hive before killing Scorpions and Mantis by 10 seconds.
+-Adjusted path from Cactus to Spider (Vicious Bee) to avoid running into a cactus.
+-Fixed fields counter in Vicious Bee cycle reporting stating extra fields if the cycle was aborted.
+-Updated many paths (thanks Zaappiix for these!)
+-Updated Hydroponic and Heat-Treated Planter speed and nectar bonuses to match the information given in-game.
+-Increased reliability and speed of camera realignment in confirming nighttime.
+-Added limit to Number of Bees in Settings tab to prevent inputs over 50.
+-Introduced validation of Private Server Link with a new error message before storing an invalid link.
 
 
 0.8.8 Patch Notes
 
 Bugs
-- Added a delay for Beesmas Feast animation to end and fixed camera rotation before looting.
-- Fixed issue where Honey Wreath would not be collected.
-- Fixed Stockings path running into Bee Bear if "Walk" Move Method was selected.
-- Added detection of Beesmas-coloured tunnel to Tunnel Bear.
-- Fixed planter paths for Pumpkin and Cactus fields being affected by non-collide pumpkin.
-- Fixed 'Gather with Shift Lock' breaking macro after reconnect.
+-Added a delay for Beesmas Feast animation to end and fixed camera rotation before looting.
+-Fixed issue where Honey Wreath would not be collected.
+-Fixed Stockings path running into Bee Bear if "Walk" Move Method was selected.
+-Added detection of Beesmas-coloured tunnel to Tunnel Bear.
+-Fixed planter paths for Pumpkin and Cactus fields being affected by non-collide pumpkin.
+-Fixed 'Gather with Shift Lock' breaking macro after reconnect.
 
 Other
-- Increased left movement of Stockings loot pattern to ensure collection of leftmost token.
-- Added 5 mins to Gingerbread House timer if disconnected and successfully reconnected.
-- Added RotLeft, RotRight, ZoomIn, ZoomOut support in patterns.
-- Increased heartbeat timeout to 120 seconds in order to reduce some false activations.
-- Edited non-ASCII warning to make it easier to understand.
-- Added Robo Pass inventory full detection for Robo Pass Dispenser.
-- Modified Honey Wreath loot path to more reliably collect all tokens.
-- Added delay after conversion based on Number of Bees in Settings tab.
+-Increased left movement of Stockings loot pattern to ensure collection of leftmost token.
+-Added 5 mins to Gingerbread House timer if disconnected and successfully reconnected.
+-Added RotLeft, RotRight, ZoomIn, ZoomOut support in patterns.
+-Increased heartbeat timeout to 120 seconds in order to reduce some false activations.
+-Edited non-ASCII warning to make it easier to understand.
+-Added Robo Pass inventory full detection for Robo Pass Dispenser.
+-Modified Honey Wreath loot path to more reliably collect all tokens.
+-Added delay after conversion based on Number of Bees in Settings tab.
 
 
 0.8.7 Patch Notes
