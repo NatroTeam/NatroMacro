@@ -1,7 +1,30 @@
+0.6.3 Patch Notes
+
+New Features
+-Added "Rejoin" convert option for those unfortunate souls that think this is a good idea.  Embrace those bad decisions!
+
+Bugs
+-Bucko/Riley "Picnic" quest image was missing.  Added.
+-Bucko/Riley "Picnic" quest was not properly feeding berries.
+-Fixed and issue where the planter confirm window was treated as dialog and gets stuck in an infinite loop.
+-Added an active honey/second check to balloon conversion logic.  This is a failsafe for a case resulting in the macro waiting forever for conversion to end.
+-I (AGAIN) accidently included settings for my alt in the last release for Black Bear Quests.  The blue/red collection field selections were sub-optimal.
+-Fixed an issue causing Gather Fields2&3 settings to revert to defaults every time the macro was restarted.
+
+Other
+-Quests steps that require token gathering will now use all of your GatherField1 settings instead of the default field settings for that field.
+-Added a mouse movement to the default location (right of the shop menu) to the reset action.
+-Added an extra 30 seconds to the bug respawn timers to help prevent cases where they are not quite respawned yet when you go back to kill them.
+-Added an extra 30 seconds to the collection timers to help prevent cases where they are not quite ready yet when you go back to get them.
+-Added validity checking for the private server link.  The public server link will be used instead if the private link is invalid.
+-Changed quest feed amount from 25 to 100.  Yes this will most likely over-feed for the quest and "waste" blueberries or strawberries but it should complete that part of the quest in 1 step.
+
+
+
 0.6.2 Patch Notes
 
 Bugs
--Fixed issue causing pollen to not convert at all!
+-Fixed issue causing pollen to not convert at all!  This issue was introduced in V0.6.1
 -Fixed issue with King Beetle re-try timer not working properly.
 
 

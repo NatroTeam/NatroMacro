@@ -21,7 +21,7 @@ runWith(version){
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.6.2"
+VersionID:="0.6.3"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; NATRO ENHANCEMENT STUFF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -232,10 +232,10 @@ IniRead, AltPineStart, ba_config.ini, gui, AltPineStart
 ; READ INI VALUES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 global PolarBear:={"Aromatic Pie":[[3,"kill","mantis"],[4,"kill","ladybugs"],[1,"collect","rose"],[2,"collect","Pine Tree"]], "Beetle Brew":[[3,"kill", "ladybugs"],[4,"kill", "rhinobeetles"],[1,"collect","Pineapple"],[2,"collect","Dandelion"]], "Candied Beetles":[[3, "kill","rhinobeetles"],[1,"collect","Strawberry"],[2,"collect","Blue Flower"]], "Exotic Salad":[[1,"collect", "Cactus"],[2, "collect", "Rose"],[3,"collect","Blue Flower"],[4,"collect","Clover"]], "Extreme Stir-Fry":[[6,"kill","werewolf"],[5,"kill","scorpions"],[4,"kill","spider"],[1,"collect","Cactus"],[2,"collect","Bamboo"],[3,"collect","Dandelion"]], "High Protein":[[4,"kill","spider"],[3,"kill","scorpions"],[2,"kill","mantis"],[1,"collect","Sunflower"]], "Ladybug Poppers":[[2,"kill","ladybugs"],[1,"collect","Blue Flower"]], "Mantis Meatballs":[[2,"kill","mantis"],[1,"collect","Pine Tree"]], "Prickly Pears":[[1,"collect","Cactus"]], "Pumpkin Pie":[[3,"kill","mantis"],[1,"collect","Pumpkin"],[2,"collect","Sunflower"]], "Scorpion Salad":[[2,"kill","scorpions"],[1,"collect","Rose"]], "Spiced Kebab":[[3,"kill","werewolf"],[1,"collect","Clover"],[2,"collect","Bamboo"]], "Spider Pot-Pie":[[2,"kill","spider"],[1,"collect","Mushroom"]], "Spooky Stew":[[4,"kill","werewolf"],[3,"kill","spider"],[1,"collect","Spider"],[2,"collect","Mushroom"]], "Strawberry Skewers":[[3,"kill","scorpions"],[1,"collect","Strawberry"],[2,"collect","Bamboo"]], "Teriyaki Jerky":[[3,"kill","werewolf"],[1,"collect","Pineapple"],[2,"collect","Spider"]], "Thick Smoothie":[[1,"collect","Strawberry"],[2,"collect","Pumpkin"]], "Trail Mix":[[1,"collect","Sunflower"],[2,"collect","Pineapple"]]}
-;global BlackBear:={"Just White":[[1,"collect","white"]], "Just Red":[[1,"collect","red"]], "Just Blue":[[1,"collect","blue"]], "A Bit Of Both":[[1,"collect","red"],[2,"collect","blue"]], "Any Pollen":[[1,"collect","any"]], "The Whole Lot":[[1,"collect","red"],[2,"collect","blue"],[3,"collect","white"]], "Between The Bamboo":[[2,"collect","Bamboo"], [1,"collect","blue"]], "Play In The Pumpkins":[[2,"collect","Pumpkin"],[1,"collect","white"]], "Plundering Pineapples":[[2,"collect","Pineapple"],[1,"collect","any"]], "Stroll In The Strawberries":[[2, "collect", "Strawberry"],[1,"collect","red"]], "Mid-Level Mission":[[1,"collect","Spider"],[2, "collect","Strawberry"],[3,"collect","Bamboo"]], "Blue Flower Bliss":[[1,"collect","Blue Flower"]], "Delve Into Dandelions":[[1,"collect","Dandelion"]], "Fun In The Sunflowers":[[1,"collect","Sunflower"]], "Mission For Mushrooms":[[1,"collect","Mushroom"]], "Leisurely Lowlands":[[1,"collect","Sunflower"],[2,"collect","Dandelion"],[3,"collect","Mushroom"],[4,"collect","Blue Flower"]], "Triple Trek":[[1,"collect", "Mountain Top"],[2,"collect","Pepper"],[3,"collect","Coconut"]], "Pepper Patrol":[[1,"collect","Pepper"]]}
-global BlackBear:={"Just White":[[1,"collect","white"]], "Just Red":[[1,"collect","red"]], "Just Blue":[[1,"collect","Mountain Top"]], "A Bit Of Both":[[1,"collect","Mountain Top"],[2,"collect","Mountain Top"]], "Any Pollen":[[1,"collect","any"]], "The Whole Lot":[[1,"collect","Mountain Top"],[2,"collect","Mountain Top"],[3,"collect","white"]], "Between The Bamboo":[[2,"collect","Bamboo"], [1,"collect","Mountain Top"]], "Play In The Pumpkins":[[2,"collect","Pumpkin"],[1,"collect","white"]], "Plundering Pineapples":[[2,"collect","Pineapple"],[1,"collect","any"]], "Stroll In The Strawberries":[[2, "collect", "Strawberry"],[1,"collect","red"]], "Mid-Level Mission":[[1,"collect","Spider"],[2, "collect","Strawberry"],[3,"collect","Bamboo"]], "Blue Flower Bliss":[[1,"collect","Blue Flower"]], "Delve Into Dandelions":[[1,"collect","Dandelion"]], "Fun In The Sunflowers":[[1,"collect","Sunflower"]], "Mission For Mushrooms":[[1,"collect","Mushroom"]], "Leisurely Lowlands":[[1,"collect","Sunflower"],[2,"collect","Dandelion"],[3,"collect","Mushroom"],[4,"collect","Blue Flower"]], "Triple Trek":[[1,"collect", "Mountain Top"],[2,"collect","Pepper"],[3,"collect","Coconut"]], "Pepper Patrol":[[1,"collect","Pepper"]]}
-global BuckoBee:={"Abilities":[[1,"Collect","Any"]], "Bamboo":[[1,"Collect","Bamboo"]], "Bombard":[[4,"Get","Ant"],[3,"Get","Ant"],[2,"Kill","RhinoBeetles"],[1,"Collect","Any"]], "Booster":[[2,"Get","BlueBoost"],[1,"Collect","Any"]], "Clean-Up":[[1,"Collect","Blue Flower"],[2,"Collect","Bamboo"],[3,"Collect","Pine Tree"]], "Extraction":[[1,"Collect","Clover"],[2,"Collect","Cactus"],[3,"Collect","Pumpkin"]], "Flowers":[[1,"Collect","Blue Flower"]], "Goo":[[1,"Collect","Blue"]], "Medley":[[2,"Collect","Bamboo"],[3,"Collect","Pine Tree"],[1,"Collect","Any"]], "Picnic":[[5, "Get", "Ant"],[4,"Get","Ant"],[3,"Feed","Blueberries"],[1,"Collect","Blue Flower"],[2,"Collect","Blue"]], "Pine Trees":[[1, "Collect", "Pine Tree"]], "Pollen":[[1,"Collect","Blue"]], "Scavenge":[[1,"Collect","Blue"],[3,"Collect","Blue"],[2,"Collect","Any"]], "Skirmish":[[2,"Kill","RhinoBeetles"],[1,"Collect","Blue Flower"]], "Tango":[[3,"Kill","Mantis"],[1,"Collect","Blue"],[2,"Collect","Any"]], "Tour":[[5,"Kill","Mantis"],[4,"Kill","RhinoBeetles"],[1,"Collect","Blue Flower"],[2,"Collect","Bamboo"],[3,"Collect","Pine Tree"]]}
-global RileyBee:={"Abilities":[[1,"Collect","Any"]], "Booster":[[2,"Get","RedBoost"],[1,"Collect","Any"]], "Clean-Up":[[1,"Collect","Mushroom"],[2,"Collect","Strawberry"],[3,"Collect","Rose"]], "Extraction":[[1,"Collect","Clover"],[2,"Collect","Cactus"],[3,"Collect","Pumpkin"]], "Goo":[[1,"Collect","Red"]], "Medley":[[2,"Collect","Strawberry"],[3,"Collect","Rose"],[1,"Collect","Any"]], "Mushrooms":[[1,"collect","Mushroom"]], "Picnic":[[4,"Get","Ant"],[3,"Feed","Strawberries"],[1,"Collect","Mushroom"],[2,"Collect","Red"]], "Pollen":[[1,"Collect","Red"]], "Rampage":[[3,"Get","Ant"],[2,"kill","Ladybugs"],[1,"Kill","All"]], "Roses":[[1,"Collect","Rose"]], "Scavenge":[[1,"Collect","Red"],[3,"Collect","Red"],[2,"Collect","Any"]], "Skirmish":[[2,"Kill","Ladybugs"],[1,"Collect","Mushroom"]], "Strawberries":[[1,"Collect","Strawberry"]], "Tango":[[3,"Kill","Scorpions"],[1,"Collect","Red"],[2,"Collect","Any"]], "Tour":[[5,"Kill","Scorpions"],[4,"Kill","Ladybugs"],[1,"Collect","Mushroom"],[2,"Collect","Strawberry"],[3,"Collect","Rose"]]}
+global BlackBear:={"Just White":[[1,"collect","white"]], "Just Red":[[1,"collect","red"]], "Just Blue":[[1,"collect","blue"]], "A Bit Of Both":[[1,"collect","red"],[2,"collect","blue"]], "Any Pollen":[[1,"collect","any"]], "The Whole Lot":[[1,"collect","red"],[2,"collect","blue"],[3,"collect","white"]], "Between The Bamboo":[[2,"collect","Bamboo"], [1,"collect","blue"]], "Play In The Pumpkins":[[2,"collect","Pumpkin"],[1,"collect","white"]], "Plundering Pineapples":[[2,"collect","Pineapple"],[1,"collect","any"]], "Stroll In The Strawberries":[[2, "collect", "Strawberry"],[1,"collect","red"]], "Mid-Level Mission":[[1,"collect","Spider"],[2, "collect","Strawberry"],[3,"collect","Bamboo"]], "Blue Flower Bliss":[[1,"collect","Blue Flower"]], "Delve Into Dandelions":[[1,"collect","Dandelion"]], "Fun In The Sunflowers":[[1,"collect","Sunflower"]], "Mission For Mushrooms":[[1,"collect","Mushroom"]], "Leisurely Lowlands":[[1,"collect","Sunflower"],[2,"collect","Dandelion"],[3,"collect","Mushroom"],[4,"collect","Blue Flower"]], "Triple Trek":[[1,"collect", "Mountain Top"],[2,"collect","Pepper"],[3,"collect","Coconut"]], "Pepper Patrol":[[1,"collect","Pepper"]]}
+;global BlackBear:={"Just White":[[1,"collect","white"]], "Just Red":[[1,"collect","red"]], "Just Blue":[[1,"collect","Mountain Top"]], "A Bit Of Both":[[1,"collect","Mountain Top"],[2,"collect","Mountain Top"]], "Any Pollen":[[1,"collect","any"]], "The Whole Lot":[[1,"collect","Mountain Top"],[2,"collect","Mountain Top"],[3,"collect","white"]], "Between The Bamboo":[[2,"collect","Bamboo"], [1,"collect","Mountain Top"]], "Play In The Pumpkins":[[2,"collect","Pumpkin"],[1,"collect","white"]], "Plundering Pineapples":[[2,"collect","Pineapple"],[1,"collect","any"]], "Stroll In The Strawberries":[[2, "collect", "Strawberry"],[1,"collect","red"]], "Mid-Level Mission":[[1,"collect","Spider"],[2, "collect","Strawberry"],[3,"collect","Bamboo"]], "Blue Flower Bliss":[[1,"collect","Blue Flower"]], "Delve Into Dandelions":[[1,"collect","Dandelion"]], "Fun In The Sunflowers":[[1,"collect","Sunflower"]], "Mission For Mushrooms":[[1,"collect","Mushroom"]], "Leisurely Lowlands":[[1,"collect","Sunflower"],[2,"collect","Dandelion"],[3,"collect","Mushroom"],[4,"collect","Blue Flower"]], "Triple Trek":[[1,"collect", "Mountain Top"],[2,"collect","Pepper"],[3,"collect","Coconut"]], "Pepper Patrol":[[1,"collect","Pepper"]]}
+global BuckoBee:={"Abilities":[[1,"Collect","Any"]], "Bamboo":[[1,"Collect","Bamboo"]], "Bombard":[[4,"Get","Ant"],[3,"Get","Ant"],[2,"Kill","RhinoBeetles"],[1,"Collect","Any"]], "Booster":[[2,"Get","BlueBoost"],[1,"Collect","Any"]], "Clean-Up":[[1,"Collect","Blue Flower"],[2,"Collect","Bamboo"],[3,"Collect","Pine Tree"]], "Extraction":[[1,"Collect","Clover"],[2,"Collect","Cactus"],[3,"Collect","Pumpkin"]], "Flowers":[[1,"Collect","Blue Flower"]], "Goo":[[1,"Collect","Blue"]], "Medley":[[2,"Collect","Bamboo"],[3,"Collect","Pine Tree"],[1,"Collect","Any"]], "Picnic":[[5, "Get", "Ant"],[4,"Get","Ant"],[3,"Feed","Blueberry"],[1,"Collect","Blue Flower"],[2,"Collect","Blue"]], "Pine Trees":[[1, "Collect", "Pine Tree"]], "Pollen":[[1,"Collect","Blue"]], "Scavenge":[[1,"Collect","Blue"],[3,"Collect","Blue"],[2,"Collect","Any"]], "Skirmish":[[2,"Kill","RhinoBeetles"],[1,"Collect","Blue Flower"]], "Tango":[[3,"Kill","Mantis"],[1,"Collect","Blue"],[2,"Collect","Any"]], "Tour":[[5,"Kill","Mantis"],[4,"Kill","RhinoBeetles"],[1,"Collect","Blue Flower"],[2,"Collect","Bamboo"],[3,"Collect","Pine Tree"]]}
+global RileyBee:={"Abilities":[[1,"Collect","Any"]], "Booster":[[2,"Get","RedBoost"],[1,"Collect","Any"]], "Clean-Up":[[1,"Collect","Mushroom"],[2,"Collect","Strawberry"],[3,"Collect","Rose"]], "Extraction":[[1,"Collect","Clover"],[2,"Collect","Cactus"],[3,"Collect","Pumpkin"]], "Goo":[[1,"Collect","Red"]], "Medley":[[2,"Collect","Strawberry"],[3,"Collect","Rose"],[1,"Collect","Any"]], "Mushrooms":[[1,"collect","Mushroom"]], "Picnic":[[4,"Get","Ant"],[3,"Feed","Strawberry"],[1,"Collect","Mushroom"],[2,"Collect","Red"]], "Pollen":[[1,"Collect","Red"]], "Rampage":[[3,"Get","Ant"],[2,"kill","Ladybugs"],[1,"Kill","All"]], "Roses":[[1,"Collect","Rose"]], "Scavenge":[[1,"Collect","Red"],[3,"Collect","Red"],[2,"Collect","Any"]], "Skirmish":[[2,"Kill","Ladybugs"],[1,"Collect","Mushroom"]], "Strawberries":[[1,"Collect","Strawberry"]], "Tango":[[3,"Kill","Scorpions"],[1,"Collect","Red"],[2,"Collect","Any"]], "Tour":[[5,"Kill","Scorpions"],[4,"Kill","Ladybugs"],[1,"Collect","Mushroom"],[2,"Collect","Strawberry"],[3,"Collect","Rose"]]}
 ;key:="Aromatic Pie"
 ;msgbox % PolarBear["Aromatic Pie"][1][2]
 global FieldBooster:={"pine tree":{booster:"blue", stacks:1}, "bamboo":{booster:"blue", stacks:1}, "blue flower":{booster:"blue", stacks:3}, "rose":{booster:"red", stacks:1}, "strawberry":{booster:"red", stacks:1}, "mushroom":{booster:"red", stacks:3}, "sunflower":{booster:"mountain", stacks:3}, "dandelion":{booster:"mountain", stacks:3}, "spider":{booster:"mountain", stacks:2}, "clover":{booster:"mountain", stacks:2}, "pineapple":{booster:"mountain", stacks:2}, "pumpkin":{booster:"mountain", stacks:1}, "cactus":{booster:"mountain", stacks:1}, "stump":{booster:"none", stacks:0}, "mountain top":{booster:"none", stacks:0}, "coconut":{booster:"none", stacks:0}, "pepper":{booster:"none", stacks:0}}
@@ -510,11 +510,11 @@ Gui, Add, DropDownList, x300 y115 w45 vFieldUntilPack2 gnm_SaveGather, %FieldUnt
 GuiControl, disable, FieldUntilPack2
 Gui, Add, DropDownList, x300 y175 w45 vFieldUntilPack3 gnm_SaveGather, %FieldUntilPack3%||100|95|90|85|80|75|70|65|60|55|50|45|40|35|30|25|20|15|10|5
 GuiControl, disable, FieldUntilPack3
-Gui, Add, DropDownList, x347 y57 w60 vFieldReturnType1 gnm_SaveGather, %FieldReturnType1%||Walk|Reset
+Gui, Add, DropDownList, x347 y57 w60 vFieldReturnType1 gnm_SaveGather, %FieldReturnType1%||Walk|Reset|Rejoin
 GuiControl, disable, FieldReturnType1
-Gui, Add, DropDownList, x347 y115 w60 vFieldReturnType2 gnm_SaveGather, %FieldReturnType2%||Walk|Reset
+Gui, Add, DropDownList, x347 y115 w60 vFieldReturnType2 gnm_SaveGather, %FieldReturnType2%||Walk|Reset|Rejoin
 GuiControl, disable, FieldReturnType2
-Gui, Add, DropDownList, x347 y175 w60 vFieldReturnType3 gnm_SaveGather, %FieldReturnType3%||Walk|Reset
+Gui, Add, DropDownList, x347 y175 w60 vFieldReturnType3 gnm_SaveGather, %FieldReturnType3%||Walk|Reset|Rejoin
 GuiControl, disable, FieldReturnType3
 Gui, Add, DropDownList, x415 y57 w80 vFieldSprinklerLoc1 gnm_SaveGather, %FieldSprinklerLoc1%||Center|Upper Left|Upper|Upper Right|Right|Lower Right|Lower|Lower Left|Left
 GuiControl, disable, FieldSprinklerLoc1
@@ -541,7 +541,7 @@ Gui, Add, GroupBox, x3 y23 w160 h215, Development
 Gui, Add, GroupBox, x163 y23 w335 h215, Contributors
 Gui, Font
 Gui, Add, Text, x5 y38 w155 +wrap +backgroundtrans, Special Thanks for your contributions in the development and testing of this project.  Your feedback and ideas have been invaluable in the design process!`n`nzez#8710`nFHL09#4061`nLittleChurch#1631 (N00b)`nZaappiix#2372`nSP#0305
-Gui, Add, Text, x170 y38 w330 +wrap +backgroundtrans, Thank you for your donations to this project!`n`nFHL09#4061
+Gui, Add, Text, x170 y38 w330 +wrap +backgroundtrans, Thank you for your donations to this project!`n`nFHL09#4061`nNick 9#9476
 
 
 
@@ -592,7 +592,7 @@ nm_setStats()
 ;------------------------
 Gui, Tab, Settings
 GuiControl,focus, Tab
-Gui, Add, Button, x290 y25 w43 h15 gnm_testButton, Test
+;Gui, Add, Button, x290 y25 w43 h15 gnm_testButton, Test
 Gui, Add, Checkbox, x15 y25 vAlwaysOnTop gnm_AlwaysOnTop Checked%AlwaysOnTop%, Always On Top
 Gui, Add, Text, x5 y50 w60 +Right +BackgroundTrans,GUI Theme:
 Gui, Add, DropDownList, x70 y45 w80 h100 vGuiTheme gnm_guiThemeSelect, %GuiTheme%||Allure|Ayofe|BluePaper|Concaved|Core|Cosmo|Fanta|GrayGray|Hana|Invoice|Lakrits|Luminous|MacLion3|Minimal|Museo|Panther|PaperAGV|PINK|Relapse|Simplex3|SNAS|Stomp|VS7|WhiteGray|Woodwork
@@ -1365,9 +1365,7 @@ Gui, Show, x%GuiX% y%GuiY% w500 h300 , Natro Macro
 GuiControl,focus, Tab
 nm_guiTransparencySet()
 ;unlock tabs
-nm_FieldUnlock1()
-nm_FieldSelect2()
-nm_FieldSelect3()
+nm_FieldUnlock()
 nm_TabCollectUnLock()
 nm_TabBoostUnLock()
 nm_TabPlantersPlusUnLock()
@@ -2168,7 +2166,8 @@ nm_TabGatherLock(){
 	GuiControl, Disable, FieldRotateTimes3
 	GuiControl, Disable, FieldDriftCheck3
 }
-nm_FieldUnlock1(){
+nm_FieldUnlock(){
+	global FieldName2, FieldName3
 	GuiControl, Enable, FieldName1
 	GuiControl, Enable, FieldName2
 	GuiControl, Enable, FieldPattern1
@@ -2183,6 +2182,35 @@ nm_FieldUnlock1(){
 	GuiControl, Enable, FieldRotateDirection1
 	GuiControl, Enable, FieldRotateTimes1
 	GuiControl, Enable, FieldDriftCheck1
+	if(FieldName2!="none"){
+		GuiControl, Enable, FieldName3
+		GuiControl, Enable, FieldPattern2
+		GuiControl, Enable, FieldPatternSize2
+		GuiControl, Enable, FieldPatternReps2
+		GuiControl, Enable, FieldPatternShift2
+		GuiControl, Enable, FieldUntilMins2
+		GuiControl, Enable, FieldUntilPack2
+		GuiControl, Enable, FieldReturnType2
+		GuiControl, Enable, FieldSprinklerLoc2
+		GuiControl, Enable, FieldSprinklerDist2
+		GuiControl, Enable, FieldRotateDirection2
+		GuiControl, Enable, FieldRotateTimes2
+		GuiControl, Enable, FieldDriftCheck2
+	}
+	if(FieldName3!="none"){
+		GuiControl, Enable, FieldPattern3
+		GuiControl, Enable, FieldPatternSize3
+		GuiControl, Enable, FieldPatternReps3
+		GuiControl, Enable, FieldPatternShift3
+		GuiControl, Enable, FieldUntilMins3
+		GuiControl, Enable, FieldUntilPack3
+		GuiControl, Enable, FieldReturnType3
+		GuiControl, Enable, FieldSprinklerLoc3
+		GuiControl, Enable, FieldSprinklerDist3
+		GuiControl, Enable, FieldRotateDirection3
+		GuiControl, Enable, FieldRotateTimes3
+		GuiControl, Enable, FieldDriftCheck3
+	}
 }
 nm_FieldSelect2(){
 	global CurrentField, CurrentFieldNum
@@ -4856,15 +4884,15 @@ nm_Reset(checkAll:=1, wait:=2000){
 		;check to make sure you are not in dialog before reset
 		dialog := nm_imgSearch("dialog.png",30,"center")
 		If (dialog[1] = 0) {
-			;check to make sure you are not at a planter on accident
-			imgPos := nm_imgSearch("no.png",30)
-			If (imgPos[1] = 0){
-				MouseMove, (imgPos[2]), (imgPos[3])
-				Click
-				MouseMove, 350, (Roblox[3]+70)
-			}
-			;continue dialog checking
 			while(dialog[1] = 0){
+				;check to make sure you are not at a planter on accident
+				imgPos := nm_imgSearch("no.png",30)
+				If (imgPos[1] = 0){
+					MouseMove, (imgPos[2]), (imgPos[3])
+					Click
+					MouseMove, 350, (Roblox[3]+70)
+				}
+				;continue dialog checking
 				MouseMove, dialog[2],dialog[3]
 				click
 				MouseMove, -30, 0, 0, R
@@ -4905,6 +4933,7 @@ nm_Reset(checkAll:=1, wait:=2000){
 		if(!HiveConfirmed) {
 			nm_setStatus("Resetting", "Character " . A_Index)
 			HiveConfirmed:=0
+			MouseMove, 350, (Roblox[3]+70)
 			;reset
 			send {esc}
 			sleep, 100
@@ -5657,11 +5686,10 @@ nm_walkToCollect(){
 	;clock
 	global ClockCheck
 	global LastClock
-	if(ClockCheck  && (nowUnix()-LastClock)>3600){ ;1 hour
+	if(ClockCheck  && (nowUnix()-LastClock)>3630){ ;1 hour
 		loop, 2 {
 			nm_Reset()
 			objective:="Clock"
-			;nm_setObjective("Clock")
 			nm_gotoRamp()
 			nm_Move(10500*MoveSpeedFactor, BackKey, LeftKey)
 			nm_Move(9000*MoveSpeedFactor, LeftKey)
@@ -5708,7 +5736,7 @@ nm_walkToCollect(){
 	;ant pass
 	global AntPassCheck, AntPassAction, QuestAnt
 	global LastAntPass
-	if((AntPassCheck || QuestAnt)  && (nowUnix()-LastAntPass)>7200){ ;2 hours
+	if((AntPassCheck || QuestAnt)  && (nowUnix()-LastAntPass)>7230){ ;2 hours
 		loop, 2 {
 			nm_Reset()
 			if(QuestAnt)
@@ -5781,7 +5809,7 @@ nm_walkToCollect(){
 	;Honey
 	global HoneyDisCheck
 	global LastHoneyDis
-	if(HoneyDisCheck  && (nowUnix()-LastHoneyDis)>3600){ ;1 hour
+	if(HoneyDisCheck  && (nowUnix()-LastHoneyDis)>3630){ ;1 hour
 		loop, 2 {
 			nm_Reset()
 			nm_setStatus("Traveling", "Honey Dispenser")
@@ -5807,7 +5835,7 @@ nm_walkToCollect(){
 	;Treat
 	global TreatDisCheck
 	global LastTreatDis
-	if(TreatDisCheck  && (nowUnix()-LastTreatDis)>3600){ ;1 hour
+	if(TreatDisCheck  && (nowUnix()-LastTreatDis)>3630){ ;1 hour
 		loop, 2 {
 			nm_Reset()
 			;nm_setObjective("Treat Dispenser")
@@ -5848,7 +5876,7 @@ nm_walkToCollect(){
 	;Blueberry
 	global BlueberryDisCheck
 	global LastBlueberryDis
-	if(BlueberryDisCheck  && (nowUnix()-LastBlueberryDis)>14400){ ;4 hours
+	if(BlueberryDisCheck  && (nowUnix()-LastBlueberryDis)>14430){ ;4 hours
 		loop, 2 {
 			nm_Reset()
 			objective:="Blueberry Dispenser"
@@ -5869,7 +5897,7 @@ nm_walkToCollect(){
 	;Strawberry
 	global StrawberryDisCheck
 	global LastStrawberryDis
-	if(StrawberryDisCheck  && (nowUnix()-LastStrawberryDis)>14400){ ;4 hours
+	if(StrawberryDisCheck  && (nowUnix()-LastStrawberryDis)>14430){ ;4 hours
 		loop, 2 {
 			nm_Reset()
 			objective:="Strawberry Dispenser"
@@ -5894,7 +5922,7 @@ nm_walkToCollect(){
 	;Coconut
 	global CoconutDisCheck
 	global LastCoconutDis
-	if(CoconutDisCheck  && (nowUnix()-LastCoconutDis)>14400){ ;4 hours
+	if(CoconutDisCheck  && (nowUnix()-LastCoconutDis)>14430){ ;4 hours
 		loop, 2 {
 			nm_Reset()
 			objective:="Coconut Dispenser"
@@ -5917,7 +5945,7 @@ nm_walkToCollect(){
 	;Glue
 	global GlueDisCheck
 	global LastGlueDis
-	if(GlueDisCheck  && (nowUnix()-LastGlueDis)>(79200)){ ;22 hours
+	if(GlueDisCheck  && (nowUnix()-LastGlueDis)>(79230)){ ;22 hours
 		loop 2 {
 			nm_Reset()
 			nm_setStatus("Traveling", "Glue Dispenser")
@@ -6044,7 +6072,7 @@ nm_Bugrun(){
 	global TunnelBearCheck, TunnelBearBabyCheck, KingBeetleCheck, KingBeetleBabyCheck, LastTunnelBear, LastKingBeetle
 	global TotalBossKills, SessionBossKills, TotalBugKills, SessionBugKills
 	bypass:=0
-	if(((BugrunSpiderCheck || QuestSpider || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1800*(1-GiftedViciousCheck*.15))) && HiveBees>=5){ ;30 minutes
+	if(((BugrunSpiderCheck || QuestSpider || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1830*(1-GiftedViciousCheck*.15))) && HiveBees>=5){ ;30 minutes
 		loop 1 {
 			if(VBState=1)
 				break
@@ -6105,7 +6133,7 @@ nm_Bugrun(){
 			if(VBState=1)
 				break
 			;head to ladybugs?
-			if((BugrunLadybugsCheck || QuestLadybugs || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(300*(1-GiftedViciousCheck*.15))) {
+			if((BugrunLadybugsCheck || QuestLadybugs || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) {
 				bypass:=1
 				nm_setStatus("Traveling", "Ladybugs (Strawberry)")
 				if(not BugrunSpiderLoot) {
@@ -6122,7 +6150,7 @@ nm_Bugrun(){
 		}
 	}
 	;Ladybugs
-	if((BugrunLadybugsCheck || QuestLadybugs || RileyLadybugs || RileyAll)  && (nowUnix()-LastBugrunLadybugs)>floor(300*(1-GiftedViciousCheck*.15))){ ;5 minutes
+	if((BugrunLadybugsCheck || QuestLadybugs || RileyLadybugs || RileyAll)  && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))){ ;5 minutes
 		loop 1 {
 			if(VBState=1)
 				break
@@ -6261,7 +6289,7 @@ nm_Bugrun(){
 	global BugrunMantisCheck
 	global BugrunMantisLoot
 	global LastBugrunMantis
-	if(((BugrunLadybugsCheck || QuestLadybugs || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(300*(1-GiftedViciousCheck*.15))) || ((BugrunRhinoBeetlesCheck || QuestRhinoBeetles || BuckoRhinoBeetles || RileyAll)  && (nowUnix()-LastBugrunRhinoBeetles)>floor(300*(1-GiftedViciousCheck*.15)))){ ;5 minutes
+	if(((BugrunLadybugsCheck || QuestLadybugs || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) || ((BugrunRhinoBeetlesCheck || QuestRhinoBeetles || BuckoRhinoBeetles || RileyAll)  && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15)))){ ;5 minutes
 		loop 1 {
 			if(VBState=1)
 				break
@@ -6346,7 +6374,7 @@ nm_Bugrun(){
 	if(VBState=1)
 		Return
 	;Rhino Beetles
-	if((BugrunRhinoBeetlesCheck || QuestRhinoBeetles || BuckoRhinoBeetles || RileyAll)  && (nowUnix()-LastBugrunRhinoBeetles)>floor(300*(1-GiftedViciousCheck*.15))){ ;5 minutes
+	if((BugrunRhinoBeetlesCheck || QuestRhinoBeetles || BuckoRhinoBeetles || RileyAll)  && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15))){ ;5 minutes
 		loop 1 {
 			if(VBState=1)
 				break
@@ -6484,7 +6512,7 @@ nm_Bugrun(){
 	if(VBState=1)
 		Return
 	;Rhino Beetles and/or Mantis
-	if(((BugrunMantisCheck || QuestMantis || BuckoMantis || RileyAll)  && (nowUnix()-LastBugrunMantis)>floor(1200*(1-GiftedViciousCheck*.15))) || ((BugrunRhinoBeetlesCheck || QuestRhinoBeetles || BuckoRhinoBeetles || RileyAll)  && (nowUnix()-LastBugrunRhinoBeetles)>floor(300*(1-GiftedViciousCheck*.15)))){ ;5 min Rhino 20min Mantis
+	if(((BugrunMantisCheck || QuestMantis || BuckoMantis || RileyAll)  && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15))) || ((BugrunRhinoBeetlesCheck || QuestRhinoBeetles || BuckoRhinoBeetles || RileyAll)  && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15)))){ ;5 min Rhino 20min Mantis
 		if(HiveBees>=10) {
 			;pineapple
 			BugRunField:="pineapple"
@@ -6614,7 +6642,7 @@ nm_Bugrun(){
 		global BugrunWerewolfCheck
 		global BugrunWerewolfLoot
 		global LastBugrunWerewolf
-		if((BugrunWerewolfCheck || QuestWerewolf || RileyAll)  && (nowUnix()-LastBugrunWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))){ ;60 minutes
+		if((BugrunWerewolfCheck || QuestWerewolf || RileyAll)  && (nowUnix()-LastBugrunWerewolf)>floor(3630*(1-GiftedViciousCheck*.15))){ ;60 minutes
 			loop 1 {
 				if(VBState=1)
 					break
@@ -6701,14 +6729,14 @@ nm_Bugrun(){
 		if(VBState=1)
 			Return
 		;mantis
-		if((BugrunMantisCheck || QuestMantis || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1200*(1-GiftedViciousCheck*.15))){ ;20 minutes
+		if((BugrunMantisCheck || QuestMantis || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15))){ ;20 minutes
 			loop 1 {
 				if(VBState=1)
 					break
 				;pine tree
 				BugRunField:="pine tree"
 				;walk to pine tree from pumpkin if just killed werewolf
-				if((BugrunWerewolfCheck || QuestWerewolf || RileyAll) && (nowUnix()-LastBugrunWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))){
+				if((BugrunWerewolfCheck || QuestWerewolf || RileyAll) && (nowUnix()-LastBugrunWerewolf)>floor(3630*(1-GiftedViciousCheck*.15))){
 					success:=0
 					bypass:=1
 					nm_setStatus("Traveling", "Mantis (Pine Tree)")
@@ -6782,14 +6810,14 @@ nm_Bugrun(){
 		global BugrunScorpionsCheck
 		global BugrunScorpionsLoot
 		global LastBugrunScorpions
-		if((BugrunScorpionsCheck || QuestScorpions || RileyScorpions || RileyAll)  && (nowUnix()-LastBugrunScorpions)>floor(1200*(1-GiftedViciousCheck*.15))){ ;20 minutes
+		if((BugrunScorpionsCheck || QuestScorpions || RileyScorpions || RileyAll)  && (nowUnix()-LastBugrunScorpions)>floor(1230*(1-GiftedViciousCheck*.15))){ ;20 minutes
 			loop 1 {
 				if(VBState=1)
 					break
 				;rose
 				BugRunField:="rose"
 				;walk to rose from pine tree if just killed mantis
-				if((BugrunMantisCheck || QuestMantis || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1200*(1-GiftedViciousCheck*.15)) && MoveMethod="walk"){
+				if((BugrunMantisCheck || QuestMantis || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15)) && MoveMethod="walk"){
 					success:=0
 					bypass:=1
 					nm_setStatus("Traveling", "Scorpions (Rose)")
@@ -7279,7 +7307,7 @@ nm_cannonToCollect(){
 	;clock
 	global ClockCheck
 	global LastClock
-	if(ClockCheck && (nowUnix()-LastClock)>3600){ ;1 hour
+	if(ClockCheck && (nowUnix()-LastClock)>3630){ ;1 hour
 		loop, 2 {
 			nm_Reset()
 			objective:="Clock"
@@ -7361,7 +7389,7 @@ nm_cannonToCollect(){
 			sleep,1500
 		}
 	}
-	if(((AntPassCheck || QuestAnt) && (nowUnix()-LastAntPass)>7200) || (QuestAnt && doAntChallenge)){ ;2 hours OR ant quest
+	if(((AntPassCheck || QuestAnt) && (nowUnix()-LastAntPass)>7230) || (QuestAnt && doAntChallenge)){ ;2 hours OR ant quest
 		loop, 2 {
 			AntStart:
 			nm_Reset()
@@ -7437,7 +7465,7 @@ nm_cannonToCollect(){
 	;Honey
 	global HoneyDisCheck
 	global LastHoneyDis
-	if(HoneyDisCheck  && (nowUnix()-LastHoneyDis)>3600){ ;1 hour
+	if(HoneyDisCheck  && (nowUnix()-LastHoneyDis)>3630){ ;1 hour
 		loop, 2 {
 			nm_Reset()
 			nm_setStatus("Traveling", "Honey Dispenser")
@@ -7463,7 +7491,7 @@ nm_cannonToCollect(){
 	;Treat
 	global TreatDisCheck
 	global LastTreatDis
-	if(TreatDisCheck  && (nowUnix()-LastTreatDis)>3600){ ;1 hour
+	if(TreatDisCheck  && (nowUnix()-LastTreatDis)>3630){ ;1 hour
 		loop, 2 {
 			nm_Reset()
 			objective:="Treat Dispenser"
@@ -7495,7 +7523,7 @@ nm_cannonToCollect(){
 	;Blueberry
 	global BlueberryDisCheck
 	global LastBlueberryDis
-	if(BlueberryDisCheck  && (nowUnix()-LastBlueberryDis)>14400){ ;4 hours
+	if(BlueberryDisCheck  && (nowUnix()-LastBlueberryDis)>14430){ ;4 hours
 		loop, 2 {
 			nm_Reset()
 			objective:="Blueberry Dispenser"
@@ -7529,7 +7557,7 @@ nm_cannonToCollect(){
 	;Strawberry
 	global StrawberryDisCheck
 	global LastStrawberryDis
-	if(StrawberryDisCheck  && (nowUnix()-LastStrawberryDis)>14400){ ;4 hours
+	if(StrawberryDisCheck  && (nowUnix()-LastStrawberryDis)>14430){ ;4 hours
 		loop, 2 {
 			nm_Reset()
 			objective:="Strawberry Dispenser"
@@ -7564,7 +7592,7 @@ nm_cannonToCollect(){
 	;Coconut
 	global CoconutDisCheck
 	global LastCoconutDis
-	if(CoconutDisCheck  && (nowUnix()-LastCoconutDis)>14400){ ;4 hours
+	if(CoconutDisCheck  && (nowUnix()-LastCoconutDis)>14430){ ;4 hours
 		loop, 2 {
 			nm_Reset()
 			objective:="Coconut Dispenser"
@@ -7588,7 +7616,7 @@ nm_cannonToCollect(){
 	;Royal Jelly
 	global RoyalJellyDisCheck
 	global LastRoyalJellyDis
-	if(RoyalJellyDisCheck  && (nowUnix()-LastRoyalJellyDis)>(79200)){ ;22 hours
+	if(RoyalJellyDisCheck  && (nowUnix()-LastRoyalJellyDis)>(79230)){ ;22 hours
 		loop, 2 {
 			nm_Reset()
 			nm_setStatus("Traveling", "Royal Jelly Dispenser (star cave)")
@@ -7622,7 +7650,7 @@ nm_cannonToCollect(){
 	;Glue
 	global GlueDisCheck
 	global LastGlueDis
-	if(GlueDisCheck  && (nowUnix()-LastGlueDis)>(79200)){ ;22 hours
+	if(GlueDisCheck  && (nowUnix()-LastGlueDis)>(79230)){ ;22 hours
 		loop, 2 {
 			nm_Reset()
 			nm_setStatus("Traveling", "Glue Dispenser")
@@ -8356,18 +8384,43 @@ nm_GoGather(){
 	global WhirligigKey
 	global LastWhirligig
 	global BoostChaserCheck, LastBlueBoost, LastRedBoost, LastMountainBoost, FieldBooster3, FieldBooster2, FieldBooster1, FieldDefault, LastMicroConverter
-	GuiControlGet, FieldName%CurrentFieldNum%
-	GuiControlGet, FieldPattern%CurrentFieldNum%
-	GuiControlGet, FieldPatternSize%CurrentFieldNum%
-	GuiControlGet, FieldPatternReps%CurrentFieldNum%
-	GuiControlGet, FieldPatternShift%CurrentFieldNum%
-	GuiControlGet, FieldUntilMins%CurrentFieldNum%
-	GuiControlGet, FieldUntilPack%CurrentFieldNum%
-	GuiControlGet, FieldReturnType%CurrentFieldNum%
-	GuiControlGet, FieldSprinklerLoc%CurrentFieldNum%
-	GuiControlGet, FieldSprinklerDist%CurrentFieldNum%
-	GuiControlGet, FieldRotateDirection%CurrentFieldNum%
-	GuiControlGet, FieldRotateTimes%CurrentFieldNum%
+	;global FieldName1, FieldName2, FieldName3, FieldPattern1, FieldPattern2, FieldPattern3, FieldPatternSize1, FieldPatternSize2, FieldPatternSize3, FieldPatternReps1, FieldPatternReps2, FieldPatternReps3, FieldPatternShift1, FieldPatternShift2, FieldPatternShift3, FieldUntilMins1, FieldUntilMins2, FieldUntilMins3, FieldUntilPack1, FieldUntilPack2, FieldUntilPack3, FieldReturnType1, FieldReturnType2, FieldReturnType3, FieldSprinklerLoc1, FieldSprinklerLoc2, FieldSprinklerLoc3, FieldSprinklerDist1, FieldSprinklerDist2, FieldSprinklerDist3, FieldRotateDirection1, FieldRotateDirection2, FieldRotateDirection3, FieldRotateTimes1, FieldRotateTimes2, FieldRotateTimes3
+	GuiControlGet, FieldName1
+	GuiControlGet, FieldPattern1
+	GuiControlGet, FieldPatternSize1
+	GuiControlGet, FieldPatternReps1
+	GuiControlGet, FieldPatternShift1
+	GuiControlGet, FieldUntilMins1
+	GuiControlGet, FieldUntilPack1
+	GuiControlGet, FieldReturnType1
+	GuiControlGet, FieldSprinklerLoc1
+	GuiControlGet, FieldSprinklerDist1
+	GuiControlGet, FieldRotateDirection1
+	GuiControlGet, FieldRotateTimes1
+	GuiControlGet, FieldName2
+	GuiControlGet, FieldPattern2
+	GuiControlGet, FieldPatternSize2
+	GuiControlGet, FieldPatternReps2
+	GuiControlGet, FieldPatternShift2
+	GuiControlGet, FieldUntilMins2
+	GuiControlGet, FieldUntilPack2
+	GuiControlGet, FieldReturnType2
+	GuiControlGet, FieldSprinklerLoc2
+	GuiControlGet, FieldSprinklerDist2
+	GuiControlGet, FieldRotateDirection2
+	GuiControlGet, FieldRotateTimes2
+	GuiControlGet, FieldName3
+	GuiControlGet, FieldPattern3
+	GuiControlGet, FieldPatternSize3
+	GuiControlGet, FieldPatternReps3
+	GuiControlGet, FieldPatternShift3
+	GuiControlGet, FieldUntilMins3
+	GuiControlGet, FieldUntilPack3
+	GuiControlGet, FieldReturnType3
+	GuiControlGet, FieldSprinklerLoc3
+	GuiControlGet, FieldSprinklerDist3
+	GuiControlGet, FieldRotateDirection3
+	GuiControlGet, FieldRotateTimes3
 	global MondoBuffCheck
 	global StingerCheck
 	GuiControlGet, gotoPlanterField
@@ -8383,7 +8436,7 @@ nm_GoGather(){
 	global GatherStartTime, TotalGatherTime, SessionGatherTime, ConvertStartTime, TotalConvertTime, SessionConvertTime
 	nm_backpackPercentFilter()
 	;BUGS GatherInterruptCheck
-	if((PolarQuestGatherInterruptCheck || BuckoQuestGatherInterruptCheck || RileyQuestGatherInterruptCheck || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(300*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck || BuckoRhinoBeetles || RileyAll) && (nowUnix()-LastBugrunRhinoBeetles)>floor(300*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1800*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1200*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck || RileyScorpions || RileyAll) && (nowUnix()-LastBugrunScorpions)>floor(1200*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck || RileyAll) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
+	if((PolarQuestGatherInterruptCheck || BuckoQuestGatherInterruptCheck || RileyQuestGatherInterruptCheck || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck || BuckoRhinoBeetles || RileyAll) && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1830*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck || RileyScorpions || RileyAll) && (nowUnix()-LastBugrunScorpions)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck || RileyAll) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
 		return
 	}
 	;reset
@@ -8459,18 +8512,33 @@ nm_GoGather(){
 		if((BlackQuestCheck || BuckoQuestCheck || RileyQuestCheck) && QuestGatherField!="None"){
 			fieldOverrideReason:="Quest"
 			thisfield:=QuestGatherField
-			FieldName%CurrentFieldNum%:=QuestGatherField
-			FieldPattern%CurrentFieldNum%:=FieldDefault[QuestGatherField]["pattern"][1]
-			FieldPatternSize%CurrentFieldNum%:=FieldDefault[QuestGatherField]["pattern"][2]
-			FieldPatternReps%CurrentFieldNum%:=FieldDefault[QuestGatherField]["pattern"][3]
-			FieldPatternShift%CurrentFieldNum%:=0
-			FieldUntilMins%CurrentFieldNum%:=QuestGatherMins
-			FieldUntilPack%CurrentFieldNum%:=100
-			FieldReturnType%CurrentFieldNum%:=FieldReturnType1
-			FieldRotateDirection%CurrentFieldNum%:=FieldDefault[QuestGatherField]["camera"][1]
-			FieldRotateTimes%CurrentFieldNum%:=FieldDefault[QuestGatherField]["camera"][2]
-			FieldSprinklerLoc%CurrentFieldNum%:=FieldDefault[QuestGatherField]["sprinkler"][1]
-			FieldSprinklerDist%CurrentFieldNum%:=FieldDefault[QuestGatherField]["sprinkler"][2]
+			if(QuestGatherField=FieldName1) {
+				FieldName%CurrentFieldNum%:=QuestGatherField
+				FieldPattern%CurrentFieldNum%:=FieldPattern1
+				FieldPatternSize%CurrentFieldNum%:=FieldPatternSize1
+				FieldPatternReps%CurrentFieldNum%:=FieldPatternReps1
+				FieldPatternShift%CurrentFieldNum%:=FieldPatternShift1
+				FieldUntilMins%CurrentFieldNum%:=FieldUntilMins1
+				FieldUntilPack%CurrentFieldNum%:=FieldUntilPack1
+				FieldReturnType%CurrentFieldNum%:=FieldReturnType1
+				FieldRotateDirection%CurrentFieldNum%:=FieldRotateDirection1
+				FieldRotateTimes%CurrentFieldNum%:=FieldRotateTimes1
+				FieldSprinklerLoc%CurrentFieldNum%:=FieldSprinklerLoc1
+				FieldSprinklerDist%CurrentFieldNum%:=FieldSprinklerDist1
+			} else {
+				FieldName%CurrentFieldNum%:=QuestGatherField
+				FieldPattern%CurrentFieldNum%:=FieldDefault[QuestGatherField]["pattern"][1]
+				FieldPatternSize%CurrentFieldNum%:=FieldDefault[QuestGatherField]["pattern"][2]
+				FieldPatternReps%CurrentFieldNum%:=FieldDefault[QuestGatherField]["pattern"][3]
+				FieldPatternShift%CurrentFieldNum%:=0
+				FieldUntilMins%CurrentFieldNum%:=QuestGatherMins
+				FieldUntilPack%CurrentFieldNum%:=100
+				FieldReturnType%CurrentFieldNum%:=FieldReturnType1
+				FieldRotateDirection%CurrentFieldNum%:=FieldDefault[QuestGatherField]["camera"][1]
+				FieldRotateTimes%CurrentFieldNum%:=FieldDefault[QuestGatherField]["camera"][2]
+				FieldSprinklerLoc%CurrentFieldNum%:=FieldDefault[QuestGatherField]["sprinkler"][1]
+				FieldSprinklerDist%CurrentFieldNum%:=FieldDefault[QuestGatherField]["sprinkler"][2]
+			}
 			break
 		}
 		;Gather in planter field override
@@ -8587,7 +8655,7 @@ nm_GoGather(){
 			break
 		}
 		;GatherInterruptCheck
-		if((PolarQuestGatherInterruptCheck || BuckoQuestGatherInterruptCheck || RileyQuestGatherInterruptCheck || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(300*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck || BuckoRhinoBeetles || RileyAll) && (nowUnix()-LastBugrunRhinoBeetles)>floor(300*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1800*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1200*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck || RileyScorpions || RileyAll) && (nowUnix()-LastBugrunScorpions)>floor(1200*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck || RileyAll) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
+		if((PolarQuestGatherInterruptCheck || BuckoQuestGatherInterruptCheck || RileyQuestGatherInterruptCheck || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck || BuckoRhinoBeetles || RileyAll) && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1830*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck || RileyScorpions || RileyAll) && (nowUnix()-LastBugrunScorpions)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck || RileyAll) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
 			nm_setStatus("Interupted", "Kill Bugs")
 			break
 		}
@@ -8745,6 +8813,15 @@ nm_GoGather(){
 			}
 			;convert
 			nm_convert(1)
+		} else if(FieldReturnType%CurrentFieldNum%="rejoin") { ;exit and rejoin game
+			;reset
+			send {esc}
+			sleep, 100
+			send l
+			sleep, 100
+			send {enter}
+			sleep, 5000
+			return
 		} else { ;reset back
 			if (WhirligigKey!="none" && (nowUnix()-LastWhirligig)>300) {
 				if(FieldName%CurrentFieldNum%="sunflower"){
@@ -9236,6 +9313,7 @@ nm_convert(hiveConfirm:=0)
 				If (bigBalloonConfirm>=10) {
 					ballooncomplete:=0
 					searchRet := nm_imgSearch("e_button.png",30,"high")
+					inactiveHoney:=0
 					while(searchRet[1]=0 && AIndex<=600) { ;10 mins
 						if(A_Index=1) {
 							nm_setStatus("Converting", "Balloon")
@@ -9248,6 +9326,15 @@ nm_convert(hiveConfirm:=0)
 						nm_AutoFieldBoost(currentField)
 						if(AFBuseGlitter || AFBuseBooster)
 							break
+						if(not nm_activeHoney()){
+							inactiveHoney:=inactiveHoney+1
+							if(inactiveHoney>10) { ;10 consecutive seconds of inactive honey
+								nm_setStatus("Interrupted", "Inactive Honey")
+								break
+							}
+						} else {
+							inactiveHoney:=0
+						}
 						searchRet := nm_imgSearch("balloonblessing.png",30,"lowright")
 						If (searchRet[1] = 0) {
 							ballooncomplete:=1
@@ -9584,6 +9671,11 @@ DisconnectCheck(){
 	global WindowedScreen
 	global Roblox
 	GuiControlGet, PrivServer
+	if(not RegExMatch(PrivServer, "i)^((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\?privateServerLinkCode=\d{32}$")){
+		;null out the private server link for this disconnect
+		PrivServer:=
+		nm_setStatus("Error", "Private Server Link Invalid")
+	}
 	global ReloadRobloxSecs
 	global TotalDisconnects, SessionDisconnects
 	PublicServer:="https://www.roblox.com/games/4189852503?privateServerLinkCode=94175309348158422142147035472390"
@@ -10601,8 +10693,8 @@ nm_PolarQuestProg(){
 		MouseMove, 350, (Roblox[3]+70)
 	}
 	;search for Polar Quest
-	imgPos := nm_imgSearch("polar_bear.png",10, "quest")
-	imgPos2 := nm_imgSearch("polar_bear2.png",10, "quest")
+	imgPos := nm_imgSearch("polar_bear.png",10, "left")
+	imgPos2 := nm_imgSearch("polar_bear2.png",10, "left")
 	If (imgPos[1]=0 || imgPos2[1]=0){ ;polar quest found
 		If (imgPos[1]=0){
 			Qfound:=imgPos
@@ -10618,8 +10710,8 @@ nm_PolarQuestProg(){
 		}
 		Loop, 25 {
 			;search for Polar Quest
-			imgPos := nm_imgSearch("polar_bear.png",10, "quest")
-			imgPos2 := nm_imgSearch("polar_bear2.png",10, "quest")
+			imgPos := nm_imgSearch("polar_bear.png",10, "left")
+			imgPos2 := nm_imgSearch("polar_bear2.png",10, "left")
 			If (imgPos[1]=0 || imgPos2[1]=0){ ;polar quest found
 				If (imgPos[1]=0){
 					Qfound:=imgPos
@@ -10779,7 +10871,7 @@ nm_PolarQuestProg(){
 	}
 }
 nm_PolarQuest(){
-	global PolarQuestCheck
+	global PolarQuestCheck, PolarQuest
 	global QuestGatherField
 	global QuestLadybugs
 	global QuestRhinoBeetles
@@ -10805,6 +10897,7 @@ nm_PolarQuest(){
 		nm_gotoQuestgiver("polar")
 		nm_PolarQuestProg()
 		if(!PolarQuestComplete){
+			nm_setStatus("Starting", "Polar Quest: " . PolarQuest)
 			TotalQuestsComplete:=TotalQuestsComplete+1
 			SessionQuestsComplete:=SessionQuestsComplete+1
 			IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
@@ -10812,7 +10905,7 @@ nm_PolarQuest(){
 		}
 	}
 	;do quest stuff
-	while(QuestGatherField!="None" || (QuestLadybugs && (nowUnix()-LastBugrunLadybugs)>floor(300*(1-GiftedViciousCheck*.15))) || (QuestRhinoBeetlesbugs && (nowUnix()-LastBugrunRhinoBeetles)>floor(300*(1-GiftedViciousCheck*.15))) || (QuestSpider && (nowUnix()-LastBugrunSpider)>floor(1800*(1-GiftedViciousCheck*.15))) || (QuestMantis && (nowUnix()-LastBugrunMantis)>floor(1200*(1-GiftedViciousCheck*.15))) || (QuestScorpions && (nowUnix()-LastBugrunScorpions)>floor(1200*(1-GiftedViciousCheck*.15))) || (QuestWerewolf && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15)))){
+	while(QuestGatherField!="None" || (QuestLadybugs && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) || (QuestRhinoBeetlesbugs && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15))) || (QuestSpider && (nowUnix()-LastBugrunSpider)>floor(1830*(1-GiftedViciousCheck*.15))) || (QuestMantis && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15))) || (QuestScorpions && (nowUnix()-LastBugrunScorpions)>floor(1230*(1-GiftedViciousCheck*.15))) || (QuestWerewolf && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15)))){
 		nm_Bugrun()
 		nm_PolarQuestProg()
 		while(QuestGatherField!="None") {
@@ -10823,6 +10916,7 @@ nm_PolarQuest(){
 			nm_gotoQuestgiver("polar")
 			nm_PolarQuestProg()
 			if(!PolarQuestComplete){
+				nm_setStatus("Starting", "Polar Quest: " . PolarQuest)
 				TotalQuestsComplete:=TotalQuestsComplete+1
 				SessionQuestsComplete:=SessionQuestsComplete+1
 				IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
@@ -10877,10 +10971,13 @@ nm_Feed(food){
 		sleep, 1000
 		imgPos := nm_imgSearch("feeder.png",30)
 		If (imgPos[1]=0){
+			SetKeyDelay, 50
 			MouseMove, imgPos[2],imgPos[3]
 			sleep 100
 			Click
-			send 25
+			sleep 100
+			send 100
+			SetKeyDelay, 10
 			sleep 1000
 			imgPos := nm_imgSearch("feed.png",30)
 			If (imgPos[1]=0){
@@ -10906,10 +11003,13 @@ nm_Feed(food){
 				sleep, 1000
 				imgPos := nm_imgSearch("feeder.png",30)
 				If (imgPos[1]=0){
+					SetKeyDelay, 50
 					MouseMove, imgPos[2],imgPos[3]
 					sleep 100
 					Click
-					send 25
+					sleep 100
+					send 100
+					SetKeyDelay, 10
 					sleep 1000
 					imgPos := nm_imgSearch("feed.png",30)
 					If (imgPos[1]=0){
@@ -10954,8 +11054,8 @@ nm_RileyQuestProg(){
 		sleep, 1000
 	}
 	;search for Riley Quest
-	imgPos := nm_imgSearch("riley.png",100, "quest")
-	imgPos2 := nm_imgSearch("riley2.png",100, "quest")
+	imgPos := nm_imgSearch("riley.png",100, "left")
+	imgPos2 := nm_imgSearch("riley2.png",100, "left")
 	If (imgPos[1]=0 || imgPos2[1]=0){ ;Riley quest found
 		If (imgPos[1]=0){
 			Qfound:=imgPos
@@ -10971,8 +11071,8 @@ nm_RileyQuestProg(){
 		}
 		Loop, 25 {
 			;search for Riley Quest
-			imgPos := nm_imgSearch("riley.png",100, "quest")
-			imgPos2 := nm_imgSearch("riley2.png",100, "quest")
+			imgPos := nm_imgSearch("riley.png",100, "left")
+			imgPos2 := nm_imgSearch("riley2.png",100, "left")
 			If (imgPos[1]=0 || imgPos2[1]=0){ ;Riley quest found
 				If (imgPos[1]=0){
 					Qfound:=imgPos
@@ -11170,10 +11270,10 @@ nm_RileyQuestProg(){
 		GuiControl,,RileyQuestProgress, %rileyProgress%
 		rileyProgressIni := StrReplace(rileyProgress, "`n" , "|")
 		IniWrite, %rileyProgressIni%, nm_config.ini, Quests, RileyQuestProgress
-		if(RileyLadybugs=0 && RileyScorpions=0 && QuestGatherField="None" && QuestAnt=0 && QuestRedBoost=0 && QuestFeed="None") {
+		if(RileyLadybugs=0 && RileyScorpions=0 && RileyAll=0 && QuestGatherField="None" && QuestAnt=0 && QuestRedBoost=0 && QuestFeed="None") {
 				RileyQuestComplete:=1
 			} else { ;check if all doable things are done and everything else is on cooldown
-				if(QuestGatherField="None" && QuestRedBoost=0 && QuestFeed="None" && ((QuestAnt && (nowUnix()-LastAntPass)<7200) || (RileyLadybugs && (nowUnix()-LastBugrunLadybugs)<floor(300*(1-GiftedViciousCheck*.15))) || (RileyScorpions && (nowUnix()-LastBugrunScorpions)<floor(1200*(1-GiftedViciousCheck*.15))))) { ;there is at least one thing no longer on cooldown
+				if(((QuestAnt && (nowUnix()-LastAntPass)<7200) || (RileyLadybugs && (nowUnix()-LastBugrunLadybugs)<floor(330*(1-GiftedViciousCheck*.15))) || (RileyScorpions && (nowUnix()-LastBugrunScorpions)<floor(1230*(1-GiftedViciousCheck*.15))))) { ;there is at least one thing no longer on cooldown
 					RileyQuestComplete:=0
 				} else {
 					RileyQuestComplete:=2
@@ -11193,6 +11293,7 @@ nm_RileyQuest(){
 		nm_gotoQuestgiver("Riley")
 		nm_RileyQuestProg()
 		if(RileyQuestComplete!=1){
+			nm_setStatus("Starting", "Riley Quest: " . RileyQuest)
 			TotalQuestsComplete:=TotalQuestsComplete+1
 			SessionQuestsComplete:=SessionQuestsComplete+1
 			IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
@@ -11200,11 +11301,13 @@ nm_RileyQuest(){
 		}
 	}
 	if(RileyQuestComplete!=1){
+		if(QuestFeed!="none")
+			nm_feed(QuestFeed)
 		if(QuestAnt)
 			nm_toCollect()
 		if(QuestRedBoost)
 			nm_ToAnyBooster()
-		if((RileyLadybugs && (nowUnix()-LastBugrunLadybugs)>floor(300*(1-GiftedViciousCheck*.15))) || (RileyScorpions && (nowUnix()-LastBugrunScorpions)>floor(1200*(1-GiftedViciousCheck*.15)))) {
+		if((RileyLadybugs && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) || (RileyScorpions && (nowUnix()-LastBugrunScorpions)>floor(1230*(1-GiftedViciousCheck*.15)))) {
 			nm_Bugrun()
 		}
 		nm_RileyQuestProg()
@@ -11212,6 +11315,7 @@ nm_RileyQuest(){
 			nm_gotoQuestgiver("Riley")
 			nm_RileyQuestProg()
 			if(!RileyQuestComplete){
+				nm_setStatus("Starting", "Riley Quest: " . RileyQuest)
 				TotalQuestsComplete:=TotalQuestsComplete+1
 				SessionQuestsComplete:=SessionQuestsComplete+1
 				IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
@@ -11247,8 +11351,8 @@ nm_BuckoQuestProg(){
 		sleep, 1000
 	}
 	;search for Bucko Quest
-	imgPos := nm_imgSearch("bucko.png",100, "quest")
-	imgPos2 := nm_imgSearch("bucko2.png",100, "quest")
+	imgPos := nm_imgSearch("bucko.png",100, "left")
+	imgPos2 := nm_imgSearch("bucko2.png",100, "left")
 	If (imgPos[1]=0 || imgPos2[1]=0){ ;bucko quest found
 		If (imgPos[1]=0){
 			Qfound:=imgPos
@@ -11264,8 +11368,8 @@ nm_BuckoQuestProg(){
 		}
 		Loop, 25 {
 			;search for Bucko Quest
-			imgPos := nm_imgSearch("bucko.png",100, "quest")
-			imgPos2 := nm_imgSearch("bucko2.png",100, "quest")
+			imgPos := nm_imgSearch("bucko.png",100, "left")
+			imgPos2 := nm_imgSearch("bucko2.png",100, "left")
 			If (imgPos[1]=0 || imgPos2[1]=0){ ;bucko quest found
 				If (imgPos[1]=0){
 					Qfound:=imgPos
@@ -11466,7 +11570,7 @@ nm_BuckoQuestProg(){
 		if(BuckoRhinoBeetles=0 && BuckoMantis=0 && QuestGatherField="None" && QuestAnt=0 && QuestBlueBoost=0 && QuestFeed="None") {
 				BuckoQuestComplete:=1
 			} else { ;check if all doable things are done and everything else is on cooldown
-				if(QuestGatherField="None" && QuestBlueBoost=0 && QuestFeed="None" && ((QuestAnt && (nowUnix()-LastAntPass)<7200) || (BuckoRhinoBeetles && (nowUnix()-LastBugrunRhinoBeetles)<floor(300*(1-GiftedViciousCheck*.15))) || (BuckoMantis && (nowUnix()-LastBugrunMantis)<floor(1200*(1-GiftedViciousCheck*.15))))) { ;there is at least one thing no longer on cooldown
+				if(((QuestAnt && (nowUnix()-LastAntPass)<7200) || (BuckoRhinoBeetles && (nowUnix()-LastBugrunRhinoBeetles)<floor(330*(1-GiftedViciousCheck*.15))) || (BuckoMantis && (nowUnix()-LastBugrunMantis)<floor(1230*(1-GiftedViciousCheck*.15))))) { ;there is at least one thing no longer on cooldown
 					BuckoQuestComplete:=0
 				} else {
 					BuckoQuestComplete:=2
@@ -11487,6 +11591,7 @@ nm_BuckoQuest(){
 		nm_gotoQuestgiver("bucko")
 		nm_BuckoQuestProg()
 		if(BuckoQuestComplete!=1){
+			nm_setStatus("Starting", "Bucko Quest: " . BuckoQuest)
 			TotalQuestsComplete:=TotalQuestsComplete+1
 			SessionQuestsComplete:=SessionQuestsComplete+1
 			IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
@@ -11494,11 +11599,13 @@ nm_BuckoQuest(){
 		}
 	}
 	if(BuckoQuestComplete!=1){
+		if(QuestFeed!="none")
+			nm_feed(QuestFeed)
 		if(QuestAnt)
 			nm_toCollect()
 		if(QuestBlueBoost)
 			nm_ToAnyBooster()
-		if((BuckoRhinoBeetlesbugs && (nowUnix()-LastBugrunRhinoBeetles)>floor(300*(1-GiftedViciousCheck*.15))) || (BuckoMantis && (nowUnix()-LastBugrunMantis)>floor(1200*(1-GiftedViciousCheck*.15)))) {
+		if((BuckoRhinoBeetlesbugs && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15))) || (BuckoMantis && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15)))) {
 			nm_Bugrun()
 		}
 		nm_BuckoQuestProg()
@@ -11506,6 +11613,7 @@ nm_BuckoQuest(){
 			nm_gotoQuestgiver("bucko")
 			nm_BuckoQuestProg()
 			if(!BuckoQuestComplete){
+				nm_setStatus("Starting", "Bucko Quest: " . BuckoQuest)
 				TotalQuestsComplete:=TotalQuestsComplete+1
 				SessionQuestsComplete:=SessionQuestsComplete+1
 				IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
@@ -11538,10 +11646,10 @@ nm_BlackQuestProg(){
 		sleep, 1000
 	}
 	;search for Black Quest
-	imgPos := nm_imgSearch("black_bear.png",100, "quest")
-	imgPos2 := nm_imgSearch("black_bear2.png",100, "quest")
-	imgPos3 := nm_imgSearch("black_bear3.png",100, "quest")
-	imgPos4 := nm_imgSearch("black_bear4.png",100, "quest")
+	imgPos := nm_imgSearch("black_bear.png",100, "left")
+	imgPos2 := nm_imgSearch("black_bear2.png",100, "left")
+	imgPos3 := nm_imgSearch("black_bear3.png",100, "left")
+	imgPos4 := nm_imgSearch("black_bear4.png",100, "left")
 	If (imgPos[1]=0 || imgPos2[1]=0 || imgPos3[1]=0 || imgPos4[1]=0){ ;black quest found
 		If (imgPos[1]=0){
 			Qfound:=imgPos
@@ -11561,10 +11669,10 @@ nm_BlackQuestProg(){
 		}
 		Loop, 25 {
 			;search for Black Quest
-			imgPos := nm_imgSearch("black_bear.png",100, "quest")
-			imgPos2 := nm_imgSearch("black_bear2.png",100, "quest")
-			imgPos3 := nm_imgSearch("black_bear3.png",100, "quest")
-			imgPos4 := nm_imgSearch("black_bear4.png",100, "quest")
+			imgPos := nm_imgSearch("black_bear.png",100, "left")
+			imgPos2 := nm_imgSearch("black_bear2.png",100, "left")
+			imgPos3 := nm_imgSearch("black_bear3.png",100, "left")
+			imgPos4 := nm_imgSearch("black_bear4.png",100, "left")
 			If (imgPos[1]=0 || imgPos2[1]=0 || imgPos3[1]=0 || imgPos4[1]=0){ ;black quest found
 				If (imgPos[1]=0){
 					Qfound:=imgPos
@@ -11779,6 +11887,7 @@ nm_BlackQuest(){
 		nm_gotoQuestgiver("black")
 		nm_BlackQuestProg()
 		if(!BlackQuestComplete){
+			nm_setStatus("Starting", "Black Bear Quest: " . BlackQuest)
 			TotalQuestsComplete:=TotalQuestsComplete+1
 			SessionQuestsComplete:=SessionQuestsComplete+1
 			IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
@@ -11930,7 +12039,7 @@ nm_gotoQuestgiver(giver){
 				sleep, 50
 				send {%RightKey% down}
 				send {%BackKey% down}
-				sleep, 1100 
+				sleep, 1200 
 				send {space}
 				send {space}
 				sleep, 1250
@@ -11941,7 +12050,7 @@ nm_gotoQuestgiver(giver){
 					send {%RotLeft%}
 				}
 				sleep, 2500 ;4250
-				nm_Move(1000*MoveSpeedFactor, BackKey, LeftKey)
+				nm_Move(1500*MoveSpeedFactor, BackKey, LeftKey)
 				nm_Move(500*MoveSpeedFactor, FwdKey, RightKey)
 			} else {
 				msgbox GotoQuestGiver: MoveMethod undefined!
