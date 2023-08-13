@@ -1,7 +1,18 @@
+0.7.3 Patch Notes
+
+Bugs
+-Fixed an issue where a disconnect would not cause Roblox to fully close (Beta App).  This would result in the reconnect not working.
+-VIP links that start with "web.roblox.com" will no longer be identified as invalid links.
+
+
 0.7.2 Patch Notes
 
 Bugs
 -Fixed another issue with Daily Reconnect where an hours or minutes value of "00" did not function properly.  I also made it so it would not do this if the macro was not actively running.
+
+Other
+-Removed an obsolete Planter check that was preventing some planters from being harvested.
+-The macro no longer forces Roblox to open in the browser.  It seems it will only open using the Beta App now...Thanks for that Roblox...*grumble*
 
 
 0.7.1 Patch Notes

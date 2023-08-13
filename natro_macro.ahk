@@ -25,12 +25,12 @@ OnMessage(0x4299, "nm_setLastHeartbeat")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.7.2"
+VersionID:="0.7.3"
 #include *i personal.ahk
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; DISABLE ROBLOX BETA APP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;RegWrite, REG_SZ, HKEY_CURRENT_USER\SOFTWARE\ROBLOX Corporation\Environments\roblox-player, LaunchExp, InBrowser
+RegWrite, REG_SZ, HKEY_CURRENT_USER\SOFTWARE\ROBLOX Corporation\Environments\roblox-player, LaunchExp, InBrowser
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; NATRO ENHANCEMENT STUFF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -583,7 +583,7 @@ Gui, Add, GroupBox, x3 y23 w160 h215, Development
 Gui, Add, GroupBox, x163 y23 w335 h215, Contributors
 Gui, Font
 Gui, Add, Text, x5 y38 w155 +wrap +backgroundtrans, Special Thanks for your contributions in the development and testing of this project.  Your feedback and ideas have been invaluable in the design process!`n`nzez#8710`nFHL09#4061`nLittleChurch#1631 (N00b)`nZaappiix#2372`nSP#0305`nZiz | Jake#9154`nBlackBeard6#2691
-Gui, Add, Text, x170 y38 w330 +wrap +backgroundtrans, Thank you for your donations to this project!`n`nFHL09#4061`nNick 9#9476`nwilalwil2#4175`nAshtonishing#4420`nTheRealXoli#1017`nK_Money#0001`nHeat#9350
+Gui, Add, Text, x170 y38 w330 +wrap +backgroundtrans, Thank you for your donations to this project!`n`nFHL09#4061`nNick 9#9476`nwilalwil2#4175`nAshtonishing#4420`nTheRealXoli#1017`nK_Money#0001`nHeat#9350`nSasuel#5393
 
 
 
@@ -4543,7 +4543,7 @@ SkinForm(Param1 = "Apply", DLL = "", SkinName = ""){
 nm_ServerLink(){
 	GuiControlGet, PrivServer
 	;https://www.roblox.com/games/
-	if InStr(PrivServer, "https://www.roblox.com/games/") {
+	if (InStr(PrivServer, "https://www.roblox.com/games/") || InStr(PrivServer, "https://web.roblox.com/games/")) {
 	} else {
 		msgbox It appears you have not entered a full address.  Please ensure the entire private server address is included in this field.
 	}
@@ -5238,7 +5238,7 @@ nm_Reset(checkAll:=1, wait:=2000){
 		nm_setStatus("Detected", "Roblox Game Frozen, Restarting")
 		While(winexist("Roblox")){
 			WinKill, Roblox
-			WinWaitClose, Roblox
+			;WinWaitClose, Roblox
 			;WinClose StatMonitor.ahk
 			sleep, 8000
 		}
@@ -5285,7 +5285,7 @@ nm_Reset(checkAll:=1, wait:=2000){
 			While(winexist("Roblox")){
 				;WinClose, Roblox
 				WinKill, Roblox
-				WinWaitClose, Roblox
+				;WinWaitClose, Roblox
 				;WinClose StatMonitor.ahk
 				sleep, 8000
 			}
