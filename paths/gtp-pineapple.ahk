@@ -9,21 +9,15 @@ Sleep, 2500
 send {" RotRight " 3}
 " nm_Walk(8, BackKey) "
 " nm_Walk(10, BackKey, RightKey) "
-" nm_Walk(27, RightKey) "
-" nm_Walk(6, BackKey, RightKey) "
+" nm_Walk(10, RightKey) "
+" nm_Walk(13, RightKey, FwdKey) "
+" nm_Walk(8, BackKey, RightKey) "
 send {" FwdKey " down}{" LeftKey " down}
-send {space down}
-HyperSleep(300)
-send {space up}
-HyperSleep(300)
-send {space down}
-HyperSleep(300)
-send {space up}
-HyperSleep(2000)
-Walk(13)
+Walk(12)
 send {" LeftKey " up}
-" nm_Walk(12, RightKey) "
+" nm_Walk(10, RightKey) "
 send {" FwdKey " up}
 " nm_Walk(12, BackKey) "
+send {" RotRight " 1}
 HyperSleep(100)
 )"

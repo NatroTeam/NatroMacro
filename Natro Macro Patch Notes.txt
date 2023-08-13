@@ -1,3 +1,49 @@
+0.8.9 Patch Notes
+
+New Features
+- Added Webhook Screenshots! This will send additional screenshots to your webhook after certain non-critical events! Click '?' next to Webhook Settings to learn more.
+
+Bugs
+- Fixed planters regarded as "Missing" because planter scrolling does not initiate.
+- Fixed an issue where items other than planters would be dragged while searching the inventory.
+- Fixed quest progress detection issues caused by Quest Log not opening or the quests being covered by a Beesmas quest.
+- Fixed an issue where the environment would confuse the macro into misdetecting quest completion (Cactus, Rose).
+- Improved quest dialog search to increase speed and also prevent accidental present gifting.
+- Fixed an issue where the red vignette effect from the character receiving damage caused the macro to miss planters.
+- Fixed an issue where Robo Pass Dispenser was repetitively checked by adding cooldown detection.
+- Fixed some issues with "Traveling" status update not being sent.
+- Fixed an issue where camera would not be rotated back after Confirming Night returned daytime.
+- Fixed an issue where Status in GUI would not be cleared before writing a new one.
+- Fixed Bag Full and Inactive Honey check not applying when field is boosted.
+
+Other
+- Updated StatMonitor to v2.3! The main new features are improved honey detection and new graphs!
+- Added Gather Interrupt for Beesmas collections! This is useful if you want to collect Beesmas machines as fast as possible.
+- Significant reconnect rework to improve stability and speed, as well as improved reporting and splitting users into a selection of Public Server rejoin links.
+- Added shift-lock detection and dynamic setting throughout the code! This will trim down shift-lock issues to improper keyboard layouts.
+- Revamped contributors tab to allow space for more names and rework the design.
+- Added implementation of a 'Reconnect Interval' to reconnect more than once daily.
+- Altered the delay after conversion to be set according to the value of Hive Bees (Settings tab). With the correct settings, this will fix incomplete conversion.
+- Added the ability to change AutoClicker Options in the Settings tab.
+- Added images for hive detection in Snowstorm and Honeystorm.
+- Migrated Mondo path to the new movement system.
+- Reworked nm_feed() function to improve reliability.
+- Planters+ options are now disabled if main switch is disabled.
+- Added a jump when placing first sprinkler if sprinkler type is not Supreme or Basic.
+- Reduced the default number of attempts for a Phantom Planter check from 10 to 5 and ensured clearing out of planter on failure.
+- Reworked emergency macro restart function with a Force Start, in case F1 is blocked by another program.
+- Reworked priorities of some tasks such as Vicious Bee run and Mondo Chick by adding a return to other tasks.
+- Changed Stockings token collection movement to collect tokens more reliably for some animation packs.
+- Increased minimum delay at hive before killing Scorpions and Mantis by 10 seconds.
+- Adjusted path from Cactus to Spider (Vicious Bee) to avoid running into a cactus.
+- Fixed fields counter in Vicious Bee cycle reporting stating extra fields if the cycle was aborted.
+- Updated many paths (thanks Zaappiix for these!)
+- Updated Hydroponic and Heat-Treated Planter speed and nectar bonuses to match the information given in-game.
+- Increased reliability and speed of camera realignment in confirming nighttime.
+- Added limit to Number of Bees in Settings tab to prevent inputs over 50.
+- Introduced validation of Private Server Link with a new error message before storing an invalid link.
+
+
 0.8.8 Patch Notes
 
 Bugs

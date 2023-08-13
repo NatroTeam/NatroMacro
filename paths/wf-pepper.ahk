@@ -1,8 +1,8 @@
 ﻿paths["pepper"] := "
 (LTrim Join`r`n
-" nm_Walk(22.5, RightKey) "
+" nm_Walk(42, RightKey) "
 " nm_Walk(45, BackKey) "
-" nm_Walk(45, RightKey) "
+" nm_Walk(50, RightKey) "
 " nm_Walk(54, BackKey) "
 send {" RotLeft " 2}
 " nm_Walk(13.5, FwdKey) "

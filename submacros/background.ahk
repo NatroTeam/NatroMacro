@@ -22,12 +22,13 @@ runWith(version){
 ;initialization
 global imgfolder:="..\nm_image_assets"
 resetTime:=LastRobloxWindow:=LastState:=LastHeartbeat:=nowUnix()
-state:=0
+VBState:=state:=0
 DailyReconnect:=0
 IniRead, NightLastDetected, ..\settings\nm_config.ini, Collect, NightLastDetected
 IniRead, VBLastKilled, ..\settings\nm_config.ini, Collect, VBLastKilled
 IniRead, StingerCheck, ..\settings\nm_config.ini, Collect, StingerCheck
 IniRead, AnnounceGuidingStar, ..\settings\nm_config.ini, Settings, AnnounceGuidingStar
+IniRead, ReconnectInterval, ..\settings\nm_config.ini, Settings, ReconnectInterval
 IniRead, ReconnectHour, ..\settings\nm_config.ini, Settings, ReconnectHour
 IniRead, ReconnectMin, ..\settings\nm_config.ini, Settings, ReconnectMin
 
@@ -128,6 +129,9 @@ nm_popStarCheck(){
 			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
 				PostMessage, 0x5555, 8, 0
 			}
+			if WinExist("StatMonitor.ahk ahk_class AutoHotkey") {
+				PostMessage, 0x5556, 1, 0
+			}
 		}
 	}
 	else if(ErrorLevel=1){
@@ -135,7 +139,10 @@ nm_popStarCheck(){
 			PopStarActive := 1
 			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
 				PostMessage, 0x5555, 8, 1
-				Send_WM_COPYDATA("Detected: Pop Star Active", "natro_macro.ahk ahk_class AutoHotkey")
+				;Send_WM_COPYDATA("Detected: Pop Star Active", "natro_macro.ahk ahk_class AutoHotkey")
+			}
+			if WinExist("StatMonitor.ahk ahk_class AutoHotkey") {
+				PostMessage, 0x5556, 1, 1
 			}
 		}
 	}
@@ -144,8 +151,8 @@ nm_popStarCheck(){
 nm_dayOrNight(){
 	disableDayorNight:=0
 	;VBState 0=no VB, 1=searching for VB, 2=VB found
-	global windowX, windowY, windowWidth, windowHeight, NightLastDetected, StingerCheck, VBLastKilled
-	static VBState:=0, confirm:=0
+	global windowX, windowY, windowWidth, windowHeight, NightLastDetected, StingerCheck, VBLastKilled, VBState
+	static confirm:=0
 	if (disableDayorNight || StingerCheck=0)
 		return
 	if(((VBState=1) && ((nowUnix()-NightLastDetected)>400 || (nowUnix()-NightLastDetected)<0)) || ((VBState=2) && ((nowUnix()-VBLastKilled)>(400) || (nowUnix()-VBLastKilled)<0))) {
@@ -315,7 +322,7 @@ nm_backpackPercent(){
 	Return BackpackPercent
 }
 nm_backpackPercentFilter(){
-	static PackFilterArray:=[], LastBackpackPercentFiltered:="", samplesize:=6 ;6 seconds (6 samples @ 1 sec intervals)
+	static PackFilterArray:=[], LastBackpackPercentFiltered:="", i:=0, samplesize:=6 ;6 seconds (6 samples @ 1 sec intervals)
 	
 	;make room for new sample
 	if(PackFilterArray.Length()=samplesize){
@@ -328,9 +335,15 @@ nm_backpackPercentFilter(){
 	for key, val in PackFilterArray {
 		sum+=val
 	}
-	BackpackPercentFiltered:=sum/PackFilterArray.length()
-	if ((BackpackPercentFiltered != LastBackpackPercentFiltered) && WinExist("natro_macro.ahk ahk_class AutoHotkey")) {
-		PostMessage, 0x5555, 5, %BackpackPercentFiltered%
+	BackpackPercentFiltered:=Round(sum/PackFilterArray.length())
+	if ((i=0) && WinExist("StatMonitor.ahk ahk_class AutoHotkey")) {
+		PostMessage, 0x5557, BackpackPercentFiltered, 60 * A_Min + A_Sec
+	}
+	i:=Mod(i+1, 6)
+	if (BackpackPercentFiltered != LastBackpackPercentFiltered) {
+		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+			PostMessage, 0x5555, 5, BackpackPercentFiltered
+		}
 		LastBackpackPercentFiltered := BackpackPercentFiltered
 	}
 }
@@ -369,10 +382,21 @@ nm_guidingStarDetect(){
 }
 
 nm_dailyReconnect(){
-	global ReconnectHour, ReconnectMin, DailyReconnect
+	global ReconnectHour, ReconnectMin, ReconnectInterval, DailyReconnect
+	if ((ReconnectHour = "") || (ReconnectMin = "") || (ReconnectInterval = ""))
+		return
 	FormatTime, RChourUTC, %A_NowUTC%, HH
 	FormatTime, RCminUTC, %A_Now%, mm
-	if((ReconnectMin=RCminUTC) && (ReconnectHour=RChourUTC) && (DailyReconnect=0)) {
+	HourReady:=0
+	Loop % 24//ReconnectInterval
+	{
+		if (Mod(ReconnectHour+ReconnectInterval*(A_Index-1), 24)=RChourUTC)
+		{
+			HourReady:=1
+			break
+		}
+	}
+	if((ReconnectMin=RCminUTC) && HourReady && (DailyReconnect=0)) {
 		DailyReconnect:=1
 		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
 			PostMessage, 0x5555, 9, 1
@@ -396,18 +420,20 @@ nm_sendHeartbeat(){
 				WinGet, natroPID, PID
 				Process, Close, % natroPID
 			}
-			while WinExist("Roblox ahk_exe RobloxPlayerBeta.exe") {
+			while WinExist("Roblox") {
 				WinKill
 				sleep, 1000
 			}
 			
 			Run, ..\natro_macro.ahk
-			WinWait, natro_macro.ahk ahk_class AutoHotkeyGUI, , 30
+			WinWait, Natro ahk_class AutoHotkeyGUI, , 300
 			if (success := !ErrorLevel) {
 				Sleep, 5000
-				Send_WM_COPYDATA("Error: " ((reason = 1) ? "No Heartbeat in 120s!" : "No Roblox window in 10m!") "`nSuccessfully restarted macro!", "natro_macro.ahk ahk_class AutoHotkey")
+				Send_WM_COPYDATA("Error: " ((reason = 1) ? "Macro Unresponsive Timeout!" : "No Roblox Window Timeout!") "`nSuccessfully restarted macro!", "natro_macro.ahk ahk_class AutoHotkey")
 				Sleep, 1000
-				Send {F1}
+				if WinExist("natro_macro.ahk ahk_class AutoHotkey")
+					PostMessage, 0x5550
+				Sleep, 1000
 				ExitApp
 			}
 		}

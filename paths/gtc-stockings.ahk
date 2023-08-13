@@ -19,7 +19,7 @@ else
 	send {e down}
 	HyperSleep(100)
 	send {e up}{" LeftKey " down}{" FwdKey " down}
-	HyperSleep(1200)
+	HyperSleep(1180)
 	send {space 2}
 	HyperSleep(4950)
 	send {" FwdKey " up}{" LeftKey " up}{space}
