@@ -1,7 +1,7 @@
 #NoEnv
 #SingleInstance force
 #MaxThreads 255
-#include *i functions.ahk
+#include lib\Gdip_All.ahk
 ;check if correct AHK version is installed before running anything
 RunWith(32)
 runWith(version){	
@@ -20,7 +20,7 @@ runWith(version){
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.4.1"
+VersionID:="0.5.0"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; NATRO ENHANCEMENT STUFF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -529,15 +529,41 @@ GuiControl, disable, FieldSprinklerDist3
 IniRead, StatusLogReverse, nm_config.ini, Status, StatusLogReverse
 IniRead, TotalRuntime, nm_config.ini, Status, TotalRuntime
 IniRead, SessionRuntime, nm_config.ini, Status, SessionRuntime
+IniRead, TotalGatherTime, nm_config.ini, Status, TotalGatherTime
+IniRead, SessionGatherTime, nm_config.ini, Status, SessionGatherTime
+IniRead, TotalConvertTime, nm_config.ini, Status, TotalConvertTime
+IniRead, SessionConvertTime, nm_config.ini, Status, SessionConvertTime
+IniRead, TotalViciousKills, nm_config.ini, Status, TotalViciousKills
+IniRead, SessionViciousKills, nm_config.ini, Status, SessionViciousKills
+IniRead, TotalBossKills, nm_config.ini, Status, TotalBossKills
+IniRead, SessionBossKills, nm_config.ini, Status, SessionBossKills
+IniRead, TotalBugKills, nm_config.ini, Status, TotalBugKills
+IniRead, SessionBugKills, nm_config.ini, Status, SessionBugKills
+IniRead, TotalPlantersCollected, nm_config.ini, Status, TotalPlantersCollected
+IniRead, SessionPlantersCollected, nm_config.ini, Status, SessionPlantersCollected
+IniRead, TotalQuestsComplete, nm_config.ini, Status, TotalQuestsComplete
+IniRead, SessionQuestsComplete, nm_config.ini, Status, SessionQuestsComplete
+IniRead, TotalDisconnects, nm_config.ini, Status, TotalDisconnects
+IniRead, SessionDisconnects, nm_config.ini, Status, SessionDisconnects
+IniRead, Webhook, nm_config.ini, Status, Webhook
+IniRead, WebhookCheck, nm_config.ini, Status, WebhookCheck
 Gui, Tab, Status
 GuiControl,focus, Tab
 Gui, Font, w700
 Gui, Add, GroupBox, x5 y23 w250 h214, Status Log
-Gui, Add, GroupBox, x255 y23 w240 h214, Stats
+Gui, Add, GroupBox, x255 y23 w240 h179, Stats
 Gui, Font
 Gui, Add, Checkbox, x85 y23 vStatusLogReverse gnm_StatusLogReverseCheck Checked%StatusLogReverse%, Reverse Order
 Gui, Add, Text, x10 y37 w240 h198 left vstatuslog,
-Gui, Add, Text, x260 y37 w235 h198 left vstats,
+Gui, font, w700
+Gui, Add, Text, x260 y37, Total
+Gui, Add, Text, x380 y37, Session
+Gui, Font
+Gui, Add, Text, x260 y52 w230 h148 left vstats,
+Gui, Add, Button, x290 y37 w50 h15 vResetTotalStats gnm_ResetTotalStats, Reset
+Gui, Add, Text, x260 y202 w160 +left +BackgroundTrans,Webhook Link (full address):
+Gui, Add, Checkbox, x400 y202 +BackgroundTrans vWebhookCheck gnm_saveConfig Checked%WebhookCheck%, Enable
+Gui, Add, Edit, x260 y215 w160 r1 +BackgroundTrans vWebhook gnm_saveConfig, %Webhook%
 nm_setStatus()
 nm_setStats()
 
@@ -545,7 +571,7 @@ nm_setStats()
 ;------------------------
 Gui, Tab, Settings
 GuiControl,focus, Tab
-Gui, Add, Button, x290 y25 w43 h15 gnm_testButton, Test
+;Gui, Add, Button, x290 y25 w43 h15 gnm_testButton, Test
 Gui, Add, Checkbox, x15 y25 vAlwaysOnTop gnm_AlwaysOnTop Checked%AlwaysOnTop%, Always On Top
 Gui, Add, Text, x5 y50 w60 +Right +BackgroundTrans,GUI Theme:
 Gui, Add, DropDownList, x70 y45 w80 h100 vGuiTheme gnm_guiThemeSelect, %GuiTheme%||Allure|Ayofe|BluePaper|Concaved|Core|Cosmo|Fanta|GrayGray|Hana|Invoice|Lakrits|Luminous|MacLion3|Minimal|Museo|Panther|PaperAGV|PINK|Relapse|Simplex3|SNAS|Stomp|VS7|WhiteGray|Woodwork
@@ -647,6 +673,7 @@ Gui, Add, Edit, x28 y215 w20 h15 r1 number +BackgroundTrans vReloadRobloxSecs gn
 GuiControl, disable, ReloadRobloxSecs
 Gui, Add, Text, x51 y218 w160 +left +BackgroundTrans,seconds to load Roblox.
 nm_convertBalloon()
+
 
 ;COLLECT TAB
 ;------------------------
@@ -1379,16 +1406,22 @@ nm_setObjective(newObjective){
 	GuiControl, text, objective, %objective%
 }
 nm_setStats(){
-	global TotalRuntime
-	global MacroStartTime
+	global TotalRuntime, SessionRuntime, TotalGatherTime, SessionGatherTime, TotalConvertTime, SessionConvertTime
+	global MacroStartTime, GatherStartTime, ConvertStartTime
+	global TotalViciousKills, SessionViciousKills, TotalBossKills, SessionBossKills, TotalBugKills, SessionBugKills, TotalPlantersCollected, SessionPlantersCollected, TotalQuestsComplete, SessionQuestsComplete, TotalDisconnects, SessionDisconnects
 	newLine:="`n"
 	tab:="`t"
-	delta:=0
+	rundelta:=0
+	gatherdelta:=0
+	convertdelta:=0
 	if(MacroRunning) {
-		SessionRuntime:=PausedRuntime+nowUnix()-MacroStartTime
-		delta:=(nowUnix()-MacroStartTime)
+		rundelta:=(nowUnix()-MacroStartTime)
+		if(GatherStartTime)
+			gatherdelta:=(nowUnix()-GatherStartTime)
+		if(ConvertStartTime)
+			convertdelta:=(nowUnix()-ConvertStartTime)
 	}
-	statsString:=("TotalRuntime: " nm_TimeFromSeconds(TotalRuntime+delta) . tab . "SessionRuntime: " . nm_TimeFromSeconds(SessionRuntime))
+	statsString:=("Runtime: " nm_TimeFromSeconds(TotalRuntime+rundelta) . tab . "Runtime: " . nm_TimeFromSeconds(SessionRuntime+rundelta) . newline . "GatherTime: " nm_TimeFromSeconds(TotalGatherTime+gatherdelta) . Tab . "GatherTime: " nm_TimeFromSeconds(SessionGatherTime+gatherdelta) . newline . "ConvertTime: " nm_TimeFromSeconds(TotalConvertTime+convertdelta) . Tab . "ConvertTime: " nm_TimeFromSeconds(SessionConvertTime+convertdelta) . newline . "ViciousKills=" . TotalViciousKills . Tab . Tab . "ViciousKills=" . SessionViciousKills . newline . "BossKills=" . TotalBossKills . Tab . Tab . "BossKills=" . SessionBossKills . newline . "BugKills=" . TotalBugKills . Tab . Tab . "BugKills=" . SessionBugKills . newline . "PlantersCollected=" . TotalPlantersCollected . Tab . "PlantersCollected=" . SessionPlantersCollected . newline . "QuestsComplete=" . TotalQuestsComplete . Tab . "QuestsComplete=" . SessionQuestsComplete . newline . "Disconnects=" . TotalDisconnects . Tab . Tab . "Disconnects=" . SessionDisconnects)
 	GuiControl,,stats, %statsString%
 }
 nm_TimeFromSeconds(secs)
@@ -1454,6 +1487,264 @@ nm_setStatus(newState:=0, newObjective:=0){
         }
     }
     GuiControl,,statuslog,%displayText%
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;webhook test
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	global webhook, webhookCheck, lastHourlyUpdate
+	static lastSuccess := 0
+	global totalCom, totalMot, totalRef, totalSat, totalInv
+	global TotalRuntime, SessionRuntime, MacroStartTime, TotalGatherTime, SessionGatherTime, GatherStartTime, TotalConvertTime, SessionConvertTime, ConvertStartTime, TotalViciousKills, SessionViciousKills, TotalBossKills, SessionBossKills, TotalBugKills, SessionBugKills, TotalPlantersCollected, SessionPlantersCollected, TotalQuestsComplete, SessionQuestsComplete, TotalDisconnects, SessionDisconnects
+	if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$"))
+	{		
+		if(GatherStartTime)
+			SessionGatherTimeWHT:=(SessionGatherTime+(nowUnix()-GatherStartTime))
+		else
+			SessionGatherTimeWHT:=SessionGatherTime
+		if(ConvertStartTime)
+			SessionConvertTimeWHT:=(SessionConvertTime+(nowUnix()-ConvertStartTime))
+		else
+			SessionConvertTimeWHT:=SessionConvertTime
+		; create postdata for normal message
+		color := (InStr(stateString,"disconnected") || InStr(stateString,"failed") || InStr(stateString,"died")) ? 15085139 : (InStr(stateString,"checking") || InStr(stateString,"holding") || InStr(stateString,"searching")) ? 14408468 : (InStr(stateString,"confirmed") || InStr(stateString,"found")) ? 9755247 : (InStr(stateString,"engaged") || InStr(stateString,"full")) ? 16366336 : (InStr(stateString,"mondo") || InStr(stateString,"boss") || InStr(stateString,"vb dead")) ? 7036559 : (InStr(stateString,"gathering") || InStr(stateString,"converting")) ? 8871681 : (InStr(stateString,"startup")) ? 15658739 : 3223350
+		eventFormatted := StrReplace(stateString, "`r`n", "\n")
+		postdata =
+		(
+		{
+			"embeds": [{
+				"description": "[%A_Hour%:%A_Min%:%A_Sec%] %eventFormatted%",
+				"color": "%color%"
+			}]
+		}
+		)
+		
+		; post to webhook
+		wr := ComObjCreate("WinHTTP.WinHTTPRequest.5.1")
+		wr.Open("POST", webhook)
+		wr.SetRequestHeader("User-Agent", "AHK")
+		wr.SetRequestHeader("Content-Type", "application/json")
+		wr.Send(postdata)
+		wr.WaitForResponse()
+		
+		; check if event needs screenshot
+		IniRead, ssCooldown, nm_config.ini, Status, ssCooldown, 0
+		if (nowUnix() - ssCooldown > 300)
+		{
+			ssEvents := ["Startup", "Disconnected"]
+			for k,v in ssEvents
+			{
+				if (stateString = v)
+				{
+					; save screenshot to temporary file (could use A_Temp if you want cleaner directory)
+					pToken := Gdip_Startup()
+					SysGet, pmonN, MonitorPrimary
+					pBitmap := Gdip_BitmapFromScreen(pmonN)
+					Gdip_SaveBitmapToFile(pBitmap, "file.png")
+					Gdip_Shutdown(pToken)
+					
+					; create multipart/form-data for image
+					path := A_ScriptDir . "\file.png"
+					objParam := {file: [path]}
+					CreateFormData(postdata, hdr_ContentType, objParam)
+					
+					; post to webhook
+					wr := ComObjCreate("WinHTTP.WinHTTPRequest.5.1")
+					wr.Open("POST", webhook)
+					wr.SetRequestHeader("User-Agent", "AHK")
+					wr.SetRequestHeader("Content-Type", hdr_ContentType)
+					wr.Send(postdata)
+					wr.WaitForResponse()
+					
+					; delete the temporary image file and update cooldown
+					FileDelete, file.png
+					IniWrite, % nowUnix(), nm_config.ini, Status, ssCooldown
+					break
+				}
+			}
+		}
+		; check if it is time for hourly update
+		timeBetween := nowUnix() - lastHourlyUpdate
+		if ((timeBetween >= 300) && !InStr(stateString, "Startup"))
+		{
+			; initialise variables
+			rblxid := WinExist("Roblox")
+			if !rblxid
+				return
+			WinActivate, ahk_id %rblxid%
+			WinGetPos, x, y, w, , ahk_id %rblxid%
+			WinGet, style, Style, ahk_id %rblxid%
+			y += (style & 0x20800000) ? 22 : 0
+			static startHoney, lastHoney, lastGath, lastCon
+			global totalTime, totalGath, totalCon, totalKills, totalBoss, totalVic, totalQuests, totalDcs, totalPlants, totalCom, totalMot, totalRef, totalSat, totalInv
+			
+			; detect honey, enlarge image if necessary
+			detectedValues := {}
+			pToken := Gdip_Startup()
+			pBM := Gdip_BitmapFromScreen(w//2 - 300 "|" y "|300|100")
+			pEffect := Gdip_CreateEffect(5,-80,40)
+			Gdip_BitmapApplyEffect(pBM, pEffect)
+			Gdip_DisposeEffect(pEffect)
+			
+			Loop, 100
+			{
+				pBMNew := Gdip_ResizeBitmap(pBM, 300 + A_Index * 3, 100 + A_Index, 0, 7)
+				hBM := Gdip_CreateHBITMAPFromBitmap(pBMNew)
+				Gdip_DisposeImage(pBMNew)
+				pIRandomAccessStream := HBitmapToRandomAccessStream(hBM)
+				DllCall("DeleteObject", "Ptr", hBM)
+				ocrtext := StrReplace(StrReplace("L" . StrReplace(StrReplace(ocr(pIRandomAccessStream), " ", "L"), "`n", "L"), "o", "0"), ".", ",")
+				RegexMatch(ocrtext, "(?<=L)\d{1,3}(,\d{3})+(?=L)", detectedHoney)
+				if detectedHoney
+				{
+					if (detectedValues.HasKey(detectedHoney))
+						detectedValues[detectedHoney]++
+					else
+						detectedValues[detectedHoney]:=1
+				}
+			}
+			
+			for k,v in detectedValues
+				if (v > detectedValues[mode])
+					mode := k
+			currentHoney := StrReplace(mode, ",")
+			
+			Gdip_DisposeImage(pBM)
+			Gdip_Shutdown(pToken)
+			; check that it is appropriate to calculate metrics
+			if (currentHoney && lastHourlyUpdate)
+			{
+				; calculate honey earned during last hour
+				honeyEarned := (currentHoney - lastHoney) // (lastSuccess + 1)
+				
+				; calculate hourly average
+				honeyTotal := currentHoney - startHoney
+				honeyAverage := honeyTotal // ((SessionRuntime+(nowUnix()-MacroStartTime)) / 3600)
+				lastSuccess := 0
+				
+				; format numerical stats for display
+				numnames := ["Million","Billion","Trillion","Quadrillion","Quintillion"]
+				for i,x in ["currentHoney","honeyTotal","honeyEarned","honeyAverage"]
+				{
+					digit := floor(log(abs(%x%)))+1
+					if (digit > 6)
+					{
+						numname := (digit-4)//3
+						numstring := SubStr((round(%x%,4-digit)) / 10**(3*numname+3), 1, 5)
+						numformat := (SubStr(numstring, 0) = ".") ? 1.000 : numstring, numname += (SubStr(numstring, 0) = ".") ? 1 : 0
+						%x%Formatted := SubStr((round(%x%,4-digit)) / 10**(3*numname+3), 1, 5) " " numnames[numname]
+					}
+					else
+					{
+						VarSetCapacity(%x%Formatted,32),DllCall("GetNumberFormatEx","str","!x-sys-default-locale","uint",0,"str",%x%,"ptr",0,"str",%x%Formatted,"int",32)
+						%x%Formatted := SubStr(%x%Formatted, 1, -3)
+					}
+				}
+				honeyEarnedFormatted .= lastSuccess ? " *(Adjusted for " . lastSuccess . "fails)*" : ""		
+				; format time stats for display
+				hourGath := SessionGatherTimeWHT - lastGath, hourCon := SessionConvertTimeWHT - lastCon
+				VarSetCapacity(totalTimeFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",(SessionRuntime+(nowUnix()-MacroStartTime))*10000000,"wstr","hh:mm:ss","str",totalTimeFormatted,"int",256)
+				VarSetCapacity(totalGathFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",(SessionGatherTimeWHT)*10000000,"wstr","hh:mm:ss","str",totalGathFormatted,"int",256)
+				VarSetCapacity(totalConFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",SessionConvertTimeWHT*10000000,"wstr","hh:mm:ss","str",totalConFormatted,"int",256)
+				VarSetCapacity(hourGathFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",hourGath*10000000,"wstr","hh:mm:ss","str",hourGathFormatted,"int",256)
+				VarSetCapacity(hourConFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",hourCon*10000000,"wstr","hh:mm:ss","str",hourConFormatted,"int",256)
+				totalGathFormatted .= (SessionRuntime+(nowUnix()-MacroStartTime)) ? " (" . Round((SessionGatherTimeWHT) * 100 / (SessionRuntime+(nowUnix()-MacroStartTime))) . "%)" : ""
+				totalConFormatted .= (SessionRuntime+(nowUnix()-MacroStartTime)) ? " (" . Round(SessionConvertTimeWHT * 100 / (SessionRuntime+(nowUnix()-MacroStartTime))) . "%)" : ""
+				hourGathFormatted .= timeBetween ? " (" . Round(hourGath * 100 / timeBetween) . "%)" : ""
+				hourConFormatted .= timeBetween ? " (" . Round(hourCon * 100 / timeBetween) . "%)" : ""
+				;Determine Bloat
+				WinGetPos, windowX, windowY, windowWidth, windowHeight, Roblox
+				bloatColor:=0xCC8048
+				PixelSearch, bx2, by2, 0, 0, %windowWidth%, 150, %bloatColor%,0, Fast
+				If (ErrorLevel=0) {
+					nexty:=by2+1
+					pixels:=1
+					loop 38 {
+						PixelGetColor, OutputVar, %bx2%, %nexty%, fast
+						If (OutputVar=bloatColor) {
+							nexty:=nexty+1
+							pixels:=pixels+1
+						} else {
+							bloatPercent:=round(pixels/38*100, 0)
+							break
+						}
+					}
+				} else {
+					bloatPercent:=0
+				}
+				bloatNum:=round((bloatPercent/100)*6, 2)
+				; create postdata for hourly report
+				message := "[" A_Hour ":" A_Min ":" A_Sec "]\n"
+				. "**HOURLY REPORT:**\n"
+				. "Hourly Average: " honeyAverageFormatted "\n"
+				. "Last Hour Honey: " honeyEarnedFormatted "\n"
+				. "Last Hour Gather: " hourGathFormatted "\n"
+				. "Last Hour Convert: " hourConFormatted "\n"
+				. "--------------------\n"
+				. "Current Honey: " currentHoneyFormatted "\n"
+				. "Session Time: " totalTimeFormatted "\n"
+				. "Session Honey: " honeyTotalFormatted "\n"
+				. "Session Gather: " totalGathFormatted "\n"
+				. "Session Convert: " totalConFormatted "\n"
+				. "--------------------\n"
+				. "Total Vicious Kills:" SessionViciousKills "\n"
+				. "Total Boss Kills:" SessionBossKills "\n"
+				. "Total Bug Kills: " SessionBugKills "\n"
+				. "Total Planters: " SessionPlantersCollected "\n"
+				. "Quests Done: " SessionQuestsComplete "\n"
+				. "Disconnects: " SessionDisconnects "\n"
+				. "--------------------\n"
+				. "Bloat: " bloatNum "\n"
+				. "Nectars: Com " totalCom "%\nMot " totalMot "`% - Sat " totalSat "%\nRef " totalRef "`% - Inv " totalInv "%\n"
+				. "**END OF REPORT**"
+				
+				postdata =
+				(
+				{
+					"embeds": [{
+						"description": "%message%",
+						"color": "14052794"
+					}]
+				}
+				)
+			}
+			else
+			{
+				; possibilities are first run or failed OCR
+				if (currentHoney = 0)
+				{
+					; if next OCR succeeds, set divisor for Recent Hour honey
+					lastSuccess += 1
+					postdata =
+					(
+					{
+						"embeds": [{
+							"description": "[%A_Hour%:%A_Min%:%A_Sec%] Honey OCR Failed!\nHourly Update was skipped.\n**Debugging:**%ocrtext%",
+							"color": "15085139"
+						}]
+					}
+					)
+				}
+				else
+				{
+					; initialise honey variables
+					startHoney := currentHoney
+					honeyAverage := 0
+				}
+			}
+			
+			; update variables for future hourly updates
+			lastHoney := (currentHoney) ? currentHoney : lastHoney
+			lastGath := SessionGatherTimeWHT
+			lastCon := SessionConvertTimeWHT
+			lastHourlyUpdate := nowUnix()			
+			; post to webhook
+			wr := ComObjCreate("WinHTTP.WinHTTPRequest.5.1")
+			wr.Open("POST", webhook)
+			wr.SetRequestHeader("User-Agent", "AHK")
+			wr.SetRequestHeader("Content-Type", "application/json")
+			wr.Send(postdata)
+			wr.WaitForResponse()
+		}
+	}
 }
 nm_StatusLogReverseCheck(){
 	global StatusLogReverse
@@ -2480,6 +2771,27 @@ nm_savequest(){
 	GuiControlGet, PolarQuestCheck
 	IniWrite, %PolarQuestCheck%, nm_config.ini, Quests, PolarQuestCheck
 }
+nm_ResetTotalStats(){
+	global TotalRuntime:=0
+	global TotalGatherTime:=0
+	global TotalConvertTime:=0
+	global TotalViciousKills:=0
+	global TotalBossKills:=0
+	global TotalBugKills:=0
+	global TotalPlantersCollected:=0
+	global TotalQuestsComplete:=0
+	global TotalDisconnects:=0
+	IniWrite, %TotalRuntime%, nm_config.ini, Status, TotalRuntime
+	IniWrite, %TotalGatherTime%, nm_config.ini, Status, TotalGatherTime
+	IniWrite, %TotalConvertTime%, nm_config.ini, Status, TotalConvertTime
+	IniWrite, %TotalViciousKills%, nm_config.ini, Status, TotalViciousKills
+	IniWrite, %TotalBossKills%, nm_config.ini, Status, TotalBossKills
+	IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+	IniWrite, %TotalPlantersCollected%, nm_config.ini, Status, TotalPlantersCollected
+	IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
+	IniWrite, %TotalDisconnects%, nm_config.ini, Status, TotalDisconnects
+	nm_setStats()
+}
 ;;;;;;;;; START AFB
 nm_autoFieldBoostButton(){
 	nm_autoFieldBoostGui()
@@ -3145,6 +3457,7 @@ nm_saveConfig(){
 	global ConvertMins
 	global ReloadRobloxSecs
 	global DisableToolUse
+	global Webhook
 	GuiControlGet HiveSlot
 	GuiControlGet HiveBees
 	GuiControlGet, MoveMethod
@@ -3152,6 +3465,8 @@ nm_saveConfig(){
 	GuiControlGet, ConvertMins
 	GuiControlGet, ReloadRobloxSecs
 	GuiControlGet, DisableToolUse
+	GuiControlGet, Webhook
+	GuiControlGet, WebhookCheck
 	IniWrite, %HiveSlot%, nm_config.ini, Settings, HiveSlot
 	IniWrite, %HiveBees%, nm_config.ini, Settings, HiveBees
 	IniWrite, %MoveMethod%, nm_config.ini, Settings, MoveMethod
@@ -3159,6 +3474,8 @@ nm_saveConfig(){
 	IniWrite, %ConvertMins%, nm_config.ini, Settings, ConvertMins
 	IniWrite, %ReloadRobloxSecs%, nm_config.ini, Settings, ReloadRobloxSecs
 	IniWrite, %DisableToolUse%, nm_config.ini, Settings, DisableToolUse
+	IniWrite, %Webhook%, nm_config.ini, Status, Webhook
+	IniWrite, %WebhookCheck%, nm_config.ini, Status, WebhookCheck
 }
 nm_convertBalloon(){
 	GuiControlGet, ConvertBalloon
@@ -3418,6 +3735,326 @@ nm_TabSettingsUnLock(){
 	GuiControl, enable, PrivServer
 	GuiControl, enable, ReloadRobloxSecs
 }
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Optical Character Recognition (OCR) functions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+HBitmapFromScreen(X, Y, W, H) {
+   HDC := DllCall("GetDC", "Ptr", 0, "UPtr")
+   HBM := DllCall("CreateCompatibleBitmap", "Ptr", HDC, "Int", W, "Int", H, "UPtr")
+   PDC := DllCall("CreateCompatibleDC", "Ptr", HDC, "UPtr")
+   DllCall("SelectObject", "Ptr", PDC, "Ptr", HBM)
+   DllCall("BitBlt", "Ptr", PDC, "Int", 0, "Int", 0, "Int", W, "Int", H
+                   , "Ptr", HDC, "Int", X, "Int", Y, "UInt", 0x00CC0020)
+   DllCall("DeleteDC", "Ptr", PDC)
+   DllCall("ReleaseDC", "Ptr", 0, "Ptr", HDC)
+   Return HBM
+}
+HBitmapToRandomAccessStream(hBitmap) {
+   static IID_IRandomAccessStream := "{905A0FE1-BC53-11DF-8C49-001E4FC686DA}"
+        , IID_IPicture            := "{7BF80980-BF32-101A-8BBB-00AA00300CAB}"
+        , PICTYPE_BITMAP := 1
+        , BSOS_DEFAULT   := 0
+        
+   DllCall("Ole32\CreateStreamOnHGlobal", "Ptr", 0, "UInt", true, "PtrP", pIStream, "UInt")
+   
+   VarSetCapacity(PICTDESC, sz := 8 + A_PtrSize*2, 0)
+   NumPut(sz, PICTDESC)
+   NumPut(PICTYPE_BITMAP, PICTDESC, 4)
+   NumPut(hBitmap, PICTDESC, 8)
+   riid := CLSIDFromString(IID_IPicture, GUID1)
+   DllCall("OleAut32\OleCreatePictureIndirect", "Ptr", &PICTDESC, "Ptr", riid, "UInt", false, "PtrP", pIPicture, "UInt")
+   ; IPicture::SaveAsFile
+   DllCall(NumGet(NumGet(pIPicture+0) + A_PtrSize*15), "Ptr", pIPicture, "Ptr", pIStream, "UInt", true, "UIntP", size, "UInt")
+   riid := CLSIDFromString(IID_IRandomAccessStream, GUID2)
+   DllCall("ShCore\CreateRandomAccessStreamOverStream", "Ptr", pIStream, "UInt", BSOS_DEFAULT, "Ptr", riid, "PtrP", pIRandomAccessStream, "UInt")
+   ObjRelease(pIPicture)
+   ObjRelease(pIStream)
+   Return pIRandomAccessStream
+}
+ocr(file, lang := "FirstFromAvailableLanguages")
+{
+   static OcrEngineStatics, OcrEngine, MaxDimension, LanguageFactory, Language, CurrentLanguage, BitmapDecoderStatics, GlobalizationPreferencesStatics
+   if (OcrEngineStatics = "")
+   {
+      CreateClass("Windows.Globalization.Language", ILanguageFactory := "{9B0252AC-0C27-44F8-B792-9793FB66C63E}", LanguageFactory)
+      CreateClass("Windows.Graphics.Imaging.BitmapDecoder", IBitmapDecoderStatics := "{438CCB26-BCEF-4E95-BAD6-23A822E58D01}", BitmapDecoderStatics)
+      CreateClass("Windows.Media.Ocr.OcrEngine", IOcrEngineStatics := "{5BFFA85A-3384-3540-9940-699120D428A8}", OcrEngineStatics)
+      DllCall(NumGet(NumGet(OcrEngineStatics+0)+6*A_PtrSize), "ptr", OcrEngineStatics, "uint*", MaxDimension)   ; MaxImageDimension
+   }
+   if (file = "ShowAvailableLanguages")
+   {
+      if (GlobalizationPreferencesStatics = "")
+         CreateClass("Windows.System.UserProfile.GlobalizationPreferences", IGlobalizationPreferencesStatics := "{01BF4326-ED37-4E96-B0E9-C1340D1EA158}", GlobalizationPreferencesStatics)
+      DllCall(NumGet(NumGet(GlobalizationPreferencesStatics+0)+9*A_PtrSize), "ptr", GlobalizationPreferencesStatics, "ptr*", LanguageList)   ; get_Languages
+      DllCall(NumGet(NumGet(LanguageList+0)+7*A_PtrSize), "ptr", LanguageList, "int*", count)   ; count
+      loop % count
+      {
+         DllCall(NumGet(NumGet(LanguageList+0)+6*A_PtrSize), "ptr", LanguageList, "int", A_Index-1, "ptr*", hString)   ; get_Item
+         DllCall(NumGet(NumGet(LanguageFactory+0)+6*A_PtrSize), "ptr", LanguageFactory, "ptr", hString, "ptr*", LanguageTest)   ; CreateLanguage
+         DllCall(NumGet(NumGet(OcrEngineStatics+0)+8*A_PtrSize), "ptr", OcrEngineStatics, "ptr", LanguageTest, "int*", bool)   ; IsLanguageSupported
+         if (bool = 1)
+         {
+            DllCall(NumGet(NumGet(LanguageTest+0)+6*A_PtrSize), "ptr", LanguageTest, "ptr*", hText)
+            buffer := DllCall("Combase.dll\WindowsGetStringRawBuffer", "ptr", hText, "uint*", length, "ptr")
+            text .= StrGet(buffer, "UTF-16") "`n"
+         }
+         ObjRelease(LanguageTest)
+      }
+      ObjRelease(LanguageList)
+      return text
+   }
+   if (lang != CurrentLanguage) or (lang = "FirstFromAvailableLanguages")
+   {
+      if (OcrEngine != "")
+      {
+         ObjRelease(OcrEngine)
+         if (CurrentLanguage != "FirstFromAvailableLanguages")
+            ObjRelease(Language)
+      }
+      if (lang = "FirstFromAvailableLanguages")
+         DllCall(NumGet(NumGet(OcrEngineStatics+0)+10*A_PtrSize), "ptr", OcrEngineStatics, "ptr*", OcrEngine)   ; TryCreateFromUserProfileLanguages
+      else
+      {
+         CreateHString(lang, hString)
+         DllCall(NumGet(NumGet(LanguageFactory+0)+6*A_PtrSize), "ptr", LanguageFactory, "ptr", hString, "ptr*", Language)   ; CreateLanguage
+         DeleteHString(hString)
+         DllCall(NumGet(NumGet(OcrEngineStatics+0)+9*A_PtrSize), "ptr", OcrEngineStatics, ptr, Language, "ptr*", OcrEngine)   ; TryCreateFromLanguage
+      }
+      if (OcrEngine = 0)
+      {
+         msgbox Can not use language "%lang%" for OCR, please install language pack.
+         ExitApp
+      }
+      CurrentLanguage := lang
+   }
+   IRandomAccessStream := file
+   DllCall(NumGet(NumGet(BitmapDecoderStatics+0)+14*A_PtrSize), "ptr", BitmapDecoderStatics, "ptr", IRandomAccessStream, "ptr*", BitmapDecoder)   ; CreateAsync
+   WaitForAsync(BitmapDecoder)
+   BitmapFrame := ComObjQuery(BitmapDecoder, IBitmapFrame := "{72A49A1C-8081-438D-91BC-94ECFC8185C6}")
+   DllCall(NumGet(NumGet(BitmapFrame+0)+12*A_PtrSize), "ptr", BitmapFrame, "uint*", width)   ; get_PixelWidth
+   DllCall(NumGet(NumGet(BitmapFrame+0)+13*A_PtrSize), "ptr", BitmapFrame, "uint*", height)   ; get_PixelHeight
+   if (width > MaxDimension) or (height > MaxDimension)
+   {
+      msgbox Image is to big - %width%x%height%.`nIt should be maximum - %MaxDimension% pixels
+      ExitApp
+   }
+   BitmapFrameWithSoftwareBitmap := ComObjQuery(BitmapDecoder, IBitmapFrameWithSoftwareBitmap := "{FE287C9A-420C-4963-87AD-691436E08383}")
+   DllCall(NumGet(NumGet(BitmapFrameWithSoftwareBitmap+0)+6*A_PtrSize), "ptr", BitmapFrameWithSoftwareBitmap, "ptr*", SoftwareBitmap)   ; GetSoftwareBitmapAsync
+   WaitForAsync(SoftwareBitmap)
+   DllCall(NumGet(NumGet(OcrEngine+0)+6*A_PtrSize), "ptr", OcrEngine, ptr, SoftwareBitmap, "ptr*", OcrResult)   ; RecognizeAsync
+   WaitForAsync(OcrResult)
+   DllCall(NumGet(NumGet(OcrResult+0)+6*A_PtrSize), "ptr", OcrResult, "ptr*", LinesList)   ; get_Lines
+   DllCall(NumGet(NumGet(LinesList+0)+7*A_PtrSize), "ptr", LinesList, "int*", count)   ; count
+   loop % count
+   {
+      DllCall(NumGet(NumGet(LinesList+0)+6*A_PtrSize), "ptr", LinesList, "int", A_Index-1, "ptr*", OcrLine)
+      DllCall(NumGet(NumGet(OcrLine+0)+7*A_PtrSize), "ptr", OcrLine, "ptr*", hText) 
+      buffer := DllCall("Combase.dll\WindowsGetStringRawBuffer", "ptr", hText, "uint*", length, "ptr")
+      text .= StrGet(buffer, "UTF-16") "`n"
+      ObjRelease(OcrLine)
+   }
+   Close := ComObjQuery(IRandomAccessStream, IClosable := "{30D5A829-7FA4-4026-83BB-D75BAE4EA99E}")
+   DllCall(NumGet(NumGet(Close+0)+6*A_PtrSize), "ptr", Close)   ; Close
+   ObjRelease(Close)
+   Close := ComObjQuery(SoftwareBitmap, IClosable := "{30D5A829-7FA4-4026-83BB-D75BAE4EA99E}")
+   DllCall(NumGet(NumGet(Close+0)+6*A_PtrSize), "ptr", Close)   ; Close
+   ObjRelease(Close)
+   ObjRelease(IRandomAccessStream)
+   ObjRelease(BitmapDecoder)
+   ObjRelease(BitmapFrame)
+   ObjRelease(BitmapFrameWithSoftwareBitmap)
+   ObjRelease(SoftwareBitmap)
+   ObjRelease(OcrResult)
+   ObjRelease(LinesList)
+   return text
+}
+CLSIDFromString(IID, ByRef CLSID) {
+   VarSetCapacity(CLSID, 16, 0)
+   if res := DllCall("ole32\CLSIDFromString", "WStr", IID, "Ptr", &CLSID, "UInt")
+      throw Exception("CLSIDFromString failed. Error: " . Format("{:#x}", res))
+   Return &CLSID
+}
+CreateClass(string, interface, ByRef Class)
+{
+   CreateHString(string, hString)
+   VarSetCapacity(GUID, 16)
+   DllCall("ole32\CLSIDFromString", "wstr", interface, "ptr", &GUID)
+   result := DllCall("Combase.dll\RoGetActivationFactory", "ptr", hString, "ptr", &GUID, "ptr*", Class)
+   if (result != 0)
+   {
+      if (result = 0x80004002)
+         msgbox No such interface supported
+      else if (result = 0x80040154)
+         msgbox Class not registered
+      else
+         msgbox error: %result%
+      ExitApp
+   }
+   DeleteHString(hString)
+}
+CreateHString(string, ByRef hString)
+{
+    DllCall("Combase.dll\WindowsCreateString", "wstr", string, "uint", StrLen(string), "ptr*", hString)
+}
+DeleteHString(hString)
+{
+   DllCall("Combase.dll\WindowsDeleteString", "ptr", hString)
+}
+WaitForAsync(ByRef Object)
+{
+   AsyncInfo := ComObjQuery(Object, IAsyncInfo := "{00000036-0000-0000-C000-000000000046}")
+   loop
+   {
+      DllCall(NumGet(NumGet(AsyncInfo+0)+7*A_PtrSize), "ptr", AsyncInfo, "uint*", status)   ; IAsyncInfo.Status
+      if (status != 0)
+      {
+         if (status != 1)
+         {
+            DllCall(NumGet(NumGet(AsyncInfo+0)+8*A_PtrSize), "ptr", AsyncInfo, "uint*", ErrorCode)   ; IAsyncInfo.ErrorCode
+            msgbox AsyncInfo status error: %ErrorCode%
+            ExitApp
+         }
+         ObjRelease(AsyncInfo)
+         break
+      }
+      sleep 10
+   }
+   DllCall(NumGet(NumGet(Object+0)+8*A_PtrSize), "ptr", Object, "ptr*", ObjectResult)   ; GetResults
+   ObjRelease(Object)
+   Object := ObjectResult
+}
+;OCRMutation(ByRef amount, ByRef stat, x1, y1, w1, h1)
+ba_OCRStringExists(findString, aim:="full")
+{
+	WinGetPos, windowX, windowY, windowWidth, windowHeight, Roblox
+    xi := 0
+    yi := 0
+	ww := windowWidth
+	wh := windowHeight
+    if (aim!="full"){
+        if (aim = "low")
+			yi := windowHeight / 2
+        if (aim = "high")
+            wh := windowHeight / 2
+		if (aim = "buff")
+            wh := 150
+		if (aim = "left")
+			ww := windowWidth / 2
+		if (aim = "right")
+			xi := windowWidth / 2
+		if (aim = "center") {
+			xi := windowWidth / 4
+			yi := windowHeight / 4
+			ww := xi*3
+			wh := yi*3
+		}
+        if (aim = "lowright") {
+            yi := windowHeight / 2
+            xi := windowWidth / 2
+        }
+		if (aim = "highright") {
+            xi := windowWidth / 2
+			wh := windowHeight / 2
+        }
+    }
+	hBitmap := HBitmapFromScreen(xi, yi, ww, wh)
+	pIRandomAccessStream := HBitmapToRandomAccessStream(hBitmap)
+	DllCall("DeleteObject", "Ptr", hBitmap)
+	ocrtext := StrReplace(StrReplace(ocr(pIRandomAccessStream, "en"), "`n"), " ")
+	;msgbox %ocrtext%
+	if(InStr(ocrtext, findString)) {
+		return 1
+	} else {
+		return 0
+	}
+}
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; WEBHOOK
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; CreateFormData() by tmplinshi modified by SKAN
+; for sending images to webhook
+CreateFormData(ByRef retData, ByRef retHeader, objParam) {
+	New CreateFormData(retData, retHeader, objParam)
+}
+Class CreateFormData {
+
+	__New(ByRef retData, ByRef retHeader, objParam) {
+
+		Local CRLF := "`r`n", i, k, v, str, pvData
+		; Create a random Boundary
+		Local Boundary := this.RandomBoundary()
+		Local BoundaryLine := "------------------------------" . Boundary
+
+    this.Len := 0 ; GMEM_ZEROINIT|GMEM_FIXED = 0x40
+    this.Ptr := DllCall( "GlobalAlloc", "UInt",0x40, "UInt",1, "Ptr"  )          ; allocate global memory
+
+		; Loop input paramters
+		For k, v in objParam
+		{
+			If IsObject(v) {
+				For i, FileName in v
+				{
+					str := BoundaryLine . CRLF
+					     . "Content-Disposition: form-data; name=""" . k . """; filename=""" . FileName . """" . CRLF
+					     . "Content-Type: " . this.MimeType(FileName) . CRLF . CRLF
+          this.StrPutUTF8( str )
+          this.LoadFromFile( Filename )
+          this.StrPutUTF8( CRLF )
+				}
+			} Else {
+				str := BoundaryLine . CRLF
+				     . "Content-Disposition: form-data; name=""" . k """" . CRLF . CRLF
+				     . v . CRLF
+        this.StrPutUTF8( str )
+			}
+		}
+
+		this.StrPutUTF8( BoundaryLine . "--" . CRLF )
+
+    ; Create a bytearray and copy data in to it.
+    retData := ComObjArray( 0x11, this.Len ) ; Create SAFEARRAY = VT_ARRAY|VT_UI1
+    pvData  := NumGet( ComObjValue( retData ) + 8 + A_PtrSize )
+    DllCall( "RtlMoveMemory", "Ptr",pvData, "Ptr",this.Ptr, "Ptr",this.Len )
+
+    this.Ptr := DllCall( "GlobalFree", "Ptr",this.Ptr, "Ptr" )                   ; free global memory 
+
+    retHeader := "multipart/form-data; boundary=----------------------------" . Boundary
+	}
+
+  StrPutUTF8( str ) {
+    Local ReqSz := StrPut( str, "utf-8" ) - 1
+    this.Len += ReqSz                                  ; GMEM_ZEROINIT|GMEM_MOVEABLE = 0x42
+    this.Ptr := DllCall( "GlobalReAlloc", "Ptr",this.Ptr, "UInt",this.len + 1, "UInt", 0x42 )   
+    StrPut( str, this.Ptr + this.len - ReqSz, ReqSz, "utf-8" )
+  }
+  
+  LoadFromFile( Filename ) {
+    Local objFile := FileOpen( FileName, "r" )
+    this.Len += objFile.Length                     ; GMEM_ZEROINIT|GMEM_MOVEABLE = 0x42 
+    this.Ptr := DllCall( "GlobalReAlloc", "Ptr",this.Ptr, "UInt",this.len, "UInt", 0x42 )
+    objFile.RawRead( this.Ptr + this.Len - objFile.length, objFile.length )
+    objFile.Close()       
+  }
+
+	RandomBoundary() {
+		str := "0|1|2|3|4|5|6|7|8|9|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z"
+		Sort, str, D| Random
+		str := StrReplace(str, "|")
+		Return SubStr(str, 1, 12)
+	}
+
+	MimeType(FileName) {
+		n := FileOpen(FileName, "r").ReadUInt()
+		Return (n        = 0x474E5089) ? "image/png"
+		     : (n        = 0x38464947) ? "image/gif"
+		     : (n&0xFFFF = 0x4D42    ) ? "image/bmp"
+		     : (n&0xFFFF = 0xD8FF    ) ? "image/jpeg"
+		     : (n&0xFFFF = 0x4949    ) ? "image/tiff"
+		     : (n&0xFFFF = 0x4D4D    ) ? "image/tiff"
+		     : "application/octet-stream"
+	}
+
+}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3428,8 +4065,56 @@ nm_testButton(){
 	CoordMode, Pixel, Relative
 	TopOfBuffY:=35
 	startMeasuring:=A_TickCount
+	;Bloat
+	WinGetPos, windowX, windowY, windowWidth, windowHeight, Roblox
+	bloatColor:=0xCC8048
+	PixelSearch, bx2, by2, 0, 0, %windowWidth%, 150, %bloatColor%,0, Fast
+	If (ErrorLevel=0) {
+		nexty:=by2+1
+		pixels:=1
+		loop 38 {
+			PixelGetColor, OutputVar, %bx2%, %nexty%, fast
+			If (OutputVar=bloatColor) {
+				nexty:=nexty+1
+				pixels:=pixels+1
+			} else {
+				blo:=round(pixels/38*100, 0)
+				break
+			}
+		}
+	} else {
+		blo:=0
+	}
+	blonum:=round((blo/100)*6, 2)
+	msgbox Bloat=%blo% -> %blonum%
 	;Comforting
-	nectarColor:=0x7E9EB3
+	;nectarColor:=0x7E9EB3
+	nectarColor:=0xB39E7E
+	;: (var="motivating") ? nectarColor:=0xB37D93
+	;: (var="satisfying") ? nectarColor:=0xA798B3
+	;: (var="refreshing") ? nectarColor:=0x75B378
+	;: (var="invigorating") ? nectarColor:=0x5159B3
+	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%,0, Fast
+	If (ErrorLevel=0) {
+		nexty:=by2+1
+		pixels:=1
+		loop 38 {
+			;PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
+			PixelGetColor, OutputVar, %bx2%, %nexty%, fast
+			;PixelSearch, bx3, by3, %bx2%-1, %nexty%, %bx2%+38, 150, %nectarColor%,0, Fast
+			If (OutputVar=nectarColor) {
+			;If (ErrorLevel=0) {
+				nexty:=nexty+1
+				pixels:=pixels+1
+			} else {
+				com:=round(pixels/38*100, 0)
+				break
+			}
+		}
+	} else {
+		com:=0
+	}
+	/*
 	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
 	if(TopOfBuffY)
 		com:=round((38-(bx2-TopOfBuffY))/38*100, 0)
@@ -3449,7 +4134,30 @@ nm_testButton(){
 	} else {
 		com:=0
 	}
+	*/
 	;Refreshing
+	nectarColor:=0x75B378
+	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%,0, Fast
+	If (ErrorLevel=0) {
+		nexty:=by2+1
+		pixels:=1
+		loop 38 {
+			;PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
+			PixelGetColor, OutputVar, %bx2%, %nexty%, fast
+			;PixelSearch, bx3, by3, %bx2%-1, %nexty%, %bx2%+38, 150, %nectarColor%,0, Fast
+			If (OutputVar=nectarColor) {
+			;If (ErrorLevel=0) {
+				nexty:=nexty+1
+				pixels:=pixels+1
+			} else {
+				ref:=round(pixels/38*100, 0)
+				break
+			}
+		}
+	} else {
+		ref:=0
+	}
+	/*
 	nectarColor:=0x78B375
 	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
 	if(TopOfBuffY)
@@ -3470,7 +4178,30 @@ nm_testButton(){
 	} else {
 		ref:=0
 	}
+	*/
 	;Satisfying
+	nectarColor:=0xA798B3
+	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%,0, Fast
+	If (ErrorLevel=0) {
+		nexty:=by2+1
+		pixels:=1
+		loop 38 {
+			;PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
+			PixelGetColor, OutputVar, %bx2%, %nexty%, fast
+			;PixelSearch, bx3, by3, %bx2%-1, %nexty%, %bx2%+38, 150, %nectarColor%,0, Fast
+			If (OutputVar=nectarColor) {
+			;If (ErrorLevel=0) {
+				nexty:=nexty+1
+				pixels:=pixels+1
+			} else {
+				sat:=round(pixels/38*100, 0)
+				break
+			}
+		}
+	} else {
+		sat:=0
+	}
+	/*
 	nectarColor:=0xB398A7
 	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
 	if(TopOfBuffY)
@@ -3491,7 +4222,30 @@ nm_testButton(){
 	} else {
 		sat:=0
 	}
+	*/
 	;Motivating
+	nectarColor:=0xB37D93
+	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%,0, Fast
+	If (ErrorLevel=0) {
+		nexty:=by2+1
+		pixels:=1
+		loop 38 {
+			;PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
+			PixelGetColor, OutputVar, %bx2%, %nexty%, fast
+			;PixelSearch, bx3, by3, %bx2%-1, %nexty%, %bx2%+38, 150, %nectarColor%,0, Fast
+			If (OutputVar=nectarColor) {
+			;If (ErrorLevel=0) {
+				nexty:=nexty+1
+				pixels:=pixels+1
+			} else {
+				mot:=round(pixels/38*100, 0)
+				break
+			}
+		}
+	} else {
+		mot:=0
+	}
+	/*
 	nectarColor:=0x937DB3
 	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
 	if(TopOfBuffY)
@@ -3512,7 +4266,30 @@ nm_testButton(){
 	} else {
 		mot:=0
 	}
+	*/
 	;Invigorating
+	nectarColor:=0x5159B3
+	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%,0, Fast
+	If (ErrorLevel=0) {
+		nexty:=by2+1
+		pixels:=1
+		loop 38 {
+			;PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
+			PixelGetColor, OutputVar, %bx2%, %nexty%, fast
+			;PixelSearch, bx3, by3, %bx2%-1, %nexty%, %bx2%+38, 150, %nectarColor%,0, Fast
+			If (OutputVar=nectarColor) {
+			;If (ErrorLevel=0) {
+				nexty:=nexty+1
+				pixels:=pixels+1
+			} else {
+				inv:=round(pixels/38*100, 0)
+				break
+			}
+		}
+	} else {
+		inv:=0
+	}
+	/*
 	nectarColor:=0xB35951
 	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
 	if(TopOfBuffY)
@@ -3533,6 +4310,7 @@ nm_testButton(){
 	} else {
 		inv:=0
 	}
+	*/
 	speed:=A_TickCount-startMeasuring
 	msgbox Com=%com% Ref=%ref% Sat=%sat% Mot=%mot% Inv=%inv% nextY:=%nextY%`nspeed=%speed%
 
@@ -3578,47 +4356,55 @@ nm_imgSearch(fileName,v,aim := "full", trans:="none"){
 	global WindowedScreen
 	CoordMode, Pixel, Relative
     WinGetPos , windowX, windowY, windowWidth, windowHeight, Roblox
-    xi := 0
-    yi := 0
-	ww := windowWidth
-	wh := windowHeight
-    if (aim!="full"){
+    ;xi := 0
+    ;yi := 0
+	;ww := windowWidth
+	;wh := windowHeight
+	;if (aim!="full"){
+		
+		xi:=(aim="actionbar") ? windowWidth/4 : (aim="highright") ? windowWidth/2 : (aim="right") ? windowWidth/2 : (aim="center") ? windowWidth/4 : (aim="lowright") ? windowWidth/2 : 0
+		yi:=(aim="low") ? windowHeight/2 : (aim="actionbar") ? (windowHeight/4)*3 : (aim="center") ? yi:=windowHeight/4 : (aim="lowright") ? windowHeight/2 : 0
+		ww:=(aim="actionbar") ? xi*3 : (aim="highleft") ? windowWidth/2 : (aim="left") ? windowWidth/2 : (aim="center") ? xi*3 : windowWidth
+		wh:=(aim="high") ? windowHeight/2 : (aim="highright") ? windowHeight/2 : (aim="highleft") ? windowHeight/2 : (aim="buff") ? 150 : (aim="abovebuff") ? 30+WindowedScreen*31 : (aim="center") ? yi*3 : windowHeight
+		
+		/*
         if (aim = "low")
 			yi := windowHeight / 2
-		if (aim = "actionbar") {
+		else if (aim = "actionbar") {
 			xi := windowWidth / 4
 			yi := (windowHeight / 4)*3
 			ww := xi*3
 		}
-        if (aim = "high")
+        else if (aim = "high")
             wh := windowHeight / 2
-		if (aim = "highright") {
+		else if (aim = "highright") {
 			wh := windowHeight / 2
 			xi := windowWidth / 2
 		}
-		if (aim = "highleft") {
+		else if (aim = "highleft") {
 			wh := windowHeight / 2
 			ww := windowWidth / 2
 		}
-		if (aim = "buff")
+		else if (aim = "buff")
             wh := 150
-		if (aim = "abovebuff")
+		else if (aim = "abovebuff")
             wh := 30+WindowedScreen*31
-		if (aim = "left")
+		else if (aim = "left")
 			ww := windowWidth / 2
-		if (aim = "right")
+		else if (aim = "right")
 			xi := windowWidth / 2
-		if (aim = "center") {
+		else if (aim = "center") {
 			xi := windowWidth / 4
 			yi := windowHeight / 4
 			ww := xi*3
 			wh := yi*3
 		}
-        if (aim = "lowright") {
+        else if (aim = "lowright") {
             yi := windowHeight / 2
             xi := windowWidth / 2
         }
-    }
+		*/
+    ;}
 	IfExist, %A_ScriptDir%\nm_image_assets\
 	{	
 		if(trans!="none")
@@ -3671,8 +4457,8 @@ nm_Reset(checkAll:=1, wait:=2000){
 		nm_locateVB()
 	}
 	while (1){
+		;nm_setStatus("Resetting", "Character " . A_Index)
 		resetTime:=nowUnix()
-		nm_setStatus("Resetting", "Character " . A_Index)
 		;failsafe game frozen
 		if(A_Index>10) {
 			WinClose, Roblox
@@ -3711,6 +4497,7 @@ nm_Reset(checkAll:=1, wait:=2000){
 			}
 		}
 		if(!HiveConfirmed) {
+			nm_setStatus("Resetting", "Character " . A_Index)
 			HiveConfirmed:=0
 			;reset
 			send {esc}
@@ -3732,12 +4519,12 @@ nm_Reset(checkAll:=1, wait:=2000){
 				if(A_Index=16)
 					repeat:=1
 				If (nm_imgSearch("hive4.png",HiveVariation,"actionbar")[1] = 0){
-					loop 3{
+					loop 4{
 						send %RotRight%
+					}
+					loop 4{
 						send {PgDn}
 					}
-					sleep, 50
-					send %RotRight%
 					break
 				}
 				send %RotRight%
@@ -4802,6 +5589,7 @@ nm_Bugrun(){
 	global KingBeetleBabyCheck
 	global LastTunnelBear
 	global LastKingBeetle
+	global TotalBossKills, SessionBossKills, TotalBugKills, SessionBugKills
 	bypass:=0
 	if(((BugrunSpiderCheck || QuestSpider) && (nowUnix()-LastBugrunSpider)>floor(1800*(1-GiftedViciousCheck*.15))) && HiveBees>=5){ ;30 minutes
 		loop 1 {
@@ -4840,6 +5628,10 @@ nm_Bugrun(){
 			}
 			LastBugrunSpider:=nowUnix()
 			IniWrite, %LastBugrunSpider%, nm_config.ini, Collect, LastBugrunSpider
+			TotalBugKills:=TotalBugKills+1
+			SessionBugKills:=SessionBugKills+1
+			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 			if(BugrunSpiderLoot){
 				if(!DisableToolUse)
 					click, down
@@ -4905,6 +5697,10 @@ nm_Bugrun(){
 					}
 					click, up
 				}
+				TotalBugKills:=TotalBugKills+2
+				SessionBugKills:=SessionBugKills+2
+				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 				if(BugrunLadybugsLoot){
 					if(!DisableToolUse)
 						click, down
@@ -4959,6 +5755,10 @@ nm_Bugrun(){
 				}
 				click, up
 			}
+			TotalBugKills:=TotalBugKills+1
+			SessionBugKills:=SessionBugKills+1
+			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 			if(BugrunLadybugsLoot){
 				if(!DisableToolUse)
 					click, down
@@ -5026,6 +5826,10 @@ nm_Bugrun(){
 			;done with ladybugs
 			LastBugrunLadybugs:=nowUnix()
 			IniWrite, %LastBugrunLadybugs%, nm_config.ini, Collect, LastBugrunLadybugs
+			TotalBugKills:=TotalBugKills+2
+			SessionBugKills:=SessionBugKills+2
+			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 			;loot
 			if(((BugrunLadybugsCheck || QuestLadybugs) && BugrunLadybugsLoot) || ((BugrunRhinoBeetlesCheck || QuestRhinoBeetles) && BugrunRhinoBeetlesLoot)){
 				if(!DisableToolUse)
@@ -5084,6 +5888,10 @@ nm_Bugrun(){
 				LastBugrunRhinoBeetles:=nowUnix()
 				IniWrite, %LastBugrunRhinoBeetles%, nm_config.ini, Collect, LastBugrunRhinoBeetles
 			}
+			TotalBugKills:=TotalBugKills+1
+			SessionBugKills:=SessionBugKills+1
+			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 			;loot
 			if(BugrunRhinoBeetlesLoot){
 				if(!DisableToolUse)
@@ -5135,6 +5943,10 @@ nm_Bugrun(){
 					LastBugrunRhinoBeetles:=nowUnix()
 					IniWrite, %LastBugrunRhinoBeetles%, nm_config.ini, Collect, LastBugrunRhinoBeetles
 				}
+				TotalBugKills:=TotalBugKills+2
+				SessionBugKills:=SessionBugKills+2
+				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 				;loot
 				if(BugrunRhinoBeetlesLoot){
 					if(!DisableToolUse)
@@ -5240,6 +6052,10 @@ nm_Bugrun(){
 				LastBugrunMantis:=nowUnix()
 				IniWrite, %LastBugrunMantis%, nm_config.ini, Collect, LastBugrunMantis
 			}
+			TotalBugKills:=TotalBugKills+2
+			SessionBugKills:=SessionBugKills+2
+			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 			;loot
 			if(((BugrunMantisCheck || QuestMantis) && BugrunMantisLoot) || ((BugrunRhinoBeetlesCheck || QuestRhinoBeetles) && BugrunRhinoBeetlesLoot)){
 				if(!DisableToolUse)
@@ -5303,6 +6119,10 @@ nm_Bugrun(){
 				}
 				LastBugrunWerewolf:=nowUnix()
 				IniWrite, %LastBugrunWerewolf%, nm_config.ini, Collect, LastBugrunWerewolf
+				TotalBugKills:=TotalBugKills+1
+				SessionBugKills:=SessionBugKills+1
+				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 				if(BugrunWerewolfLoot){
 					if(!DisableToolUse)
 						click, down
@@ -5364,6 +6184,10 @@ nm_Bugrun(){
 				;done with Mantis
 				LastBugrunMantis:=nowUnix()
 				IniWrite, %LastBugrunMantis%, nm_config.ini, Collect, LastBugrunMantis
+				TotalBugKills:=TotalBugKills+2
+				SessionBugKills:=SessionBugKills+2
+				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 				;loot
 				if(BugrunMantisLoot){
 					if(!DisableToolUse)
@@ -5445,6 +6269,10 @@ nm_Bugrun(){
 				;done with Scorpions
 				LastBugrunScorpions:=nowUnix()
 				IniWrite, %LastBugrunScorpions%, nm_config.ini, Collect, LastBugrunScorpions
+				TotalBugKills:=TotalBugKills+2
+				SessionBugKills:=SessionBugKills+2
+				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
 				;loot
 				if(BugrunScorpionsLoot){
 					if(!DisableToolUse)
@@ -5534,7 +6362,9 @@ nm_Bugrun(){
 					;attack tunnel bear
 					TBdead:=0
 					if(found) {
-						send {PgUp}
+						loop 2 {
+							send {PgUp}
+						}
 						nm_setStatus("Attacking", "Tunnel Bear")
 						loop 75 {
 							while(nm_imgSearch("tunnelbear.png",5,"high")[1] = 0){
@@ -5542,7 +6372,9 @@ nm_Bugrun(){
 							}
 							if(nm_imgSearch("tunnelbeardead.png",25,"lowright")[1] = 0){
 								TBdead:=1
-								send {PgDn}
+								loop 2 {
+									send {PgDn}
+								}
 								break
 							}
 							if(youDied)
@@ -5552,6 +6384,10 @@ nm_Bugrun(){
 					}
 					;loot
 					if(TBdead) {
+						TotalBossKills:=TotalBossKills+1
+						SessionBossKills:=SessionBossKills+1
+						IniWrite, %TotalBossKills%, nm_config.ini, Status, TotalBossKills
+						IniWrite, %SessionBossKills%, nm_config.ini, Status, SessionBossKills
 						nm_setStatus("Looting")
 						nm_Move(12000*MoveSpeedFactor, FwdKey)
 						nm_Move(18000*MoveSpeedFactor, BackKey)
@@ -6660,6 +7496,7 @@ nm_GoGather(){
 	global objective
 	global BackpackPercentFiltered
 	global MicroConverterKey
+	global PackFilterArray
 	global WhirligigKey
 	global LastWhirligig
 	GuiControlGet, FieldName%CurrentFieldNum%
@@ -6690,6 +7527,7 @@ nm_GoGather(){
 	global LastBugrunMantis
 	global LastBugrunScorpions
 	global LastBugrunWerewolf
+	global GatherStartTime, TotalGatherTime, SessionGatherTime, ConvertStartTime, TotalConvertTime, SessionConvertTime
 	nm_backpackPercentFilter()
 	;reset
 	nm_Reset()
@@ -6770,7 +7608,8 @@ nm_GoGather(){
 	;gather loop
 	bypass:=0
 	nm_setStatus("Gathering")
-	gatherStart:=nowUnix()
+	gatherStart:=nowUnix() ; used to control how long to gather in this cycle
+	GatherStartTime:=nowUnix() ; used to track total and session gathering time metrics
 	if(FieldPatternShift%CurrentFieldNum%)
 		send, {shift}
 	BackpackPercentFiltered:=0
@@ -6782,10 +7621,14 @@ nm_GoGather(){
 		;special hotkeys
 		if(BackpackPercentFiltered>=95 && MicroConverterKey!="none") {
 			send {%MicroConverterKey%}
+			PackFilterArray:=[]
 			sleep, 500
 		}
 		;interrupt if...
-		if(DisconnectCheck() || youDied || not nm_activeHoney() || VBState=1) {
+		if(not nm_activeHoney() && (BackpackPercentFiltered<FieldUntilPack%CurrentFieldNum%)){
+			break
+		}
+		if(DisconnectCheck() || youDied || VBState=1) {
 			bypass:=1
 			break
 		}
@@ -6796,6 +7639,9 @@ nm_GoGather(){
 			break
 		}
 	}
+	TotalGatherTime:=TotalGatherTime+(nowUnix()-GatherStartTime)
+	SessionGatherTime:=SessionGatherTime+(nowUnix()-GatherStartTime)
+	GatherStartTime:=0
 	if(FieldPatternShift%CurrentFieldNum%)
 		send, {shift}
 	if(not bypass){
@@ -7166,7 +8012,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 }
 nm_convert(hiveConfirm:=0)
 {
-	global KeyDelay, HiveVariation, RotRight, ZoomOut, AFBrollingDice, AFBuseGlitter, AFBuseBooster, CurrentField, HiveConfirmed, EnzymesKey,  LastEnzymes
+	global KeyDelay, HiveVariation, RotRight, ZoomOut, AFBrollingDice, AFBuseGlitter, AFBuseBooster, CurrentField, HiveConfirmed, EnzymesKey,  LastEnzymes, ConvertStartTime, TotalConvertTime, SessionConvertTime
 	GuiControlGet ConvertBalloon
 	GuiControlGet ConvertMins
 	IniRead, LastConvertBalloon, nm_config.ini, Settings, LastConvertBalloon
@@ -7200,6 +8046,7 @@ nm_convert(hiveConfirm:=0)
 		}
 		if(HiveConfirmed || ConvertAnyway){
 			send e
+			ConvertStartTime:=nowUnix()
 			;empty pack
 			loop 180 {
 				If (nm_backpackPercent()>0 && A_Index=1)
@@ -7212,12 +8059,77 @@ nm_convert(hiveConfirm:=0)
 					break
 				}
 			}
-			sleep, 5000
+			sleep, 6000
+			searchRet := nm_imgSearch("e_button.png",30,"high")
+			If (searchRet[1] = 1) {
+				TotalConvertTime:=TotalConvertTime+(nowUnix()-ConvertStartTime)
+				SessionConvertTime:=SessionConvertTime+(nowUnix()-ConvertStartTime)
+				ConvertStartTime:=0
+				return
+			}
 			;empty balloon
 			if(ConvertBalloon="always" || (ConvertBalloon="Every" && (nowUnix() - LastConvertBalloon)>(ConvertMins*60))) {
 				bigBalloonConfirm:=0
 				inactiveHoney:=0
 				confirmActive:=0
+				;;;;;;;;;;;;;;;;;;;
+				while (bigBalloonConfirm<=10 && A_Index<=60) {
+					nm_AutoFieldBoost(currentField)
+					if(AFBuseGlitter || AFBuseBooster)
+						break
+					searchRet := nm_imgSearch("e_button.png",30,"high")
+					If (searchRet[1] = 0) {
+						bigBalloonConfirm:=bigBalloonConfirm+1
+					} else {
+						break
+					}
+					searchRet := nm_imgSearch("balloonblessing.png",30,"lowright")
+					If (searchRet[1] = 0) {
+						nm_setStatus(0, "Balloon Refreshed")
+						LastConvertBalloon:=nowUnix()
+						IniWrite, %LastConvertBalloon%, nm_config.ini, Settings, LastConvertBalloon
+						TotalConvertTime:=TotalConvertTime+(nowUnix()-ConvertStartTime)
+						SessionConvertTime:=SessionConvertTime+(nowUnix()-ConvertStartTime)
+						ConvertStartTime:=0
+						return
+					}
+					sleep, 1000
+				}
+				If (bigBalloonConfirm>=10) {
+					ballooncomplete:=0
+					searchRet := nm_imgSearch("e_button.png",30,"high")
+					while(searchRet[1]=0 && AIndex<=600) {
+						if(A_Index=1) {
+							nm_setStatus("Converting", "Balloon")
+							if(EnzymesKey!="none" && (nowUnix()-LastEnzymes)>600 && nm_activeHoney()) {
+								send {%EnzymesKey%}
+								LastEnzymes:=nowUnix()
+								IniWrite, %LastEnzymes%, nm_config.ini, Boost, LastEnzymes
+							}
+						}
+						nm_AutoFieldBoost(currentField)
+						if(AFBuseGlitter || AFBuseBooster)
+							break
+						searchRet := nm_imgSearch("balloonblessing.png",30,"lowright")
+						If (searchRet[1] = 0) {
+							ballooncomplete:=1
+							break
+						}
+						searchRet := nm_imgSearch("e_button.png",30,"high")
+						If (searchRet[1] = 1) {
+							ballooncomplete:=1
+							break
+						}
+						sleep, 1000
+					}
+					if(ballooncomplete){
+						nm_setStatus(0, "Balloon Refreshed")
+						LastConvertBalloon:=nowUnix()
+						IniWrite, %LastConvertBalloon%, nm_config.ini, Settings, LastConvertBalloon
+					}
+				}
+				;;;;;;;;;;;;;;;;;;;
+				/*
 				;look for active honey
 				loop 60 {
 					nm_AutoFieldBoost(currentField)
@@ -7294,7 +8206,11 @@ nm_convert(hiveConfirm:=0)
 						IniWrite, %LastConvertBalloon%, nm_config.ini, Settings, LastConvertBalloon
 					}
 				}
+				*/
 			}
+			TotalConvertTime:=TotalConvertTime+(nowUnix()-ConvertStartTime)
+			SessionConvertTime:=SessionConvertTime+(nowUnix()-ConvertStartTime)
+			ConvertStartTime:=0
 		}
 	}
 }
@@ -7590,6 +8506,7 @@ DisconnectCheck(){
 	global Roblox
 	GuiControlGet, PrivServer
 	global ReloadRobloxSecs
+	global TotalDisconnects, SessionDisconnects
 	PublicServer:="https://www.roblox.com/games/4189852503?privateServerLinkCode=94175309348158422142147035472390"
 	while(1){
 		If (nm_imgSearch("disconnected.png",25, "center")[1] = 1 && WinExist("Roblox")){
@@ -7598,6 +8515,12 @@ DisconnectCheck(){
 		if (!ReloadRobloxSecs || ReloadRobloxSecs=0)
 			ReloadRobloxSecs:=60
 		nm_setStatus("Disconnected", "Reconnecting")
+		if(A_Index=1){
+			TotalDisconnects:=TotalDisconnects+1
+			SessionDisconnects:=SessionDisconnects+1
+			IniWrite, %TotalDisconnects%, nm_config.ini, Status, TotalDisconnects
+			IniWrite, %SessionDisconnects%, nm_config.ini, Status, SessionDisconnects
+		}
 		StringLen, linklen, PrivServer
 		if (linklen > 0 && A_Index<10){
 			WinClose, Roblox
@@ -7678,7 +8601,6 @@ nm_deathCheck(){
 		searchRet := nm_imgSearch("died.png",50,"lowright")
 		If (searchRet[1] = 0) {
 			youDied:=1
-			;nm_setState("You Died")
 			nm_setStatus("You Died")
 		}
 	}
@@ -7689,8 +8611,8 @@ nm_activeHoney(){
 	WinGetPos, windowX, windowY, windowWidth, windowHeight, Roblox
     x1 := (windowWidth/2)-65
     x2 := (windowWidth/2)
-    ;PixelSearch, bx2, by2, x1, 0, x2, 65, 0x80E3FF, 10, Fast
-	PixelSearch, bx2, by2, x1, 0, x2, 65, 0xF3DB7E, 20, RGB Fast
+    PixelSearch, bx2, by2, x1, 0, x2, 65, 0x80E3FF, 10, Fast
+	;PixelSearch, bx2, by2, x1, 0, x2, 65, 0xF3DB7E, 20, RGB Fast
     if not ErrorLevel
 	{
         return 1
@@ -7698,8 +8620,8 @@ nm_activeHoney(){
 		if(HiveBees<25){
 			x1 := (windowWidth/2)+235
 			x2 := (windowWidth/2)+275
-			;PixelSearch, bx2, by2, x1, 0, x2, 65, 0xFFFFFF, 10, Fast
-			PixelSearch, bx2, by2, x1, 0, x2, 65, 0xFFFFFF, 10, RGB Fast
+			PixelSearch, bx2, by2, x1, 0, x2, 65, 0xFFFFFF, 10, Fast
+			;PixelSearch, bx2, by2, x1, 0, x2, 65, 0xFFFFFF, 10, RGB Fast
 			
 			if not ErrorLevel
 			{
@@ -7765,7 +8687,7 @@ nm_dayOrNight(){
 	global NightLastDetected
 	global VBLastKilled
 	GuiControl, Text, VBState, %VBState%
-	if (disableDayorNight)
+	if (disableDayorNight || !StingerCheck)
 		return
 	if(((VBState=1) && ((nowUnix()-NightLastDetected)>(6*60) || (nowUnix()-NightLastDetected)<0)) || ((VBState=2) && ((nowUnix()-VBLastKilled)>(5*60) || (nowUnix()-VBLastKilled)<0))) {
 		VBState:=0
@@ -7802,6 +8724,7 @@ nm_dayOrNight(){
 nm_ViciousCheck(){
 	global VBState ;0=no VB, 1=searching for VB, 2=VB found
 	global VBLastKilled
+	global TotalViciousKills, SessionViciousKills
 	send, /
 	send, {Enter}
 	sleep, 100
@@ -7827,6 +8750,10 @@ nm_ViciousCheck(){
 				nm_setStatus("Defeated")
 				VBLastKilled:=nowUnix()
 				IniWrite, %VBLastKilled%, nm_config.ini, Collect, VBLastKilled
+				TotalViciousKills:=TotalViciousKills+1
+				SessionViciousKills:=SessionViciousKills+1
+				IniWrite, %TotalViciousKills%, nm_config.ini, Status, TotalViciousKills
+				IniWrite, %SessionViciousKills%, nm_config.ini, Status, SessionViciousKills
 			}
 		} else if((nowUnix()-VBLastKilled)>(5*60)) { ;it has been greater than 5 minutes since VB was found
 				VBState:=0
@@ -8644,6 +9571,12 @@ nm_PolarQuest(){
 	if(PolarQuestComplete) {
 		nm_gotoQuestgiver("polar")
 		nm_PolarQuestProg()
+		if(!PolarQuestComplete){
+			TotalQuestsComplete:=TotalQuestsComplete+1
+			SessionQuestsComplete:=SessionQuestsComplete+1
+			IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
+			IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
+		}
 	}
 	;do quest stuff
 	while(QuestGatherField!="None" || (QuestLadybugs && (nowUnix()-LastBugrunLadybugs)>floor(300*(1-GiftedViciousCheck*.15))) || (QuestRhinoBeetlesbugs && (nowUnix()-LastBugrunRhinoBeetles)>floor(300*(1-GiftedViciousCheck*.15))) || (QuestSpider && (nowUnix()-LastBugrunSpider)>floor(1800*(1-GiftedViciousCheck*.15))) || (QuestMantis && (nowUnix()-LastBugrunMantis)>floor(1200*(1-GiftedViciousCheck*.15))) || (QuestScorpions && (nowUnix()-LastBugrunScorpions)>floor(1200*(1-GiftedViciousCheck*.15))) || (QuestWerewolf && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15)))){
@@ -8656,6 +9589,12 @@ nm_PolarQuest(){
 		if(PolarQuestComplete) {
 			nm_gotoQuestgiver("polar")
 			nm_PolarQuestProg()
+			if(!PolarQuestComplete){
+				TotalQuestsComplete:=TotalQuestsComplete+1
+				SessionQuestsComplete:=SessionQuestsComplete+1
+				IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
+				IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
+			}
 		}
 	}
 	;close quest menu
@@ -8678,6 +9617,7 @@ nm_questGather(){
 	global AFCFBKey
 	global TCLRKey
 	global AFCLRKey
+	global YouDied
 	thisfield:=QuestGatherField
 	if(QuestGatherField="none")
 		return
@@ -8705,19 +9645,22 @@ nm_questGather(){
 	;gather loop
 	bypass:=0
 	nm_setStatus("Gathering")
-	gatherStart:=nowUnix()
+	gatherStart:=nowUnix() ; used to track gathering time for this cycle
+	;GatherStartTime:=nowUnix() ;used to track total and session time metrics
 	while((BackpackPercentFiltered<100) && ((nowUnix()-gatherStart)<(1800))){
 		nm_gather("squares",, 3)
 		nm_fieldDriftCompensation()
 		nm_PolarQuestProg()
 		;interrupt if
-		if (thisfield!=QuestGatherField || QuestGatherField="none" || PolarQuestComplete){ ;change fields or this field is complete
+		if (thisfield!=QuestGatherField || QuestGatherField="none" || PolarQuestComplete || YouDied){ ;change fields or this field is complete
 			;msgbox QuestGatherField=%QuestGatherField%`,PolarQuestComplete=%PolarQuestComplete%
 			break
 		}
 		;temp1:=(nowUnix()-gatherStart)
 		;msgbox BackpackPercentFiltered=%BackpackPercentFiltered%`n(nowUnix()-gatherStart)=%temp1%
 	}
+	;TotalGatherTime:=TotalGatherTime+(nowUnix()-GatherStartTime)
+	;SessionGatherTime:=SessionGatherTime+(nowUnix()-GatherStartTime)
 }
 nm_gotoQuestgiver(giver){
 	global FwdKey
@@ -8846,10 +9789,25 @@ GuiMode=0
 StatusLogReverse=0
 TotalRuntime=0
 SessionRuntime=0
-TotalGatheringTime=0
-SessionGatheringTime=0
+TotalGatherTime=0
+SessionGatherTime=0
 TotalConvertTime=0
+SessionConvertTime=0
+TotalViciousKills=0
+SessionViciousKills=0
+TotalBossKills=0
+SessionBossKills=0
+TotalBugKills=0
+SessionBugKills=0
+TotalPlantersCollected=0
+SessionPlantersCollected=0
+TotalQuestsComplete=0
+SessionQuestsComplete=0
 TotalDisconnects=0
+SessionDisconnects=0
+Webhook=
+WebhookCheck=0
+ssCooldown=0
 
 [Keys]
 KeyboardLayout=qwerty
@@ -10245,20 +11203,30 @@ ba_GetNectarPercent(var){
 	global nectarnames
 	global graphicsKey
     global resolutionKey
+	global totalCom, totalMot, totalRef, totalSat, totalInv
 	for key, value in nectarnames {
 		if (var=value){
-			(var="comforting") ? nectarColor:=0x7E9EB3
-			: (var="motivating") ? nectarColor:=0x937DB3
-			: (var="satisfying") ? nectarColor:=0xB398A7
-			: (var="refreshing") ? nectarColor:=0x78B375
-			: (var="invigorating") ? nectarColor:=0xB35951
-			PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
+			;(var="comforting") ? nectarColor:=0x7E9EB3
+			;: (var="motivating") ? nectarColor:=0x937DB3
+			;: (var="satisfying") ? nectarColor:=0xB398A7
+			;: (var="refreshing") ? nectarColor:=0x78B375
+			;: (var="invigorating") ? nectarColor:=0xB35951
+			;PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
+			(var="comforting") ? nectarColor:=0xB39E7E
+			: (var="motivating") ? nectarColor:=0xB37D93
+			: (var="satisfying") ? nectarColor:=0xA798B3
+			: (var="refreshing") ? nectarColor:=0x75B378
+			: (var="invigorating") ? nectarColor:=0x5159B3
+			PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%,0, Fast
 			If (ErrorLevel=0) {
 				nexty:=by2+1
 				pixels:=1
-				loop 37 {
-					PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
+				loop 38 {
+					;PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
+					PixelGetColor, OutputVar, %bx2%, %nexty%, fast
+					;PixelSearch, bx3, by3, %bx2%-1, %nexty%, %bx2%+38, 150, %nectarColor%,0, Fast
 					If (OutputVar=nectarColor) {
+					;If (ErrorLevel=0) {
 						nexty:=nexty+1
 						pixels:=pixels+1
 					} else {
@@ -10348,6 +11316,22 @@ ba_GetNectarPercent(var){
 			break
 			*/
 		}
+	}
+	;msgbox %var%: %nectarpercent%
+	if (var="comforting"){
+		totalCom := nectarpercent
+	}
+	else if (var="motivating"){
+		totalMot := nectarpercent
+	}
+	else if (var="refreshing"){
+		totalRef := nectarpercent
+	}
+	else if (var="satisfying"){
+		totalSat := nectarpercent
+	}
+	else if (var="invigorating"){
+		totalInv := nectarpercent
 	}
 	return nectarpercent
 }
@@ -10701,6 +11685,7 @@ ba_harvestPlanter(planterNum){
 	global MovespeedFactor
 	global objective
 	global WindowedScreen
+	global TotalPlantersCollected, SessionPlantersCollected
 	GuiControlGet, HarvestFullGrown
 	;goto specified field
 	;ba_locateVB()
@@ -10829,15 +11814,15 @@ ba_harvestPlanter(planterNum){
 			IniRead, PlanterNectar%planterNum%, ba_config.ini, Planters, PlanterNectar%planterNum%
 			IniRead, PlanterHarvestTime%planterNum%, ba_config.ini, Planters, PlanterHarvestTime%planterNum%
 			IniRead, PlanterEstPercent%planterNum%, ba_config.ini, Planters, PlanterEstPercent%planterNum%
+			TotalPlantersCollected:=TotalPlantersCollected+1
+			SessionPlantersCollected:=SessionPlantersCollected+1
+			IniWrite, %TotalPlantersCollected%, nm_config.ini, Status, TotalPlantersCollected
+			IniWrite, %SessionPlantersCollected%, nm_config.ini, Status, SessionPlantersCollected
 			;gather loot
-			;nm_setState("Looting")
-			;nm_setObjective(planterName .  " Loot")
 			nm_setStatus("Looting", planterName . " Loot")
-			;statusUpdate("Gathering "  . planterName .  " Loot")
 			sleep, 4000
 			nm_Move(1500*MoveSpeedFactor, BackKey, RightKey)
 			nm_loot(2000, 5, "left")
-			;gatherLoot_()
 		}
 	}
 }
@@ -11223,6 +12208,7 @@ MouseMove, 350, (Roblox[3]+70)
 ;set stats
 MacroRunning:=1
 MacroStartTime:=nowUnix()
+global lastHourlyUpdate:=0
 global PausedRuntime:=0
 ;lock tabs
 nm_TabGatherLock()
@@ -11233,6 +12219,23 @@ nm_TabSettingsLock()
 GuiControl, show, LockedText
 ;set globals
 nm_setStatus(0, "Setting Globals")
+global SessionRuntime:=0
+global TotalGatherTime
+global SessionGatherTime:=0
+global TotalConvertTime
+global SessionConvertTime:=0
+global TotalViciousKills
+global SessionViciousKills:=0
+global TotalBossKills
+global SessionBossKills:=0
+global TotalBugKills
+global SessionBugKills:=0
+global TotalPlantersCollected
+global SessionPlantersCollected:=0
+global TotalQuestsComplete
+global SessionQuestsComplete:=0
+global TotalDisconnects
+global SessionDisconnects:=0
 global CurrentField
 global FwdKey
 global LeftKey
@@ -11409,6 +12412,7 @@ global QuestBarGapSize:=0
 global QuestBarInset:=0
 global MyField:=None
 global ReloadRobloxSecs
+global Webhook
 GuiControlGet, CurrentField
 GuiControlGet, MoveMethod
 GuiControlGet, FwdKey
@@ -11459,6 +12463,7 @@ GuiControlGet, KingBeetleCheck
 GuiControlGet, KingBeetleBabyCheck
 GuiControlGet, PolarQuestCheck
 GuiControlGet, ReloadRobloxSecs
+GuiControlGet, Webhook
 loop 3 {
 	GuiControlGet, FieldName%A_Index%
 	GuiControlGet, FieldPattern%A_Index%
@@ -11556,6 +12561,14 @@ IniRead, LastHotkey6, nm_config.ini, Boost, LastHotkey6
 IniRead, LastHotkey7, nm_config.ini, Boost, LastHotkey7
 IniRead, LastWhirligig, nm_config.ini, Boost, LastWhirligig
 IniRead, LastEnzymes, nm_config.ini, Boost, LastEnzymes
+IniRead, TotalGatherTime, nm_config.ini, Status, TotalGatherTime
+IniRead, TotalConvertTime, nm_config.ini, Status, TotalConvertTime
+IniRead, TotalViciousKills, nm_config.ini, Status, TotalViciousKills
+IniRead, TotalBossKills, nm_config.ini, Status, TotalBossKills
+IniRead, TotalBugKills, nm_config.ini, Status, TotalBugKills
+IniRead, TotalPlantersCollected, nm_config.ini, Status, TotalPlantersCollected
+IniRead, TotalQuestsComplete, nm_config.ini, Status, TotalQuestsComplete
+IniRead, TotalDisconnects, nm_config.ini, Status, TotalDisconnects
 whileNames:=["Always", "Attacking", "Gathering", "At Hive"]
 for key, val in whileNames {
 	loop 6 {
@@ -11637,8 +12650,18 @@ nm_Start()
 return
 ;STOP MACRO
 f3::
+global TotalGatherTime, SessionGatherTime, TotalConvertTime, SessionConvertTime
 if(MacroRunning) {
 	TotalRuntime:=TotalRuntime+(nowUnix()-MacroStartTime)
+	SessionRuntime:=SessionRuntime+(nowUnix()-MacroStartTime)
+	if(!GatherStartTime)
+		GatherStartTime:=nowUnix()
+	TotalGatherTime:=TotalGatherTime+(nowUnix()-GatherStartTime)
+	SessionGatherTime:=SessionGatherTime+(nowUnix()-GatherStartTime)
+	if(!ConvertStartTime)
+		ConvertStartTime:=nowUnix()
+	TotalConvertTime:=TotalConvertTime+(nowUnix()-ConvertStartTime)
+	SessionConvertTime:=SessionConvertTime+(nowUnix()-ConvertStartTime)
 }
 IniWrite, %TotalRuntime%, nm_config.ini, Status, TotalRuntime
 MacroRunning:=0
@@ -11650,12 +12673,18 @@ send {space up}
 click up
 ;nm_releaseKeys()
 IniWrite, %SessionRuntime%, nm_config.ini, Status, SessionRuntime
+IniWrite, %TotalGatherTime%, nm_config.ini, Status, TotalGatherTime
+IniWrite, %SessionGatherTime%, nm_config.ini, Status, SessionGatherTime
+IniWrite, %TotalConvertTime%, nm_config.ini, Status, TotalConvertTime
+IniWrite, %SessionConvertTime%, nm_config.ini, Status, SessionConvertTime
 nm_setStatus("End", "Macro")
 Reload
 return
 ;PAUSE MACRO
 f2::
 global state
+if(state="startup")
+	return
 if(A_IsPaused) {
 	if(FwdKeyState)
 		send {%FwdKey% down}
@@ -11671,6 +12700,7 @@ if(A_IsPaused) {
 	MacroRunning:=1
 	;manage runtimes
 	MacroStartTime:=nowUnix()
+	GatherStartTime:=nowUnix()
 } else {
 	FwdKeyState:=GetKeyState(FwdKey)
 	BackKeyState:=GetKeyState(BackKey)
@@ -11688,7 +12718,10 @@ if(A_IsPaused) {
 	MacroRunning:=0
 	;manage runtimes
 	TotalRuntime:=TotalRuntime+(nowUnix()-MacroStartTime)
-	PausedRuntime:=SessionRuntime
+	PausedRuntime:=PausedRuntime+(nowUnix()-MacroStartTime)
+	SessionRuntime:=SessionRuntime+(nowUnix()-MacroStartTime)
+	TotalGatherTime:=TotalGatherTime+(nowUnix()-GatherStartTime)
+	SessionGatherTime:=SessionGatherTime+(nowUnix()-GatherStartTime)
 	IniWrite, %TotalRuntime%, nm_config.ini, Status, TotalRuntime
 	nm_setStatus("Paused", "Press F2 to Continue")
 }

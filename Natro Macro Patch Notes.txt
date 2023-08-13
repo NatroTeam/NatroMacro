@@ -1,3 +1,21 @@
+0.5.0 Patch Notes
+
+New Features
+-Added Webhooks!! Special thanks to xSPx and Scripting_Noob for developing this nice feature.  This feature is still a work in progress and it will likely be a little out of sync with the Noob edition.
+
+Bugs
+-Adjusted hive camera rotation ordering.
+-Corrected an slowness issue that was introduced in the previous patch.
+-Checking for nighttime will now only occur if the Stingers option is selected.  This was causing trouble for gathering patterns.
+-Fixed an error in the Planters+ nectar measurement where a 100% full nectar was counted as 0%.  This would cause Planters+ to keep re-planting for that nectar indefinately.
+-Fixed an issue where after using a micro-converter you would return to hive anyway.
+-Fixed an issue where if you die while gathering pollen for a quest, you will reset and try again.
+-Fixed an issue where a full backpack would cause a reset rather than return to hive.
+
+Other
+-Pause (F2) will no longer do anything if the macro has not previously been started (F1).
+
+
 0.4.1 Patch Notes
 
 Bugs
