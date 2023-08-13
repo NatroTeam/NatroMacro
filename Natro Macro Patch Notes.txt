@@ -1,3 +1,13 @@
+0.9.4 Patch Notes
+
+New Features
+-Added Robo Bear Party De-Leveling feature.  This option will go to the party cake and start the party. THAT IS ALL!!! Unless by some miracle doing nothing defeats all robots this will result in a failure and the party level will be lowered.
+-Added my new custom pattern "Fork"
+
+Other
+-Added winterstorm image for supreme saturator for field drift compensation while a storm is active.
+
+
 0.9.3 Patch Notes
 
 New Features
