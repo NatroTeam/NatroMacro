@@ -21,10 +21,12 @@ else {
 	" nm_Walk(3, LeftKey) "
 	" nm_Walk(4, BackKey) "
 	send {" RotLeft " 4}{space down}
-	HyperSleep(150)
-	send {space up}{" FwdKey " down}
-	HyperSleep(200)
-	send {space}
+	HyperSleep(100)
+	send {" SC_Space " up}{" FwdKey " down}
+	HyperSleep(250)
+	send {" SC_Space " down}
+	HyperSleep(100)
+	send {" SC_Space " up}
 	HyperSleep(3000)
 	send {" FwdKey " up}
 	HyperSleep(2600)

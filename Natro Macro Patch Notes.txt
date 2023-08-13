@@ -1,3 +1,44 @@
+0.9.2 Patch Notes
+
+New Features
+- Remote Control has been implemented to the macro! This will allow you to control the macro through Discord with a wide range of commands. This is an advanced feature, a full documentation made by Zaappiix is in the Natro Macro Discord server to use as a reference for setup and usage.
+- Added the Misc tab which will include various tools independent from the macro, such as Gifted Basic Bee Hatcher and the detection of your bee list for import into Hive Builder.
+- Added a custom GUI for Discord Integration settings to make space for many more options, including remote control and the customisation of screenshots and pings.
+- Added the ability to change Start/Stop/Pause and other hotkeys in Misc tab.
+- Added the option to leave amulets on screen instead of always doing Keep Old.
+- Added the option to disable the gathering of Planter Loot.
+- Added a feature to announce Night Detection to a specific Discord Webhook for stinger farming.
+- Rearranged Gather tab and introduced the option to overwrite field defaults using the Save button. This allows you to change the settings used automatically for Quests. These settings can be reset in the Settings tab.
+- Added an option to run Vicious Bee cycle only for the Daily Bonus.
+
+Bugs
+- Fixed misdetection of default browser in some edge cases, most notably fixing the issues of incorrect browser being used and the 'Choose default browser' popup.
+- Fixed the issue where Glitter was not used for Manual Planters due to a typo in the code.
+- Fixed a bug where Session Stats would show incorrectly in the GUI.
+- Altered Cactus walk back path to increase reliability and reduce occurrences of walking into Werewolf cave.
+- Fixed some infinite loops when encountering an error when harvesting Planters.
+- Fixed the issue where duplicate status updates would be sent by introducing a new system to process messages.
+- Reworked 'Confirming: Night' to reduce false negatives (i.e. aborting night when it is night) and increase accuracy.
+- Fixed a potential memory leak when using the Snowflake Boost option.
+
+Other
+- The macro is now licensed under GNU GPLv3 to give us protection against some shameless actions.
+- All Discord links can now launch in the app directly instead of opening browser. You can now click on members of the Dev and Tester teams to view their profiles.
+- Implemented upload (Discord) of images/screenshots directly from memory stream instead of saving to hard disk, hugely increasing speed and reducing the chance of error.
+- Added Discord Integration features to warn and ping if balloon has not been converted in over 50 minutes and send a screenshot of Daily Honey Leaderboard.
+- Changed Hotbar Options time settings to accept a wider range and display the time clearly in 'hms' format.
+- Added option to disable debug log writing in Misc tab.
+- Reworked tab closing further to analyse window stack for browser more reliably.
+- Easy/Advanced Mode has been removed from the GUI, and the bottom of GUI has been redesigned.
+- Added a subtab system to separate Collect/Kill tab to make more space for future options.
+- Pausing the macro now automatically activates the Natro window.
+- Updated nm_Reset() (and all other reset functions) to dynamically wait for reset instead of a fixed time, improving speed and reliability during server lag (slow resets).
+- Reworked Heartbeat function to work separately from background scripts and ensure that all necessary scripts for the current state are running.
+- Added Mondo interrupt for Stump Snail and Commando Chick.
+- Added small wait time before traveling to harvest Rose, Spider, Cactus, Pumpkin, Pine Tree Planters.
+- Fixed some typos in status updates and GUI dialog boxes.
+
+
 0.9.1 Patch Notes
 
 New Features

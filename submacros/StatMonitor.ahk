@@ -1,13 +1,27 @@
-﻿#NoEnv
+﻿/*
+Natro Macro, https://bit.ly/NatroMacro
+Copyright © 2022-2023 Natro Dev Team (natromacroserver@gmail.com)
+
+This file is part of Natro Macro. Our source code will always be open and available.
+
+Natro Macro is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+Natro Macro is distributed in the hope that it will be useful. This does not give you the right to steal sections from our code, distribute it under your own name, then slander the macro. 
+
+You should have received a copy of the GNU General Public License along with Natro Macro. If not, see https://www.gnu.org/licenses/. 
+*/
+
+#NoEnv
 #Persistent
 #SingleInstance, force
 #Requires AutoHotkey v1.1.31+
-SetBatchLines -1
-SetWorkingDir %A_ScriptDir%\..
 
 #Include %A_ScriptDir%\..\lib
 #Include Gdip_All.ahk
 #Include Gdip_ImageSearch.ahk
+
+SetBatchLines -1
+SetWorkingDir %A_ScriptDir%\..
 
 ; set version number
 version := "2.3"
@@ -271,11 +285,6 @@ if FileExist("natro_macro.ahk")
 	IniRead, MaxAllowedPlanters, settings\nm_config.ini, gui, MaxAllowedPlanters, 0
 }
 
-; obtain webhook for sending reports
-IniRead, webhook1, settings\nm_config.ini, Status, Webhook, 0
-IniRead, webhook2, settings\nm_config.ini, Status, Webhook2, 0
-webhook := RegExMatch(webhook2, "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$") ? webhook2 : webhook1
-
 ; time until next report
 DllCall("GetSystemTimeAsFileTime", "int64p", start_time)
 VarSetCapacity(time,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",Ceil((36000000000-Mod(start_time, 36000000000))/10000000)*10000000,"wstr","m'm 's's'","str",time,"int",256)
@@ -296,7 +305,7 @@ message .= (natro_version ? "\n\nMacro: **Natro v" natro_version "**\n"
 			: "")
 			
 
-; SEND TO WEBHOOK
+; SEND STARTUP REPORT
 ; create postdata
 postdata =
 (
@@ -309,16 +318,8 @@ postdata =
 }
 )
 
-; post to webhook
-try
-{
-	wr := ComObjCreate("WinHTTP.WinHTTPRequest.5.1")
-	wr.Open("POST", webhook)
-	wr.SetRequestHeader("User-Agent", "AHK")
-	wr.SetRequestHeader("Content-Type", "application/json")
-	wr.Send(postdata)
-	wr.WaitForResponse()
-}
+; post to status
+Send_WM_COPYDATA(postdata, "Status.ahk ahk_class AutoHotkey")
 
 
 
@@ -825,7 +826,7 @@ DetectHoney()
 		i := A_Index
 		Loop, 2
 		{
-			pBMNew := Gdip_ResizeBitmap(pBM, ((A_Index = 1) ? (300 + i * 15) : (700 - i * 15)), 36 + i * 3, 0, 2)
+			pBMNew := Gdip_ResizeBitmap(pBM, ((A_Index = 1) ? (250 + i * 20) : (750 - i * 20)), 36 + i * 4, 0, 2)
 			Gdip_BitmapApplyEffect(pBMNew, pEffect)
 			hBM := Gdip_CreateHBITMAPFromBitmap(pBMNew)
 			;Gdip_SaveBitmapToFile(pBMNew, i A_Index ".png")
@@ -871,13 +872,13 @@ DetectHoney()
 
 /*
 SendHourlyReport()
-this function assesses the honey and buff arrays, accumulates them into a report, then sends it via webhook
+this function assesses the honey and buff arrays, accumulates them into a report, then sends it to status
 it is programmed to run every hour and provides an hourly-based report with graphs and stats
 */
 
 SendHourlyReport()
 {
-	global pBM, webhook, regions, stat_regions, honey_values, honey_12h, backpack_values, buff_values, buff_colors, status_changes, start_time, start_honey, stats, latest_boost, latest_winds, graph_regions, version, natro_version, os_version, bitmaps, ocr_enabled, ocr_language
+	global pBM, regions, stat_regions, honey_values, honey_12h, backpack_values, buff_values, buff_colors, status_changes, start_time, start_honey, stats, latest_boost, latest_winds, graph_regions, version, natro_version, os_version, bitmaps, ocr_enabled, ocr_language
 	static honey_average := 0, honey_earned := 0, convert_time := 0, gather_time := 0, other_time := 0, stats_old := {1:["Total Boss Kills",0],2:["Total Vic Kills",0],3:["Total Bug Kills",0],4:["Total Planters",0],5:["Quests Done",0],6:["Disconnects",0]}
 	
 	if (honey_values.Count() > 0)
@@ -1565,28 +1566,84 @@ SendHourlyReport()
 	Gdip_TextToGraphics(G, "Natro v" natro_version, "s56 Left Bold cffb47bd1 x" x+100 " y" y, "Segoe UI")
 	
 	Gdip_DeleteGraphics(G)
-
-	result := Gdip_SaveBitmapToFile(pBMReport, "file.png")
-	Gdip_DisposeImage(pBMReport)
-	path := "file.png"
-
-	;FormatTime, t, %A_NowUTC%, HH:mm:ss (UTC+0)
-
-	payload_json =
-	(
-	{
-		"embeds": [{
-			"title": "**[%A_Hour%:%A_Min%:00] Hourly Report**",
-			"color": "14052794",
-			"image": {"url": "attachment://file.png"}
-		}]
-	}
-	)
+	
+	IniRead, webhook, settings\nm_config.ini, Status, webhook
+	IniRead, bottoken, settings\nm_config.ini, Status, bottoken
+	IniRead, discordMode, settings\nm_config.ini, Status, discordMode
+	IniRead, ReportChannelID, settings\nm_config.ini, Status, ReportChannelID
+	if (StrLen(ReportChannelID) < 17)
+		IniRead, ReportChannelID, settings\nm_config.ini, Status, MainChannelID
 	
 	try
 	{
-		objParam := {payload_json: payload_json, file: [path]}
-		CreateFormData(postdata, hdr_ContentType, objParam)
+		str := "0|1|2|3|4|5|6|7|8|9|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z"
+		Sort, str, D| Random
+		str := StrReplace(str, "|")
+		boundary := SubStr(str, 1, 12)
+		hData := DllCall("GlobalAlloc","UInt",0x2,"UPtr",0,"Ptr")
+		DllCall("ole32\CreateStreamOnHGlobal", "Ptr", hData, "Int", 0, "PtrP", pStream:=0, "UInt")
+
+		str := "
+		(LTrim Join`r`n
+		------------------------------" boundary "
+		Content-Disposition: form-data; name=""payload_json""
+		Content-Type: application/json
+
+		{
+			""embeds"": [{
+				""title"": ""**[" A_Hour ":" A_Min ":00] Hourly Report**"",
+				""color"": ""14052794"",
+				""image"": {""url"": ""attachment://file.png""}
+			}]
+		}
+		------------------------------" boundary "
+		Content-Disposition: form-data; name=""files[0]""; filename=""file.png""
+		Content-Type: image/png
+		
+		
+		)"
+		
+		VarSetCapacity(utf8, length := StrPut(str, "UTF-8") - 1), StrPut(str, &utf8, length, "UTF-8")
+		DllCall("shlwapi\IStream_Write", "Ptr", pStream, "Ptr", &utf8, "UInt", length, "UInt")
+		
+		pFileStream := Gdip_SaveBitmapToStream(pBMReport, "PNG")
+		DllCall("shlwapi\IStream_Size", "Ptr", pFileStream, "UInt64P", size:=0, "UInt")
+		DllCall("shlwapi\IStream_Reset", "Ptr", pFileStream, "UInt")
+		DllCall("shlwapi\IStream_Copy", "Ptr", pFileStream, "Ptr", pStream, "UInt", size, "UInt")
+		ObjRelease(pFileStream)
+
+		str := "
+		(LTrim Join`r`n
+
+		------------------------------" boundary "--
+
+		)"
+
+		VarSetCapacity(utf8, length := StrPut(str, "UTF-8") - 1), StrPut(str, &utf8, length, "UTF-8")
+		DllCall("shlwapi\IStream_Write", "Ptr", pStream, "Ptr", &utf8, "UInt", length, "UInt")
+		ObjRelease(pStream)
+
+		pData := DllCall("GlobalLock", "Ptr", hData, "Ptr")
+		size := DllCall("GlobalSize", "Ptr", pData, "UPtr")
+
+		retData := ComObjArray(0x11, size)
+		pvData := NumGet(ComObjValue(retData), 8 + A_PtrSize, "Ptr")
+		DllCall("RtlMoveMemory", "Ptr", pvData, "Ptr", pData, "Ptr", size)
+
+		DllCall("GlobalUnlock", "Ptr", hData)
+		DllCall("GlobalFree", "Ptr", hData, "Ptr")
+		contentType := "multipart/form-data; boundary=----------------------------" boundary
+		
+		wr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+		wr.Option(9) := 2720
+		wr.Open("POST", (discordMode = 0) ? webhook : ("https://discord.com/api/v10/channels/" ReportChannelID "/messages"), 0)
+		if (discordMode = 1)
+		{
+			wr.SetRequestHeader("User-Agent", "DiscordBot (AHK, " A_AhkVersion ")")
+			wr.SetRequestHeader("Authorization", "Bot " bottoken)
+		}
+		wr.SetRequestHeader("Content-Type", contentType)
+		wr.Send(retData)
 	}
 	catch e
 	{
@@ -1611,20 +1668,10 @@ SendHourlyReport()
 		}
 		)
 		
-		hdr_ContentType := "application/json"
+		Send_WM_COPYDATA(postdata, "Status.ahk ahk_class AutoHotkey")
 	}
 
-	try
-	{
-		wr := ComObjCreate("WinHTTP.WinHTTPRequest.5.1")
-		wr.Open("POST", webhook)
-		wr.SetRequestHeader("User-Agent", "AHK")
-		wr.SetRequestHeader("Content-Type", hdr_ContentType)
-		wr.Send(postdata)
-		wr.WaitForResponse()
-	}
-
-	FileDelete, file.png
+	Gdip_DisposeImage(pBMReport)
 	
 	; save old stats for comparison
 	for k,v in stats_old
@@ -1750,136 +1797,6 @@ maxX(List)
 	return X
 }
 
-
-/*
-CreateFormData() by tmplinshi, https://www.autohotkey.com/boards/viewtopic.php?t=7647
-this function creates a 'multipart/form-data' header, enables posting images through HTTP
-*/
-
-CreateFormData(ByRef retData, ByRef retHeader, objParam) {
-	New CreateFormData(retData, retHeader, objParam)
-}
-
-Class CreateFormData {
-
-	__New(ByRef retData, ByRef retHeader, objParam) {
-
-		CRLF := "`r`n"
-
-		Boundary := this.RandomBoundary()
-		BoundaryLine := "------------------------------" . Boundary
-
-		; Loop input paramters
-		binArrs := []
-		fileArrs := []
-		For k, v in objParam
-		{
-			If IsObject(v) {
-				For i, FileName in v
-				{
-					str := BoundaryLine . CRLF
-					     . "Content-Disposition: form-data; name=""" . k . """; filename=""" . FileName . """" . CRLF
-					     . "Content-Type: " . this.MimeType(FileName) . CRLF . CRLF
-					fileArrs.Push( BinArr_FromString(str) )
-					fileArrs.Push( BinArr_FromFile(FileName) )
-					fileArrs.Push( BinArr_FromString(CRLF) )
-				}
-			} Else {
-				str := BoundaryLine . CRLF
-				     . "Content-Disposition: form-data; name=""" . k """" . CRLF . CRLF
-				     . v . CRLF
-				binArrs.Push( BinArr_FromString(str) )
-			}
-		}
-
-		binArrs.push( fileArrs* )
-
-		str := BoundaryLine . "--" . CRLF
-		binArrs.Push( BinArr_FromString(str) )
-
-		retData := BinArr_Join(binArrs*)
-		retHeader := "multipart/form-data; boundary=----------------------------" . Boundary
-	}
-
-	RandomBoundary() {
-		str := "0|1|2|3|4|5|6|7|8|9|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z"
-		Sort, str, D| Random
-		str := StrReplace(str, "|")
-		Return SubStr(str, 1, 12)
-	}
-
-	MimeType(FileName) {
-		n := FileOpen(FileName, "r").ReadUInt()
-		Return (n        = 0x474E5089) ? "image/png"
-		     : (n        = 0x38464947) ? "image/gif"
-		     : (n&0xFFFF = 0x4D42    ) ? "image/bmp"
-		     : (n&0xFFFF = 0xD8FF    ) ? "image/jpeg"
-		     : (n&0xFFFF = 0x4949    ) ? "image/tiff"
-		     : (n&0xFFFF = 0x4D4D    ) ? "image/tiff"
-		     : "application/octet-stream"
-	}
-
-}
-
-BinArr_FromString(str) {
-	oADO := ComObjCreate("ADODB.Stream")
-
-	oADO.Type := 2 ; adTypeText
-	oADO.Mode := 3 ; adModeReadWrite
-	oADO.Open
-	oADO.Charset := "UTF-8"
-	oADO.WriteText(str)
-
-	oADO.Position := 0
-	oADO.Type := 1 ; adTypeBinary
-	oADO.Position := 3 ; Skip UTF-8 BOM
-	return oADO.Read, oADO.Close
-}
-
-BinArr_FromFile(FileName) {
-	oADO := ComObjCreate("ADODB.Stream")
-
-	oADO.Type := 1 ; adTypeBinary
-	oADO.Open
-	oADO.LoadFromFile(FileName)
-	return oADO.Read, oADO.Close
-}
-
-BinArr_Join(Arrays*) {
-	oADO := ComObjCreate("ADODB.Stream")
-
-	oADO.Type := 1 ; adTypeBinary
-	oADO.Mode := 3 ; adModeReadWrite
-	oADO.Open
-	For i, arr in Arrays
-		oADO.Write(arr)
-	oADO.Position := 0
-	return oADO.Read, oADO.Close
-}
-
-BinArr_ToString(BinArr, Encoding := "UTF-8") {
-	oADO := ComObjCreate("ADODB.Stream")
-
-	oADO.Type := 1 ; adTypeBinary
-	oADO.Mode := 3 ; adModeReadWrite
-	oADO.Open
-	oADO.Write(BinArr)
-
-	oADO.Position := 0
-	oADO.Type := 2 ; adTypeText
-	oADO.Charset  := Encoding 
-	return oADO.ReadText, oADO.Close
-}
-
-BinArr_ToFile(BinArr, FileName) {
-	oADO := ComObjCreate("ADODB.Stream")
-
-	oADO.Type := 1 ; adTypeBinary
-	oADO.Open
-	oADO.Write(BinArr)
-	oADO.SaveToFile(FileName, 2)
-	oADO.Close
-}
 
 /*
 OCR with UWP API by malcev
@@ -2076,4 +1993,20 @@ WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", Win
     DllCall("ClientToScreen", "UPtr",hWnd, "Ptr",&RECT)
     X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
     Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
+}
+
+Send_WM_COPYDATA(ByRef StringToSend, ByRef TargetScriptTitle, wParam:=0)
+{
+    VarSetCapacity(CopyDataStruct, 3*A_PtrSize, 0)
+    SizeInBytes := (StrLen(StringToSend) + 1) * (A_IsUnicode ? 2 : 1)
+    NumPut(SizeInBytes, CopyDataStruct, A_PtrSize)
+    NumPut(&StringToSend, CopyDataStruct, 2*A_PtrSize)
+    Prev_DetectHiddenWindows := A_DetectHiddenWindows
+    Prev_TitleMatchMode := A_TitleMatchMode
+    DetectHiddenWindows On
+    SetTitleMatchMode 2
+    SendMessage, 0x004A, wParam, &CopyDataStruct,, %TargetScriptTitle%,,,, 10000
+    DetectHiddenWindows %Prev_DetectHiddenWindows%
+    SetTitleMatchMode %Prev_TitleMatchMode%
+    return ErrorLevel
 }

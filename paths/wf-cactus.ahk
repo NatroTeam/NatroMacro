@@ -1,17 +1,13 @@
 ﻿paths["cactus"] := "
 (LTrim Join`r`n
-" nm_Walk(9, LeftKey) "
-" nm_Walk(22.5, BackKey) "
-send {" BackKey " down}{" LeftKey " down}
-HyperSleep(2000)
-send {space down}
-HyperSleep(200)
-send {space up}
-HyperSleep(2000)
-send {" BackKey " up}{" LeftKey " up}
+" nm_Walk(8, BackKey) "
+" nm_Walk(10, LeftKey, BackKey) "
+" nm_Walk(14.5, BackKey) "
+" nm_Walk(28, LeftKey) "
 " nm_Walk(36, FwdKey) "
-" nm_Walk(4.5, FwdKey, RightKey) "
-" nm_Walk(4.5, FwdKey, LeftKey) "
+" nm_Walk(3, RightKey) "
+" nm_Walk(4, FwdKey) "
+" nm_Walk(4, LeftKey) "
 " nm_Walk(27, FwdKey) "
 " nm_Walk(2.25, FwdKey, LeftKey) "
 " nm_Walk(90, FwdKey) "

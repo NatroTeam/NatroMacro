@@ -1,9 +1,23 @@
+/*
+Natro Macro, https://bit.ly/NatroMacro
+Copyright © 2022-2023 Natro Dev Team (natromacroserver@gmail.com)
+
+This file is part of Natro Macro. Our source code will always be open and available.
+
+Natro Macro is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+Natro Macro is distributed in the hope that it will be useful. This does not give you the right to steal sections from our code, distribute it under your own name, then slander the macro. 
+
+You should have received a copy of the GNU General Public License along with Natro Macro. If not, see https://www.gnu.org/licenses/. 
+*/
+
 #NoEnv
 #NoTrayIcon
 #SingleInstance force
-SetBatchLines -1
 #InputLevel 1
 #MaxThreads 255
+
+SetBatchLines -1
 SetWorkingDir %A_ScriptDir%
 
 RunWith(32)
@@ -23,16 +37,18 @@ RunWith(bits) {
 
 ;initialization
 global imgfolder:="..\nm_image_assets"
-resetTime:=LastRobloxWindow:=LastState:=LastHeartbeat:=nowUnix()
-VBState:=state:=0
-DailyReconnect:=0
+resetTime:=LastState:=LastConvertBalloon:=nowUnix()
+DailyReconnect:=VBState:=state:=0
+MacroState:=2
 IniRead, NightLastDetected, ..\settings\nm_config.ini, Collect, NightLastDetected
 IniRead, VBLastKilled, ..\settings\nm_config.ini, Collect, VBLastKilled
 IniRead, StingerCheck, ..\settings\nm_config.ini, Collect, StingerCheck
+IniRead, StingerDailyBonusCheck, ..\settings\nm_config.ini, Collect, StingerDailyBonusCheck
 IniRead, AnnounceGuidingStar, ..\settings\nm_config.ini, Settings, AnnounceGuidingStar
 IniRead, ReconnectInterval, ..\settings\nm_config.ini, Settings, ReconnectInterval
 IniRead, ReconnectHour, ..\settings\nm_config.ini, Settings, ReconnectHour
 IniRead, ReconnectMin, ..\settings\nm_config.ini, Settings, ReconnectMin
+IniRead, EmergencyBalloonPingCheck, ..\settings\nm_config.ini, Status, EmergencyBalloonPingCheck
 
 CoordMode, Pixel, Client
 DetectHiddenWindows On
@@ -40,8 +56,10 @@ SetTitleMatchMode 2
 
 ;OnMessages
 OnExit("ExitFunc")
+OnMessage(0x5552, "nm_setGlobalInt", 255)
 OnMessage(0x5554, "nm_setGlobalNum", 255)
 OnMessage(0x5555, "nm_setState", 255)
+OnMessage(0x5556, "nm_sendHeartbeat")
 
 loop {
 	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
@@ -52,14 +70,14 @@ loop {
 	nm_backpackPercentFilter()
 	nm_guidingStarDetect()
 	nm_dailyReconnect()
-	(Mod(A_Index, 10) = 0) ? nm_sendHeartbeat()
+	nm_EmergencyBalloon()
 	sleep, 1000
 }
 
 nm_setGlobalNum(wParam, lParam){
 	Critical
-	global resetTime, NightLastDetected, VBState, StingerCheck, VBLastKilled, DailyReconnect, LastHeartbeat
-	static arr:=["resetTime", "NightLastDetected", "VBState", "StingerCheck", "VBLastKilled", "DailyReconnect", "LastHeartbeat"]
+	global resetTime, NightLastDetected, VBState, StingerCheck, VBLastKilled, DailyReconnect, LastConvertBalloon
+	static arr:=["resetTime", "NightLastDetected", "VBState", "StingerCheck", "VBLastKilled", "DailyReconnect", "LastConvertBalloon"]
 	
 	var := arr[wParam], %var% := lParam
 	return 0
@@ -152,7 +170,7 @@ nm_popStarCheck(){
 nm_dayOrNight(){
 	disableDayorNight:=0
 	;VBState 0=no VB, 1=searching for VB, 2=VB found
-	global windowX, windowY, windowWidth, windowHeight, NightLastDetected, StingerCheck, VBLastKilled, VBState
+	global windowX, windowY, windowWidth, windowHeight, NightLastDetected, StingerCheck, StingerDailyBonusCheck, VBLastKilled, VBState
 	static confirm:=0
 	if (disableDayorNight || StingerCheck=0)
 		return
@@ -187,7 +205,7 @@ nm_dayOrNight(){
 				PostMessage, 0x5555, 2, %NightLastDetected%
 				Send_WM_COPYDATA("Detected: Night", "natro_macro.ahk ahk_class AutoHotkey")
 			}
-			if(StingerCheck && VBState=0) {
+			if(StingerCheck && (!StingerDailyBonusCheck || (nowUnix()-VBLastKilled)>86400) && VBState=0) {
 				VBState:=1 ;0=no VB, 1=searching for VB, 2=VB found
 				if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
 					PostMessage, 0x5555, 3, 1
@@ -322,6 +340,7 @@ nm_backpackPercent(){
 	}
 	Return BackpackPercent
 }
+
 nm_backpackPercentFilter(){
 	static PackFilterArray:=[], LastBackpackPercentFiltered:="", i:=0, samplesize:=6 ;6 seconds (6 samples @ 1 sec intervals)
 	
@@ -397,53 +416,53 @@ nm_dailyReconnect(){
 			break
 		}
 	}
-	if((ReconnectMin=RCminUTC) && HourReady && (DailyReconnect=0)) {
+	if((ReconnectMin=RCminUTC) && HourReady && (DailyReconnect=0) && (MacroState = 2)) {
 		DailyReconnect:=1
 		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
 			PostMessage, 0x5555, 9, 1
 			Send_WM_COPYDATA("Closing: Roblox, Daily Reconnect", "natro_macro.ahk ahk_class AutoHotkey")
+			PostMessage, 0x5557
 		}
-		while(winexist("Roblox ahk_exe RobloxPlayerBeta.exe")){
-			WinKill
-			sleep, 1000
+	}
+}
+
+nm_EmergencyBalloon(){
+	global EmergencyBalloonPingCheck, LastConvertBalloon
+	static LastEmergency:=0
+	if ((EmergencyBalloonPingCheck = 1) && ((time := nowUnix() - LastConvertBalloon) > 3000) && (nowUnix() - LastEmergency > 300))
+	{
+		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+			VarSetCapacity(duration,256), DllCall("GetDurationFormatEx","Ptr",0,"UInt",0,"Ptr",0,"Int64",time*10000000,"WStr",((time >= 60) ? "m'm' s" : "") "s's'","Str",duration,"Int",256)
+			Send_WM_COPYDATA("Emergency: No Balloon Convert in " duration, "natro_macro.ahk ahk_class AutoHotkey")
+			LastEmergency := nowUnix()
 		}
 	}
 }
 
 nm_sendHeartbeat(){
-	global LastHeartbeat, LastState, LastRobloxWindow
-	time := nowUnix()
-	if WinExist("Roblox ahk_exe RobloxPlayerBeta.exe")
-		LastRobloxWindow:=time
-	if (((time - LastHeartbeat > 120) && (reason := 1)) || ((time - LastRobloxWindow > 600) && (reason := 2))) {
-		Loop, 10 {
-			while WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-				WinGet, natroPID, PID
-				Process, Close, % natroPID
-			}
-			while WinExist("Roblox") {
-				WinKill
-				sleep, 1000
-			}
-			
-			run, "%A_AhkPath%" "..\natro_macro.ahk"
-			WinWait, Natro ahk_class AutoHotkeyGUI, , 300
-			if (success := !ErrorLevel) {
-				Sleep, 5000
-				Send_WM_COPYDATA("Error: " ((reason = 1) ? "Macro Unresponsive Timeout!" : "No Roblox Window Timeout!") "`nSuccessfully restarted macro!", "natro_macro.ahk ahk_class AutoHotkey")
-				Sleep, 1000
-				if WinExist("natro_macro.ahk ahk_class AutoHotkey")
-					PostMessage, 0x5550
-				Sleep, 1000
-				ExitApp
-			}
-		}
+	Critical
+	Prev_DetectHiddenWindows := A_DetectHiddenWindows
+	Prev_TitleMatchMode := A_TitleMatchMode
+	DetectHiddenWindows On
+	SetTitleMatchMode 2
+	if WinExist("Heartbeat.ahk ahk_class AutoHotkey") {
+		PostMessage, 0x5556, 2
 	}
-	if WinExist("natro_macro.ahk ahk_class AutoHotkey")
-		PostMessage, 0x5556
+	DetectHiddenWindows %Prev_DetectHiddenWindows%
+	SetTitleMatchMode %Prev_TitleMatchMode%
+	return 0
 }
-
-
+nm_setGlobalInt(wParam, lParam)
+{
+	global
+	Critical
+	local var
+	; enumeration
+	static arr := {23: "MacroState"}
+	
+	var := arr[wParam], %var% := lParam
+	return 0
+}
 Send_WM_COPYDATA(ByRef StringToSend, ByRef TargetScriptTitle, wParam:=0)
 {
     VarSetCapacity(CopyDataStruct, 3*A_PtrSize, 0)
