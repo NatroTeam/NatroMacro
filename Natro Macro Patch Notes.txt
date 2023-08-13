@@ -1,0 +1,14 @@
+0.4.1 Patch Notes
+
+Bugs
+-Fixed an issue causing character to stand in place for a while doing nothing.
+-Fixed an issue causing balloon conversions to abort too early and in some cases causing blessing to be lost.
+-Fixed an issue where fields 2 and 3 were not gathered.
+-Fixed pathing for Vicious Bee check in Pepper
+-Fixed a pathing issue when placing diamond sprinklers.
+
+New Features
+-Added ability to customize distance for field sprinkler start locations.
+
+Other
+-Changed how Planters+ measures nectar percentages.  It is much faster and more accurate than before.

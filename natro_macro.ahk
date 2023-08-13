@@ -20,7 +20,7 @@ runWith(version){
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.4"
+VersionID:="0.4.1"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; NATRO ENHANCEMENT STUFF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -290,6 +290,7 @@ loop 3 {
 	IniRead, FieldUntilPack%A_Index%, nm_config.ini, Gather, FieldUntilPack%A_Index%
 	IniRead, FieldReturnType%A_Index%, nm_config.ini, Gather, FieldReturnType%A_Index%
 	IniRead, FieldSprinklerLoc%A_Index%, nm_config.ini, Gather, FieldSprinklerLoc%A_Index%
+	IniRead, FieldSprinklerDist%A_Index%, nm_config.ini, Gather, FieldSprinklerDist%A_Index%
 	IniRead, FieldRotateDirection%A_Index%, nm_config.ini, Gather, FieldRotateDirection%A_Index%
 	IniRead, FieldRotateTimes%A_Index%, nm_config.ini, Gather, FieldRotateTimes%A_Index%
 	IniRead, FieldDriftCheck%A_Index%, nm_config.ini, Gather, FieldDriftCheck%A_Index%
@@ -465,30 +466,30 @@ Gui, Add, Checkbox, x20 y140 +BackgroundTrans vFieldDriftCheck2 gnm_SaveGather C
 GuiControl, disable, FieldDriftCheck2
 Gui, Add, Checkbox, x20 y200 +BackgroundTrans vFieldDriftCheck3 gnm_SaveGather Checked%FieldDriftCheck3%,Field Drift`nCompensation
 GuiControl, disable, FieldDriftCheck3
-Gui, Add, Checkbox, x125 y85 +BackgroundTrans vFieldPatternShift1 gnm_SaveGather Checked%FieldPatternShift1%, Gather w/Shift-Lock
+Gui, Add, Checkbox, x115 y85 +BackgroundTrans vFieldPatternShift1 gnm_SaveGather Checked%FieldPatternShift1%, Gather w/Shift-Lock
 GuiControl, disable, FieldPatternShift1
-Gui, Add, Checkbox, x125 y145 +BackgroundTrans vFieldPatternShift2 gnm_SaveGather Checked%FieldPatternShift2%, Gather w/Shift-Lock
+Gui, Add, Checkbox, x115 y145 +BackgroundTrans vFieldPatternShift2 gnm_SaveGather Checked%FieldPatternShift2%, Gather w/Shift-Lock
 GuiControl, disable, FieldPatternShift2
-Gui, Add, Checkbox, x125 y205 +BackgroundTrans vFieldPatternShift3 gnm_SaveGather Checked%FieldPatternShift3%, Gather w/Shift-Lock
+Gui, Add, Checkbox, x115 y205 +BackgroundTrans vFieldPatternShift3 gnm_SaveGather Checked%FieldPatternShift3%, Gather w/Shift-Lock
 GuiControl, disable, FieldPatternShift3
-Gui, Add, Text, x295 y80 vrotateCam1, Before Gathering,`n    Rotate Camera:
-Gui, Add, Text, x295 y140 vrotateCam2, Before Gathering,`n    Rotate Camera:
-Gui, Add, Text, x295 y200 vrotateCam3, Before Gathering,`n    Rotate Camera:
-Gui, Add, DropDownList, x385 y82 w50 vFieldRotateDirection1 gnm_SaveGather, %FieldRotateDirection1%||None|Left|Right
+Gui, Add, Text, x235 y80 vrotateCam1, Before Gathering,`n    Rotate Camera:
+Gui, Add, Text, x235 y140 vrotateCam2, Before Gathering,`n    Rotate Camera:
+Gui, Add, Text, x235 y200 vrotateCam3, Before Gathering,`n    Rotate Camera:
+Gui, Add, DropDownList, x325 y82 w50 vFieldRotateDirection1 gnm_SaveGather, %FieldRotateDirection1%||None|Left|Right
 GuiControl, disable, FieldRotateDirection1
-Gui, Add, DropDownList, x385 y142 w50 vFieldRotateDirection2 gnm_SaveGather, %FieldRotateDirection2%||None|Left|Right
+Gui, Add, DropDownList, x325 y142 w50 vFieldRotateDirection2 gnm_SaveGather, %FieldRotateDirection2%||None|Left|Right
 GuiControl, disable, FieldRotateDirection2
-Gui, Add, DropDownList, x385 y202 w50 vFieldRotateDirection3 gnm_SaveGather, %FieldRotateDirection3%||None|Left|Right
+Gui, Add, DropDownList, x325 y202 w50 vFieldRotateDirection3 gnm_SaveGather, %FieldRotateDirection3%||None|Left|Right
 GuiControl, disable, FieldRotateDirection3
-Gui, Add, DropDownList, x435 y82 w32 vFieldRotateTimes1 gnm_SaveGather, %FieldRotateTimes1%||1|2|3|4
+Gui, Add, DropDownList, x375 y82 w32 vFieldRotateTimes1 gnm_SaveGather, %FieldRotateTimes1%||1|2|3|4
 GuiControl, disable, FieldRotateTimes1
-Gui, Add, DropDownList, x435 y142 w32 vFieldRotateTimes2 gnm_SaveGather, %FieldRotateTimes2%||1|2|3|4
+Gui, Add, DropDownList, x375 y142 w32 vFieldRotateTimes2 gnm_SaveGather, %FieldRotateTimes2%||1|2|3|4
 GuiControl, disable, FieldRotateTimes2
-Gui, Add, DropDownList, x435 y202 w32 vFieldRotateTimes3 gnm_SaveGather, %FieldRotateTimes3%||1|2|3|4
+Gui, Add, DropDownList, x375 y202 w32 vFieldRotateTimes3 gnm_SaveGather, %FieldRotateTimes3%||1|2|3|4
 GuiControl, disable, FieldRotateTimes3
-Gui, Add, Text, x470 y85 vrotateCamTimes1, times
-Gui, Add, Text, x470 y145 vrotateCamTimes2, times
-Gui, Add, Text, x470 y205 vrotateCamTimes3, times
+;Gui, Add, Text, x410 y85 vrotateCamTimes1, times
+;Gui, Add, Text, x410 y145 vrotateCamTimes2, times
+;Gui, Add, Text, x410 y205 vrotateCamTimes3, times
 Gui, Add, Edit, x268 y57 w30 h20 limit3 number vFieldUntilMins1 gnm_SaveGather, %FieldUntilMins1%
 GuiControl, disable, FieldUntilMins1
 Gui, Add, Edit, x268 y115 w30 h20 limit3 number vFieldUntilMins2 gnm_SaveGather, %FieldUntilMins2%
@@ -513,6 +514,15 @@ Gui, Add, DropDownList, x415 y115 w80 vFieldSprinklerLoc2 gnm_SaveGather, %Field
 GuiControl, disable, FieldSprinklerLoc2
 Gui, Add, DropDownList, x415 y175 w80 vFieldSprinklerLoc3 gnm_SaveGather, %FieldSprinklerLoc3%||Center|Upper Left|Upper|Upper Right|Right|Lower Right|Lower|Lower Left|Left
 GuiControl, disable, FieldSprinklerLoc3
+Gui, Add, Text, x420 y77 w80 vsprinklerDistance1,distance
+Gui, Add, DropDownList,x460 y80 w35 vFieldSprinklerDist1 gnm_SaveGather, %FieldSprinklerDist1%||1|2|3|4|5|6|7|8|9|10
+GuiControl, disable, FieldSprinklerDist1
+Gui, Add, Text, x420 y135 w80 vsprinklerDistance2,distance
+Gui, Add, DropDownList, x460 y138 w35 vFieldSprinklerDist2 gnm_SaveGather, %FieldSprinklerDist2%||1|2|3|4|5|6|7|8|9|10
+GuiControl, disable, FieldSprinklerDist2
+Gui, Add, Text, x420 y195 w80 vsprinklerDistance3,distance
+Gui, Add, DropDownList, x460 y198 w35 vFieldSprinklerDist3 gnm_SaveGather, %FieldSprinklerDist3%||1|2|3|4|5|6|7|8|9|10
+GuiControl, disable, FieldSprinklerDist3
 
 ;STATUS TAB
 ;------------------------
@@ -535,7 +545,7 @@ nm_setStats()
 ;------------------------
 Gui, Tab, Settings
 GuiControl,focus, Tab
-;Gui, Add, Button, x290 y25 w43 h15 gnm_testButton, Test
+Gui, Add, Button, x290 y25 w43 h15 gnm_testButton, Test
 Gui, Add, Checkbox, x15 y25 vAlwaysOnTop gnm_AlwaysOnTop Checked%AlwaysOnTop%, Always On Top
 Gui, Add, Text, x5 y50 w60 +Right +BackgroundTrans,GUI Theme:
 Gui, Add, DropDownList, x70 y45 w80 h100 vGuiTheme gnm_guiThemeSelect, %GuiTheme%||Allure|Ayofe|BluePaper|Concaved|Core|Cosmo|Fanta|GrayGray|Hana|Invoice|Lakrits|Luminous|MacLion3|Minimal|Museo|Panther|PaperAGV|PINK|Relapse|Simplex3|SNAS|Stomp|VS7|WhiteGray|Woodwork
@@ -1316,11 +1326,13 @@ nm_guiModeButton(toggle:=1){
 			GuiControl, hide, FieldPatternShift%A_Index%
 			GuiControl, hide, FieldUntilPack%A_Index%
 			GuiControl, hide, FieldSprinklerLoc%A_Index%
+			GuiControl, hide, FieldSprinklerDist%A_Index%
 			GuiControl, hide, FieldRotateDirection%A_Index%
 			GuiControl, hide, FieldRotateTimes%A_Index%
 			GuiControl, hide, rotateCam%A_Index%
 			GuiControl, hide, rotateCamTimes%A_Index%
 			GuiControl, hide, FieldDriftCheck%A_Index%
+			GuiControl, hide, sprinklerDistance%A_Index%
 		}
 		GuiControl, hide, patternRepsHeader
 		GuiControl, hide, untilPackHeader
@@ -1334,11 +1346,13 @@ nm_guiModeButton(toggle:=1){
 			GuiControl, show, FieldPatternShift%A_Index%
 			GuiControl, show, FieldUntilPack%A_Index%
 			GuiControl, show, FieldSprinklerLoc%A_Index%
+			GuiControl, show, FieldSprinklerDist%A_Index%
 			GuiControl, show, FieldRotateDirection%A_Index%
 			GuiControl, show, FieldRotateTimes%A_Index%
 			GuiControl, show, rotateCam%A_Index%
 			GuiControl, show, rotateCamTimes%A_Index%
 			GuiControl, show, FieldDriftCheck%A_Index%
+			GuiControl, show, sprinklerDistance%A_Index%
 		}
 		GuiControl, show, patternRepsHeader
 		GuiControl, show, untilPackHeader
@@ -1472,6 +1486,7 @@ nm_TabGatherLock(){
 	GuiControl, Disable, FieldUntilPack1
 	GuiControl, Disable, FieldReturnType1
 	GuiControl, Disable, FieldSprinklerLoc1
+	GuiControl, Disable, FieldSprinklerDist1
 	GuiControl, Disable, FieldRotateDirection1
 	GuiControl, Disable, FieldRotateTimes1
 	GuiControl, Disable, FieldDriftCheck1
@@ -1484,6 +1499,7 @@ nm_TabGatherLock(){
 	GuiControl, Disable, FieldUntilPack2
 	GuiControl, Disable, FieldReturnType2
 	GuiControl, Disable, FieldSprinklerLoc2
+	GuiControl, Disable, FieldSprinklerDist2
 	GuiControl, Disable, FieldRotateDirection2
 	GuiControl, Disable, FieldRotateTimes2
 	GuiControl, Disable, FieldDriftCheck2
@@ -1496,6 +1512,7 @@ nm_TabGatherLock(){
 	GuiControl, Disable, FieldUntilPack3
 	GuiControl, Disable, FieldReturnType3
 	GuiControl, Disable, FieldSprinklerLoc3
+	GuiControl, Disable, FieldSprinklerDist3
 	GuiControl, Disable, FieldRotateDirection3
 	GuiControl, Disable, FieldRotateTimes3
 	GuiControl, Disable, FieldDriftCheck3
@@ -1511,6 +1528,7 @@ nm_FieldUnlock1(){
 	GuiControl, Enable, FieldUntilPack1
 	GuiControl, Enable, FieldReturnType1
 	GuiControl, Enable, FieldSprinklerLoc1
+	GuiControl, Enable, FieldSprinklerDist1
 	GuiControl, Enable, FieldRotateDirection1
 	GuiControl, Enable, FieldRotateTimes1
 	GuiControl, Enable, FieldDriftCheck1
@@ -1527,6 +1545,7 @@ nm_FieldSelect2(){
 		GuiControl, Enable, FieldUntilPack2
 		GuiControl, Enable, FieldReturnType2
 		GuiControl, Enable, FieldSprinklerLoc2
+		GuiControl, Enable, FieldSprinklerDist2
 		GuiControl, Enable, FieldRotateDirection2
 		GuiControl, Enable, FieldRotateTimes2
 		GuiControl, Enable, FieldDriftCheck2
@@ -1539,6 +1558,7 @@ nm_FieldSelect2(){
 		GuiControl, Disable, FieldUntilPack2
 		GuiControl, Disable, FieldReturnType2
 		GuiControl, Disable, FieldSprinklerLoc2
+		GuiControl, Disable, FieldSprinklerDist2
 		GuiControl, Disable, FieldRotateDirection2
 		GuiControl, Disable, FieldRotateTimes2
 		GuiControl, Disable, FieldDriftCheck2
@@ -1560,6 +1580,7 @@ nm_FieldSelect3(){
 		GuiControl, Enable, FieldUntilPack3
 		GuiControl, Enable, FieldReturnType3
 		GuiControl, Enable, FieldSprinklerLoc3
+		GuiControl, Enable, FieldSprinklerDist3
 		GuiControl, Enable, FieldRotateDirection3
 		GuiControl, Enable, FieldRotateTimes3
 		GuiControl, Enable, FieldDriftCheck3
@@ -1572,6 +1593,7 @@ nm_FieldSelect3(){
 		GuiControl, Disable, FieldUntilPack3
 		GuiControl, Disable, FieldReturnType3
 		GuiControl, Disable, FieldSprinklerLoc3
+		GuiControl, Disable, FieldSprinklerDist3
 		GuiControl, Disable, FieldRotateDirection3
 		GuiControl, Disable, FieldRotateTimes3
 		GuiControl, Disable, FieldDriftCheck3
@@ -1588,6 +1610,7 @@ nm_FieldDefaults(num){
 	GuiControl, ChooseString, FieldUntilPack%num%, 100
 	GuiControl, ChooseString, FieldReturnType%num%, Walk
 	GuiControl, ChooseString, FieldSprinklerLoc%num%, Right
+	GuiControl, ChooseString, FieldSprinklerDist%num%, 10
 	GuiControl, ChooseString, FieldRotateDirection%num%, None
 	GuiControl, ChooseString, FieldRotateTimes%num%, 1
 	GuiControl, ChooseString, FieldDriftCheck%num%, 1
@@ -1599,6 +1622,7 @@ nm_FieldDefaults(num){
 	FieldUntilPackN:=FieldUntilPack%num%
 	FieldReturnTypeN:=FieldReturnType%num%
 	FieldSprinklerLocN:=FieldSprinklerLoc%num%
+	FieldSprinklerDistN:=FieldSprinklerDist%num%
 	FieldRotateDirectionN:=FieldRotateDirection%num%
 	FieldRotateTimesN:=FieldRotateTimes%num%
 	FieldDriftCheckN:=FieldDriftCheck%num%
@@ -1610,6 +1634,7 @@ nm_FieldDefaults(num){
 	IniWrite, %FieldUntilPackN%, nm_config.ini, Gather, FieldUntilPack%num%
 	IniWrite, %FieldReturnTypeN%, nm_config.ini, Gather, FieldReturnType%num%
 	IniWrite, %FieldSprinklerLocN%, nm_config.ini, Gather, FieldSprinklerLoc%num%
+	IniWrite, %FieldSprinklerDistN%, nm_config.ini, Gather, FieldSprinklerDist%num%
 	IniWrite, %FieldRotateDirectionN%, nm_config.ini, Gather, FieldRotateDirection%num%
 	IniWrite, %FieldRotateTimesN%, nm_config.ini, Gather, FieldRotateTimes%num%
 	IniWrite, %FieldDriftCheckN%, nm_config.ini, Gather, FieldDriftCheck%num%
@@ -1969,6 +1994,7 @@ nm_SaveGather(){
 		GuiControlGet, FieldUntilPack%A_Index%
 		GuiControlGet, FieldReturnType%A_Index%
 		GuiControlGet, FieldSprinklerLoc%A_Index%
+		GuiControlGet, FieldSprinklerDist%A_Index%
 		GuiControlGet, FieldRotateDirection%A_Index%
 		GuiControlGet, FieldRotateTimes%A_Index%
 		GuiControlGet, FieldDriftCheck%A_Index%
@@ -1981,6 +2007,7 @@ nm_SaveGather(){
 		FieldUntilPackN:=FieldUntilPack%A_Index%
 		FieldReturnTypeN:=FieldReturnType%A_Index%
 		FieldSprinklerLocN:=FieldSprinklerLoc%A_Index%
+		FieldSprinklerDistN:=FieldSprinklerDist%A_Index%
 		FieldRotateDirectionN:=FieldRotateDirection%A_Index%
 		FieldRotateTimesN:=FieldRotateTimes%A_Index%
 		FieldDriftCheckN:=FieldDriftCheck%A_Index%
@@ -1993,6 +2020,7 @@ nm_SaveGather(){
 		IniWrite, %FieldUntilPackN%, nm_config.ini, Gather, FieldUntilPack%A_Index%
 		IniWrite, %FieldReturnTypeN%, nm_config.ini, Gather, FieldReturnType%A_Index%
 		IniWrite, %FieldSprinklerLocN%, nm_config.ini, Gather, FieldSprinklerLoc%A_Index%
+		IniWrite, %FieldSprinklerDistN%, nm_config.ini, Gather, FieldSprinklerDist%A_Index%
 		IniWrite, %FieldRotateDirectionN%, nm_config.ini, Gather, FieldRotateDirection%A_Index%
 		IniWrite, %FieldRotateTimesN%, nm_config.ini, Gather, FieldRotateTimes%A_Index%
 		IniWrite, %FieldDriftCheckN%, nm_config.ini, Gather, FieldDriftCheck%A_Index%
@@ -3363,6 +3391,7 @@ nm_TabSettingsLock(){
 }
 nm_TabSettingsUnLock(){
 	GuiControlGet, KeyboardLayout
+	GuiControlGet, ConvertBalloon
 	GuiControl, enable, GuiTheme
 	GuiControl, enable, GuiTransparency
 	if(KeyboardLayout="other") {
@@ -3380,7 +3409,8 @@ nm_TabSettingsUnLock(){
 	GuiControl, enable, MoveMethod
 	GuiControl, enable, SprinklerType
 	GuiControl, enable, ConvertBalloon
-	GuiControl, enable, ConvertMins
+	if(ConvertBalloon="every")
+		GuiControl, enable, ConvertMins
 	GuiControl, enable, DisableToolUse
 	GuiControl, enable, HiveSlot
 	GuiControl, enable, HiveVariation
@@ -3394,66 +3424,117 @@ nm_TabSettingsUnLock(){
 nm_testButton(){
 	WinActivate, Roblox
 	WinWaitActive, Roblox
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	FwdKey:="w"
-	LeftKey:="a"
-	BackKey:="s"
-	RightKey:="d"
-	KeyDelay:=20
-	MoveSpeedFactor:=0.69
-	;global CurrentFieldNum
-	global FieldDriftCheck1
-	global FieldDriftCheck2
-	global FieldDriftCheck3
-	global FieldSprinklerLoc1
-	global FieldSprinklerLoc2
-	global FieldSprinklerLoc3
-FieldDriftComp:=1
-SprinklerType:="golden"
-sat:="golden"
-WinActivate, Roblox
-WinWaitActive, Roblox
-Coordmode, Pixel, Relative
-sleep, 1000
-	If (1){
-		WinGetPos , windowX, windowY, windowWidth, windowHeight, Roblox
-        winUp := windowHeight / 2.14
-        winDown := windowHeight / 1.88
-        winLeft := windowWidth / 2.14
-        winRight := windowWidth /1.88
-		if (sat = "golden" || sat = "diamond"){
-			imgName:=(sat . ".png")
-		} else {
-			imgName:="saturator.png"
-		}
-		saturatorFinder := nm_imgSearch(imgName,10)
-		If (saturatorFinder[1] = 0){
-			while (saturatorFinder[1] = 0 && A_Index<=10) {
-				MouseMove, saturatorFinder[2], saturatorFinder[3], 5
-				if(saturatorFinder[2] >= winleft && saturatorFinder[2] <= winRight && saturatorFinder[3] >= winUp && saturatorFinder[3] <= winDown) {
-					break
-				}
-				if (saturatorFinder[2] < winleft){
-					send {%LeftKey% down}
-				} else if (saturatorFinder[2] > winRight){
-					send {%RightKey% down}
-				}
-				if (saturatorFinder[3] < winUp){
-					send {%FwdKey% down}
-				} else if (saturatorFinder[3] > winDown){
-					send {%BackKey% down}
-				}
-				sleep, 200*MoveSpeedFactor
-				send {%LeftKey% up}
-				send {%RightKey% up}
-				send {%FwdKey% up}
-				send {%BackKey% up}
-				saturatorFinder := nm_imgSearch(imgName,10)
+	
+	CoordMode, Pixel, Relative
+	TopOfBuffY:=35
+	startMeasuring:=A_TickCount
+	;Comforting
+	nectarColor:=0x7E9EB3
+	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
+	if(TopOfBuffY)
+		com:=round((38-(bx2-TopOfBuffY))/38*100, 0)
+	If (ErrorLevel=0) {
+		nexty:=by2+1
+		pixels:=1
+		loop 37 {
+			PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
+			If (OutputVar=nectarColor) {
+				nexty:=nexty+1
+				pixels:=pixels+1
+			} else {
+				com:=round(pixels/38*100, 0)
+				break
 			}
 		}
-		msgbox done
+	} else {
+		com:=0
 	}
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;Refreshing
+	nectarColor:=0x78B375
+	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
+	if(TopOfBuffY)
+		ref:=round((38-(bx2-TopOfBuffY))/38*100, 0)
+	If (ErrorLevel=0) {
+		nexty:=by2+1
+		pixels:=1
+		loop 37 {
+			PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
+			If (OutputVar=nectarColor) {
+				nexty:=nexty+1
+				pixels:=pixels+1
+			} else {
+				ref:=round(pixels/38*100, 0)
+				break
+			}
+		}
+	} else {
+		ref:=0
+	}
+	;Satisfying
+	nectarColor:=0xB398A7
+	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
+	if(TopOfBuffY)
+		sat:=round((38-(bx2-TopOfBuffY))/38*100, 0)
+	If (ErrorLevel=0) {
+		nexty:=by2+1
+		pixels:=1
+		loop 37 {
+			PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
+			If (OutputVar=nectarColor) {
+				nexty:=nexty+1
+				pixels:=pixels+1
+			} else {
+				sat:=round(pixels/38*100, 0)
+				break
+			}
+		}
+	} else {
+		sat:=0
+	}
+	;Motivating
+	nectarColor:=0x937DB3
+	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
+	if(TopOfBuffY)
+		mot:=round((38-(bx2-TopOfBuffY))/38*100, 0)
+	If (ErrorLevel=0) {
+		nexty:=by2+1
+		pixels:=1
+		loop 37 {
+			PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
+			If (OutputVar=nectarColor) {
+				nexty:=nexty+1
+				pixels:=pixels+1
+			} else {
+				mot:=round(pixels/38*100, 0)
+				break
+			}
+		}
+	} else {
+		mot:=0
+	}
+	;Invigorating
+	nectarColor:=0xB35951
+	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
+	if(TopOfBuffY)
+		inv:=round((38-(bx2-TopOfBuffY))/38*100, 0)
+	If (ErrorLevel=0) {
+		nexty:=by2+1
+		pixels:=1
+		loop 37 {
+			PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
+			If (OutputVar=nectarColor) {
+				nexty:=nexty+1
+				pixels:=pixels+1
+			} else {
+				inv:=round(pixels/38*100, 0)
+				break
+			}
+		}
+	} else {
+		inv:=0
+	}
+	speed:=A_TickCount-startMeasuring
+	msgbox Com=%com% Ref=%ref% Sat=%sat% Mot=%mot% Inv=%inv% nextY:=%nextY%`nspeed=%speed%
 
 
 	/*
@@ -3559,7 +3640,7 @@ nowUnix(){
     EnvSub, Time, 19700101000000, Seconds
     return Time
 }
-nm_Reset(checkAll:=1, wait:=0){
+nm_Reset(checkAll:=1, wait:=2000){
 	global resetTime
 	global youDied
 	global VBState
@@ -3595,7 +3676,7 @@ nm_Reset(checkAll:=1, wait:=0){
 		;failsafe game frozen
 		if(A_Index>10) {
 			WinClose, Roblox
-			sleep, 6000
+			sleep, 8000
 			DisconnectCheck()
 		}
 		;check to make sure you are not in dialog before reset
@@ -3645,7 +3726,7 @@ nm_Reset(checkAll:=1, wait:=0){
 			loop 6 {
 				send %ZoomOut%
 			}
-			sleep,2000
+			sleep,1000
 			repeat:=0
 			loop, 16 { ;60
 				if(A_Index=16)
@@ -3655,6 +3736,7 @@ nm_Reset(checkAll:=1, wait:=0){
 						send %RotRight%
 						send {PgDn}
 					}
+					sleep, 50
 					send %RotRight%
 					break
 				}
@@ -3688,7 +3770,7 @@ nm_backpackPercent(){
 	;Bar = 220 pixels wide = 11 pixels per 5%
 	X1:=round((windowWidth/2+59+3), 0)
 	Y1:=round((3+WindowedScreen*31+3), 0)
-	PixelGetColor, backpackColor, %X1%, %Y1%, RGB
+	PixelGetColor, backpackColor, %X1%, %Y1%, RGB fast
 	BackpackPercent:=0
 
 	if((backpackColor & 0xFF0000 <= Format("{:d}",0x690000))) { ;less or equal to 50%
@@ -3822,8 +3904,6 @@ nm_backpackPercentFilter(){
 	}
 	BackpackPercentFiltered:=sum/PackFilterArray.length()
 	return BackpackPercentFiltered
-	
-	
 }
 nm_gotoRamp(){
 	global FwdKey
@@ -6590,6 +6670,7 @@ nm_GoGather(){
 	GuiControlGet, FieldUntilPack%CurrentFieldNum%
 	GuiControlGet, FieldReturnType%CurrentFieldNum%
 	GuiControlGet, FieldSprinklerLoc%CurrentFieldNum%
+	GuiControlGet, FieldSprinklerDist%CurrentFieldNum%
 	GuiControlGet, FieldRotateDirection%CurrentFieldNum%
 	GuiControlGet, FieldRotateTimes%CurrentFieldNum%
 	global MondoBuffCheck
@@ -6609,6 +6690,7 @@ nm_GoGather(){
 	global LastBugrunMantis
 	global LastBugrunScorpions
 	global LastBugrunWerewolf
+	nm_backpackPercentFilter()
 	;reset
 	nm_Reset()
 	if(CurrentField="mountain top" && (A_Min>=0 && A_Min<15)) ;mondo dangerzone! skip over this field if possible
@@ -6626,10 +6708,9 @@ nm_GoGather(){
 				GuiControlGet, FieldUntilPack1
 				GuiControlGet, FieldReturnType1
 				GuiControlGet, FieldSprinklerLoc1
+				GuiControlGet, FieldSprinklerDist1
 				GuiControlGet, FieldRotateDirection1
 				GuiControlGet, FieldRotateTimes1
-				GuiControlGet, FieldSprinklerLoc1
-				GuiControlGet, FieldRotateDirection1
 				FieldPatternSize%CurrentFieldNum%:=FieldPatternSize1
 				FieldPatternReps%CurrentFieldNum%:=FieldPatternReps1
 				FieldPatternShift%CurrentFieldNum%:=FieldPatternShift1
@@ -6638,6 +6719,7 @@ nm_GoGather(){
 				FieldReturnType%CurrentFieldNum%:=FieldReturnType1
 				FieldRotateTimes%CurrentFieldNum%:=FieldRotateTimes1
 				FieldSprinklerLoc%CurrentFieldNum%:=FieldSprinklerLoc1
+				FieldSprinklerDist%CurrentFieldNum%:=FieldSprinklerDist1
 				FieldRotateDirection%CurrentFieldNum%:=FieldRotateDirection1
 				break
             }
@@ -6691,6 +6773,7 @@ nm_GoGather(){
 	gatherStart:=nowUnix()
 	if(FieldPatternShift%CurrentFieldNum%)
 		send, {shift}
+	BackpackPercentFiltered:=0
 	while((BackpackPercentFiltered<FieldUntilPack%CurrentFieldNum%) && ((nowUnix()-gatherStart)<(FieldUntilMins%CurrentFieldNum%*60))){
 		nm_gather(FieldPattern%CurrentFieldNum%, FieldPatternSize%CurrentFieldNum%, FieldPatternReps%CurrentFieldNum%)
 		nm_autoFieldBoost(FieldName%CurrentFieldNum%)
@@ -7083,17 +7166,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 }
 nm_convert(hiveConfirm:=0)
 {
-	global KeyDelay
-	global HiveVariation
-	global RotRight
-	global ZoomOut
-	global AFBrollingDice
-	global AFBuseGlitter
-	global AFBuseBooster
-	global CurrentField
-	global HiveConfirmed
-	global EnzymesKey
-	global LastEnzymes
+	global KeyDelay, HiveVariation, RotRight, ZoomOut, AFBrollingDice, AFBuseGlitter, AFBuseBooster, CurrentField, HiveConfirmed, EnzymesKey,  LastEnzymes
 	GuiControlGet ConvertBalloon
 	GuiControlGet ConvertMins
 	IniRead, LastConvertBalloon, nm_config.ini, Settings, LastConvertBalloon
@@ -7135,27 +7208,66 @@ nm_convert(hiveConfirm:=0)
 				nm_AutoFieldBoost(currentField)
 				if(AFBuseGlitter || AFBuseBooster)
 					break
-				If (nm_backpackPercent() = 0)
+				If (nm_backpackPercent() = 0) {
 					break
+				}
 			}
 			sleep, 5000
 			;empty balloon
 			if(ConvertBalloon="always" || (ConvertBalloon="Every" && (nowUnix() - LastConvertBalloon)>(ConvertMins*60))) {
+				bigBalloonConfirm:=0
+				inactiveHoney:=0
+				confirmActive:=0
+				;look for active honey
 				loop 60 {
 					nm_AutoFieldBoost(currentField)
 					if(AFBuseGlitter || AFBuseBooster)
 						break
-					If (nm_activeHoney())
+					If (nm_activeHoney()){
+						confirmActive:=1
 						break
+					}
+					searchRet := nm_imgSearch("balloonblessing.png",30,"lowright")
+					If (searchRet[1] = 0) {
+						nm_setStatus(0, "Balloon Refreshed")
+						LastConvertBalloon:=nowUnix()
+						IniWrite, %LastConvertBalloon%, nm_config.ini, Settings, LastConvertBalloon
+						return
+					}
 					sleep, 1000
 				}
+				;confirm big balloon or empty
+				if(confirmActive){
+					loop 60 {
+						nm_AutoFieldBoost(currentField)
+						if(AFBuseGlitter || AFBuseBooster)
+							break
+						If (nm_activeHoney()){
+							bigBalloonConfirm:=bigBalloonConfirm+1
+							inactiveHoney:=0
+						} else {
+							bigBalloonConfirm:=0
+							inactiveHoney:=inactiveHoney+1
+						}
+						if(bigBalloonConfirm>=10 || inactiveHoney>=10)
+							break
+						searchRet := nm_imgSearch("balloonblessing.png",30,"lowright")
+						If (searchRet[1] = 0) {
+							nm_setStatus(0, "Balloon Refreshed")
+							LastConvertBalloon:=nowUnix()
+							IniWrite, %LastConvertBalloon%, nm_config.ini, Settings, LastConvertBalloon
+							return
+						}
+						sleep, 1000
+					}
+				}
+				;convert big balloon
 				sleep, 1000
 				If (nm_activeHoney()) {
 					ballooncomplete:=0
 					loop 600 {
 						if(A_Index=1) {
 							nm_setStatus("Converting", "Balloon")
-						} else if (A_Index=10) {
 							if(EnzymesKey!="none" && (nowUnix()-LastEnzymes)>600) {
 								send {%EnzymesKey%}
 								LastEnzymes:=nowUnix()
@@ -7165,13 +7277,19 @@ nm_convert(hiveConfirm:=0)
 						nm_AutoFieldBoost(currentField)
 						if(AFBuseGlitter || AFBuseBooster)
 							break
-						sleep, 1000
+						searchRet := nm_imgSearch("balloonblessing.png",30,"lowright")
+						If (searchRet[1] = 0) {
+							ballooncomplete:=1
+							break
+						}
 						If (not nm_activeHoney()) {
 							ballooncomplete:=1
 							break
 						}
+						sleep, 1000
 					}
 					if(ballooncomplete){
+						nm_setStatus(0, "Balloon Refreshed")
 						LastConvertBalloon:=nowUnix()
 						IniWrite, %LastConvertBalloon%, nm_config.ini, Settings, LastConvertBalloon
 					}
@@ -7189,6 +7307,7 @@ nm_setSprinkler(){
 	global MoveSpeedFactor
 	global CurrentFieldNum
 	GuiControlGet, FieldSprinklerLoc%CurrentFieldNum%
+	GuiControlGet, FieldSprinklerDist%CurrentFieldNum%
 	GuiControlGet, FieldName%CurrentFieldNum%
 	GuiControlGet, SprinklerType
 	GuiControlGet, gotoPlanterField
@@ -7208,88 +7327,88 @@ nm_setSprinkler(){
 	;field dimensions
 	if(FieldName%CurrentFieldNum%="sunflower") {
 		;sunflower: L=4 W=5
-		flen:=1250
-		fwid:=2000
+		flen:=1250*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=2000*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="dandelion") {
 		;dandelion: L=6 W=3
-		flen:=2500
-		fwid:=1000
+		flen:=2500*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=1000*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="mushroom") {
 		;mushroom: L=4 W=5
-		flen:=1250
-		fwid:=1750
+		flen:=1250*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=1750*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="blue flower") {
 		;blueflower: L=6 W=3
-		flen:=2750
-		fwid:=750
+		flen:=2750*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=750*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="clover") {
 		;clover: L=5 W=4
-		flen:=2000
-		fwid:=1500
+		flen:=2000*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=1500*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="spider") {
 		;spider: L=5 W=5
-		flen:=2000
-		fwid:=2000
+		flen:=2000*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=2000*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="strawberry") {
 		;strawberry: L=4 W=5
-		flen:=1500
-		fwid:=2000
+		flen:=1500*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=2000*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="bamboo") {
 		;bamboo: L=6 W=3
-		flen:=3000
-		fwid:=1250
+		flen:=3000*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=1250*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="pineapple") {
 		;pineapple: L=4 W=5
-		flen:=1750
-		fwid:=3000
+		flen:=1750*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=3000*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="stump") {
 		;stump: L=3 W=3
-		flen:=1500
-		fwid:=1500
+		flen:=1500*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=1500*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="cactus") {
 		;cactus: L=3 W=6
-		flen:=1500
-		fwid:=2500
+		flen:=1500*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=2500*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="pumpkin") {
 		;pumpkin: L=3 W=6
-		flen:=1500
-		fwid:=2500
+		flen:=1500*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=2500*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="pine tree") {
 		;pine tree: L=5 W=4
-		flen:=2500
-		fwid:=1750
+		flen:=2500*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=1750*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="rose") {
 		;rose: L=5 W=4
-		flen:=2500
-		fwid:=1500
+		flen:=2500*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=1500*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="mountain top") {
 		;rose: L=4 W=4
-		flen:=2250
-		fwid:=1500
+		flen:=2250*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=1500*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="pepper") {
 		;rose: L=3 W=4
-		flen:=1500
-		fwid:=2250
+		flen:=1500*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=2250*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	else if(FieldName%CurrentFieldNum%="coconut") {
 		;rose: L=3 W=4
-		flen:=1500
-		fwid:=2250
+		flen:=1500*(FieldSprinklerDist%CurrentFieldNum%/10)
+		fwid:=2250*(FieldSprinklerDist%CurrentFieldNum%/10)
 	}
 	;move to start position
 	if(InStr(FieldSprinklerLoc%CurrentFieldNum%, "Upper")){
@@ -7367,9 +7486,9 @@ nm_setSprinkler(){
 		send {space up}
 		sleep, 900
 		if(InStr(FieldSprinklerLoc%CurrentFieldNum%, "Left")){
-			nm_Move(fwid*MoveSpeedFactor, LeftKey)
+			nm_Move(1000*MoveSpeedFactor, LeftKey)
 		} else {
-			nm_Move(fwid*MoveSpeedFactor, RightKey)
+			nm_Move(1000*MoveSpeedFactor, RightKey)
 		}
 	}	
 }
@@ -7570,7 +7689,8 @@ nm_activeHoney(){
 	WinGetPos, windowX, windowY, windowWidth, windowHeight, Roblox
     x1 := (windowWidth/2)-65
     x2 := (windowWidth/2)
-    PixelSearch, bx2, by2, x1, 0, x2, 65, 0x80E3FF, 10, Fast
+    ;PixelSearch, bx2, by2, x1, 0, x2, 65, 0x80E3FF, 10, Fast
+	PixelSearch, bx2, by2, x1, 0, x2, 65, 0xF3DB7E, 20, RGB Fast
     if not ErrorLevel
 	{
         return 1
@@ -7578,7 +7698,9 @@ nm_activeHoney(){
 		if(HiveBees<25){
 			x1 := (windowWidth/2)+235
 			x2 := (windowWidth/2)+275
-			PixelSearch, bx2, by2, x1, 0, x2, 65, 0xFFFFFF, 10, Fast
+			;PixelSearch, bx2, by2, x1, 0, x2, 65, 0xFFFFFF, 10, Fast
+			PixelSearch, bx2, by2, x1, 0, x2, 65, 0xFFFFFF, 10, RGB Fast
+			
 			if not ErrorLevel
 			{
 				return 1
@@ -7794,13 +7916,13 @@ nm_locateVB(){
 
 			;configure
 			reps:=2
-			leftOrRightDist:=3000
-			forwardOrBackDist:=1200
+			leftOrRightDist:=4000
+			forwardOrBackDist:=900
 			;starting point
 			if(!DisableToolUse)
 				click, down
-			nm_Move(1250*MoveSpeedFactor, RightKey)
-			nm_Move(750*MoveSpeedFactor, FwdKey)
+			nm_Move(1700*MoveSpeedFactor, RightKey)
+			nm_Move(1700*MoveSpeedFactor, FwdKey)
 			;search pattern
 			if(VBState=1){
 				loop, %reps% {
@@ -8465,7 +8587,7 @@ nm_PolarQuestProg(){
 			action:=PolarBear[PolarQuest][A_Index][2]
 			where:=PolarBear[PolarQuest][A_Index][3]
 			;PixelGetColor, questbarColor, 17, 50*(PolarBear[PolarQuest][A_Index][1]-1)+PolarStart[3]+11, RGB
-			PixelGetColor, questbarColor, QuestBarInset+10, QuestBarSize*(PolarBear[PolarQuest][A_Index][1]-1)+PolarStart[3]+QuestBarGapSize+1, RGB
+			PixelGetColor, questbarColor, QuestBarInset+10, QuestBarSize*(PolarBear[PolarQuest][A_Index][1]-1)+PolarStart[3]+QuestBarGapSize+1, RGB fast
 			;temp%A_Index%:=questbarColor
 			if((questbarColor=Format("{:d}",0xF46C55)) || (questbarColor=Format("{:d}",0x6EFF60))) {
 				PolarQuestComplete:=0
@@ -8769,6 +8891,9 @@ FieldReturnType3=Walk
 FieldSprinklerLoc1=Center
 FieldSprinklerLoc2=Center
 FieldSprinklerLoc3=Center
+FieldSprinklerDist1=10
+FieldSprinklerDist2=10
+FieldSprinklerDist3=10
 FieldRotateDirection1=None
 FieldRotateDirection2=None
 FieldRotateDirection3=None
@@ -10122,21 +10247,30 @@ ba_GetNectarPercent(var){
     global resolutionKey
 	for key, value in nectarnames {
 		if (var=value){
-			nectarpercent:=0
-			/*
-			loop, 10 {
-				percent:=A_Index*10
-				filename:=(value . "_" . percent . ".png")
-				coordmode, pixel, Relative
-				searchRet := ba_wrappedSearch(filename,10,"high")
-				If (searchRet[1] = 0) {
-					if (A_Index=10)
-						nectarpercent:=99.99
-					else
-						nectarpercent:=percent
+			(var="comforting") ? nectarColor:=0x7E9EB3
+			: (var="motivating") ? nectarColor:=0x937DB3
+			: (var="satisfying") ? nectarColor:=0xB398A7
+			: (var="refreshing") ? nectarColor:=0x78B375
+			: (var="invigorating") ? nectarColor:=0xB35951
+			PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
+			If (ErrorLevel=0) {
+				nexty:=by2+1
+				pixels:=1
+				loop 37 {
+					PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
+					If (OutputVar=nectarColor) {
+						nexty:=nexty+1
+						pixels:=pixels+1
+					} else {
+						nectarpercent:=round(pixels/38*100, 0)
+						break
+					}
 				}
+			} else {
+				nectarpercent:=0
 			}
-			*/
+			/*
+			nectarpercent:=0
 			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 			;check 50%
 			filename:=(value . "_50.png")
@@ -10212,6 +10346,7 @@ ba_GetNectarPercent(var){
 			}
 			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 			break
+			*/
 		}
 	}
 	return nectarpercent
@@ -11208,6 +11343,9 @@ global FieldReturnType3
 global FieldSprinklerLoc1
 global FieldSprinklerLoc2
 global FieldSprinklerLoc3
+global FieldSprinklerDist1
+global FieldSprinklerDist2
+global FieldSprinklerDist3
 global FieldRotateDirection1
 global FieldRotateDirection2
 global FieldRotateDirection3
@@ -11331,6 +11469,7 @@ loop 3 {
 	GuiControlGet, FieldUntilPack%A_Index%
 	GuiControlGet, FieldReturnType%A_Index%
 	GuiControlGet, FieldSprinklerLoc%A_Index%
+	GuiControlGet, FieldSprinklerDist%A_Index%
 	GuiControlGet, FieldRotateDirection%A_Index%
 	GuiControlGet, FieldRotateTimes%A_Index%
 	GuiControlGet, FieldDriftCheck%A_Index%
