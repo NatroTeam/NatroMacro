@@ -19,12 +19,17 @@ runWith(version){
 
 OnMessage(0x004A, "nm_WM_COPYDATA")
 OnMessage(0x4201, "nm_backgroundEvent")
+OnMessage(0x4299, "nm_setLastHeartbeat")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; CONFIG FILE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.6.4"
+VersionID:="0.6.5"
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; DISABLE ROBLOX BETA APP
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+RegWrite, REG_SZ, HKEY_CURRENT_USER\SOFTWARE\ROBLOX Corporation\Environments\roblox-player, LaunchExp, InBrowser
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; NATRO ENHANCEMENT STUFF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -262,9 +267,11 @@ global AFBuseBooster:=0
 global FieldLastBoostedBy:="None"
 global MacroRunning:=0
 global MacroStartTime:=nowUnix()
+global MacroReloadTime:=nowUnix()
 ;global delta:=0
 global SessionRuntime:=0
 global PausedRuntime:=0
+global LastHeartbeat:=nowUnix()
 state:="Startup"
 objective:="UI"
 IniRead, GuiTheme, nm_config.ini, Settings, GuiTheme
@@ -544,7 +551,7 @@ Gui, Add, GroupBox, x3 y23 w160 h215, Development
 Gui, Add, GroupBox, x163 y23 w335 h215, Contributors
 Gui, Font
 Gui, Add, Text, x5 y38 w155 +wrap +backgroundtrans, Special Thanks for your contributions in the development and testing of this project.  Your feedback and ideas have been invaluable in the design process!`n`nzez#8710`nFHL09#4061`nLittleChurch#1631 (N00b)`nZaappiix#2372`nSP#0305`nZiz | Jake#9154
-Gui, Add, Text, x170 y38 w330 +wrap +backgroundtrans, Thank you for your donations to this project!`n`nFHL09#4061`nNick 9#9476`nwilalwil2#4175`nAshtonishing#4420
+Gui, Add, Text, x170 y38 w330 +wrap +backgroundtrans, Thank you for your donations to this project!`n`nFHL09#4061`nNick 9#9476`nwilalwil2#4175`nAshtonishing#4420`nTheRealXoli#1017`nK_Money#0001
 
 
 
@@ -595,7 +602,7 @@ nm_setStats()
 ;------------------------
 Gui, Tab, Settings
 GuiControl,focus, Tab
-Gui, Add, Button, x290 y25 w43 h15 gnm_testButton, Test
+;Gui, Add, Button, x290 y25 w43 h15 gnm_testButton, Test
 Gui, Add, Checkbox, x15 y25 vAlwaysOnTop gnm_AlwaysOnTop Checked%AlwaysOnTop%, Always On Top
 Gui, Add, Text, x5 y50 w60 +Right +BackgroundTrans,GUI Theme:
 Gui, Add, DropDownList, x70 y45 w80 h100 vGuiTheme gnm_guiThemeSelect, %GuiTheme%||Allure|Ayofe|BluePaper|Concaved|Core|Cosmo|Fanta|GrayGray|Hana|Invoice|Lakrits|Luminous|MacLion3|Minimal|Museo|Panther|PaperAGV|PINK|Relapse|Simplex3|SNAS|Stomp|VS7|WhiteGray|Woodwork
@@ -1091,6 +1098,7 @@ IniRead, RileyQuestCheck, nm_config.ini, Quests, RileyQuestCheck
 IniRead, RileyQuestGatherInterruptCheck, nm_config.ini, Quests, RileyQuestGatherInterruptCheck
 IniRead, RileyQuestProgress, nm_config.ini, Quests, RileyQuestProgress
 IniRead, QuestGatherMins, nm_config.ini, Quests, QuestGatherMins
+IniRead, QuestGatherReturnBy, nm_config.ini, Quests, QuestGatherReturnBy
 RileyQuestProgress := StrReplace(RileyQuestProgress, "|", "`n")
 Gui, Font, w700
 Gui, Add, GroupBox, x5 y23 w150 h108, Polar Bear
@@ -1109,6 +1117,8 @@ Gui, Add, Checkbox, x80 y131 vHoneyQuestCheck gnm_savequest Checked%HoneyQuestCh
 Gui, Add, Text, x8 y145 w143 h20 vHoneyQuestProgress, Startup
 Gui, Add, Text, x8 y188 +BackgroundTrans, Quest Gather Limit:
 Gui, Add, Edit, x100 y185 w25 h17 limit3 number vQuestGatherMins gnm_savequest, %QuestGatherMins%
+Gui, Add, Text, x8 y205 +BackgroundTrans, Return to hive by:
+Gui, Add, DropDownList, x92 y203 w55 vQuestGatherReturnBy gnm_savequest, %QuestGatherReturnBy%||Walk|Reset
 Gui, Add, Text, x126 y188 +BackgroundTrans, Mins
 Gui, Add, Checkbox, x235 y23 vBlackQuestCheck gnm_savequest Checked%BlackQuestCheck%, Enable
 Gui, Add, Text, x163 y38 w158 h92 vBlackQuestProgress, %BlackQuestProgress%
@@ -1379,9 +1389,25 @@ nm_TabSettingsUnLock()
 WinActivate, Roblox
 WinWaitActive, Roblox
 settimer, StartBackground, -5000
+;settimer, Heartbeat, 10000
 run background.ahk, submacros
-if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$"))
-	Run, StatMonitor.ahk
+
+Prev_DetectHiddenWindows := A_DetectHiddenWindows
+Prev_TitleMatchMode := A_TitleMatchMode
+DetectHiddenWindows On
+SetTitleMatchMode 2
+;IfWinNotExist, heartbeat.ahk
+;{
+;	run heartbeat.ahk, submacros
+;}
+DetectHiddenWindows %Prev_DetectHiddenWindows%
+SetTitleMatchMode %Prev_TitleMatchMode%
+myOS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)
+if((myOS*1)>=10) {
+	if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) {
+		Run, StatMonitor.ahk
+	}
+}
 return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; MAIN LOOP
@@ -1395,6 +1421,8 @@ nm_Start(){
 	run:=1
 	while(run){
 		DisconnectCheck()
+		;vicious/stingers
+		nm_locateVB()
 		;planters
 		ba_planter()
 		;kill things
@@ -1857,258 +1885,31 @@ nm_setStatus(newState:=0, newObjective:=0){
 	static lastSuccess := 0
 	global totalCom, totalMot, totalRef, totalSat, totalInv
 	global TotalRuntime, SessionRuntime, MacroStartTime, TotalGatherTime, SessionGatherTime, GatherStartTime, TotalConvertTime, SessionConvertTime, ConvertStartTime, TotalViciousKills, SessionViciousKills, TotalBossKills, SessionBossKills, TotalBugKills, SessionBugKills, TotalPlantersCollected, SessionPlantersCollected, TotalQuestsComplete, SessionQuestsComplete, TotalDisconnects, SessionDisconnects
-	if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$"))
-	{		
-		; update status
-		newState ? Send_WM_COPYDATA("status " . ((newState = "gathering") ? "1" : (newState = "converting") ? "2" : "0"), "StatMonitor.ahk ahk_class AutoHotkey")
-		if(GatherStartTime)
-			SessionGatherTimeWHT:=(SessionGatherTime+(nowUnix()-GatherStartTime))
-		else
-			SessionGatherTimeWHT:=SessionGatherTime
-		if(ConvertStartTime)
-			SessionConvertTimeWHT:=(SessionConvertTime+(nowUnix()-ConvertStartTime))
-		else
-			SessionConvertTimeWHT:=SessionConvertTime
-		; create postdata for normal message
-		color := (InStr(stateString,"disconnected") || InStr(stateString,"failed") || InStr(stateString,"died")) ? 15085139 : (InStr(stateString,"checking") || InStr(stateString,"holding") || InStr(stateString,"searching")) ? 14408468 : (InStr(stateString,"confirmed") || InStr(stateString,"found")) ? 9755247 : (InStr(stateString,"engaged") || InStr(stateString,"full")) ? 16366336 : (InStr(stateString,"mondo") || InStr(stateString,"boss") || InStr(stateString,"vb dead")) ? 7036559 : (InStr(stateString,"gathering") || InStr(stateString,"converting")) ? 8871681 : (InStr(stateString,"startup")) ? 15658739 : 3223350
-		eventFormatted := StrReplace(stateString, "`r`n", "\n")
-		postdata =
-		(
-		{
-			"embeds": [{
-				"description": "[%A_Hour%:%A_Min%:%A_Sec%] %eventFormatted%",
-				"color": "%color%"
-			}]
-		}
-		)
-		
-		; post to webhook
-		try
-		{
-			wr := ComObjCreate("WinHTTP.WinHTTPRequest.5.1")
-			wr.Option(9) := 2048
-			wr.Open("POST", webhook)
-			wr.SetRequestHeader("User-Agent", "AHK")
-			wr.SetRequestHeader("Content-Type", "application/json")
-			wr.Send(postdata)
-			wr.WaitForResponse()
-		}
-		; check if event needs screenshot
-		IniRead, ssCooldown, nm_config.ini, Status, ssCooldown, 0
-		if (nowUnix() - ssCooldown > 300)
-		{
-			ssEvents := ["Startup", "Disconnected"]
-			for k,v in ssEvents
-			{
-				if (stateString = v)
-				{
-					; save screenshot to temporary file (could use A_Temp if you want cleaner directory)
-					pToken := Gdip_Startup()
-					SysGet, pmonN, MonitorPrimary
-					pBitmap := Gdip_BitmapFromScreen(pmonN)
-					Gdip_SaveBitmapToFile(pBitmap, "file.png")
-					Gdip_Shutdown(pToken)
-					
-					; create multipart/form-data for image
-					path := A_ScriptDir . "\file.png"
-					objParam := {file: [path]}
-					CreateFormData(postdata, hdr_ContentType, objParam)
-					
-					; post to webhook
-					try
-					{
-						wr := ComObjCreate("WinHTTP.WinHTTPRequest.5.1")
-						wr.Option(9) := 2048
-						wr.Open("POST", webhook)
-						wr.SetRequestHeader("User-Agent", "AHK")
-						wr.SetRequestHeader("Content-Type", hdr_ContentType)
-						wr.Send(postdata)
-						wr.WaitForResponse()
-					}
-					
-					; delete the temporary image file and update cooldown
-					FileDelete, file.png
-					IniWrite, % nowUnix(), nm_config.ini, Status, ssCooldown
-					break
-				}
-			}
-		}
-		/*
-		; check if it is time for hourly update
-		timeBetween := nowUnix() - lastHourlyUpdate
-		if ((timeBetween >= 3600) && !InStr(stateString, "Startup"))
-		{
-			; initialise variables
-			rblxid := WinExist("Roblox")
-			if !rblxid
-				return
-			WinActivate, ahk_id %rblxid%
-			WinGetPos, x, y, w, , ahk_id %rblxid%
-			WinGet, style, Style, ahk_id %rblxid%
-			y += (style & 0x20800000) ? 22 : 0
-			static startHoney, lastHoney, lastGath, lastCon
-			global totalTime, totalGath, totalCon, totalKills, totalBoss, totalVic, totalQuests, totalDcs, totalPlants, totalCom, totalMot, totalRef, totalSat, totalInv
-			
-			; detect honey, enlarge image if necessary
-			detectedValues := {}
-			pToken := Gdip_Startup()
-			pBM := Gdip_BitmapFromScreen(w//2 - 300 "|" y "|300|100")
-			pEffect := Gdip_CreateEffect(5,-80,40)
-			Gdip_BitmapApplyEffect(pBM, pEffect)
-			Gdip_DisposeEffect(pEffect)
-			
-			Loop, 100
-			{
-				pBMNew := Gdip_ResizeBitmap(pBM, 300 + A_Index * 3, 100 + A_Index, 0, 7)
-				hBM := Gdip_CreateHBITMAPFromBitmap(pBMNew)
-				Gdip_DisposeImage(pBMNew)
-				pIRandomAccessStream := HBitmapToRandomAccessStream(hBM)
-				DllCall("DeleteObject", "Ptr", hBM)
-				ocrtext := StrReplace(StrReplace("L" . StrReplace(StrReplace(ocr(pIRandomAccessStream), " ", "L"), "`n", "L"), "o", "0"), ".", ",")
-				RegexMatch(ocrtext, "(?<=L)\d{1,3}(,\d{3})+(?=L)", detectedHoney)
-				if detectedHoney
-				{
-					if (detectedValues.HasKey(detectedHoney))
-						detectedValues[detectedHoney]++
-					else
-						detectedValues[detectedHoney]:=1
-				}
-			}
-			
-			for k,v in detectedValues
-				if (v > detectedValues[mode])
-					mode := k
-			currentHoney := StrReplace(mode, ",")
-			
-			Gdip_DisposeImage(pBM)
-			Gdip_Shutdown(pToken)
-			; check that it is appropriate to calculate metrics
-			if (currentHoney && lastHourlyUpdate)
-			{
-				; calculate honey earned during last hour
-				honeyEarned := (currentHoney - lastHoney) // (lastSuccess + 1)
-				
-				; calculate hourly average
-				honeyTotal := currentHoney - startHoney
-				honeyAverage := honeyTotal // ((SessionRuntime+(nowUnix()-MacroStartTime)) / 3600)
-				lastSuccess := 0
-				
-				; format numerical stats for display
-				numnames := ["Million","Billion","Trillion","Quadrillion","Quintillion"]
-				for i,x in ["currentHoney","honeyTotal","honeyEarned","honeyAverage"]
-				{
-					digit := floor(log(abs(%x%)))+1
-					if (digit > 6)
-					{
-						numname := (digit-4)//3
-						numstring := SubStr((round(%x%,4-digit)) / 10**(3*numname+3), 1, 5)
-						numformat := (SubStr(numstring, 0) = ".") ? 1.000 : numstring, numname += (SubStr(numstring, 0) = ".") ? 1 : 0
-						%x%Formatted := SubStr((round(%x%,4-digit)) / 10**(3*numname+3), 1, 5) " " numnames[numname]
-					}
-					else
-					{
-						VarSetCapacity(%x%Formatted,32),DllCall("GetNumberFormatEx","str","!x-sys-default-locale","uint",0,"str",%x%,"ptr",0,"str",%x%Formatted,"int",32)
-						%x%Formatted := SubStr(%x%Formatted, 1, -3)
-					}
-				}
-				honeyEarnedFormatted .= lastSuccess ? " *(Adjusted for " . lastSuccess . "fails)*" : ""		
-				; format time stats for display
-				hourGath := SessionGatherTimeWHT - lastGath, hourCon := SessionConvertTimeWHT - lastCon
-				VarSetCapacity(totalTimeFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",(SessionRuntime+(nowUnix()-MacroStartTime))*10000000,"wstr","hh:mm:ss","str",totalTimeFormatted,"int",256)
-				VarSetCapacity(totalGathFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",(SessionGatherTimeWHT)*10000000,"wstr","hh:mm:ss","str",totalGathFormatted,"int",256)
-				VarSetCapacity(totalConFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",SessionConvertTimeWHT*10000000,"wstr","hh:mm:ss","str",totalConFormatted,"int",256)
-				VarSetCapacity(hourGathFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",hourGath*10000000,"wstr","hh:mm:ss","str",hourGathFormatted,"int",256)
-				VarSetCapacity(hourConFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",hourCon*10000000,"wstr","hh:mm:ss","str",hourConFormatted,"int",256)
-				totalGathFormatted .= (SessionRuntime+(nowUnix()-MacroStartTime)) ? " (" . Round((SessionGatherTimeWHT) * 100 / (SessionRuntime+(nowUnix()-MacroStartTime))) . "%)" : ""
-				totalConFormatted .= (SessionRuntime+(nowUnix()-MacroStartTime)) ? " (" . Round(SessionConvertTimeWHT * 100 / (SessionRuntime+(nowUnix()-MacroStartTime))) . "%)" : ""
-				hourGathFormatted .= timeBetween ? " (" . Round(hourGath * 100 / timeBetween) . "%)" : ""
-				hourConFormatted .= timeBetween ? " (" . Round(hourCon * 100 / timeBetween) . "%)" : ""
-				;Determine Bloat
-				WinGetPos, windowX, windowY, windowWidth, windowHeight, Roblox
-				bloatColor:=0xCC8048
-				PixelSearch, bx2, by2, 0, 0, %windowWidth%, 150, %bloatColor%,0, Fast
-				If (ErrorLevel=0) {
-					nexty:=by2+1
-					pixels:=1
-					loop 38 {
-						PixelGetColor, OutputVar, %bx2%, %nexty%, fast
-						If (OutputVar=bloatColor) {
-							nexty:=nexty+1
-							pixels:=pixels+1
-						} else {
-							bloatPercent:=round(pixels/38*100, 0)
-							break
-						}
-					}
-				} else {
-					bloatPercent:=0
-				}
-				bloatNum:=round((bloatPercent/100)*6, 2)
-				; create postdata for hourly report
-				message := "[" A_Hour ":" A_Min ":" A_Sec "]\n"
-				. "**HOURLY REPORT:**\n"
-				. "Hourly Average: " honeyAverageFormatted "\n"
-				. "Last Hour Honey: " honeyEarnedFormatted "\n"
-				. "Last Hour Gather: " hourGathFormatted "\n"
-				. "Last Hour Convert: " hourConFormatted "\n"
-				. "--------------------\n"
-				. "Current Honey: " currentHoneyFormatted "\n"
-				. "Session Time: " totalTimeFormatted "\n"
-				. "Session Honey: " honeyTotalFormatted "\n"
-				. "Session Gather: " totalGathFormatted "\n"
-				. "Session Convert: " totalConFormatted "\n"
-				. "--------------------\n"
-				. "Total Vicious Kills:" SessionViciousKills "\n"
-				. "Total Boss Kills:" SessionBossKills "\n"
-				. "Total Bug Kills: " SessionBugKills "\n"
-				. "Total Planters: " SessionPlantersCollected "\n"
-				. "Quests Done: " SessionQuestsComplete "\n"
-				. "Disconnects: " SessionDisconnects "\n"
-				. "--------------------\n"
-				. "Bloat: " bloatNum "\n"
-				. "Nectars: Com " totalCom "%\nMot " totalMot "`% - Sat " totalSat "%\nRef " totalRef "`% - Inv " totalInv "%\n"
-				. "**END OF REPORT**"
-				
-				postdata =
-				(
-				{
-					"embeds": [{
-						"description": "%message%",
-						"color": "14052794"
-					}]
-				}
-				)
-			}
+	if (WebhookCheck) {
+		if(RegExMatch(webhook, "i)^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) {
+			; update status
+			newState ? Send_WM_COPYDATA("status " . ((newState = "gathering") ? "1" : (newState = "converting") ? "2" : "0"), "StatMonitor.ahk ahk_class AutoHotkey")
+			if(GatherStartTime)
+				SessionGatherTimeWHT:=(SessionGatherTime+(nowUnix()-GatherStartTime))
 			else
+				SessionGatherTimeWHT:=SessionGatherTime
+			if(ConvertStartTime)
+				SessionConvertTimeWHT:=(SessionConvertTime+(nowUnix()-ConvertStartTime))
+			else
+				SessionConvertTimeWHT:=SessionConvertTime
+			; create postdata for normal message
+			color := (InStr(stateString,"disconnected") || InStr(stateString,"failed") || InStr(stateString,"died")) ? 15085139 : (InStr(stateString,"checking") || InStr(stateString,"holding") || InStr(stateString,"searching")) ? 14408468 : (InStr(stateString,"confirmed") || InStr(stateString,"found")) ? 9755247 : (InStr(stateString,"engaged") || InStr(stateString,"full")) ? 16366336 : (InStr(stateString,"mondo") || InStr(stateString,"boss") || InStr(stateString,"vb dead")) ? 7036559 : (InStr(stateString,"gathering") || InStr(stateString,"converting")) ? 8871681 : (InStr(stateString,"startup")) ? 15658739 : 3223350
+			eventFormatted := StrReplace(stateString, "`r`n", "\n")
+			postdata =
+			(
 			{
-				; possibilities are first run or failed OCR
-				if (currentHoney = 0)
-				{
-					; if next OCR succeeds, set divisor for Recent Hour honey
-					lastSuccess += 1
-					postdata =
-					(
-					{
-						"embeds": [{
-							"description": "[%A_Hour%:%A_Min%:%A_Sec%] Honey OCR Failed!\nHourly Update was skipped.\n**Debugging:**%ocrtext%",
-							"color": "15085139"
-						}]
-					}
-					)
-				}
-				else
-				{
-					; initialise honey variables
-					startHoney := currentHoney
-					honeyAverage := 0
-				}
+				"embeds": [{
+					"description": "[%A_Hour%:%A_Min%:%A_Sec%] %eventFormatted%",
+					"color": "%color%"
+				}]
 			}
+			)
 			
-			; update variables for future hourly updates
-			lastHoney := (currentHoney) ? currentHoney : lastHoney
-			lastGath := SessionGatherTimeWHT
-			lastCon := SessionConvertTimeWHT
-			lastHourlyUpdate := nowUnix()			
 			; post to webhook
 			try
 			{
@@ -2120,8 +1921,236 @@ nm_setStatus(newState:=0, newObjective:=0){
 				wr.Send(postdata)
 				wr.WaitForResponse()
 			}
+			; check if event needs screenshot
+			IniRead, ssCooldown, nm_config.ini, Status, ssCooldown, 0
+			if (nowUnix() - ssCooldown > 300)
+			{
+				ssEvents := ["Startup", "Disconnected"]
+				for k,v in ssEvents
+				{
+					if (stateString = v)
+					{
+						; save screenshot to temporary file (could use A_Temp if you want cleaner directory)
+						pToken := Gdip_Startup()
+						SysGet, pmonN, MonitorPrimary
+						pBitmap := Gdip_BitmapFromScreen(pmonN)
+						Gdip_SaveBitmapToFile(pBitmap, "file.png")
+						Gdip_Shutdown(pToken)
+						
+						; create multipart/form-data for image
+						path := A_ScriptDir . "\file.png"
+						objParam := {file: [path]}
+						CreateFormData(postdata, hdr_ContentType, objParam)
+						
+						; post to webhook
+						try
+						{
+							wr := ComObjCreate("WinHTTP.WinHTTPRequest.5.1")
+							wr.Option(9) := 2048
+							wr.Open("POST", webhook)
+							wr.SetRequestHeader("User-Agent", "AHK")
+							wr.SetRequestHeader("Content-Type", hdr_ContentType)
+							wr.Send(postdata)
+							wr.WaitForResponse()
+						}
+						
+						; delete the temporary image file and update cooldown
+						FileDelete, file.png
+						IniWrite, % nowUnix(), nm_config.ini, Status, ssCooldown
+						break
+					}
+				}
+			}
+			/*
+			; check if it is time for hourly update
+			timeBetween := nowUnix() - lastHourlyUpdate
+			if ((timeBetween >= 3600) && !InStr(stateString, "Startup"))
+			{
+				; initialise variables
+				rblxid := WinExist("Roblox")
+				if !rblxid
+					return
+				WinActivate, ahk_id %rblxid%
+				WinGetPos, x, y, w, , ahk_id %rblxid%
+				WinGet, style, Style, ahk_id %rblxid%
+				y += (style & 0x20800000) ? 22 : 0
+				static startHoney, lastHoney, lastGath, lastCon
+				global totalTime, totalGath, totalCon, totalKills, totalBoss, totalVic, totalQuests, totalDcs, totalPlants, totalCom, totalMot, totalRef, totalSat, totalInv
+				
+				; detect honey, enlarge image if necessary
+				detectedValues := {}
+				pToken := Gdip_Startup()
+				pBM := Gdip_BitmapFromScreen(w//2 - 300 "|" y "|300|100")
+				pEffect := Gdip_CreateEffect(5,-80,40)
+				Gdip_BitmapApplyEffect(pBM, pEffect)
+				Gdip_DisposeEffect(pEffect)
+				
+				Loop, 100
+				{
+					pBMNew := Gdip_ResizeBitmap(pBM, 300 + A_Index * 3, 100 + A_Index, 0, 7)
+					hBM := Gdip_CreateHBITMAPFromBitmap(pBMNew)
+					Gdip_DisposeImage(pBMNew)
+					pIRandomAccessStream := HBitmapToRandomAccessStream(hBM)
+					DllCall("DeleteObject", "Ptr", hBM)
+					ocrtext := StrReplace(StrReplace("L" . StrReplace(StrReplace(ocr(pIRandomAccessStream), " ", "L"), "`n", "L"), "o", "0"), ".", ",")
+					RegexMatch(ocrtext, "(?<=L)\d{1,3}(,\d{3})+(?=L)", detectedHoney)
+					if detectedHoney
+					{
+						if (detectedValues.HasKey(detectedHoney))
+							detectedValues[detectedHoney]++
+						else
+							detectedValues[detectedHoney]:=1
+					}
+				}
+				
+				for k,v in detectedValues
+					if (v > detectedValues[mode])
+						mode := k
+				currentHoney := StrReplace(mode, ",")
+				
+				Gdip_DisposeImage(pBM)
+				Gdip_Shutdown(pToken)
+				; check that it is appropriate to calculate metrics
+				if (currentHoney && lastHourlyUpdate)
+				{
+					; calculate honey earned during last hour
+					honeyEarned := (currentHoney - lastHoney) // (lastSuccess + 1)
+					
+					; calculate hourly average
+					honeyTotal := currentHoney - startHoney
+					honeyAverage := honeyTotal // ((SessionRuntime+(nowUnix()-MacroStartTime)) / 3600)
+					lastSuccess := 0
+					
+					; format numerical stats for display
+					numnames := ["Million","Billion","Trillion","Quadrillion","Quintillion"]
+					for i,x in ["currentHoney","honeyTotal","honeyEarned","honeyAverage"]
+					{
+						digit := floor(log(abs(%x%)))+1
+						if (digit > 6)
+						{
+							numname := (digit-4)//3
+							numstring := SubStr((round(%x%,4-digit)) / 10**(3*numname+3), 1, 5)
+							numformat := (SubStr(numstring, 0) = ".") ? 1.000 : numstring, numname += (SubStr(numstring, 0) = ".") ? 1 : 0
+							%x%Formatted := SubStr((round(%x%,4-digit)) / 10**(3*numname+3), 1, 5) " " numnames[numname]
+						}
+						else
+						{
+							VarSetCapacity(%x%Formatted,32),DllCall("GetNumberFormatEx","str","!x-sys-default-locale","uint",0,"str",%x%,"ptr",0,"str",%x%Formatted,"int",32)
+							%x%Formatted := SubStr(%x%Formatted, 1, -3)
+						}
+					}
+					honeyEarnedFormatted .= lastSuccess ? " *(Adjusted for " . lastSuccess . "fails)*" : ""		
+					; format time stats for display
+					hourGath := SessionGatherTimeWHT - lastGath, hourCon := SessionConvertTimeWHT - lastCon
+					VarSetCapacity(totalTimeFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",(SessionRuntime+(nowUnix()-MacroStartTime))*10000000,"wstr","hh:mm:ss","str",totalTimeFormatted,"int",256)
+					VarSetCapacity(totalGathFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",(SessionGatherTimeWHT)*10000000,"wstr","hh:mm:ss","str",totalGathFormatted,"int",256)
+					VarSetCapacity(totalConFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",SessionConvertTimeWHT*10000000,"wstr","hh:mm:ss","str",totalConFormatted,"int",256)
+					VarSetCapacity(hourGathFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",hourGath*10000000,"wstr","hh:mm:ss","str",hourGathFormatted,"int",256)
+					VarSetCapacity(hourConFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",hourCon*10000000,"wstr","hh:mm:ss","str",hourConFormatted,"int",256)
+					totalGathFormatted .= (SessionRuntime+(nowUnix()-MacroStartTime)) ? " (" . Round((SessionGatherTimeWHT) * 100 / (SessionRuntime+(nowUnix()-MacroStartTime))) . "%)" : ""
+					totalConFormatted .= (SessionRuntime+(nowUnix()-MacroStartTime)) ? " (" . Round(SessionConvertTimeWHT * 100 / (SessionRuntime+(nowUnix()-MacroStartTime))) . "%)" : ""
+					hourGathFormatted .= timeBetween ? " (" . Round(hourGath * 100 / timeBetween) . "%)" : ""
+					hourConFormatted .= timeBetween ? " (" . Round(hourCon * 100 / timeBetween) . "%)" : ""
+					;Determine Bloat
+					WinGetPos, windowX, windowY, windowWidth, windowHeight, Roblox
+					bloatColor:=0xCC8048
+					PixelSearch, bx2, by2, 0, 0, %windowWidth%, 150, %bloatColor%,0, Fast
+					If (ErrorLevel=0) {
+						nexty:=by2+1
+						pixels:=1
+						loop 38 {
+							PixelGetColor, OutputVar, %bx2%, %nexty%, fast
+							If (OutputVar=bloatColor) {
+								nexty:=nexty+1
+								pixels:=pixels+1
+							} else {
+								bloatPercent:=round(pixels/38*100, 0)
+								break
+							}
+						}
+					} else {
+						bloatPercent:=0
+					}
+					bloatNum:=round((bloatPercent/100)*6, 2)
+					; create postdata for hourly report
+					message := "[" A_Hour ":" A_Min ":" A_Sec "]\n"
+					. "**HOURLY REPORT:**\n"
+					. "Hourly Average: " honeyAverageFormatted "\n"
+					. "Last Hour Honey: " honeyEarnedFormatted "\n"
+					. "Last Hour Gather: " hourGathFormatted "\n"
+					. "Last Hour Convert: " hourConFormatted "\n"
+					. "--------------------\n"
+					. "Current Honey: " currentHoneyFormatted "\n"
+					. "Session Time: " totalTimeFormatted "\n"
+					. "Session Honey: " honeyTotalFormatted "\n"
+					. "Session Gather: " totalGathFormatted "\n"
+					. "Session Convert: " totalConFormatted "\n"
+					. "--------------------\n"
+					. "Total Vicious Kills:" SessionViciousKills "\n"
+					. "Total Boss Kills:" SessionBossKills "\n"
+					. "Total Bug Kills: " SessionBugKills "\n"
+					. "Total Planters: " SessionPlantersCollected "\n"
+					. "Quests Done: " SessionQuestsComplete "\n"
+					. "Disconnects: " SessionDisconnects "\n"
+					. "--------------------\n"
+					. "Bloat: " bloatNum "\n"
+					. "Nectars: Com " totalCom "%\nMot " totalMot "`% - Sat " totalSat "%\nRef " totalRef "`% - Inv " totalInv "%\n"
+					. "**END OF REPORT**"
+					
+					postdata =
+					(
+					{
+						"embeds": [{
+							"description": "%message%",
+							"color": "14052794"
+						}]
+					}
+					)
+				}
+				else
+				{
+					; possibilities are first run or failed OCR
+					if (currentHoney = 0)
+					{
+						; if next OCR succeeds, set divisor for Recent Hour honey
+						lastSuccess += 1
+						postdata =
+						(
+						{
+							"embeds": [{
+								"description": "[%A_Hour%:%A_Min%:%A_Sec%] Honey OCR Failed!\nHourly Update was skipped.\n**Debugging:**%ocrtext%",
+								"color": "15085139"
+							}]
+						}
+						)
+					}
+					else
+					{
+						; initialise honey variables
+						startHoney := currentHoney
+						honeyAverage := 0
+					}
+				}
+				
+				; update variables for future hourly updates
+				lastHoney := (currentHoney) ? currentHoney : lastHoney
+				lastGath := SessionGatherTimeWHT
+				lastCon := SessionConvertTimeWHT
+				lastHourlyUpdate := nowUnix()			
+				; post to webhook
+				try
+				{
+					wr := ComObjCreate("WinHTTP.WinHTTPRequest.5.1")
+					wr.Option(9) := 2048
+					wr.Open("POST", webhook)
+					wr.SetRequestHeader("User-Agent", "AHK")
+					wr.SetRequestHeader("Content-Type", "application/json")
+					wr.Send(postdata)
+					wr.WaitForResponse()
+				}
+			}
+			*/
 		}
-		*/
 	}
 }
 Send_WM_COPYDATA(ByRef StringToSend, ByRef TargetScriptTitle)
@@ -2138,6 +2167,15 @@ Send_WM_COPYDATA(ByRef StringToSend, ByRef TargetScriptTitle)
     DetectHiddenWindows %Prev_DetectHiddenWindows%
     SetTitleMatchMode %Prev_TitleMatchMode%
     return ErrorLevel
+}
+nm_sendHeartbeat(paused:=0){
+	Prev_DetectHiddenWindows := A_DetectHiddenWindows
+    Prev_TitleMatchMode := A_TitleMatchMode
+    DetectHiddenWindows On
+    SetTitleMatchMode 2
+    SendMessage, 0x4299, %paused%, %MacroRunning%,, heartbeat
+    DetectHiddenWindows %Prev_DetectHiddenWindows%
+    SetTitleMatchMode %Prev_TitleMatchMode%
 }
 nm_StatusLogReverseCheck(){
 	global StatusLogReverse
@@ -2898,7 +2936,7 @@ nm_saveCollect(){
 	DetectHiddenWindows On
 	SetTitleMatchMode 2
 	if WinExist("background.ahk ahk_class AutoHotkey") {
-		SendMessage, 0x4200, 4, StingerCheck
+		SendMessage, 0x4200, 4, %StingerCheck%
 	}
 	DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
 	SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
@@ -3307,11 +3345,13 @@ nm_savequest(){
 	GuiControlGet, HoneyQuestCheck
 	GuiControlGet, BlackQuestCheck
 	GuiControlGet, QuestGatherMins
+	GuiControlGet, QuestGatherReturnBy
 	IniWrite, %PolarQuestCheck%, nm_config.ini, Quests, PolarQuestCheck
 	IniWrite, %PolarQuestGatherInterruptCheck%, nm_config.ini, Quests, PolarQuestGatherInterruptCheck
 	IniWrite, %HoneyQuestCheck%, nm_config.ini, Quests, HoneyQuestCheck
 	IniWrite, %BlackQuestCheck%, nm_config.ini, Quests, BlackQuestCheck
 	IniWrite, %QuestGatherMins%, nm_config.ini, Quests, QuestGatherMins
+	IniWrite, %QuestGatherReturnBy%, nm_config.ini, Quests, QuestGatherReturnBy
 }
 nm_BuckoQuestCheck(){
 	GuiControlGet, BuckoQuestCheck
@@ -4105,9 +4145,9 @@ nm_webhookcheck(){
 	if(WebhookCheck){
 		myOS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)
 		if((myOS*1)<10) {
-			WebhookCheck:=0
-			Guicontrol,,WebhookCheck,0
-			msgbox The webhook feature requires Windows 10 or higher.
+			;WebhookCheck:=0
+			;Guicontrol,,WebhookCheck,0
+			msgbox The webhook feature will only provide macro state updates.  It will not provide the houry reports since that feature requires Windows 10 or higher.
 		}
 	}
 	IniWrite, %WebhookCheck%, nm_config.ini, Status, WebhookCheck
@@ -4235,6 +4275,8 @@ nm_ServerLink(){
 	if (InStr(PrivServer, "<") || InStr(PrivServer, ">")) {
 		msgbox It appears you have an improperly formatted server address.  Please remove "<" and or ">" from the full address.
 	}
+	;remove "/Bee-Swarm-Simulator" from link if it exists
+	PrivServer := StrReplace(PrivServer, "/Bee-Swarm-Simulator")
 	IniWrite, %PrivServer%, nm_config.ini, Settings, PrivServer
 }
 nm_stingerFields(){
@@ -4719,23 +4761,30 @@ nm_testButton(){
 	IniRead, MoveSpeedFactor, nm_config.ini, Settings, MoveSpeedFactor
 	GuiControlGet MoveMethod
 	
-	
-	;calculate mins
-		if(A_Min>=50) {
-			GSMins:=50-A_Min+10
-			if(GSMins<10)
-				GSMins:=("0" . GSMins)
-		 } else {
-			GSMins:=A_Min+10
-			if(GSMins<10)
-				GSMins:=("0" . GSMins)
+	nm_walkFrom("pine tree")
+	;settimer, heartbeat, off
+	/*
+	;count hiveslot locations
+	count:=0
+	previous:=1
+	current:=1
+	loop 50 {
+		previous:=current
+		current:=nm_imgSearch("hive4.png",HiveVariation,"actionbar")[1]
+		if(current=0 && (previous!=current)){
+			count:=count+1
 		}
-		send, /
-		sleep 200
-		Send {Blind}{Text} <<Guiding Star>> in .PineTree. until __:%GSMins%
-		sleep 200
-		send, {Enter}
+		searchRet := nm_imgSearch("e_button.png",30,"high")
+		If (searchRet[1] = 0) {
+			msgbox slot %count%
+			WinActivate, Roblox
+		}
+		nm_Move(200*MoveSpeedFactor, RightKey)
+		sleep, 100
+	}
+	*/
 	
+
 	
 	;run guidingStarDetect.ahk, submacros
 	/*
@@ -4852,7 +4901,7 @@ nm_Reset(checkAll:=1, wait:=2000){
 	global AFBuseBooster
 	global currentField
 	global MyField:="None"
-	global HiveConfirmed
+	global HiveConfirmed, WebhookCheck
 	SetKeyDelay , (170+KeyDelay)
 	DisconnectCheck()
 	if(youDied && not instr(objective, "mondo") && VBState=0){
@@ -4864,7 +4913,7 @@ nm_Reset(checkAll:=1, wait:=2000){
 	youDied:=0
 	nm_AutoFieldBoost(currentField)
 	;checkAll bypass to avoid infinite recursion here
-	if(checkAll) {
+	if(checkAll=1) {
 		nm_fieldBoostBooster()
 		nm_locateVB()
 	}
@@ -4876,7 +4925,16 @@ nm_Reset(checkAll:=1, wait:=2000){
 		DetectHiddenWindows On
 		SetTitleMatchMode 2
 		if WinExist("background.ahk ahk_class AutoHotkey") {
-			SendMessage, 0x4200, 1, nowUnix()
+			SendMessage, 0x4200, 1, %resetTime%
+		}
+		myOS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)
+		if((myOS*1)>=10) {
+			IfWinNotExist, StatMonitor.ahk
+			{
+				if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) {
+					Run, StatMonitor.ahk
+				}
+			}
 		}
 		DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
 		SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
@@ -4887,6 +4945,7 @@ nm_Reset(checkAll:=1, wait:=2000){
 				;WinClose, Roblox
 				WinKill, Roblox
 				WinWaitClose, Roblox
+				WinClose StatMonitor.ahk
 				sleep, 8000
 			}
 			DisconnectCheck()
@@ -4897,6 +4956,13 @@ nm_Reset(checkAll:=1, wait:=2000){
 			while(dialog[1] = 0){
 				;check to make sure you are not at a planter on accident
 				imgPos := nm_imgSearch("no.png",30)
+				If (imgPos[1] = 0){
+					MouseMove, (imgPos[2]), (imgPos[3])
+					Click
+					MouseMove, 350, (Roblox[3]+70)
+				}
+				;check to make sure you are not in feed window on accident
+				imgPos := nm_imgSearch("cancel.png",30)
 				If (imgPos[1] = 0){
 					MouseMove, (imgPos[2]), (imgPos[3])
 					Click
@@ -4944,14 +5010,23 @@ nm_Reset(checkAll:=1, wait:=2000){
 			nm_setStatus("Resetting", "Character " . A_Index)
 			HiveConfirmed:=0
 			MouseMove, 350, (Roblox[3]+70)
+			if(CheckAll=2){
+				;reset
+				send {esc}
+				sleep, 100
+				send r
+				sleep, 100
+				send {enter}
+				sleep,7000
+			}
 			;reset
 			send {esc}
 			sleep, 100
 			send r
 			sleep, 100
 			send {enter}
-			SetKeyDelay , (100+KeyDelay)
 			sleep,7000
+			SetKeyDelay , (100+KeyDelay)
 			loop 4{
 				send {PgUp}
 			}
@@ -4960,8 +5035,8 @@ nm_Reset(checkAll:=1, wait:=2000){
 			}
 			sleep,1000
 			repeat:=0
-			loop, 16 { ;60
-				if(A_Index=16)
+			loop, 4 { ;16
+				if(A_Index=4)
 					repeat:=1
 				If (nm_imgSearch("hive4.png",HiveVariation,"actionbar")[1] = 0){
 					loop 4{
@@ -4972,7 +5047,9 @@ nm_Reset(checkAll:=1, wait:=2000){
 					}
 					break
 				}
-				send %RotRight%
+				loop 4 {
+					send %RotRight%
+				}
 				sleep (100+KeyDelay)
 			}
 		}
@@ -5173,17 +5250,59 @@ nm_gotoCannon(){
 		}
 	}
 }
-nm_findHiveslot(){
-	global LeftKey
-	global BackKey
-	global MoveSpeedFactor
-	nm_Move(750*MoveSpeedFactor, BackKey)
-	loop 100 {
-		nm_Move(200*MoveSpeedFactor, LeftKey)
-		searchRet := nm_imgSearch("e_button.png",30,"high")
-		If (searchRet[1] = 0)
-			break
+nm_findHiveslot(slotnum:=0){
+	global RightKey, LeftKey, BackKey, RotRight, ZoomOut, MoveSpeedFactor, HiveSlot, KeyDelay
+	;check if already at hiveslot
+	searchRet := nm_imgSearch("e_button.png",30,"high")
+	If (searchRet[1] = 0) {
+		return
 	}
+	;find hiveslot
+	nm_Move(750*MoveSpeedFactor, BackKey)
+	;if(slotnum>0){
+		SetKeyDelay , (100+KeyDelay)
+		;count hiveslot locations
+		loop 4{
+			send {PgUp}
+		}
+		loop 6 {
+			send %ZoomOut%
+		}
+		loop 4{
+			send %RotRight%
+		}
+		count:=0
+		previous:=1
+		current:=1
+		loop 100 {
+			previous:=current
+			current:=nm_imgSearch("hive4.png",HiveVariation,"actionbar")[1]
+			if(current=0 && (previous!=current)){
+				count:=count+1
+			}
+			searchRet := nm_imgSearch("e_button.png",30,"high")
+			If (searchRet[1] = 0 && (count=HiveSlot || slotnum=0)) {
+				loop 4{
+					send %RotRight%
+				}
+				break
+			}
+			nm_Move(200*MoveSpeedFactor, RightKey)
+			sleep, 100
+		}
+	;}
+	/*
+	else { ;find first available slot
+		loop 100 {
+			nm_Move(200*MoveSpeedFactor, LeftKey)
+			searchRet := nm_imgSearch("e_button.png",30,"high")
+			If (searchRet[1] = 0)
+				break
+		}
+	}
+	*/
+	SetKeyDelay, 5
+	return count
 }
 nm_walkTo(location){
 	global FwdKey
@@ -5662,12 +5781,14 @@ nm_toAnyBooster(){
 	global MoveMethod
 	global LastBlueBoost, QuestBlueBoost
 	global LastRedBoost
-	global LastMountainBoost, QuestRedBoost
+	global LastMountainBoost, QuestRedBoost, QuestGatherField
 	global FieldBooster1
 	global FieldBooster2
 	global FieldBooster3
 	global FieldBoosterMins
 	global objective
+	if (QuestGatherField!="None")
+		return
 	loop 3 {
 		if(FieldBooster%A_Index%="none")
 			break
@@ -6190,7 +6311,7 @@ nm_Bugrun(){
 						break
 					if(not bypass){
 						wait:=min(5000, (50-HiveBees)*1000)
-						nm_Reset(1, wait)
+						nm_Reset(1,wait)
 						objective:="Ladybugs (Strawberry)"
 						nm_gotoRamp()
 						If (MoveMethod="walk")
@@ -6423,7 +6544,7 @@ nm_Bugrun(){
 					break
 				if(not bypass){
 					wait:=min(5000, (50-HiveBees)*1000)
-					nm_Reset(1, wait)
+					nm_Reset(1,wait)
 					objective:="Rhino Beetles (Blue Flower)"
 					nm_gotoRamp()
 					If (MoveMethod="walk")
@@ -6902,6 +7023,7 @@ nm_Bugrun(){
 							nm_Move(1500*MoveSpeedFactor, FwdKey)
 							searchRet := nm_imgSearch("scorpion.png",30,"lowright")
 							If (searchRet[1] = 0) {
+								nm_Move(1500*MoveSpeedFactor, BackKey)
 								success:=1
 								break
 							}
@@ -6909,6 +7031,7 @@ nm_Bugrun(){
 							nm_Move(1500*MoveSpeedFactor, LeftKey)
 							searchRet := nm_imgSearch("scorpion.png",30,"lowright")
 							If (searchRet[1] = 0) {
+								nm_Move(1500*MoveSpeedFactor, BackKey)
 								success:=1
 								break
 							}
@@ -7387,12 +7510,11 @@ nm_cannonToCollect(){
 		IniWrite, %LastClock%, nm_config.ini, Collect, LastClock
 	}
 	;ant pass
-	global AntPassCheck, AntPassAction, QuestAnt
-	global LastAntPass
+	global AntPassCheck, AntPassAction, QuestAnt, LastAntPass, LastAntPassInventory
 	if(QuestAnt) {
 		;check for ant pass in inventory
 		doAntChallenge:=0
-		if(QuestAnt || AntPassAction="challenge"){
+		if((QuestAnt || AntPassAction="challenge") && (nowUnix()-LastAntPassInventory)>300){
 			imgPos := nm_imgSearch("ItemMenu.png",10, "left")
 			If (imgPos[1] != 0){
 				MouseMove, 30, (Roblox[3]+120)
@@ -7432,6 +7554,7 @@ nm_cannonToCollect(){
 					sleep, 350
 				}
 			}
+			LastAntPassInventory:=nowUnix()
 			sleep,1500
 		}
 	}
@@ -8272,18 +8395,25 @@ nm_walkFrom(field:="none")
 			loop 4 {
 				send, {%RotLeft%}
 			}
+			nm_move(2000*MoveSpeedFactor, RightKey)
+			nm_move(1000*MoveSpeedFactor, FwdKey)
 			DllCall("Sleep",UInt,250)
 			send {space down}
 			DllCall("Sleep",UInt,50)
 			send {space up}
-			DllCall("Sleep",UInt,400)
+			DllCall("Sleep",UInt,350)
 			send {space}
-			DllCall("Sleep",UInt,4500)
 			send {%FwdKey% down}
-			send {%RightKey% down}
-			DllCall("Sleep",UInt,4500)
+			DllCall("Sleep",UInt,6000)
 			send {%FwdKey% up}
-			send {%RightKey% up}
+			DllCall("Sleep",UInt,250)
+			searchRet := nm_imgSearch("e_button.png",30,"high")
+			If (searchRet[1] = 0) {
+				return
+			}
+			nm_move(2000*MoveSpeedFactor, FwdKey)
+			nm_Move(4000*MoveSpeedFactor, RightKey)
+			nm_Move(500*MoveSpeedFactor, FwdKey)
 		}
 	}
 	else if (field = "pineapple"){
@@ -8439,7 +8569,6 @@ nm_GoGather(){
 	global WhirligigKey
 	global LastWhirligig
 	global BoostChaserCheck, LastBlueBoost, LastRedBoost, LastMountainBoost, FieldBooster3, FieldBooster2, FieldBooster1, FieldDefault, LastMicroConverter
-	;global FieldName1, FieldName2, FieldName3, FieldPattern1, FieldPattern2, FieldPattern3, FieldPatternSize1, FieldPatternSize2, FieldPatternSize3, FieldPatternReps1, FieldPatternReps2, FieldPatternReps3, FieldPatternShift1, FieldPatternShift2, FieldPatternShift3, FieldUntilMins1, FieldUntilMins2, FieldUntilMins3, FieldUntilPack1, FieldUntilPack2, FieldUntilPack3, FieldReturnType1, FieldReturnType2, FieldReturnType3, FieldSprinklerLoc1, FieldSprinklerLoc2, FieldSprinklerLoc3, FieldSprinklerDist1, FieldSprinklerDist2, FieldSprinklerDist3, FieldRotateDirection1, FieldRotateDirection2, FieldRotateDirection3, FieldRotateTimes1, FieldRotateTimes2, FieldRotateTimes3
 	GuiControlGet, FieldName1
 	GuiControlGet, FieldPattern1
 	GuiControlGet, FieldPatternSize1
@@ -8487,15 +8616,12 @@ nm_GoGather(){
 	global QuestMantis
 	global QuestScorpions
 	global QuestWerewolf
-	global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, BugrunInterruptCheck, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BlackQuestCheck, BlackQuestComplete, QuestGatherField, BuckoQuestCheck, RileyQuestCheck, RotateQuest, QuestGatherMins, BuckoRhinoBeetles, BuckoMantis, RileyLadybugs, RileyScorpions, RileyAll
+	global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, BugrunInterruptCheck, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BlackQuestCheck, BlackQuestComplete, QuestGatherField, BuckoQuestCheck, RileyQuestCheck, RotateQuest, QuestGatherMins, QuestGatherReturnBy, BuckoRhinoBeetles, BuckoMantis, RileyLadybugs, RileyScorpions, RileyAll
 	global GatherStartTime, TotalGatherTime, SessionGatherTime, ConvertStartTime, TotalConvertTime, SessionConvertTime
-	;nm_backpackPercentFilter()
 	;BUGS GatherInterruptCheck
 	if((PolarQuestGatherInterruptCheck || BuckoQuestGatherInterruptCheck || RileyQuestGatherInterruptCheck || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck || BuckoRhinoBeetles || RileyAll) && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1830*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck || RileyScorpions || RileyAll) && (nowUnix()-LastBugrunScorpions)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck || RileyAll) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
 		return
 	}
-	;reset
-	nm_Reset()
 	if(CurrentField="mountain top" && (A_Min>=0 && A_Min<15)) ;mondo dangerzone! skip over this field if possible
 		nm_currentFieldDown()
 	;FIELD OVERRIDES
@@ -8588,7 +8714,7 @@ nm_GoGather(){
 				FieldPatternShift%CurrentFieldNum%:=0
 				FieldUntilMins%CurrentFieldNum%:=QuestGatherMins
 				FieldUntilPack%CurrentFieldNum%:=100
-				FieldReturnType%CurrentFieldNum%:=FieldReturnType1
+				FieldReturnType%CurrentFieldNum%:=QuestGatherReturnBy
 				FieldRotateDirection%CurrentFieldNum%:=FieldDefault[QuestGatherField]["camera"][1]
 				FieldRotateTimes%CurrentFieldNum%:=FieldDefault[QuestGatherField]["camera"][2]
 				FieldSprinklerLoc%CurrentFieldNum%:=FieldDefault[QuestGatherField]["sprinkler"][1]
@@ -8631,6 +8757,12 @@ nm_GoGather(){
 			}
 		}
 	}
+	;reset
+	if(fieldOverrideReason="None") {
+		nm_Reset(2)
+	} else {
+		nm_Reset()
+	}
 	objective:=FieldName%CurrentFieldNum%
 	nm_gotoRamp()
 	;goto field
@@ -8652,8 +8784,6 @@ nm_GoGather(){
 	} else {
 		nm_setStatus("Gathering", fieldOverrideReason . " - " . FieldName%CurrentFieldNum%)
 	}
-	
-	
 	nm_setSprinkler()
 	;rotate
 	num:=FieldRotateTimes%CurrentFieldNum%
@@ -8682,6 +8812,7 @@ nm_GoGather(){
 		TCLRKey:=LeftKey
 		AFCLRKey:=RightKey
 	}
+	
 	;gather loop
 	bypass:=0
 	gatherStart:=nowUnix() ; used to control how long to gather in this cycle
@@ -9144,60 +9275,64 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 		}
 	} else if(pattern="typewriter"){
 		send {%TCLRKey% down}
-		DllCall("Sleep",UInt,300*MoveSpeedFactor*(reps*2+1))
+		DllCall("Sleep",UInt,183*MoveSpeedFactor*(reps*2+1.25))
 		;sleep, 300*MoveSpeedFactor*(reps*2+1)
 		send {%AFCFBKey% down}
 		send {%TCLRKey% up}
-		DllCall("Sleep",UInt,1000*MoveSpeedFactor*size)
+		DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
 		;sleep, 1000*MoveSpeedFactor*size
 		send {%AFCFBKey% up}
 		loop %reps% {
 			send {%AFCLRKey% down}
-			DllCall("Sleep",UInt,300*MoveSpeedFactor)
+			DllCall("Sleep",UInt,183*MoveSpeedFactor)
 			;sleep, 300*MoveSpeedFactor
 			send {%TCFBKey% down}
 			send {%AFCLRKey% up}
-			DllCall("Sleep",UInt,1000*MoveSpeedFactor*size)
+			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
 			;sleep, 1000*MoveSpeedFactor*size
 			send {%AFCLRKey% down}
 			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,300*MoveSpeedFactor)
+			DllCall("Sleep",UInt,183*MoveSpeedFactor)
 			;sleep, 300*MoveSpeedFactor
 			send {%AFCLRKey% up}
 			send {%AFCFBKey% down}
-			DllCall("Sleep",UInt,1000*MoveSpeedFactor*size)
+			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
 			;sleep, 1000*MoveSpeedFactor*size
 			send {%AFCFBKey% up}
 		}
 		send {%TCLRKey% down}
-		DllCall("Sleep",UInt,300*MoveSpeedFactor*(reps*2))
+		DllCall("Sleep",UInt,183*MoveSpeedFactor*(reps*2+1))
 		;sleep, 300*MoveSpeedFactor*(reps*2)
 		send {%TCFBKey% down}
 		send {%TCLRKey% up}
-		DllCall("Sleep",UInt,1000*MoveSpeedFactor*size)
+		DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
 		;sleep, 1000*MoveSpeedFactor*size
 		send {%TCFBKey% up}
 		loop %reps% {
 			send {%AFCLRKey% down}
-			DllCall("Sleep",UInt,300*MoveSpeedFactor)
+			DllCall("Sleep",UInt,183*MoveSpeedFactor)
 			;sleep, 300*MoveSpeedFactor
 			send {%AFCFBKey% down}
 			send {%AFCLRKey% up}
-			DllCall("Sleep",UInt,1000*MoveSpeedFactor*size)
+			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
 			;sleep, 1000*MoveSpeedFactor*size
 			send {%AFCLRKey% down}
 			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,300*MoveSpeedFactor)
+			DllCall("Sleep",UInt,183*MoveSpeedFactor)
 			;sleep, 300*MoveSpeedFactor
 			send {%TCFBKey% down}
 			send {%AFCLRKey% up}
-			DllCall("Sleep",UInt,1000*MoveSpeedFactor*size)
+			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
 			;sleep, 1000*MoveSpeedFactor*size
 			send {%TCFBKey% up}
 		}
 	} else if(pattern="auryn"){
 		;Auryn Gathering Path
 		AurynDelay:=175
+		;invert cus im lazy
+		temp:=TCFBKey
+		TCFBKey:=AFCFBKey
+		AFCFBKey:=temp
 		loop %reps% {
 			;infinity
 			send {%TCFBKey% down}
@@ -9478,7 +9613,7 @@ nm_convert(hiveConfirm:=0)
 						if(not nm_activeHoney()){
 							inactiveHoney:=inactiveHoney+1
 							if(inactiveHoney>10) { ;10 consecutive seconds of inactive honey
-								nm_setStatus("Interrupted", "Inactive Honey")
+								nm_setStatus("Interupted", "Inactive Honey")
 								break
 							}
 						} else {
@@ -9652,7 +9787,7 @@ nm_setSprinkler(quest:=0){
 	} else if(InStr(FieldSprinklerLoc%CurrentFieldNum%, "Right")){
 		nm_Move(fwid*MoveSpeedFactor, RightKey)
 	}
-	if(FieldSprinklerLoc%CurrentFieldNum%:="center")
+	if(FieldSprinklerLoc%CurrentFieldNum%="center")
 		sleep, 1000
 	;set sprinkler(s)
 	Send {1}
@@ -9856,10 +9991,12 @@ DisconnectCheck(){
 			;WinClose, Roblox
 			WinKill, Roblox
 			run, %PrivServer%
+			WinClose StatMonitor.ahk
 		} else {
 			;WinClose, Roblox
 			WinKill, Roblox
 			run, %PublicServer%
+			WinClose StatMonitor.ahk
 			sleep, ReloadRobloxSecs * 1000
 		}
 		sleep, ReloadRobloxSecs * 1000
@@ -9882,6 +10019,15 @@ DisconnectCheck(){
 			sleep 50
 			send {LWin up}
 			send {Up up}
+			myOS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)
+			if((myOS*1)>=10) {
+				IfWinNotExist, StatMonitor.ahk
+				{
+					if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) {
+						Run, StatMonitor.ahk
+					}
+				}
+			}
 			break
 		}
 	}
@@ -9902,12 +10048,17 @@ DisconnectCheck(){
 		;look for hive slot
 		nm_Move(10000*MoveSpeedFactor, FwdKey)
 		nm_Move(7000*MoveSpeedFactor, RightKey)
-		nm_findHiveslot()
+		if(A_Index<=2){
+			slotnum:=nm_findHiveslot(HiveSlot)
+		} else {
+			slotnum:=nm_findHiveslot()
+		}
 		;set hiveslot
 		If (nm_imgSearch("e_button.png",30,"high")[1] = 0){
 			LastClock:=nowUnix()
 			IniWrite, %LastClock%, nm_config.ini, Collect, LastClock
-			HiveSlot:=6
+			HiveSlot:=slotnum
+			GuiControl,,HiveSlot, %HiveSlot%
 			IniWrite, %HiveSlot%, nm_config.ini, Settings, HiveSlot
 			break
 		}
@@ -10076,28 +10227,30 @@ nm_ViciousCheck(){
 	global TotalViciousKills, SessionViciousKills
 	send, /
 	send, {Enter}
-	sleep, 100
+	sleep, 250
 	if(VBState=1){
 		if(nm_imgSearch("VBfoundSymbol2.png", 50, "highright")[1]=0){
 			VBState:=2
 			VBLastKilled:=nowUnix()
 			IniWrite, %VBLastKilled%, nm_config.ini, Collect, VBLastKilled
+			;nm_setStatus("VBState " . VBState, " <1>")
+			nm_setStatus("Attacking")
 			;send VBState to background.ahk
 			Prev_DetectHiddenWindows := A_DetectHiddenWindows
 			Prev_TitleMatchMode := A_TitleMatchMode
 			DetectHiddenWindows On
 			SetTitleMatchMode 2
 			if WinExist("background.ahk ahk_class AutoHotkey") {
-				SendMessage, 0x4200, 3, VBState
-				SendMessage, 0x4200, 5, VBLastKilled
+				SendMessage, 0x4200, 5, %VBLastKilled%
+				SendMessage, 0x4200, 3, %VBState%
 			}
 			DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
 			SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
-			nm_setStatus("Attacking")
 		}
 		;check if VB was already killed by someone else
 		if(nm_imgSearch("VBdeadSymbol2.png",1, "highright")[1]=0){
 			VBState:=0
+			;nm_setStatus("VBState " . VBState, " <2>")
 			nm_setStatus("Defeated")
 			VBLastKilled:=nowUnix()
 			IniWrite, %VBLastKilled%, nm_config.ini, Collect, VBLastKilled
@@ -10107,17 +10260,20 @@ nm_ViciousCheck(){
 			DetectHiddenWindows On
 			SetTitleMatchMode 2
 			if WinExist("background.ahk ahk_class AutoHotkey") {
-				SendMessage, 0x4200, 3, VBState
-				SendMessage, 0x4200, 5, VBLastKilled
+				SendMessage, 0x4200, 5, %VBLastKilled%
+				SendMessage, 0x4200, 3, %VBState%
 			}
 			DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
 			SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 		}
 	}
 	if(VBState=2){
-		if((nowUnix()-VBLastKilled)<(5*60)) { ;it has been less than 5 minutes since VB was found
+	;temp:=(nowUnix()-VBLastKilled)
+	;msgbox VBLastKilled (300): %temp%
+		if((nowUnix()-VBLastKilled)<(300)) { ;it has been less than 5 minutes since VB was found
 			if(nm_imgSearch("VBdeadSymbol2.png",1, "highright")[1]=0){
 				VBState:=0
+				;nm_setStatus("VBState " . VBState, " <3>")
 				nm_setStatus("Defeated")
 				VBLastKilled:=nowUnix()
 				IniWrite, %VBLastKilled%, nm_config.ini, Collect, VBLastKilled
@@ -10127,8 +10283,8 @@ nm_ViciousCheck(){
 				DetectHiddenWindows On
 				SetTitleMatchMode 2
 				if WinExist("background.ahk ahk_class AutoHotkey") {
-					SendMessage, 0x4200, 3, VBState
-					SendMessage, 0x4200, 5, VBLastKilled
+					SendMessage, 0x4200, 5, %VBLastKilled%
+					SendMessage, 0x4200, 3, %VBState%
 				}
 				DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
 				SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
@@ -10138,19 +10294,20 @@ nm_ViciousCheck(){
 				IniWrite, %TotalViciousKills%, nm_config.ini, Status, TotalViciousKills
 				IniWrite, %SessionViciousKills%, nm_config.ini, Status, SessionViciousKills
 			}
-		} else if((nowUnix()-VBLastKilled)>(5*60)) { ;it has been greater than 5 minutes since VB was found
+		} else if((nowUnix()-VBLastKilled)>(300)) { ;it has been greater than 5 minutes since VB was found
 				VBState:=0
+				;nm_setStatus("VBState " . VBState, " <4>")
+				nm_setStatus("Aborted", "Vicious Fight > 5 Mins")
 				;send VBState to background.ahk
 				Prev_DetectHiddenWindows := A_DetectHiddenWindows
 				Prev_TitleMatchMode := A_TitleMatchMode
 				DetectHiddenWindows On
 				SetTitleMatchMode 2
 				if WinExist("background.ahk ahk_class AutoHotkey") {
-					SendMessage, 0x4200, 3, VBState
+					SendMessage, 0x4200, 3, %VBState%
 				}
 				DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
 				SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
-				nm_setStatus("Timed-Out")
 		}
 	}
 }
@@ -10160,13 +10317,14 @@ nm_locateVB(){
 	global StingerCheck
 	if(StingerCheck=0) {
 		VBState:=0
+		;nm_setStatus("VBState " . VBState, " <5>")
 		;send VBState to background.ahk
 		Prev_DetectHiddenWindows := A_DetectHiddenWindows
 		Prev_TitleMatchMode := A_TitleMatchMode
 		DetectHiddenWindows On
 		SetTitleMatchMode 2
 		if WinExist("background.ahk ahk_class AutoHotkey") {
-			SendMessage, 0x4200, 3, VBState
+			SendMessage, 0x4200, 3, %VBState%
 		}
 		DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
 		SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
@@ -10190,7 +10348,7 @@ nm_locateVB(){
 	global MoveMethod
 	global objective
 	global DisableToolUse
-	if(((nowUnix()-NightLastDetected)<(5*60) || (nowUnix()-NightLastDetected)<0)) { ;no more than 5 minutes since NightLastDetected
+	if(((nowUnix()-NightLastDetected)<(300) || (nowUnix()-NightLastDetected)<0)) { ;no more than 5 minutes since NightLastDetected
 		loop, 1 {
 			if(VBState=1){
 				nm_setStatus("Confirming", "Night")
@@ -10215,17 +10373,20 @@ nm_locateVB(){
 					goto VBPepperBypass
 				} else If (findImg[1]=1) {
 					;false positive, ABORT!
-					NightLastDetected:=nowUnix()-5*60-1 ;make NightLastDetected older than 5 minutes
+					NightLastDetected:=nowUnix()-300-1 ;make NightLastDetected older than 5 minutes
 					IniWrite, %NightLastDetected%, nm_config.ini, Collect, NightLastDetected
 					;msgbox false alarm!
+					nm_setStatus("Aborting", "VB - Not Night")
 					break
 				}
 			}
 			startTime:=nowUnix()
 			;Check PEPPER
 			VBPepperStart:
-			if(VBState=0)
+			if(VBState=0) {
+				nm_setStatus("VBState", %VBState%)
 				break
+			}
 			if(not StingerPepperCheck)
 				goto VBMountainTopStart
 			;fieldName:="Pepper"
@@ -10299,8 +10460,10 @@ nm_locateVB(){
 			click, up
 			;Check MOUNTAIN TOP
 			VBMountainTopStart:
-			if(VBState=0)
+			if(VBState=0) {
+				nm_setStatus("VBState", %VBState%)
 				break
+			}
 			if(not StingerMountainTopCheck)
 				goto VBRoseStart
 			nm_Reset(0)
@@ -10371,8 +10534,10 @@ nm_locateVB(){
 			click, up
 			;Check ROSE
 			VBRoseStart:
-			if(VBState=0)
+			if(VBState=0){
+				nm_setStatus("VBState", %VBState%)
 				break
+			}
 			if(not StingerRoseCheck)
 				goto VBCactusStart
 			nm_Reset(0)
@@ -10440,8 +10605,10 @@ nm_locateVB(){
 			click, up
 			;Check CACTUS
 			VBCactusStart:
-			if(VBState=0)
+			if(VBState=0){
+				nm_setStatus("VBState", %VBState%)
 				break
+			}
 			if(not StingerCactusCheck) {
 				nm_Reset(0)
 				objective:="Vicious Bee (Spider)"
@@ -10521,8 +10688,10 @@ nm_locateVB(){
 			}
 			click, up
 			;Check SPIDER
-			if(VBState=0)
+			if(VBState=0){
+				nm_setStatus("VBState", %VBState%)
 				break
+			}
 			;walk to Spider from Cactus
 			objective:="Vicious Bee (Spider)"
 			nm_Move(7000*MoveSpeedFactor, LeftKey)
@@ -10634,8 +10803,10 @@ nm_locateVB(){
 			click, up
 			;Check CLOVER
 			VBCloverStart:
-			if(VBState=0)
+			if(VBState=0){
+				nm_setStatus("VBState", %VBState%)
 				break
+			}
 			if(not StingerCloverCheck)
 				break
 			nm_Reset(0)
@@ -10702,14 +10873,18 @@ nm_locateVB(){
 			}
 		}
 		click, up
+		nm_setStatus("Completed", %VBState%)
+		sleep, 100
 		VBState:=0 ;0=no VB, 1=searching for VB, 2=VB found
+		;nm_setStatus("VBState " . VBState, " <6>")
+		nm_setStatus("Completed", "Vicious Cycle")
 		;send VBState to background.ahk
 		Prev_DetectHiddenWindows := A_DetectHiddenWindows
 		Prev_TitleMatchMode := A_TitleMatchMode
 		DetectHiddenWindows On
 		SetTitleMatchMode 2
 		if WinExist("background.ahk ahk_class AutoHotkey") {
-			SendMessage, 0x4200, 3, VBState
+			SendMessage, 0x4200, 3, %VBState%
 		}
 		DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
 		SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
@@ -10719,13 +10894,14 @@ nm_locateVB(){
 	} else { ;it has been more than 5 minutes since NightLastDetected
 		if((nowUnix()-VBLastKilled)>(300) || (nowUnix()-VBLastKilled)<0) { ;more than 5 minutes since VBLastKilled
 			VBState:=0
+			;nm_setStatus("VBState " . VBState, " <7>")
 			;send VBState to background.ahk
 			Prev_DetectHiddenWindows := A_DetectHiddenWindows
 			Prev_TitleMatchMode := A_TitleMatchMode
 			DetectHiddenWindows On
 			SetTitleMatchMode 2
 			if WinExist("background.ahk ahk_class AutoHotkey") {
-				SendMessage, 0x4200, 3, VBState
+				SendMessage, 0x4200, 3, %VBState%
 			}
 			DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
 			SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
@@ -11275,7 +11451,8 @@ nm_Feed(food){
 						Click
 					}
 					MouseMove, 350, (Roblox[3]+70)
-				}	
+					break
+				}
 			}
 			loop, 2 {
 				send, {WheelDown 1}
@@ -11531,7 +11708,7 @@ nm_RileyQuestProg(){
 		if(RileyLadybugs=0 && RileyScorpions=0 && RileyAll=0 && QuestGatherField="None" && QuestAnt=0 && QuestRedBoost=0 && QuestFeed="None") {
 				RileyQuestComplete:=1
 			} else { ;check if all doable things are done and everything else is on cooldown
-				if(((QuestAnt && (nowUnix()-LastAntPass)<7200) || (RileyLadybugs && (nowUnix()-LastBugrunLadybugs)<floor(330*(1-GiftedViciousCheck*.15))) || (RileyScorpions && (nowUnix()-LastBugrunScorpions)<floor(1230*(1-GiftedViciousCheck*.15))))) { ;there is at least one thing no longer on cooldown
+				if(QuestGatherField!="None" || (QuestAnt && (nowUnix()-LastAntPass)<7200) || (RileyLadybugs && (nowUnix()-LastBugrunLadybugs)<floor(330*(1-GiftedViciousCheck*.15))) || (RileyScorpions && (nowUnix()-LastBugrunScorpions)<floor(1230*(1-GiftedViciousCheck*.15)))) { ;there is at least one thing no longer on cooldown
 					RileyQuestComplete:=0
 				} else {
 					RileyQuestComplete:=2
@@ -11831,7 +12008,7 @@ nm_BuckoQuestProg(){
 		if(BuckoRhinoBeetles=0 && BuckoMantis=0 && QuestGatherField="None" && QuestAnt=0 && QuestBlueBoost=0 && QuestFeed="None") {
 				BuckoQuestComplete:=1
 			} else { ;check if all doable things are done and everything else is on cooldown
-				if(((QuestAnt && (nowUnix()-LastAntPass)<7200) || (BuckoRhinoBeetles && (nowUnix()-LastBugrunRhinoBeetles)<floor(330*(1-GiftedViciousCheck*.15))) || (BuckoMantis && (nowUnix()-LastBugrunMantis)<floor(1230*(1-GiftedViciousCheck*.15))))) { ;there is at least one thing no longer on cooldown
+				if(QuestGatherField!="None" || (QuestAnt && (nowUnix()-LastAntPass)<7200) || (BuckoRhinoBeetles && (nowUnix()-LastBugrunRhinoBeetles)<floor(330*(1-GiftedViciousCheck*.15))) || (BuckoMantis && (nowUnix()-LastBugrunMantis)<floor(1230*(1-GiftedViciousCheck*.15)))) { ;there is at least one thing no longer on cooldown
 					BuckoQuestComplete:=0
 				} else {
 					BuckoQuestComplete:=2
@@ -12944,6 +13121,7 @@ LastMicroConverter=1
 
 [Quests]
 QuestGatherMins=5
+QuestGatherReturnBy=Reset
 PolarQuestCheck=0
 PolarQuestGatherInterruptCheck=1
 PolarQuestName=None
@@ -14498,7 +14676,8 @@ ba_placeInventoryPlanter(planterName, planterNum){
 	If (planterPos[1] = 0){
 		while (planterPos[1] = 0){
 			;MouseMove, (planterPos[2]-60), (planterPos[3]+40)
-			MouseClickDrag, Left, (planterPos[2]-60), (planterPos[3]+40), (windowWidth/2), (windowHeight/2), 5
+			;MouseClickDrag, Left, (planterPos[2]-60), (planterPos[3]+40), (windowWidth/2), (windowHeight/2), 5
+			MouseClickDrag, Left, (30), (planterPos[3]+40), (windowWidth/2), (windowHeight/2), 5
 			planterPos := nm_imgSearch(planterImg, 50, "left")
 			sleep, 200
 		}	
@@ -14562,7 +14741,8 @@ ba_placeInventoryPlanter(planterName, planterNum){
 			If (planterPos[1] = 0){
 				while (planterPos[1] = 0){
 					;MouseMove, (planterPos[2]-60), (planterPos[3]+40)
-					MouseClickDrag, Left, planterPos[2]-60, planterPos[3]+40, windowWidth/2, windowHeight/2, 5
+					;MouseClickDrag, Left, planterPos[2]-60, planterPos[3]+40, windowWidth/2, windowHeight/2, 5
+					MouseClickDrag, Left, 30, planterPos[3]+40, windowWidth/2, windowHeight/2, 5
 					planterPos := nm_imgSearch(planterImg, 100, "left")
 					sleep, 200
 				}
@@ -14958,23 +15138,23 @@ LastInvigoratingField=Cactus
 ;field planters ordered from best to worst (will always try to pick the best planter for the field)
 ;planters that provide no bonuses at all are ordered by worst to best so it can preserve the "better" planters for other nectar types
 ;planters array: [1] planter name, [2] nectar bonus, [3] speed bonus, [4] hours to complete growth (no field degradation is assumed)
-BambooPlanters=PetalPlanter, 1.5, 1.16, 12.12; PlanterOfPlenty, 1.5, 1, 16; BlueClayPlanter, 1.2, 1.17, 5.12; PesticidePlanter, 1, 1.3, 7.69; TackyPlanter, 1.25, 1, 8; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; RedClayPlanter, 1, 1, 6; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
-BlueFlowerPlanters=PlanterOfPlenty, 1.5, 1, 16; BlueClayPlanter, 1.2, 1.17, 5.12; TackyPlanter, 1, 1.25, 6.4; PetalPlanter, 1, 1.16, 12.12; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; RedClayPlanter, 1, 1, 6; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
-CactusPlanters=PlanterOfPlenty, 1.5, 1, 16; RedClayPlanter, 1.2, 1.11, 5.42; BlueClayPlanter, 1, 1.13, 5.33; PetalPlanter, 1, 1.04, 13.53; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; TackyPlanter, 1, 1, 8; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
-CloverPlanters=PlanterOfPlenty, 1.5, 1, 16; RedClayPlanter, 1.2, 1.09, 5.53; TackyPlanter, 1, 1.25, 6.4; PetalPlanter, 1, 1.16, 12.07; BlueClayPlanter, 1, 1.09, 5.53; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
-CoconutPlanters=PlanterOfPlenty, 1.5, 1.5, 10.67; PetalPlanter, 1, 1.45, 9.68; CandyPlanter, 1, 1.25, 3.2; BlueClayPlanter, 1.2,  1.01, 5.93; RedClayPlanter, 1, 1.02, 5.91; PlasticPlanter, 1, 1, 2; TackyPlanter, 1, 1, 8; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
-DandelionPlanters=PetalPlanter, 1.5, 1.43, 9.82; TackyPlanter, 1.25, 1.25, 6.4; PlanterOfPlenty, 1.5, 1, 16; BlueClayPlanter, 1.2, 1.03, 5.85; RedClayPlanter, 1, 1.01, 5.93; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
-MountainTopPlanters=PlanterOfPlenty, 1.5, 1.5, 10.67; RedClayPlanter, 1.2, 1.13, 5.33; BlueClayPlanter, 1, 1.13, 5.33; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; TackyPlanter, 1, 1, 8; PesticidePlanter, 1, 1, 10; PetalPlanter, 1, 1, 14; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
-MushroomPlanters=PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; TackyPlanter, 1, 1.25, 6.4; CandyPlanter, 1.2, 1, 4; RedClayPlanter, 1, 1.19, 5.11; PetalPlanter, 1, 1.15, 12.17; PlasticPlanter, 1, 1, 2; BlueClayPlanter, 1, 1, 6; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+BambooPlanters=PetalPlanter, 1.5, 1.16, 12.12; PesticidePlanter, 1, 1.6, 6.25; PlanterOfPlenty, 1.5, 1, 16; BlueClayPlanter, 1.2, 1.17, 5.12; TackyPlanter, 1.25, 1, 8; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; RedClayPlanter, 1, 1, 6; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+BlueFlowerPlanters=TackyPlanter, 1, 1.5, 5.33; PlanterOfPlenty, 1.5, 1, 16; BlueClayPlanter, 1.2, 1.17, 5.12; PetalPlanter, 1, 1.16, 12.12; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; RedClayPlanter, 1, 1, 6; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+CactusPlanters=PlanterOfPlenty, 1.5, 1, 16; BlueClayPlanter, 1, 1.13, 5.33; RedClayPlanter, 1.2, 1.11, 5.42; PetalPlanter, 1, 1.04, 13.53; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; TackyPlanter, 1, 1, 8; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+CloverPlanters=TackyPlanter, 1, 1.5, 5.33; PlanterOfPlenty, 1.5, 1, 16; RedClayPlanter, 1.2, 1.09, 5.53; PetalPlanter, 1, 1.16, 12.07; BlueClayPlanter, 1, 1.09, 5.53; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+CoconutPlanters=CandyPlanter, 1, 1.5, 2.67; PlanterOfPlenty, 1.5, 1.5, 10.67; PetalPlanter, 1, 1.45, 9.68; BlueClayPlanter, 1.2, 1.01, 5.93; RedClayPlanter, 1, 1.02, 5.91; PlasticPlanter, 1, 1, 2; TackyPlanter, 1, 1, 8; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+DandelionPlanters=TackyPlanter, 1.25, 1.5, 5.33; PetalPlanter, 1.5, 1.43, 9.82; PlanterOfPlenty, 1.5, 1, 16; BlueClayPlanter, 1.2, 1.03, 5.85; RedClayPlanter, 1, 1.01, 5.93; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+MountainTopPlanters=PlanterOfPlenty, 1.5, 1.5, 10.67; BlueClayPlanter, 1, 1.13, 5.33; RedClayPlanter, 1.2, 1.13, 5.33; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; TackyPlanter, 1, 1, 8; PesticidePlanter, 1, 1, 10; PetalPlanter, 1, 1, 14; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+MushroomPlanters=TackyPlanter, 1, 1.5, 5.33; PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; CandyPlanter, 1.2, 1, 4; RedClayPlanter, 1, 1.19, 5.11; PetalPlanter, 1, 1.15, 12.17; PlasticPlanter, 1, 1, 2; BlueClayPlanter, 1, 1, 6; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 PepperPlanters=PlanterOfPlenty, 1.5, 1.5, 10.67; RedClayPlanter, 1.2, 1.23, 4.88; PetalPlanter, 1, 1.04, 13.46; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; BlueClayPlanter, 1, 1, 6; TackyPlanter, 1, 1, 8; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 PineTreePlanters=PetalPlanter, 1.5, 1.08, 12.96; PlanterOfPlenty, 1.5, 1, 16; BlueClayPlanter, 1.2, 1.21, 4.96; TackyPlanter, 1.25, 1, 8; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; RedClayPlanter, 1, 1, 6; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
-PineapplePlanters=PetalPlanter, 1.5, 1.45, 9.69; PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; CandyPlanter, 1, 1.25, 3.2; TackyPlanter, 1.25, 1, 8; RedClayPlanter, 1.2, 1.02, 5.91; BlueClayPlanter, 1, 1.01, 5.93; PlasticPlanter, 1, 1, 2; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+PineapplePlanters=CandyPlanter, 1, 1.5, 2.67; PetalPlanter, 1.5, 1.45, 9.69; PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; TackyPlanter, 1.25, 1, 8; RedClayPlanter, 1.2, 1.02, 5.91; BlueClayPlanter, 1, 1.01, 5.93; PlasticPlanter, 1, 1, 2; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 PumpkinPlanters=PetalPlanter, 1.5, 1.29, 10.89; PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; RedClayPlanter, 1.2, 1.06, 5.69; TackyPlanter, 1.25, 1, 8; BlueClayPlanter, 1, 1.05, 5.7; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 RosePlanters=PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; RedClayPlanter, 1, 1.2, 4.98; CandyPlanter, 1.2, 1, 4; PetalPlanter, 1, 1.09, 12.84; PlasticPlanter, 1, 1, 2; BlueClayPlanter, 1, 1, 6; TackyPlanter, 1, 1, 8; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
-SpiderPlanters=PesticidePlanter, 1.3, 1.3, 7.69; PetalPlanter, 1, 1.5, 9.33; PlanterOfPlenty, 1.5, 1, 16; CandyPlanter, 1.2, 1, 4; PlasticPlanter, 1, 1, 2; BlueClayPlanter, 1, 1, 6; RedClayPlanter, 1, 1, 6; TackyPlanter, 1, 1, 8; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
-StrawberryPlanters=PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1, 1.3, 7.69; CandyPlanter, 1, 1.25, 3.2; BlueClayPlanter, 1.2, 1, 6; RedClayPlanter, 1, 1.17, 5.12; PetalPlanter, 1, 1.16, 12.12; PlasticPlanter, 1, 1, 2; TackyPlanter, 1, 1, 8; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+SpiderPlanters=PesticidePlanter, 1.3, 1.6, 6.25; PetalPlanter, 1, 1.5, 9.33; PlanterOfPlenty, 1.5, 1, 16; CandyPlanter, 1.2, 1, 4; PlasticPlanter, 1, 1, 2; BlueClayPlanter, 1, 1, 6; RedClayPlanter, 1, 1, 6; TackyPlanter, 1, 1, 8; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+StrawberryPlanters=PesticidePlanter, 1, 1.6, 6.25; CandyPlanter, 1, 1.5, 2.67; PlanterOfPlenty, 1.5, 1, 16;  BlueClayPlanter, 1.2, 1, 6; RedClayPlanter, 1, 1.17, 5.12; PetalPlanter, 1, 1.16, 12.12; PlasticPlanter, 1, 1, 2; TackyPlanter, 1, 1, 8; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 StumpPlanters=PlanterOfPlenty, 1.5, 1.5, 10.67; PesticidePlanter, 1.3, 1, 10; CandyPlanter, 1.2, 1, 4; BlueClayPlanter, 1, 1.19, 5.05; PetalPlanter, 1, 1.1, 12.79; RedClayPlanter, 1, 1.02, 5.91; PlasticPlanter, 1, 1, 2; TackyPlanter, 1, 1, 8; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
-SunflowerPlanters=PetalPlanter, 1.5, 1.36, 10.33; TackyPlanter, 1.25, 1.25, 6.4; PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; RedClayPlanter, 1.2, 1.04, 5.8; BlueClayPlanter, 1, 1.04, 5.78; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+SunflowerPlanters=PetalPlanter, 1.5, 1.36, 10.33; TackyPlanter, 1.25, 1.5, 5.33; PlanterOfPlenty, 1.5, 1, 16; PesticidePlanter, 1.3, 1, 10; RedClayPlanter, 1.2, 1.04, 5.8; BlueClayPlanter, 1, 1.04, 5.78; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 PlanterName1=None
 PlanterName2=None
 PlanterName3=None
@@ -15121,10 +15301,15 @@ SetTitleMatchMode 2
 WinClose guidingStarDetect.ahk
 WinClose background.ahk
 WinClose StatMonitor.ahk
+;if((nowUnix()-LastHeartbeat)<12)
+;	WinClose heartbeat.ahk
 DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
 SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 ExitApp
 
+;HeartBeat:
+;	nm_sendHeartbeat()
+;return
 StartBackground:
 settimer, Background, 2000
 bg:=1
@@ -15165,10 +15350,12 @@ return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\
 ;START MACRO
 f1::
+ControlFocus
 send ^{Alt}
 nm_setStatus("Begin", "Macro")
 ; CHECK FULL SCREEN MODE
-if(not WinExist("Roblox")) {
+IfWinNotExist, Roblox
+{
 	disconnectCheck()
 }
 WinActivate, Roblox
@@ -15381,7 +15568,7 @@ global AFBglitterHotbar
 global AFBGlitterLimit
 global AFBGlitterLimitEnable
 global PolarQuestCheck
-global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, QuestGatherMins
+global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, QuestGatherMins, QuestGatherReturnBy
 global BlackQuestCheck, BuckoQuestCheck, RileyQuestCheck, HoneyQuestCheck
 global LastBlackQuest
 global QuestLadybugs:=0
@@ -15454,6 +15641,7 @@ GuiControlGet, TunnelBearBabyCheck
 GuiControlGet, KingBeetleCheck
 GuiControlGet, KingBeetleBabyCheck
 GuiControlGet, QuestGatherMins
+GuiControlGet, QuestGatherReturnBy
 GuiControlGet, PolarQuestCheck
 GuiControlGet, PolarQuestGatherInterruptCheck
 GuiControlGet, BuckoQuestGatherInterruptCheck
@@ -15650,6 +15838,10 @@ if(AutoFieldBoostActive){
 if(AnnounceGuidingStar){
 	run guidingStarDetect.ahk, submacros
 }
+;sendMessage commands
+if WinExist("background.ahk ahk_class AutoHotkey") {
+	SendMessage, 0x4200, 4, %StingerCheck%
+}
 ;start main loop
 nm_setStatus(0, "Main Loop")
 nm_Start()
@@ -15705,6 +15897,7 @@ if(A_IsPaused) {
 		send {space down}
 	nm_setStatus(PauseState, PauseObjective)
 	MacroRunning:=1
+	;nm_sendHeartbeat(0)
 	;manage runtimes
 	MacroStartTime:=nowUnix()
 	GatherStartTime:=nowUnix()
@@ -15732,6 +15925,7 @@ if(A_IsPaused) {
 		SessionGatherTime:=SessionGatherTime+(nowUnix()-GatherStartTime)
 	}
 	IniWrite, %TotalRuntime%, nm_config.ini, Status, TotalRuntime
+	;nm_sendHeartbeat(1)
 	nm_setStatus("Paused", "Press F2 to Continue")
 }
 Pause, Toggle, 1
@@ -15793,6 +15987,9 @@ nm_WM_COPYDATA(wParam, lParam){
 			send {space down}
 	}
 }
+nm_setLastHeartbeat(wParam, lParam){
+	global LastHeartbeat:=nowUnix()
+}
 nm_backgroundEvent(wParam, lParam){
 	global youDied, NightLastDetected, VBState, BackpackPercent, BackpackPercentFiltered
 	
@@ -15804,15 +16001,15 @@ nm_backgroundEvent(wParam, lParam){
 	;Set NightLastDetected
 	else if(wParam=2){
 		NightLastDetected:=lParam
+		nm_setStatus("Detected", "Night")
 	}
 	;Set VBState
 	else if(wParam=3){
-		
 		VBState:=lParam
+		;nm_setStatus("VBState " . VBState . " temp " . temp, " <8>")
 	}
 	;Set BackpackPercent
 	else if(wParam=6){
-		
 		BackpackPercent:=lParam
 	}
 	;Set BackpackPercentFiltered

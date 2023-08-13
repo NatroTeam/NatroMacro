@@ -42,7 +42,7 @@ while 1 {
 }
 
 nm_setGlobalNum(wParam, lParam){
-	global resetTime, NightLastDetected, VBState, StingerCheck
+	global resetTime, NightLastDetected, VBState, StingerCheck, VBLastKilled
 	
 	;set resetTime
 	if(wParam=1){
@@ -68,7 +68,7 @@ nm_setGlobalNum(wParam, lParam){
 
 nm_deathCheck(){
 	global windowX, windowY, windowWidth, windowHeight
-	if ((nowUnix()-ResetTime)>10) {
+	if ((nowUnix()-ResetTime)>20) {
 		ImageSearch, FoundX, FoundY, windowWidth/2, windowHeight/2, windowWidth, windowHeight, *50 %imgfolder%\died.png	
 		if(ErrorLevel=0){
 			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
@@ -94,7 +94,7 @@ nm_dayOrNight(){
 ;msgbox reset VBState=%VBState% (nowUnix()-NightLastDetected)=%temp% (nowUnix()-VBLastKilled)=%temp2%`nnow=%temp3% VBLastKilled=%VBLastKilled%
 		VBState:=0
 		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-			SendMessage, 0x4201, 3, VBState
+			SendMessage, 0x4201, 3, %VBState%
 		}
 	}
 	ImageSearch, FoundX, FoundY, 0, windowHeight/2, windowWidth, windowHeight, *5 %imgfolder%\grassD.png
@@ -115,16 +115,23 @@ nm_dayOrNight(){
 	}
 	if(confirm>=5) {
 		dayOrNight:="Night"
-		if((nowUnix()-NightLastDetected)>(5*60) || (nowUnix()-NightLastDetected)<0) { ;at least 5 minutes since last time it was night
+		if((nowUnix()-NightLastDetected)>(300) || (nowUnix()-NightLastDetected)<0) { ;at least 5 minutes since last time it was night
 			NightLastDetected:=nowUnix()
 			IniWrite, %NightLastDetected%, ..\nm_config.ini, Collect, NightLastDetected
+;temp:=nowUnix()-NightLastDetected
+;temp2:=nowUnix()-VBLastKilled
+;temp3:=nowUnix()
+;temp4:=NightLastDetected
+;send {F2}
+;msgbox reset VBState=%VBState% (nowUnix()-NightLastDetected)=%temp%`nnow=%temp3% NightLastDetected=%NightLastDetected%
 			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-				SendMessage, 0x4201, 2, nowUnix()
+				SendMessage, 0x4201, 2, %NightLastDetected%
 			}
+			sleep, 250
 			if(StingerCheck && VBState=0) {
 				VBState:=1 ;0=no VB, 1=searching for VB, 2=VB found
 				if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-					SendMessage, 0x4201, 3, VBState
+					SendMessage, 0x4201, 3, %VBState%
 				}
 			}
 		}
@@ -134,6 +141,7 @@ nm_dayOrNight(){
 		IniWrite, %dayOrNight%, ..\nm_config.ini, gui, DayOrNight
 	}
 }
+
 nm_backpackPercent(){
 	global WindowedScreen
 	;WinGetPos , windowX, windowY, windowWidth, windowHeight, Roblox
@@ -249,7 +257,7 @@ nm_backpackPercent(){
 		}
 	}
 	if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-		SendMessage, 0x4201, 6, BackpackPercent
+		SendMessage, 0x4201, 6, %BackpackPercent%
 	}
 	Return BackpackPercent
 }
@@ -271,7 +279,7 @@ nm_backpackPercentFilter(){
 	}
 	BackpackPercentFiltered:=sum/PackFilterArray.length()
 	if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-		SendMessage, 0x4201, 7, BackpackPercentFiltered
+		SendMessage, 0x4201, 7, %BackpackPercentFiltered%
 	}
 	return BackpackPercentFiltered
 }

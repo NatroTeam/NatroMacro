@@ -1,9 +1,35 @@
+0.6.5 Patch Notes
+
+New Features
+-Upon reconnect the macro will now try to re-claim the same hive-slot position you had before.  If it cannot find it after two tries, it will claim the first available hive it can find.
+-Forces Roblox to open in browser mode (not Beta App)
+-There is now a Quest setting to return to hive by either Walk or Reset.  Previously quests would just use whatever option was selected in gathering field 1.
+
+Bugs
+-Fixed issue where Bucko quest would not be completed before moving onto next Riley quest.
+-Fixed issue where Bucko/Riley quests got stuck in a feed Blueberries/Strawberries loop.
+-Fixed an issue where placing planters did not always work properly.
+-Added another check to resets to make sure you dont get stuck in the feed window.
+-Fixed an issue introduced in 0.6.4 where Vicious/stinger collection was not completing properly.
+-Fixed an issue causing private error code spam in the macro status log.
+-Upon disconnects, the hourly charts will stop being sent.  I added logic to stop/start the graphs every time there is a disconnect.
+-Fixed an issue where sprinkler placement would change to "center" instead of the location specified in the gather tab.
+
+Other
+-Adjusted Typewriter pattern timings to more accurately match the pattern in the e_lol pine macro. (Typewriter, Length=M, Width=3)
+-Adjusted scorpion bugrun pathing again for more consistent looting.
+-Webhook can now be used for all versions of windows.  However, only Windows 10 or higher will have the hourly report summaries (graphs).
+-Reduced how often quests that require killing ants will check inventory for ant passes (once every 5 mins). This may slow down quest completion slightly but this also saves time overall to do other things.
+-Made the reset function slightly faster.
+-Added a double-reset before going to main gathering field.
+-Field Boosters will only be used if there is no quest gathering fields to prevent wasted boost time.
+
+
 0.6.4 Patch Notes
 
 New Features
 -Added Data graphs and buff tracking to Webhooks for hourly reports!! Special thanks to xSPx who coded all of it and allowed me to include this into my macro.  This is still a work in progress so there will be updates to this.
 -Added the ability to announce Guiding Star Field Boosts.  This only works for the account that is actually producing the Guiding Star.
-
 
 Bugs
 -Fixed issue where feeding was not properly dragging the food item to your hive.
