@@ -1,3 +1,28 @@
+0.5.2 Patch Notes
+
+New Features
+-Added Black Bear Quest
+-Added a "Gather in Boosted Field" option in the Boost tab.  If enabled, this will check to see if you have any field boosts and gather there instead.  If more than one field is boosted, the selection process will bias to the highest level field in the following order: Blue->White->Red. Note that this feature is mutually exclusive with Automatic Field Boost so they cannot be used at the same time.
+
+Bugs
+-Corrected various issues related to Honey Bee Quest management.
+-Corrected various issues related to Tunnel Bear and King Beetle.
+-Fixed and issue where CurrentField was not updated to a valid field if it was the current gathering field and then changed to "None" in the GUI.
+-Auto Field Boost will now stop trying to roll dice if a disconnect occurs.
+
+Other
+-"Easy Mode" is now even easier!
+-Webhook feature is no longer allowed unless using Windows 10 or higher.
+-Killing bugs now looks for death messages instead of just being a flat timer.  This should make bugruns slightly faster.
+-Added some "Interrupted" status messages for when your gathering is ended pre-maturely.
+-Minor adjustment to the glue dispenser pathing to make it more reliable.
+-Minor adjustment to the blueberry dispenser pathing to make it more reliable.
+-Minor adjustment to the ant pass dispenser pathing to make it more reliable.
+-Minor adjustment to locating hive slot after a disconnect.
+-Added separate and different field default settings for each field.  The idea is to have a default that will minimize field drift.  These settings may need adjustment since I have not extensively tested all possible combinations for every field.
+-Stingers/Vicious Bee will now interrupt a bug-run.
+
+
 0.5.1 Patch Notes
 
 New Features
