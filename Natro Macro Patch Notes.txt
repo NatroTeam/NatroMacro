@@ -1,3 +1,17 @@
+0.6.0 Patch Notes
+
+New Features
+-Added Ant Challenge
+-Added Bucko Quests
+-Added Riley Quests
+
+Bugs
+-Adjusted the Ant Pass flight path.  It was very inconsistent.
+
+Other
+-Adjusted some of the default field settings.
+
+
 0.5.2 Patch Notes
 
 New Features
