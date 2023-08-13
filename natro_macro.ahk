@@ -19,13 +19,13 @@ runWith(version){
 }
 
 OnMessage(0x004A, "nm_WM_COPYDATA")
-OnMessage(0x5555, "nm_backgroundEvent") ; ~ trying new message number, replace all 'SendMessage, 0x4201' with 'PostMessage, 0x5555' in background.ahk
+OnMessage(0x5555, "nm_backgroundEvent", 255) ; ~ trying new message number, replace all 'SendMessage, 0x4201' with 'PostMessage, 0x5555' in background.ahk
 OnMessage(0x5556, "nm_setLastHeartbeat") ; same as above, replace all "SendMessage, 0x4299' with 'PostMessage, 0x5556' in heartbeat.ahk
 ;run, test.ahk ; ~ run the test script for debugging issues, can comment this and 'WinClose, test.ahk' out when fixed or not want to test
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; CONFIG FILE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-If !FileExist("settings") ; ~ make sure the settings folder exists for stability
+If !FileExist("settings") ; ~ make sure the settings folder exists
 {
 	FileCreateDir, settings
 	If ErrorLevel
@@ -36,32 +36,9 @@ If !FileExist("settings") ; ~ make sure the settings folder exists for stability
 }
 if(not fileexist("settings\nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.8.2"
+VersionID:="0.8.3"
 #include *i personal.ahk
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; UPDATE PATTERNS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; ~ at every start of macro, ensure all patterns are loaded into 'patterns.ahk'
-init := FileExist(A_ScriptDir "\settings\patterns.ahk") ? 0 : 1
-tempfile := FileOpen(A_ScriptDir "\settings\patterns.ahk", 0), checkString := tempFile.Read(), tempFile.Close()
-patternString := ""
-Loop, Files, %A_ScriptDir%\patterns\*.ahk
-	tempFile := FileOpen(A_LoopFilePath, 0), patternString .= tempFile.Read() "`r`n`r`n", tempFile.Close()
-if (patternString != checkString)
-{
-	FileDelete, % A_ScriptDir "\settings\patterns.ahk"
-	FileAppend, % patternString, % A_ScriptDir "\settings\patterns.ahk"
-	if init
-		Reload
-	if checkString
-	{
-		msgbox, 0x34, , Change in patterns detected! Reload to update patterns?
-		ifMsgBox Yes
-			Reload
-		else
-			ExitApp
-	}
-}
+nm_import() ; ~ import paths and patterns
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; DISABLE ROBLOX BETA APP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -526,7 +503,7 @@ Gui, Add, DropDownList, x18 y175 w90 vFieldName3 gnm_FieldSelect3, %FieldName3%|
 GuiControl, disable, FieldName3
 patternlist := "" ; ~ retrieve list of patterns from 'patterns' folder
 Loop, Files, %A_ScriptDir%\patterns\*.ahk
-	patternlist .= RegExReplace(StrReplace(A_LoopFileName, ".ahk"), "(?:^|\.|\R)[- 0-9\*\(]*\K(.)([^\.\r\n]*)", "$U1$L2") "|"
+	patternlist .= StrReplace(A_LoopFileName, ".ahk") "|"
 Gui, Add, DropDownList, x118 y57 w60 vFieldPattern1 gnm_SaveGather, % FieldPattern1 "||" patternlist "Stationary"
 GuiControl, disable, FieldPattern1
 Gui, Add, DropDownList, x118 y115 w60 vFieldPattern2 gnm_SaveGather, % FieldPattern2 "||" patternlist "Stationary"
@@ -1501,10 +1478,10 @@ nm_TabPlantersPlusUnLock()
 nm_TabSettingsUnLock()
 
 WinActivate, Roblox
-WinWaitActive, Roblox
+;WinWaitActive, Roblox
 settimer, StartBackground, -5000
 ;settimer, Heartbeat, 10000
-run, background.ahk, %A_ScriptDir%\submacros
+;run, %A_ScriptDir%\submacros\background.ahk, %A_ScriptDir%\submacros
 
 Prev_DetectHiddenWindows := A_DetectHiddenWindows
 Prev_TitleMatchMode := A_TitleMatchMode
@@ -1605,22 +1582,21 @@ nm_guiModeButton(toggle:=1){
 		GuiControl, hide, sprinklerTitle
 		GuiControl, hide, sprinklerStartHeader
 		;Collect/Kill Tab
-		GuiControl,, ClockCheck, 1
-		GuiControl,, StockingsCheck, 0
-		GuiControl,, WreathCheck, 0
-		GuiControl,, FeastCheck, 0
-		GuiControl,, CandlesCheck, 0
-		GuiControl,, SamovarCheck, 0
-		GuiControl,, LidArtCheck, 0
-		GuiControl,, AntPassCheck, 0
-		GuiControl,, MondoBuffCheck, 0
-		GuiControl,, CoconutDisCheck, 0
-		GuiControl,, RoyalJellyDisCheck, 0
-		GuiControl,, GlueDisCheck, 0
-		GuiControl,, TunnelBearCheck, 0
-		GuiControl,, TunnelBearBabyCheck, 0
-		GuiControl,, KingBeetleCheck, 0
-		GuiControl,, KingBeetleBabyCheck, 0
+		;GuiControl,, StockingsCheck, 0
+		;GuiControl,, WreathCheck, 0
+		;GuiControl,, FeastCheck, 0
+		;GuiControl,, CandlesCheck, 0
+		;GuiControl,, SamovarCheck, 0
+		;GuiControl,, LidArtCheck, 0
+		;GuiControl,, AntPassCheck, 0
+		;GuiControl,, MondoBuffCheck, 0
+		;GuiControl,, CoconutDisCheck, 0
+		;GuiControl,, RoyalJellyDisCheck, 0
+		;GuiControl,, GlueDisCheck, 0
+		;GuiControl,, TunnelBearCheck, 0
+		;GuiControl,, TunnelBearBabyCheck, 0
+		;GuiControl,, KingBeetleCheck, 0
+		;GuiControl,, KingBeetleBabyCheck, 0
 		GuiControl, hide, StockingsCheck
 		GuiControl, hide, WreathCheck
 		GuiControl, hide, FeastCheck
@@ -1657,7 +1633,7 @@ nm_guiModeButton(toggle:=1){
 		GuiControl,ChooseString,FieldBooster1,None
 		GuiControl,ChooseString,FieldBooster2,None
 		GuiControl,ChooseString,FieldBooster3,None
-		GuiControl,,BoostChaserCheck,0
+		;GuiControl,,BoostChaserCheck,0
 		GuiControl,ChooseString,HotkeyWhile2,Never
 		GuiControl,ChooseString,HotkeyWhile3,Never
 		GuiControl,ChooseString,HotkeyWhile4,Never
@@ -1666,10 +1642,10 @@ nm_guiModeButton(toggle:=1){
 		GuiControl,ChooseString,HotkeyWhile7,Never
 		nm_FieldBooster1(), nm_FieldBooster2(), nm_FieldBooster3(), nm_HotkeyWhile2(), nm_HotkeyWhile3(), nm_HotkeyWhile4(), nm_HotkeyWhile5(), nm_HotkeyWhile6(), nm_HotkeyWhile7()
 		;disble AFB
-		GuiControl,afb:, AutoFieldBoostActive, 0
-		GuiControl,, AutoFieldBoostActive, 0
+		;GuiControl,afb:, AutoFieldBoostActive, 0
+		;GuiControl,, AutoFieldBoostActive, 0
 		IniWrite, %AutoFieldBoostActive%, settings\nm_config.ini, Boost, AutoFieldBoostActive
-		GuiControl,1:,AutoFieldBoostButton, Auto Field Boost`n[OFF]
+		;GuiControl,1:,AutoFieldBoostButton, Auto Field Boost`n[OFF]
 		GuiControl,disable,Boost
 		;hide
 		GuiControl,hide,FieldBooster1
@@ -1699,11 +1675,11 @@ nm_guiModeButton(toggle:=1){
 		GuiControl,show,BoostTabEasyMode
 		;quest tab
 		;disable all options
-		GuiControl,,PolarQuestCheck,0
-		GuiControl,,BlackQuestCheck,0
-		GuiControl,,HoneyQuestCheck,0
-		GuiControl,,BuckoQuestCheck,0
-		GuiControl,,RileyQuestCheck,0
+		;GuiControl,,PolarQuestCheck,0
+		;GuiControl,,BlackQuestCheck,0
+		;GuiControl,,HoneyQuestCheck,0
+		;GuiControl,,BuckoQuestCheck,0
+		;GuiControl,,RileyQuestCheck,0
 		;hide
 		GuiControl,hide,QuestGatherMins
 		GuiControl,hide,PolarQuestCheck
@@ -1722,22 +1698,22 @@ nm_guiModeButton(toggle:=1){
 		GuiControl,show,QuestTabEasyMode
 		;planters+ tab
 		;set easy mode defaults
-		GuiControl,,EnablePlantersPlus,0
+		;GuiControl,,EnablePlantersPlus,0
 		GuiControl,hide,Enabled
 		GuiControl,show,Disabled
 		GuiControl,ChooseString,NPreset,Blue
 		ba_nPresetSwitch_()
-		GuiControl,,PlasticPlanterCheck,1
-		GuiControl,,CandyPlanterCheck,1
-		GuiControl,,BlueClayPlanterCheck,1
-		GuiControl,,RedClayPlanterCheck,1
-		GuiControl,,TackyPlanterCheck,1
-		GuiControl,,PesticidePlanterCheck,1
-		GuiControl,,PetalPlanterCheck,0
-		GuiControl,,PlanterOfPlentyCheck,0
-		GuiControl,,PaperPlanterCheck,0
-		GuiControl,,TicketPlanterCheck,0
-		GuiControl,,MaxAllowedPlanters,3
+		;GuiControl,,PlasticPlanterCheck,1
+		;GuiControl,,CandyPlanterCheck,1
+		;GuiControl,,BlueClayPlanterCheck,1
+		;GuiControl,,RedClayPlanterCheck,1
+		;GuiControl,,TackyPlanterCheck,1
+		;GuiControl,,PesticidePlanterCheck,1
+		;GuiControl,,PetalPlanterCheck,0
+		;GuiControl,,PlanterOfPlentyCheck,0
+		;GuiControl,,PaperPlanterCheck,0
+		;GuiControl,,TicketPlanterCheck,0
+		;GuiControl,,MaxAllowedPlanters,3
 		;hide
 		GuiControl,hide,N1Priority
 		GuiControl,hide,N2Priority
@@ -1896,7 +1872,7 @@ nm_setState(newState){
 	global state
 	/*
 	global disableDayOrNight
-	if (newState="traveling") {
+	if (newState="Traveling") {
 		disableDayOrNight:=1
 		GuiControl, Text, TimeofDay, Travel
 	}
@@ -1944,7 +1920,7 @@ nm_setStatus(newState:=0, newObjective:=0){
 	;global disableDayOrNight
 	if(newState){
 		/*
-		if (newState="traveling") {
+		if (newState="Traveling") {
 			disableDayOrNight:=1
 			GuiControl, Text, TimeofDay, Travel
 		}
@@ -2010,7 +1986,7 @@ nm_setStatus(newState:=0, newObjective:=0){
 		: (InStr(stateString,"checking") || InStr(stateString,"holding") || InStr(stateString,"searching")) ? 14408468
 		: (InStr(stateString,"confirmed") || InStr(stateString,"found")) ? 9755247
 		: (InStr(stateString,"engaged") || InStr(stateString,"full")) ? 16366336
-		: (InStr(stateString,"mondo") || InStr(stateString,"boss") || InStr(stateString,"vb dead")) ? 7036559
+		: (InStr(stateString,"mondo") || InStr(stateString,"boss") || InStr(stateString,"defeated")) ? 7036559
 		: (InStr(stateString,"gathering") || InStr(stateString,"converting")) ? 8871681
 		: (InStr(stateString,"startup")) ? 15658739
 		: 3223350
@@ -2908,7 +2884,7 @@ nm_saveCollect(){
 	DetectHiddenWindows On
 	SetTitleMatchMode 2
 	if WinExist("background.ahk ahk_class AutoHotkey") {
-		SendMessage, 0x4200, 4, %StingerCheck%
+		PostMessage, 0x5554, 4, %StingerCheck%
 	}
 	DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
 	SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
@@ -4318,6 +4294,7 @@ nm_guiThemeSelect(){
 	GuiControlGet, GuiTheme
 	IniWrite, %GuiTheme%, settings\nm_config.ini, Settings, GuiTheme
 	reload
+	Sleep, 10000
 }
 nm_guiTransparencySet(){
 	GuiControlGet, GuiTransparency
@@ -4452,7 +4429,7 @@ nm_WebhookHelp(){ ; ~ webhook section information
 	msgbox, 0x40000, Discord Webhook Integration, DESCRIPTION:`nEnable this feature to get status updates and hourly reports sent to your Discord webhook! This is especially useful if you want to monitor the macro remotely, and also monitor the amount of honey you're making or buff uptime. To enable this, tick the checkbox next to 'Discord Webhook' and enter your webhook link below, directly copied from Discord.`n`nCRITICAL OPTIONS:`nThere are some status updates that require immediate attention, e.g. disconnects and Phantom Planter checks. You can choose to have the webhook send a screenshot with a 5 minute cooldown if the Screenshot option is checked and/or ping you on Discord by entering your Discord User ID (18-digit number).
 }
 nm_NewWalkHelp(){ ; ~ movespeed correction information
-	msgbox, 0x40000, MoveSpeed Correction, DESCRIPTION:`nWhen this option is enabled, the macro will detect your Haste, Bear Morph, Coconut Haste, Haste+, Oil and Super Smoothie values real-time. Using this information, it will calculate the distance you have moved and use that for more accurate movements. If working as intended, this option will dramatically reduce drift and make travelling anywhere in game much more accurate.`n`nIMPORTANT:`nIf you have this option enabled, make sure your 'Movement Speed' value is EXACTLY as shown in BSS Settings menu without haste or other temporary buffs (e.g. write 33.6 as 33.6 without any rounding). Also, it is ESSENTIAL that your Display Scale is 100`%, otherwise the buffs will not be detected properly.
+	msgbox, 0x40000, MoveSpeed Correction, DESCRIPTION:`nWhen this option is enabled, the macro will detect your Haste, Bear Morph, Coconut Haste, Haste+, Oil and Super Smoothie values real-time. Using this information, it will calculate the distance you have moved and use that for more accurate movements. If working as intended, this option will dramatically reduce drift and make Traveling anywhere in game much more accurate.`n`nIMPORTANT:`nIf you have this option enabled, make sure your 'Movement Speed' value is EXACTLY as shown in BSS Settings menu without haste or other temporary buffs (e.g. write 33.6 as 33.6 without any rounding). Also, it is ESSENTIAL that your Display Scale is 100`%, otherwise the buffs will not be detected properly.
 }
 nm_ReconnectTimeHelp(){
 	global ReconnectHour, ReconnectMin
@@ -5220,7 +5197,7 @@ nowUnix(){
     EnvSub, Time, 19700101000000, Seconds
     return Time
 }
-nm_Reset(checkAll:=1, wait:=2000){
+nm_Reset(checkAll:=1, wait:=2000, convertBypass:=0){
 	global resetTime
 	global youDied
 	global VBState
@@ -5272,7 +5249,7 @@ nm_Reset(checkAll:=1, wait:=2000){
 		DetectHiddenWindows On
 		SetTitleMatchMode 2
 		if WinExist("background.ahk ahk_class AutoHotkey") {
-			SendMessage, 0x4200, 1, %resetTime%
+			PostMessage, 0x5554, 1, %resetTime%
 		}
 		;myOS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)
 		;if((myOS*1)>=10) { ~ see previous commenting of this
@@ -5411,7 +5388,7 @@ nm_Reset(checkAll:=1, wait:=2000){
 	}
 	sleep, 500
 	;convert
-	nm_convert()
+	!convertBypass ? nm_convert()
 	;ensure minimum delay has been met
 	temp:=(nowUnix()-resetTime)
 	if((nowUnix()-resetTime)<wait) {
@@ -7970,23 +7947,29 @@ nm_cannonToCollect(){
 			objective:="Clock"
 			nm_gotoRamp()
 			nm_gotoCannon()
-			send, {e}
-			DllCall("Sleep",UInt,50)
-			send {%LeftKey% down}
-			send {%FwdKey% down}
-			DllCall("Sleep",UInt,825)
+			; ~ launch cannon clock route in separate script
+			movement := "
+			(LTrim Join`r`n
+			Send {e}
+			DllCall(""Sleep"",UInt,50)
+			send {" LeftKey " down}{" FwdKey " down}
+			DllCall(""Sleep"",UInt,860)
+			send {space 2}
+			DllCall(""Sleep"",UInt,2400)
+			send {" FwdKey " up}
+			DllCall(""Sleep"",UInt,500)
+			send {" LeftKey " up}
+			DllCall(""Sleep"",UInt,3500)
 			send {space}
-			send {space}
-			DllCall("Sleep",UInt,2400)
-			send {%FwdKey% up}
-			DllCall("Sleep",UInt,500)
-			send {%LeftKey% up}
-			DllCall("Sleep",UInt,3500)
-			send {space}
-			DllCall("Sleep",UInt,1000)
-			send, {%LeftKey% down}
-			DllCall("Sleep",UInt,1000)
-			send, {%LeftKey% up}
+			DllCall(""Sleep"",UInt,1000)
+			send {" LeftKey " down}
+			DllCall(""Sleep"",UInt,1000)
+			send {" LeftKey " up}
+			)"
+			nm_createWalk(movement)
+			KeyWait, F14, D T5 L
+			KeyWait, F14, T60 L
+			nm_endWalk()
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
 				send {e}
@@ -8424,341 +8407,294 @@ nm_cannonToCollect(){
 	}
 }
 nm_cannonTo(location){
-	global FwdKey
-	global LeftKey
-	global BackKey
-	global RightKey
-	global RotLeft
-	global RotRight
-	global KeyDelay
-	global MoveSpeedFactor, ShiftLockEnabled
+	global FwdKey, LeftKey, BackKey, RightKey, RotLeft, RotRight, KeyDelay, MoveSpeedFactor, ShiftLockEnabled
+	static routes := {}
+	
 	if (ShiftLockEnabled) {
 		ShiftLockEnabled:=0
 		send, {shift}
 	}
-	SetKeyDelay, 10
-	if(location="sunflower"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%RightKey% down}
-		DllCall("Sleep",UInt,425)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,900)
-		send {%RightKey% up}
-		send {space}
-		DllCall("Sleep",UInt,1000)
-		loop 2 {
-			send, {%RotRight%}
-		}
-	}
-	else if(location="dandelion"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%LeftKey% down}
-		DllCall("Sleep",UInt,275)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,1750)
-		send {%LeftKey% up}
-		send {space}
-		loop 2 {
-			send, {%RotLeft%}
-		}
-		DllCall("Sleep",UInt,1500)
-	}
-	else if(location="mushroom"){
-		send, {e}
-		DllCall("Sleep",UInt,50)	
-		send {%FwdKey% down}
-		DllCall("Sleep",UInt,725)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,150)
-		send {%FwdKey% up}
-		send {space}
-		DllCall("Sleep",UInt,2000)
-		loop 4 {
-			send, {%RotLeft%}
-		}
-	}
-	else if(location="blue flower"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%LeftKey% down}
-		DllCall("Sleep",UInt,675)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,3250)
-		send {%LeftKey% up}
-		send {space}
-		DllCall("Sleep",UInt,1000)
-		loop 2 {
-			send, {%RotLeft%}
-		}
-	}
-	else if(location="clover"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%LeftKey% down}
-		send {%FwdKey% down}
-		DllCall("Sleep",UInt,575)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,1250)
-		send {%FwdKey% up}
-		DllCall("Sleep",UInt,2750)
-		send {%LeftKey% up}
-		send {space}
-		DllCall("Sleep",UInt,1000)
-	}
-	else if(location="spider"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%BackKey% down}
-		DllCall("Sleep",UInt,1050)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,150)
-		send {%BackKey% up}
-		send {space}
-		DllCall("Sleep",UInt,1500)
-		loop 4 {
-			send, {%RotLeft%}
-		}
-	}
-	else if(location="strawberry"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%RightKey% down}
-		send {%BackKey% down}
-		DllCall("Sleep",UInt,750)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,1700)
-		send {%RightKey% up}
-		send {%BackKey% up}
-		send {space}
-		DllCall("Sleep",UInt,2000)
-		loop 2 {
-			send, {%RotRight%}
-		}
-	}
-	else if(location="bamboo"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%LeftKey% down}
-		DllCall("Sleep",UInt,1250)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,2000)
-		send {%LeftKey% up}
-		send {space}
-		loop 2 {
-			send, {%RotLeft%}
-		}
-		DllCall("Sleep",UInt,2000)
-	}
-	else if(location="pineapple"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%LeftKey% down}
-		DllCall("Sleep",UInt,1850)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,2750)
-		send {%LeftKey% up}
-		send {%BackKey% down}
-		DllCall("Sleep",UInt,1150)
-		send {%BackKey% up}
-		send {space}
-		loop 4 {
-			send, {%RotLeft%}
-		}
-		DllCall("Sleep",UInt,2000)
-	}
-	else if(location="stump"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%LeftKey% down}
-		DllCall("Sleep",UInt,1850)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,2750)
-		send {%LeftKey% up}
-		loop 2 {
-			send, {%RotLeft%}
-		}
-		send {%FwdKey% down}
-		send {%LeftKey% down}
-		DllCall("Sleep",UInt,900)
-		send {%LeftKey% up}
-		DllCall("Sleep",UInt,1500)
-		send {%FwdKey% up}
-		send {space}
-		DllCall("Sleep",UInt,1000)
-	}
-	else if(location="cactus"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%RightKey% down}
-		send {%BackKey% down}
-		DllCall("Sleep",UInt,940)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,2600)
-		send {%RightKey% up}
-		send {%BackKey% up}
-		send {space}
-		DllCall("Sleep",UInt,2000)
-	}
-	else if(location="pumpkin"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%RightKey% down}
-		send {%BackKey% down}
-		DllCall("Sleep",UInt,940)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,2600)
-		send {%RightKey% up}
-		DllCall("Sleep",UInt,1100)
-		send {%BackKey% up}
-		send {space}
-		loop 4 {
-			send, {%RotLeft%}
-		}
-		DllCall("Sleep",UInt,1500)
-	}
-	else if(location="pine tree"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%RightKey% down}
-		send {%BackKey% down}
-		DllCall("Sleep",UInt,940)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,4500)
-		send {%BackKey% up}
-		DllCall("Sleep",UInt,500)
-		send {%RightKey% up}
-		send {space}
-		loop 4 {
-			send, {%RotLeft%}
-		}
-		DllCall("Sleep",UInt,2000)
-	}
-	else if(location="rose"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%RightKey% down}
-		DllCall("Sleep",UInt,600)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,3000)
-		send {%RightKey% up}
-		send {space}
-		DllCall("Sleep",UInt,1000)
-		loop 2 {
-			send, {%RotRight%}
-		}
-
-	}
-	else if(location="mountain top"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%LeftKey% down}
-		send {%BackKey% down}
-		DllCall("Sleep",UInt,1500)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,1100)
-		send {%LeftKey% up}
-		DllCall("Sleep",UInt,350)
-		send {%BackKey% up}
-		send {space}
-		DllCall("Sleep",UInt,1500)
-	}
-	else if(location="pepper"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%FwdKey% down}
-		DllCall("Sleep",UInt,500)
-		send {space}
-		send {space}
-		send {%RightKey% down}
-		DllCall("Sleep",UInt,3900)
-		send {%RightKey% up}
-		DllCall("Sleep",UInt,2000)
-		send {%RightKey% down}
-		DllCall("Sleep",UInt,2000)
-		send {%RightKey% up}
-		send {space down}
-		DllCall("Sleep",UInt,50)
+	
+	if (routes.Count() = 0)
+	{
+		routes["sunflower"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" RightKey " down}
+		DllCall(""Sleep"",UInt,500)
+		send {space 2}
+		DllCall(""Sleep"",UInt,925)
+		send {" RightKey " up}{space}
+		DllCall(""Sleep"",UInt,1000)
+		send {" RotRight " 2}
+		)"
+		
+		routes["dandelion"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" LeftKey " down}
+		DllCall(""Sleep"",UInt,300)
+		send {space 2}
+		DllCall(""Sleep"",UInt,1700)
+		send {" LeftKey " up}{space}{" RotLeft " 2}
+		DllCall(""Sleep"",UInt,1500)
+		)"
+		
+		routes["mushroom"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)	
+		send {" FwdKey " down}
+		DllCall(""Sleep"",UInt,705)
+		send {space 2}
+		DllCall(""Sleep"",UInt,250)
+		send {" FwdKey " up}{space}
+		DllCall(""Sleep"",UInt,2000)
+		send {" RotLeft " 4}
+		)"
+		
+		routes["blue flower"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" LeftKey " down}
+		DllCall(""Sleep"",UInt,725)
+		send {space 2}
+		DllCall(""Sleep"",UInt,3250)
+		send {" LeftKey " up}{space}
+		DllCall(""Sleep"",UInt,1000)
+		send {" RotLeft " 2}
+		)"
+		
+		routes["clover"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" LeftKey " down}{" FwdKey " down}
+		DllCall(""Sleep"",UInt,575)
+		send {space 2}
+		DllCall(""Sleep"",UInt,1250)
+		send {" FwdKey " up}
+		DllCall(""Sleep"",UInt,2850)
+		send {" LeftKey " up}{space}
+		DllCall(""Sleep"",UInt,1000)
+		)"
+		
+		routes["spider"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" BackKey " down}
+		DllCall(""Sleep"",UInt,1100)
+		send {space 2}
+		DllCall(""Sleep"",UInt,300)
+		send {" BackKey " up}{space}
+		DllCall(""Sleep"",UInt,1500)
+		send, {" RotLeft " 4}
+		)"
+		
+		routes["strawberry"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" RightKey " down}{" BackKey " down}
+		DllCall(""Sleep"",UInt,750)
+		send {space 2}
+		DllCall(""Sleep"",UInt,1700)
+		send {" RightKey " up}{" BackKey " up}{space}
+		DllCall(""Sleep"",UInt,2000)
+		send {" RotRight " 2}
+		)"
+		
+		routes["bamboo"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" LeftKey " down}
+		DllCall(""Sleep"",UInt,1250)
+		send {space 2}
+		DllCall(""Sleep"",UInt,2000)
+		send {" LeftKey " up}{space}{" RotLeft " 2}
+		DllCall(""Sleep"",UInt,2000)
+		)"
+		
+		routes["pineapple"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" LeftKey " down}
+		DllCall(""Sleep"",UInt,1900)
+		send {space 2}
+		DllCall(""Sleep"",UInt,2750)
+		send {" LeftKey " up}{" BackKey " down}
+		DllCall(""Sleep"",UInt,1150)
+		send {" BackKey " up}{space}{" RotLeft " 4}
+		DllCall(""Sleep"",UInt,2000)
+		)"
+		
+		routes["stump"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" LeftKey " down}
+		DllCall(""Sleep"",UInt,1900)
+		send {space 2}
+		DllCall(""Sleep"",UInt,2750)
+		send {" LeftKey " up}{" RotLeft " 2}{" FwdKey " down}{" LeftKey " down}
+		DllCall(""Sleep"",UInt,900)
+		send {" LeftKey " up}
+		DllCall(""Sleep"",UInt,1650)
+		send {" FwdKey " up}{space}
+		DllCall(""Sleep"",UInt,1000)
+		)"
+		
+		routes["cactus"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" RightKey " down}{" BackKey " down}
+		DllCall(""Sleep"",UInt,1000)
+		send {space 2}
+		DllCall(""Sleep"",UInt,2700)
+		send {" RightKey " up}{" BackKey " up}{space}
+		DllCall(""Sleep"",UInt,2000)
+		)"
+		
+		routes["pumpkin"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" RightKey " down}{" BackKey " down}
+		DllCall(""Sleep"",UInt,1000)
+		send {space 2}
+		DllCall(""Sleep"",UInt,2700)
+		send {" RightKey " up}
+		DllCall(""Sleep"",UInt,1100)
+		send {" BackKey " up}{space}{" RotLeft " 4}
+		DllCall(""Sleep"",UInt,1500)
+		)"
+		
+		routes["pine tree"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" RightKey " down}{" BackKey " down}
+		DllCall(""Sleep"",UInt,975)
+		send {space 2}
+		DllCall(""Sleep"",UInt,4500)
+		send {" BackKey " up}
+		DllCall(""Sleep"",UInt,500)
+		send {" RightKey " up}{space}{" RotLeft " 4}
+		DllCall(""Sleep"",UInt,2000)
+		)"
+		
+		routes["rose"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" RightKey " down}
+		DllCall(""Sleep"",UInt,600)
+		send {space 2}
+		DllCall(""Sleep"",UInt,3000)
+		send {" RightKey " up}{space}
+		DllCall(""Sleep"",UInt,1000)
+		send {" RotRight " 2}
+		)"
+		
+		routes["mountain top"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" LeftKey " down}{" BackKey " down}
+		DllCall(""Sleep"",UInt,1575)
+		send {space 2}
+		DllCall(""Sleep"",UInt,1100)
+		send {" LeftKey " up}
+		DllCall(""Sleep"",UInt,350)
+		send {" BackKey " up}{space}
+		DllCall(""Sleep"",UInt,1500)
+		)"
+		
+		routes["pepper"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" FwdKey " down}
+		DllCall(""Sleep"",UInt,500)
+		send {space 2}{" RightKey " down}
+		DllCall(""Sleep"",UInt,3850)
+		send {" RightKey " up}
+		DllCall(""Sleep"",UInt,2000)
+		send {" RightKey " down}
+		DllCall(""Sleep"",UInt,2000)
+		send {" RightKey " up}{space down}
+		DllCall(""Sleep"",UInt,50)
 		send {space up}
-		DllCall("Sleep",UInt,750)
+		DllCall(""Sleep"",UInt,750)
 		send {space down}
-		DllCall("Sleep",UInt,50)
+		DllCall(""Sleep"",UInt,50)
 		send {space up}
-		DllCall("Sleep",UInt,750)
+		DllCall(""Sleep"",UInt,750)
 		send {space down}
-		DllCall("Sleep",UInt,50)
+		DllCall(""Sleep"",UInt,50)
 		send {space up}
-		DllCall("Sleep",UInt,3000*MovespeedFactor)
-		send {%RightKey% down}
+		Walk(3000*9/2000)
+		send {" RightKey " down}{space down}
+		DllCall(""Sleep"",UInt,50)
+		send {space up}
+		Walk(5000*9/2000)
 		send {space down}
-		DllCall("Sleep",UInt,50)
+		DllCall(""Sleep"",UInt,100)
 		send {space up}
-		DllCall("Sleep",UInt,5000*MovespeedFactor)
+		Walk(1500*9/2000)
+		send {" FwdKey " up}
+		Walk(2000*9/2000)
 		send {space down}
-		DllCall("Sleep",UInt,100)
+		DllCall(""Sleep"",UInt,100)
 		send {space up}
-		DllCall("Sleep",UInt,1500*MovespeedFactor)
-		send {%FwdKey% up}
-		DllCall("Sleep",UInt,2000*MovespeedFactor)
+		Walk(1000*9/2000)
+		send {" RightKey " up}{" FwdKey " up}{" RotRight " 2}
+		" nm_Walk(1900*9/2000, FwdKey) "
+		)"
+		
+		routes["coconut"] := "
+		(LTrim Join`r`n
+		send {e}
+		DllCall(""Sleep"",UInt,50)
+		send {" FwdKey " down}
+		DllCall(""Sleep"",UInt,500)
+		send {space 2}
+		send {" RightKey " down}
+		DllCall(""Sleep"",UInt,3850)
+		send {" RightKey " up}
+		DllCall(""Sleep"",UInt,2000)
+		send {" RightKey " down}
+		DllCall(""Sleep"",UInt,2000)
+		send {" RightKey " up}
 		send {space down}
-		DllCall("Sleep",UInt,100)
+		DllCall(""Sleep"",UInt,50)
 		send {space up}
-		DllCall("Sleep",UInt,1000*MovespeedFactor)
-		send {%RightKey% up}
-		send {%FwdKey% up}
-		loop 2 {
-			send {%RotRight%}
-		}
-		nm_Move(1900*MoveSpeedFactor, FwdKey)
+		DllCall(""Sleep"",UInt,750)
+		send {space down}
+		DllCall(""Sleep"",UInt,50)
+		send {space up}
+		DllCall(""Sleep"",UInt,750)
+		send {space down}
+		DllCall(""Sleep"",UInt,50)
+		send {space up}
+		Walk(3000*9/2000)
+		send {" FwdKey " up}{" LeftKey " down}
+		Walk(3000*9/2000)
+		send {" LeftKey " up}
+		)"
 	}
-	else if(location="coconut"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%FwdKey% down}
-		DllCall("Sleep",UInt,500)
-		send {space}
-		send {space}
-		send {%RightKey% down}
-		DllCall("Sleep",UInt,3900)
-		send {%RightKey% up}
-		DllCall("Sleep",UInt,2000)
-		send {%RightKey% down}
-		DllCall("Sleep",UInt,2000)
-		send {%RightKey% up}
-		send {space down}
-		DllCall("Sleep",UInt,50)
-		send {space up}
-		DllCall("Sleep",UInt,750)
-		send {space down}
-		DllCall("Sleep",UInt,50)
-		send {space up}
-		DllCall("Sleep",UInt,750)
-		send {space down}
-		DllCall("Sleep",UInt,50)
-		send {space up}
-		DllCall("Sleep",UInt,3000*MovespeedFactor)
-		send {%FwdKey% up}
-		send {%LeftKey% down}
-		DllCall("Sleep",UInt,3000*MovespeedFactor)
-		send {%LeftKey% up}
-	}
-	SetKeyDelay, 5
+	
+	nm_createWalk(routes[location])
+	KeyWait, F14, D T5 L
+	KeyWait, F14, T60 L
+	nm_endWalk()
 }
 nm_cannonToPlanter(location){ ; ~ zaappiix planter path rework, posted in server 02/11/22 (dd/mm/yy)
 	global FwdKey, LeftKey, BackKey, RightKey, RotLeft, RotRight, KeyDelay, MoveSpeedFactor, ShiftLockEnabled
@@ -9127,327 +9063,24 @@ nm_cannonToPlanter(location){ ; ~ zaappiix planter path rework, posted in server
 }
 nm_walkFrom(field:="none")
 {
+	global FwdKey, LeftKey, BackKey, RightKey, RotLeft, RotRight, KeyDelay, MoveSpeedFactor, MoveMethod
+	static paths := {}
+	
 	if (field != "bamboo"&& field != "blue flower" && field != "cactus" && field != "clover" && field != "coconut" && field != "dandelion" && field != "mountain top" && field != "mushroom" && field != "pepper" && field != "pine tree" && field != "pineapple" && field != "pumpkin" && field != "rose" && field != "spider" && field != "strawberry" && field != "stump" && field != "sunflower"){
 		msgbox walkFrom(): Invalid fieldname= %field%
 		return
 	}
-	global FwdKey
-	global LeftKey
-	global BackKey
-	global RightKey
-	global RotLeft
-	global RotRight
-	global KeyDelay
-	global MoveSpeedFactor
-	global MoveMethod
 	nm_setStatus("Traveling", "Hive")
-	if (field = "bamboo"){
-		nm_Move(3000*MoveSpeedFactor, LeftKey)
-		nm_Move(750*MoveSpeedFactor, RightKey)
-		loop 2 {
-			send, {%RotRight%}
-		}
-		nm_Move(12000*MoveSpeedFactor, RightKey)
-		nm_Move(9000*MoveSpeedFactor, FwdKey)
-		nm_Move(750*MoveSpeedFactor, FwdKey, RightKey)
-		nm_Move(13000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(5000*MoveSpeedFactor, RightKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey)
+	
+	if (paths.Count() = 0)
+	{
+		#Include *i settings\imported\paths\walkfrom.ahk
 	}
-	else if (field = "blue flower"){
-		loop 2 {
-			send, {%RotRight%}
-		}
-		nm_Move(3000*MoveSpeedFactor, FwdKey)
-		nm_Move(1000*MoveSpeedFactor, BackKey)
-		nm_Move(9000*MoveSpeedFactor, RightKey)
-		nm_Move(9000*MoveSpeedFactor, FwdKey)
-		nm_Move(8000*MoveSpeedFactor, RightKey)
-		nm_Move(6000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(6000*MoveSpeedFactor, RightKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey)
-	}
-	else if (field = "cactus"){
-		nm_Move(2000*MoveSpeedFactor, LeftKey)
-		nm_Move(5000*MoveSpeedFactor, BackKey)
-		send, {%BackKey% down}
-		send, {%LeftKey% down}
-		DllCall("Sleep",UInt,2000)
-		send, {space down}
-		DllCall("Sleep",UInt,200)
-		send, {space up}
-		DllCall("Sleep",UInt,2000)
-		send, {%BackKey% up}
-		send, {%LeftKey% up}
-		nm_Move(8000*MoveSpeedFactor, FwdKey)
-		nm_Move(1000*MoveSpeedFactor, FwdKey, RightKey)
-		nm_Move(1000*MoveSpeedFactor, FwdKey, LeftKey)
-		nm_Move(6000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey, LeftKey)
-		nm_Move(20000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(5000*MoveSpeedFactor, RightKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey)
-	}
-	else if (field = "clover"){
-		nm_Move(4000*MoveSpeedFactor, FwdKey)
-		nm_Move(8000*MoveSpeedFactor, RightKey)
-		nm_Move(1000*MoveSpeedFactor, BackKey)
-		nm_Move(11000*MoveSpeedFactor, RightKey)
-		nm_Move(8000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(6000*MoveSpeedFactor, RightKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey)
-	}
-	else if (field = "coconut"){
-		nm_Move(4500*MoveSpeedFactor, RightKey)
-		send {%Backkey% down}
-		DllCall("Sleep",UInt,5000*MoveSpeedFactor)
-		;sleep, (5000*MoveSpeedFactor)
-		send {space down}
-		DllCall("Sleep",UInt,50)
-		send {space up}
-		DllCall("Sleep",UInt,7000*MoveSpeedFactor)
-		;sleep, (7000*MoveSpeedFactor)
-		send {%BackKey% up}
-		nm_Move(7500*MoveSpeedFactor, LeftKey)
-		nm_Move(3000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(4000*MoveSpeedFactor, RightKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey)
-	}
-	else if (field = "dandelion"){
-		loop 2 {
-			send, {%RotRight%}
-		}
-		nm_Move(3000*MoveSpeedFactor, FwdKey)
-		nm_Move(8000*MoveSpeedFactor, RightKey)
-		nm_Move(6000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(6000*MoveSpeedFactor, RightKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey)
-	}
-	else if (field = "mountain top"){
-		nm_Move(4000*MoveSpeedFactor, FwdKey, RightKey)
-		nm_Move(20000*MoveSpeedFactor, FwdKey)
-		nm_Move(8000*MoveSpeedFactor, RightKey)
-		nm_Move(6000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(6000*MoveSpeedFactor, RightKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey)
-	}
-	else if (field = "mushroom"){
-		nm_Move(3000*MoveSpeedFactor, FwdKey)
-		nm_Move(6000*MoveSpeedFactor, RightKey)
-		loop 4 {
-			send, {%RotLeft%}
-		}
-		nm_Move(16000*MoveSpeedFactor, FwdKey)
-		nm_Move(11000*MoveSpeedFactor, RightKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey)
-	}
-	else if (field = "pepper"){
-		nm_Move(5000*MoveSpeedFactor, RightKey)
-		nm_Move(10000*MoveSpeedFactor, BackKey)
-		nm_Move(10000*MoveSpeedFactor, RightKey)
-		nm_Move(12000*MoveSpeedFactor, BackKey)
-		loop 2 {
-			send {%RotLeft%}
-		}
-		nm_Move(3000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(4000*MoveSpeedFactor, RightKey)
-		nm_Move(750*MoveSpeedFactor, FwdKey)
-	}
-	else if (field = "pine tree"){
-		if(MoveMethod="walk") {
-			loop 4 {
-				send, {%RotLeft%}
-			}
-			nm_Move(3000*MoveSpeedFactor, RightKey)
-			nm_Move(2500*MoveSpeedFactor, FwdKey, LeftKey)
-			nm_Move(15000*MoveSpeedFactor, FwdKey)
-			nm_Move(2000*MoveSpeedFactor, LeftKey)
-			nm_Move(5000*MoveSpeedFactor, BackKey, LeftKey)
-			nm_Move(9000*MoveSpeedFactor, FwdKey)
-			nm_Move(1000*MoveSpeedFactor, BackKey)
-			nm_Move(1000*MoveSpeedFactor, LeftKey)
-			nm_Move(1000*MoveSpeedFactor, RightKey)
-			nm_Move(11000*MoveSpeedFactor, FwdKey, LeftKey)
-			nm_Move(500*MoveSpeedFactor, BackKey)
-			nm_Move(6000*MoveSpeedFactor, RightKey)
-			nm_Move(750*MoveSpeedFactor, FwdKey)
-		}
-		else if(MoveMethod="cannon") {
-			nm_Move(10000*MoveSpeedFactor, FwdKey)
-			nm_Move(16000*MoveSpeedFactor, RightKey)
-			nm_Move(14000*MoveSpeedFactor, BackKey)
-			loop 4 {
-				send, {%RotLeft%}
-			}
-			nm_move(2000*MoveSpeedFactor, RightKey)
-			nm_move(1000*MoveSpeedFactor, FwdKey)
-			DllCall("Sleep",UInt,250)
-			send {space down}
-			DllCall("Sleep",UInt,50)
-			send {space up}
-			DllCall("Sleep",UInt,350)
-			send {space}
-			send {%FwdKey% down}
-			DllCall("Sleep",UInt,6100)
-			send {%FwdKey% up}
-			DllCall("Sleep",UInt,250)
-			searchRet := nm_imgSearch("e_button.png",30,"high")
-			If (searchRet[1] = 0) {
-				return
-			} else {
-				nm_move(1000*MoveSpeedFactor, FwdKey)
-				nm_move(100*MoveSpeedFactor, BackKey)
-				loop 10 {
-					searchRet := nm_imgSearch("e_button.png",30,"high")
-					If (searchRet[1] = 0) {
-						return
-					}
-					nm_move(50*MoveSpeedFactor, BackKey)
-				}
-			}
-			nm_move(2000*MoveSpeedFactor, FwdKey)
-			nm_Move(4000*MoveSpeedFactor, RightKey)
-			nm_Move(500*MoveSpeedFactor, FwdKey)
-		}
-	}
-	else if (field = "pineapple"){
-		nm_Move(4000*MoveSpeedFactor, FwdKey)
-		nm_Move(7000*MoveSpeedFactor, RightKey)
-		loop 4 {
-			send, {%RotLeft%}
-		}
-		nm_Move(18000*MoveSpeedFactor, FwdKey)
-		nm_Move(4000*MoveSpeedFactor, RightKey)
-		send, {%RightKey% down}
-		DllCall("Sleep",UInt,200)
-		send, {space down}
-		DllCall("Sleep",UInt,200)
-		send, {space up}
-		DllCall("Sleep",UInt,800)
-		send, {%RightKey% up}
-		nm_Move(10000*MoveSpeedFactor, FwdKey)
-		nm_Move(1000*MoveSpeedFactor, BackKey)
-		nm_Move(15000*MoveSpeedFactor, RightKey)
-		nm_Move(9000*MoveSpeedFactor, FwdKey)
-		nm_Move(8000*MoveSpeedFactor, RightKey)
-		nm_Move(6000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(6000*MoveSpeedFactor, RightKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey)
-	}
-	else if (field = "pumpkin"){
-		nm_Move(2000*MoveSpeedFactor, RightKey)
-		loop 4 {
-			send, {%RotLeft%}
-		}
-		nm_Move(2000*MoveSpeedFactor, BackKey)
-		send, {%BackKey% down}
-		send, {%LeftKey% down}
-		DllCall("Sleep",UInt,2000)
-		send, {space down}
-		DllCall("Sleep",UInt,200)
-		send, {space up}
-		DllCall("Sleep",UInt,2000)
-		send, {%BackKey% up}
-		send, {%LeftKey% up}
-		nm_Move(8000*MoveSpeedFactor, FwdKey)
-		nm_Move(1000*MoveSpeedFactor, FwdKey, RightKey)
-		nm_Move(1000*MoveSpeedFactor, FwdKey, LeftKey)
-		nm_Move(6000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey, LeftKey)
-		nm_Move(19000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(5000*MoveSpeedFactor, RightKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey)
-	}
-	else if (field = "rose"){
-		loop 2 {
-			send, {%RotLeft%}
-		}
-		nm_Move(1500*MoveSpeedFactor, FwdKey)
-		nm_Move(1500*MoveSpeedFactor, LeftKey)
-		nm_Move(6000*MoveSpeedFactor, BackKey, LeftKey)
-		nm_Move(9000*MoveSpeedFactor, FwdKey)
-		nm_Move(1000*MoveSpeedFactor, BackKey)
-		nm_Move(1500*MoveSpeedFactor, LeftKey)
-		nm_Move(1500*MoveSpeedFactor, RightKey)
-		nm_Move(11000*MoveSpeedFactor, FwdKey, LeftKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(6000*MoveSpeedFactor, RightKey)
-		nm_Move(1000*MoveSpeedFactor, FwdKey)
-	}
-	else if (field = "spider"){
-		nm_Move(5000*MoveSpeedFactor, FwdKey)
-		nm_Move(6000*MoveSpeedFactor, LeftKey)
-		loop 4 {
-			send, {%RotLeft%}
-		}
-		nm_Move(9000*MoveSpeedFactor, FwdKey)
-		nm_Move(750*MoveSpeedFactor, FwdKey, RightKey)
-		nm_Move(11000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(5000*MoveSpeedFactor, RightKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey)
-	}
-	else if (field = "strawberry"){
-		loop 2 {
-			send, {%RotLeft%}
-		}
-		nm_Move(5000*MoveSpeedFactor, BackKey, LeftKey)
-		nm_Move(6000*MoveSpeedFactor, FwdKey)
-		nm_Move(1500*MoveSpeedFactor, FwdKey, LeftKey)
-		nm_Move(18000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(6000*MoveSpeedFactor, RightKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey)
-	}
-	else if (field = "stump"){
-		nm_Move(9000*MoveSpeedFactor, RightKey)
-		loop 2 {
-			send, {%RotRight%}
-		}
-		nm_Move(5000*MoveSpeedFactor, RightKey)
-		nm_Move(5000*MoveSpeedFactor, BackKey)
-		nm_Move(3000*MoveSpeedFactor, RightKey)
-		nm_Move(9000*MoveSpeedFactor, FwdKey)
-		nm_Move(4000*MoveSpeedFactor, RightKey)
-		send, {%RightKey% down}
-		DllCall("Sleep",UInt,200)
-		send, {space down}
-		DllCall("Sleep",UInt,200)
-		send, {space up}
-		DllCall("Sleep",UInt,800)
-		send, {%RightKey% up}
-		nm_Move(10000*MoveSpeedFactor, FwdKey)
-		nm_Move(1000*MoveSpeedFactor, BackKey)
-		nm_Move(15000*MoveSpeedFactor, RightKey)
-		nm_Move(9000*MoveSpeedFactor, FwdKey)
-		nm_Move(8000*MoveSpeedFactor, RightKey)
-		nm_Move(6000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(6000*MoveSpeedFactor, RightKey)
-		nm_Move(500*MoveSpeedFactor, FwdKey)
-	}
-	else if (field = "sunflower"){
-		loop 2 {
-			send, {%RotLeft%}
-		}
-		nm_Move(3000*MoveSpeedFactor, RightKey)
-		nm_Move(10000*MoveSpeedFactor, FwdKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(11000*MoveSpeedFactor, FwdKey, LeftKey)
-		nm_Move(500*MoveSpeedFactor, BackKey)
-		nm_Move(6000*MoveSpeedFactor, RightKey)
-		nm_Move(1000*MoveSpeedFactor, FwdKey)
-	}
+	
+	nm_createWalk(paths[field])
+	KeyWait, F14, D T5 L
+	KeyWait, F14, T60 L
+	nm_endWalk()
 }
 nm_GoGather(){
 	global youDied
@@ -9524,10 +9157,10 @@ nm_GoGather(){
 	global QuestMantis
 	global QuestScorpions
 	global QuestWerewolf
-	global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, BugrunInterruptCheck, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BlackQuestCheck, BlackQuestComplete, QuestGatherField, BuckoQuestCheck, RileyQuestCheck, RotateQuest, QuestGatherMins, QuestGatherReturnBy, BuckoRhinoBeetles, BuckoMantis, RileyLadybugs, RileyScorpions, RileyAll, ShiftLockEnabled, GameFrozenCounter, HiveSlot, AtHive
+	global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, BugrunInterruptCheck, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BlackQuestCheck, BlackQuestComplete, QuestGatherField, BuckoQuestCheck, RileyQuestCheck, PolarQuestCheck,  RotateQuest, QuestGatherMins, QuestGatherReturnBy, BuckoRhinoBeetles, BuckoMantis, RileyLadybugs, RileyScorpions, RileyAll, ShiftLockEnabled, GameFrozenCounter, HiveSlot, AtHive
 	global GatherStartTime, TotalGatherTime, SessionGatherTime, ConvertStartTime, TotalConvertTime, SessionConvertTime
 	;BUGS GatherInterruptCheck
-	if((PolarQuestGatherInterruptCheck || BuckoQuestGatherInterruptCheck || RileyQuestGatherInterruptCheck || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck || BuckoRhinoBeetles || RileyAll) && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1830*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck || RileyScorpions || RileyAll) && (nowUnix()-LastBugrunScorpions)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck || RileyAll) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
+	if(((PolarQuestCheck && PolarQuestGatherInterruptCheck) || (BuckoQuestCheck && BuckoQuestGatherInterruptCheck) || (RileyQuestCheck && RileyQuestGatherInterruptCheck) || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck || BuckoRhinoBeetles || RileyAll) && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1830*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck || RileyScorpions || RileyAll) && (nowUnix()-LastBugrunScorpions)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck || RileyAll) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
 		return
 	}
 	if(CurrentField="mountain top" && (A_Min>=0 && A_Min<15)) ;mondo dangerzone! skip over this field if possible
@@ -9833,30 +9466,20 @@ nm_GoGather(){
 		nm_fieldDriftCompensation()
 		nm_fieldBoostGlitter()
 		;interrupt if... ~ used interruptReason variable to setStatus after gather end message, also improves stability as loop is ended before nesting a function
-		if(DisconnectCheck() || youDied || VBState=1 || PMondoGuidComplete) {
+		if(VBState=1 || (dccheck := DisconnectCheck()) || youDied ||  || PMondoGuidComplete) {
 			bypass:=1
-			if(DisconnectCheck())
-				interruptReason := "Disconnect"
-				;nm_setStatus("Interupted", "Disconnect")
-			else if (youDied)
-				interruptReason := "You Died!"
-				;nm_setStatus("Interupted", "You Died!")
-			else if (VBState=1)
-				interruptReason := "Vicious Bee"
-				;nm_setStatus("Interupted", "Vicious Bee")
-			else if (PMondoGuidComplete)
+			interruptReason := VBState ? "Vicious Bee" : dccheck ? "Disconnect" : youDied ? "You Died!" : "Mondo"
+			if (PMondoGuidComplete)
 				PMondoGuidComplete:=0
 			break
 		}
 		if((MondoBuffCheck && A_Min>=0 && A_Min<14 && (nowUnix()-LastMondoBuff)>960) && (MondoAction="Buff" || MondoAction="Kill")){
 			interruptReason := "Mondo"
-			;nm_setStatus("Interupted", "Mondo")
 			break
 		}
 		;GatherInterruptCheck
-		if((PolarQuestGatherInterruptCheck || BuckoQuestGatherInterruptCheck || RileyQuestGatherInterruptCheck || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck || BuckoRhinoBeetles || RileyAll) && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1830*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck || RileyScorpions || RileyAll) && (nowUnix()-LastBugrunScorpions)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck || RileyAll) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
+		if(((PolarQuestCheck && PolarQuestGatherInterruptCheck) || (BuckoQuestCheck && BuckoQuestGatherInterruptCheck) || (RileyQuestCheck && RileyQuestGatherInterruptCheck) || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck || BuckoRhinoBeetles || RileyAll) && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1830*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck || RileyScorpions || RileyAll) && (nowUnix()-LastBugrunScorpions)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck || RileyAll) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
 			interruptReason := "Kill Bugs"
-			;nm_setStatus("Interupted", "Kill Bugs")
 			break
 		}
 		;special hotkeys
@@ -9870,15 +9493,12 @@ nm_GoGather(){
 		}
 		;full backpack
 		else if (BackpackPercentFiltered>=(FieldUntilPack%CurrentFieldNum%-2)) {
-			tempstring:=("Backpack exceeds " .  FieldUntilPack%CurrentFieldNum% . " percent")
-			interruptReason := tempstring
-			;nm_setStatus("Interupted", tempstring)
+			interruptReason := "Backpack exceeds " .  FieldUntilPack%CurrentFieldNum% . " percent"
 			break
 		}
 		;active honey
 		if(not nm_activeHoney() && (BackpackPercentFiltered<FieldUntilPack%CurrentFieldNum%)){
 			interruptReason := "Inactive Honey"
-			;nm_setStatus("Interupted", "Inactive Honey")
 			GameFrozenCounter:=GameFrozenCounter+1
 			break
 		}
@@ -9892,7 +9512,6 @@ nm_GoGather(){
 			;interrupt if
 			if (thisfield!=QuestGatherField || QuestGatherField="none" || BlackQuestComplete){ ;change fields or this field is complete
 				interruptReason := "Next Quest Step"
-				;nm_setStatus("Interupted", "Next Quest Step")
 				break
 			}
 		}
@@ -9906,7 +9525,6 @@ nm_GoGather(){
 			;interrupt if
 			if (thisfield!=QuestGatherField || QuestGatherField="none" || BuckoQuestComplete=1){ ;change fields or this field is complete
 				interruptReason := "Next Quest Step"
-				;nm_setStatus("Interupted", "Next Quest Step")
 				break
 			}
 		}
@@ -10205,21 +9823,21 @@ nm_gather(pattern, patternsize:="M", reps:=1, facingcorner:=0){
 	if(!DisableToolUse)
 		click, down
 	
-	; ~ obtain all patterns, which are stored as code in settings\patterns.ahk
+	; ~ obtain all patterns, which are stored as code in settings\imported\patterns.ahk
 	; Walk(" n * size ")" / "Walk(n)" - new general form, can alter to include variables
-	; DllCall(""Sleep"",UInt," 222*MoveSpeedFactor*walkparam ") - old form derived from new form (see RegExMatch below)
+	; DllCall(""Sleep"",UInt," 2000/9*MoveSpeedFactor*walkparam ") - old form derived from new form (see RegExMatch below)
 	; ask me if you need any help with translating old form to new form or vice versa
 	; almost all of this function has been revamped to improve gathering timing inaccuracies, feel free to ask about anything
 	
 	if (patterns.Count() = 0)
 	{
-		#Include *i settings\patterns.ahk
+		#Include *i settings\imported\patterns.ahk
 	}
 	
 	Prev_DetectHiddenWindows := A_DetectHiddenWindows
-	DetectHiddenWindows, On	
-	if ((currentWalk["name"] != pattern) || !WinExist("ahk_class AutoHotkey ahk_pid " currentWalk["pid"]))
-		nm_createWalk(patterns[pattern], pattern) ; create / replace cycled walk script for this gather session
+	DetectHiddenWindows, On
+	if ((currentWalk["name"] != (pattern . patternsize . reps . TCFBKey . AFCFBKey . TCLRKey . AFCLRKey)) || !WinExist("ahk_class AutoHotkey ahk_pid " currentWalk["pid"]))
+		nm_createWalk(patterns[pattern], (pattern . patternsize . reps . TCFBKey . AFCFBKey . TCLRKey . AFCLRKey)) ; create / replace cycled walk script for this gather session
 	else
 		Send {F13} ; start new cycle
 	DetectHiddenWindows, %Prev_DetectHiddenWindows%
@@ -10266,6 +9884,7 @@ nm_createWalk(movement, name:="") ; ~ this function generates the 'walk' code an
 		Process, Priority, , AboveNormal
 		#KeyHistory 0
 		ListLines, Off
+		OnExit(""ExitFunc"")
 		
 		#Include " A_ScriptDir "\lib
 		#Include Gdip_All.ahk
@@ -10305,6 +9924,13 @@ nm_createWalk(movement, name:="") ; ~ this function generates the 'walk' code an
 		}
 		Pause, Toggle, 1
 		return
+		
+		ExitFunc()
+		{
+			global pToken
+			Send {" LeftKey " up}{" RightKey " up}{" FwdKey " up}{" BackKey " up}{Space up}{F14 up}
+			Gdip_Shutdown(pToken)
+		}
 		)" ; this is just ahk code, it will be executed as a new script
 	}
 	else
@@ -10318,26 +9944,27 @@ nm_createWalk(movement, name:="") ; ~ this function generates the 'walk' code an
 		Process, Priority, , AboveNormal
 		#KeyHistory 0
 		ListLines, Off
+		OnExit(""ExitFunc"")
 		
 		Gosub, F13
 		return
 		
 		F13::
 		Send {F14 down}
-		" RegExReplace(movement, "m)^(Walk)(\(.*\))", "DllCall(""Sleep"",UInt,222*" MoveSpeedFactor "*$2)") "
+		" RegExReplace(movement, "m)^(Walk)(\(.*\))", "DllCall(""Sleep"",UInt,2000/9*" MoveSpeedFactor "*$2)") "
 		Send {F14 up}
 		return
 		
 		F15::
 		if A_IsPaused
 		{
-			for k,v in [""" LeftKey """, """ RightKey """, """ FwdKey """, """ BackKey """, ""Space"", ""Click""]
+			for k,v in [""" LeftKey """, """ RightKey """, """ FwdKey """, """ BackKey """, ""Space"", ""LButton"", ""RButton""]
 				if %v%state
 					Send % ""{"" v "" down}""
 		}
 		else
 		{
-			for k,v in [""" LeftKey """, """ RightKey """, """ FwdKey """, """ BackKey """, ""Space"", ""Click""]
+			for k,v in [""" LeftKey """, """ RightKey """, """ FwdKey """, """ BackKey """, ""Space"", ""LButton"", ""RButton""]
 			{
 				%v%state := GetKeyState(v)
 				Send % ""{"" v "" up}""
@@ -10345,10 +9972,13 @@ nm_createWalk(movement, name:="") ; ~ this function generates the 'walk' code an
 		}
 		Pause, Toggle, 1
 		return
+		
+		ExitFunc()
+		{
+			Send {" LeftKey " up}{" RightKey " up}{" FwdKey " up}{" BackKey " up}{Space up}{F14 up}
+		}
 		)"
 	}
-	
-	clipboard := code
 	
 	script := ExecScript(code, , "name=walk") ; run it
 	WinWait, % "ahk_class AutoHotkey ahk_pid " script.ProcessID, , 2
@@ -10363,8 +9993,8 @@ nm_endWalk() ; ~ this function forcefully ends the walk script
 	DetectHiddenWindows On
 	WinClose % "ahk_class AutoHotkey ahk_pid " currentWalk["pid"]
 	DetectHiddenWindows %Prev_DetectHiddenWindows%
-	currentWalk["pid"] := ""
-	Send {%TCFBKey% up}{%AFCFBKey% up}{%TCLRKey% up}{%AFCLRKey% up}{Space up}{Click up}{F14 up}
+	currentWalk["pid"] := "", currentWalk["name"] := ""
+	; if issues, we can check if closed, else kill and force keys up
 }
 nm_convert(hiveConfirm:=0)
 {
@@ -10458,7 +10088,7 @@ nm_convert(hiveConfirm:=0)
 					}
 					searchRet := nm_imgSearch("balloonblessing.png",30,"lowright")
 					If (searchRet[1] = 0) {
-						nm_setStatus(0, "Balloon Refreshed")
+						nm_setStatus("Converting", "Balloon Refreshed")
 						LastConvertBalloon:=nowUnix()
 						IniWrite, %LastConvertBalloon%, settings\nm_config.ini, Settings, LastConvertBalloon
 						TotalConvertTime:=TotalConvertTime+(nowUnix()-ConvertStartTime)
@@ -11119,7 +10749,7 @@ nm_dayOrNight(){
 		DetectHiddenWindows On
 		SetTitleMatchMode 2
 		if WinExist("background.ahk ahk_class AutoHotkey") {
-			SendMessage, 0x4200, 3, VBState
+			PostMessage, 0x5554, 3, VBState
 		}
 		DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
 		SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
@@ -11151,7 +10781,7 @@ nm_dayOrNight(){
 			DetectHiddenWindows On
 			SetTitleMatchMode 2
 			if WinExist("background.ahk ahk_class AutoHotkey") {
-				SendMessage, 0x4200, 2, nowUnix()
+				PostMessage, 0x5554, 2, nowUnix()
 			}
 			DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
 			SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
@@ -11171,43 +10801,35 @@ nm_ViciousCheck(){
 	send, /
 	send, {Enter}
 	sleep, 250
+	Prev_DetectHiddenWindows := A_DetectHiddenWindows ; ~ to communicate with background.ahk
+	Prev_TitleMatchMode := A_TitleMatchMode 
+	DetectHiddenWindows On
+	SetTitleMatchMode 2
 	if(VBState=1){
 		if(nm_imgSearch("VBfoundSymbol2.png", 50, "highright")[1]=0){
 			VBState:=2
 			VBLastKilled:=nowUnix()
-			IniWrite, %VBLastKilled%, settings\nm_config.ini, Collect, VBLastKilled
-			;nm_setStatus("VBState " . VBState, " <1>")
-			nm_setStatus("Attacking")
 			;send VBState to background.ahk
-			Prev_DetectHiddenWindows := A_DetectHiddenWindows
-			Prev_TitleMatchMode := A_TitleMatchMode
-			DetectHiddenWindows On
-			SetTitleMatchMode 2
-			if WinExist("background.ahk ahk_class AutoHotkey") {
-				SendMessage, 0x4200, 5, %VBLastKilled%
-				SendMessage, 0x4200, 3, %VBState%
+			if WinExist("background.ahk ahk_class AutoHotkey")
+			{
+				PostMessage, 0x5554, 3, %VBState%
+				PostMessage, 0x5554, 5, %VBLastKilled%
 			}
-			DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
-			SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
+			;nm_setStatus("VBState " . VBState, " <1>")
+			IniWrite, %VBLastKilled%, settings\nm_config.ini, Collect, VBLastKilled
 		}
 		;check if VB was already killed by someone else
 		if(nm_imgSearch("VBdeadSymbol2.png",1, "highright")[1]=0){
 			VBState:=0
-			;nm_setStatus("VBState " . VBState, " <2>")
-			nm_setStatus("Defeated")
 			VBLastKilled:=nowUnix()
-			IniWrite, %VBLastKilled%, settings\nm_config.ini, Collect, VBLastKilled
 			;send VBState to background.ahk
-			Prev_DetectHiddenWindows := A_DetectHiddenWindows
-			Prev_TitleMatchMode := A_TitleMatchMode
-			DetectHiddenWindows On
-			SetTitleMatchMode 2
 			if WinExist("background.ahk ahk_class AutoHotkey") {
-				SendMessage, 0x4200, 5, %VBLastKilled%
-				SendMessage, 0x4200, 3, %VBState%
+				PostMessage, 0x5554, 3, %VBState%
+				PostMessage, 0x5554, 5, %VBLastKilled%
 			}
-			DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
-			SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
+			IniWrite, %VBLastKilled%, settings\nm_config.ini, Collect, VBLastKilled
+			;nm_setStatus("VBState " . VBState, " <2>")
+			nm_setStatus("Defeated", "Vicious Bee - Other Player")
 		}
 	}
 	if(VBState=2){
@@ -11216,643 +10838,364 @@ nm_ViciousCheck(){
 		if((nowUnix()-VBLastKilled)<(300)) { ;it has been less than 5 minutes since VB was found
 			if(nm_imgSearch("VBdeadSymbol2.png",1, "highright")[1]=0){
 				VBState:=0
-				;nm_setStatus("VBState " . VBState, " <3>")
-				nm_setStatus("Defeated")
 				VBLastKilled:=nowUnix()
-				IniWrite, %VBLastKilled%, settings\nm_config.ini, Collect, VBLastKilled
 				;send VBState to background.ahk
-				Prev_DetectHiddenWindows := A_DetectHiddenWindows
-				Prev_TitleMatchMode := A_TitleMatchMode
-				DetectHiddenWindows On
-				SetTitleMatchMode 2
 				if WinExist("background.ahk ahk_class AutoHotkey") {
-					SendMessage, 0x4200, 5, %VBLastKilled%
-					SendMessage, 0x4200, 3, %VBState%
+					PostMessage, 0x5554, 5, %VBLastKilled%
+					PostMessage, 0x5554, 3, %VBState%
 				}
-				DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
-				SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
+				IniWrite, %VBLastKilled%, settings\nm_config.ini, Collect, VBLastKilled
+				;nm_setStatus("VBState " . VBState, " <3>")
+				;nm_setStatus("Defeated", "VB")
 				TotalViciousKills:=TotalViciousKills+1
 				SessionViciousKills:=SessionViciousKills+1
 				Send_WM_COPYDATA("incrementstat Total Vic Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 				IniWrite, %TotalViciousKills%, settings\nm_config.ini, Status, TotalViciousKills
 				IniWrite, %SessionViciousKills%, settings\nm_config.ini, Status, SessionViciousKills
+				killed := 1
 			}
 		} else if((nowUnix()-VBLastKilled)>(300)) { ;it has been greater than 5 minutes since VB was found
 				VBState:=0
+				;send VBState to background.ahk
+				if WinExist("background.ahk ahk_class AutoHotkey")
+					PostMessage, 0x5554, 3, %VBState%
 				;nm_setStatus("VBState " . VBState, " <4>")
 				nm_setStatus("Aborted", "Vicious Fight > 5 Mins")
-				;send VBState to background.ahk
-				Prev_DetectHiddenWindows := A_DetectHiddenWindows
-				Prev_TitleMatchMode := A_TitleMatchMode
-				DetectHiddenWindows On
-				SetTitleMatchMode 2
-				if WinExist("background.ahk ahk_class AutoHotkey") {
-					SendMessage, 0x4200, 3, %VBState%
-				}
-				DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
-				SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 		}
 	}
+	DetectHiddenWindows %Prev_DetectHiddenWindows%
+	SetTitleMatchMode %Prev_TitleMatchMode%
+	return killed
 }
 
-nm_locateVB(){
-	global VBState
-	global StingerCheck
-	if(StingerCheck=0) {
+nm_locateVB(){ ; ~ rewrote function to hopefully eliminate issues and implement new walk
+	global VBState, StingerCheck, StingerPepperCheck, StingerMountainTopCheck, StingerRoseCheck, StingerCactusCheck, StingerSpiderCheck, StingerCloverCheck, NightLastDetected, VBLastKilled, FwdKey, LeftKey, BackKey, RightKey, RotLeft, RotRight, MoveSpeedFactor, MoveMethod, objective, DisableToolUse, CurrentAction, PreviousAction
+	
+	Prev_DetectHiddenWindows := A_DetectHiddenWindows
+	Prev_TitleMatchMode := A_TitleMatchMode
+	DetectHiddenWindows On
+	SetTitleMatchMode 2
+	; must set these back to prev before returning
+	
+	time := nowUnix()
+	; don't run if stinger check disabled, VB last killed less than 5m ago, night last detected more than 5m ago
+	if ((StingerCheck=0) || (time-VBLastKilled)<300 || ((time-NightLastDetected)>300 || (time-NightLastDetected)<0) || (VBState = 0)) {
 		VBState:=0
-		;nm_setStatus("VBState " . VBState, " <5>")
 		;send VBState to background.ahk
-		Prev_DetectHiddenWindows := A_DetectHiddenWindows
-		Prev_TitleMatchMode := A_TitleMatchMode
-		DetectHiddenWindows On
-		SetTitleMatchMode 2
-		if WinExist("background.ahk ahk_class AutoHotkey") {
-			SendMessage, 0x4200, 3, %VBState%
-		}
-		DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
-		SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
+		if WinExist("background.ahk ahk_class AutoHotkey")
+			PostMessage, 0x5554, 3, %VBState%
+		DetectHiddenWindows %Prev_DetectHiddenWindows%
+		SetTitleMatchMode %Prev_TitleMatchMode%
 		return
 	}
-	global StingerPepperCheck
-	global StingerMountainTopCheck
-	global StingerRoseCheck
-	global StingerCactusCheck
-	global StingerSpiderCheck
-	global StingerCloverCheck
-	global NightLastDetected
-	global VBLastKilled
-	global FwdKey
-	global LeftKey
-	global BackKey
-	global RightKey
-	global RotLeft
-	global RotRight
-	global MoveSpeedFactor
-	global MoveMethod
-	global objective
-	global DisableToolUse, CurrentAction, PreviousAction
-	if(((nowUnix()-NightLastDetected)<(300) || (nowUnix()-NightLastDetected)<0)) { ;no more than 5 minutes since NightLastDetected
-		PreviousAction:=CurrentAction
-		CurrentAction:="Stingers"
-		loop, 1 {
-			if(VBState=1){
-				nm_setStatus("Confirming", "Night")
-				;confirm it is actually night and not a false positive
-				nm_Reset(0)
-				loop 3 {
-				send, {%RotRight%}
-				}
-				loop 3 {
-				send, {PgDn}
-				}
-				findImg := nm_imgSearch("nightsky.png", 50, "abovebuff")
-				if(findImg[1]=0){
-					;night confirmed, proceed!
-					loop 3 {
-						send, {%RotLeft%}
-					}
-					loop 3 {
-						send, {PgUp}
-					}
-					nm_setStatus("Searching")
-					goto VBPepperBypass
-				} else If (findImg[1]=1) {
-					;false positive, ABORT!
-					NightLastDetected:=nowUnix()-300-1 ;make NightLastDetected older than 5 minutes
-					IniWrite, %NightLastDetected%, settings\nm_config.ini, Collect, NightLastDetected
-					;msgbox false alarm!
-					nm_setStatus("Aborting", "VB - Not Night")
-					break
-				}
-			}
-			startTime:=nowUnix()
-			;Check PEPPER
-			VBPepperStart:
-			if(VBState=0) {
-				nm_setStatus("VBState", %VBState%)
-				break
-			}
-			if(not StingerPepperCheck)
-				goto VBMountainTopStart
-			;fieldName:="Pepper"
-			nm_Reset(0)
-			VBPepperBypass:
-			battleDist:=1000
-			if(not StingerPepperCheck)
-				goto VBMountainTopSBypass
-			objective:="Vicious Bee (Pepper)"
-			nm_gotoRamp()
-			if(MoveMethod="walk") {
-				nm_walkTo("pepper")
-			} else {
-				nm_gotoCannon()
-				nm_cannonTo("pepper")
-			}
-			nm_setStatus("Searching")
-
-			;configure
-			reps:=2
-			leftOrRightDist:=4000
-			forwardOrBackDist:=900
-			;starting point
-			if(!DisableToolUse)
-				click, down
-			nm_Move(1700*MoveSpeedFactor, RightKey)
-			nm_Move(1700*MoveSpeedFactor, FwdKey)
-			;search pattern
-			if(VBState=1){
-				loop, %reps% {
-					nm_Move(leftOrRightDist*MoveSpeedFactor, LeftKey)
-					nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					if(not nm_activeHoney())
-						goto VBPepperStart
-					nm_Move(leftOrRightDist*MoveSpeedFactor, RightKey)
-					if(A_Index<reps) {
-						nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					}
-					if(not nm_activeHoney())
-						goto VBPepperStart
-					nm_ViciousCheck()
-				}
-				if(VBState=2){
-					nm_Move((forwardOrBackDist*2*(reps-0.5)*MoveSpeedFactor), FwdKey)
-					nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-				}
-			}
-			;battle pattern
-			;configure
-			breps:=1
-			leftOrRightDist:=3000
-			forwardOrBackDist:=1000
-			if(VBState=2){
-				while (VBState=2) {
-					loop, %breps% {
-					nm_Move(leftOrRightDist*MoveSpeedFactor, LeftKey)
-					nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					if(not nm_activeHoney())
-						goto VBPepperStart
-					nm_Move(leftOrRightDist*MoveSpeedFactor, RightKey)
-					if(A_Index<breps) {
-						nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					}
-					if(not nm_activeHoney())
-						goto VBPepperStart
-					nm_ViciousCheck()
-					}
-					nm_Move((forwardOrBackDist*2*(breps-0.5)*MoveSpeedFactor), FwdKey)
-				}
-			}
-			click, up
-			;Check MOUNTAIN TOP
-			VBMountainTopStart:
-			if(VBState=0) {
-				nm_setStatus("VBState", %VBState%)
-				break
-			}
-			if(not StingerMountainTopCheck)
-				goto VBRoseStart
-			nm_Reset(0)
-			VBMountainTopSBypass:
-			objective:="Vicious Bee (Mountain Top)"
-			nm_gotoRamp()
-			if(MoveMethod="walk") {
-				nm_walkTo("mountain top")
-			} else {
-				nm_gotoCannon()
-				nm_cannonTo("mountain top")
-				loop 2 {
-					send {%RotLeft%}
-				}
-			}
-			nm_setStatus("Searching")
-			;configure
-			reps:=1
-			leftOrRightDist:=3500
-			forwardOrBackDist:=1500
-			;starting point
-			if(!DisableToolUse)
-				click, down
-			nm_Move(2000*MoveSpeedFactor, RightKey)
-			nm_Move(1600*MoveSpeedFactor, FwdKey)
-			;search pattern
-			if(VBState=1){
-				loop, %reps% {
-					nm_Move(leftOrRightDist*MoveSpeedFactor, LeftKey)
-					nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					nm_Move(leftOrRightDist*MoveSpeedFactor, RightKey)
-					if(not nm_activeHoney())
-						goto VBMountainTopStart
-					nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					nm_Move(leftOrRightDist*MoveSpeedFactor, LeftKey)
-					if(not nm_activeHoney())
-						goto VBMountainTopStart
-					nm_ViciousCheck()
-				}
-				if(VBState=2){
-					nm_Move(leftOrRightDist*MoveSpeedFactor, RightKey)
-					nm_Move(forwardOrBackDist*MoveSpeedFactor, FwdKey)
-				}
-			}
-			;battle pattern
-			if(VBState=2){
-				;configure
-				breps:=1
-				leftOrRightDist:=3000
-				forwardOrBackDist:=1000
-				while (VBState=2) {
-					loop, %breps% {
-					nm_Move(leftOrRightDist*MoveSpeedFactor, LeftKey)
-					nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					if(not nm_activeHoney())
-						goto VBMountainTopStart
-					nm_Move(leftOrRightDist*MoveSpeedFactor, RightKey)
-					if(A_Index<breps) {
-						nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					}
-					if(not nm_activeHoney())
-						goto VBMountainTopStart
-					nm_ViciousCheck()
-					}
-					nm_Move((forwardOrBackDist*2*(breps-0.5)*MoveSpeedFactor), FwdKey)
-				}
-			}
-			click, up
-			;Check ROSE
-			VBRoseStart:
-			if(VBState=0){
-				nm_setStatus("VBState", %VBState%)
-				break
-			}
-			if(not StingerRoseCheck)
-				goto VBCactusStart
-			nm_Reset(0)
-			objective:="Vicious Bee (Rose)"
-			nm_gotoRamp()
-			if(MoveMethod="walk") {
-				nm_walkTo("rose")
-			} else {
-				nm_gotoCannon()
-				nm_cannonTo("rose")
-			}
-			nm_setStatus("Searching")
-			;configure
-			reps:=2
-			leftOrRightDist:=2750
-			forwardOrBackDist:=1500
-			;starting point
-			if(!DisableToolUse)
-				click, down
-			nm_Move(1200*MoveSpeedFactor, RightKey)
-			nm_Move(1875*MoveSpeedFactor, FwdKey)
-			;search pattern
-			if(VBState=1){
-				loop, %reps% {
-					nm_Move(leftOrRightDist*MoveSpeedFactor, LeftKey)
-					nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					if(not nm_activeHoney())
-						goto VBRoseStart
-					nm_Move(leftOrRightDist*MoveSpeedFactor, RightKey)
-					if(A_Index<reps) {
-						nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					}
-					if(not nm_activeHoney())
-						goto VBRoseStart
-					nm_ViciousCheck()
-				}
-				if(VBState=2){
-					nm_Move((forwardOrBackDist*2*(reps)*MoveSpeedFactor), FwdKey)
-					nm_Move((forwardOrBackDist*MoveSpeedFactor), BackKey)
-				}
-			}
-			;battle pattern
-			;configure
-			breps:=1
-			leftOrRightDist:=2500
-			forwardOrBackDist:=1000
-			if(VBState=2){
-				while (VBState=2) {
-					loop, %breps% {
-					nm_Move(leftOrRightDist*MoveSpeedFactor, LeftKey)
-					nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					if(not nm_activeHoney())
-						goto VBRoseStart
-					nm_Move(leftOrRightDist*MoveSpeedFactor, RightKey)
-					if(A_Index<breps) {
-						nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					}
-					if(not nm_activeHoney())
-						goto VBRoseStart
-					nm_ViciousCheck()
-					}
-					nm_Move((forwardOrBackDist*2*(breps-0.5)*MoveSpeedFactor), FwdKey)
-				}
-			}
-			click, up
-			;Check CACTUS
-			VBCactusStart:
-			if(VBState=0){
-				nm_setStatus("VBState", %VBState%)
-				break
-			}
-			if(not StingerCactusCheck) {
-				nm_Reset(0)
-				objective:="Vicious Bee (Spider)"
-				nm_gotoRamp()
-				if(MoveMethod="walk") {
-					nm_walkTo("spider")
-				} else {
-					nm_gotoCannon()
-					nm_cannonTo("spider")
-				}
-				nm_setStatus("Searching")
-				if(!DisableToolUse)
-					click, down
-				nm_Move(4500*MoveSpeedFactor, FwdKey)
-				nm_Move(3000*MoveSpeedFactor, LeftKey)
-				goto VBSpiderStart
-			}
-			nm_Reset(0)
-			objective:="Vicious Bee (Cactus)"
-			nm_gotoRamp()
-			if(MoveMethod="walk") {
-				nm_walkTo("cactus")
-			} else {
-				nm_gotoCannon()
-				nm_cannonTo("cactus")
-			}
-			nm_setStatus("Searching")
-			;configure
-			reps:=1
-			leftOrRightDist:=5000
-			forwardOrBackDist:=1500
-			;starting point
-			if(!DisableToolUse)
-				click, down
-			nm_Move(2000*MoveSpeedFactor, RightKey)
-			nm_Move(600*MoveSpeedFactor, FwdKey)
-			;search pattern
-			if(VBState=1){
-				loop, %reps% {
-					nm_Move(leftOrRightDist*MoveSpeedFactor, LeftKey)
-					nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					if(not nm_activeHoney())
-						goto VBCactusStart
-					nm_Move(leftOrRightDist*MoveSpeedFactor, RightKey)
-					if(A_Index<reps) {
-						nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					}
-					if(not nm_activeHoney())
-						goto VBCactusStart
-					nm_ViciousCheck()
-				}
-				nm_Move((forwardOrBackDist*2*(reps-0.5)*MoveSpeedFactor), FwdKey)
-			}
-			nm_ViciousCheck()
-			;battle pattern
-			;configure
-			breps:=1
-			leftOrRightDist:=3250
-			forwardOrBackDist:=750
-			if(VBState=2){
-				while (VBState=2) {
-					loop, %breps% {
-					nm_Move(leftOrRightDist*MoveSpeedFactor, LeftKey)
-					nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					if(not nm_activeHoney())
-						goto VBCactusStart
-					nm_Move(leftOrRightDist*MoveSpeedFactor, RightKey)
-					if(A_Index<breps) {
-						nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					}
-					if(not nm_activeHoney())
-						goto VBCactusStart
-					nm_ViciousCheck()
-					}
-					nm_Move((forwardOrBackDist*2*(breps-0.5)*MoveSpeedFactor), FwdKey)
-				}
-			}
-			click, up
-			;Check SPIDER
-			if(VBState=0){
-				nm_setStatus("VBState", %VBState%)
-				break
-			}
-			;walk to Spider from Cactus
-			objective:="Vicious Bee (Spider)"
-			nm_Move(7000*MoveSpeedFactor, LeftKey)
-			nm_Move(2500*MoveSpeedFactor, FwdKey)
-			loop 4 {
-				send {%RotLeft%}
-			}
-			nm_Move(2000*MoveSpeedFactor, RightKey)
-			nm_Move(3500*MoveSpeedFactor, FwdKey)
-			nm_Move(2000*MoveSpeedFactor, LeftKey)
-			;configure
-			reps:=2
-			leftOrRightDist:=3750
-			forwardOrBackDist:=1500
-			VBSpiderStart:
-			;starting point
-			if(!DisableToolUse)
-				click, down
-			nm_Move(1000*MoveSpeedFactor, RightKey)
-			nm_Move(1000*MoveSpeedFactor, BackKey)
-			;search pattern
-			if(VBState=1){
-				loop, %reps% {
-					nm_Move(leftOrRightDist*MoveSpeedFactor, RightKey)
-					if(A_Index<reps) {
-						nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-						if(not nm_activeHoney()) {
-							nm_Reset(0)
-							nm_gotoRamp()
-							if(MoveMethod="walk") {
-								nm_walkTo("spider")
-							} else {
-								nm_gotoCannon()
-								nm_cannonTo("spider")
-							}
-							nm_Move(4500*MoveSpeedFactor, FwdKey)
-							nm_Move(3000*MoveSpeedFactor, LeftKey)
-							goto VBSpiderStart
-						}
-						nm_Move(leftOrRightDist*MoveSpeedFactor, LeftKey)
-						nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					}
-					if(not nm_activeHoney()) {
-						nm_Reset(0)
-						nm_gotoRamp()
-						if(MoveMethod="walk") {
-							nm_walkTo("spider")
-						} else {
-							nm_gotoCannon()
-							nm_cannonTo("spider")
-						}
-						nm_Move(4500*MoveSpeedFactor, FwdKey)
-						nm_Move(3000*MoveSpeedFactor, LeftKey)
-						goto VBSpiderStart
-					}
-					nm_ViciousCheck()
-				}
-				if(VBState=2){
-					nm_Move((forwardOrBackDist*2*(reps-0.5)*MoveSpeedFactor), FwdKey)
-					nm_Move(leftOrRightDist*MoveSpeedFactor, LeftKey)
-					nm_Move((forwardOrBackDist*MoveSpeedFactor), BackKey)
-				}
-			}
-			;battle pattern
-			;configure
-			breps:=1
-			leftOrRightDist:=2500
-			forwardOrBackDist:=1000
-			if(VBState=2){
-				while (VBState=2) {
-					loop, %breps% {
-					nm_Move(leftOrRightDist*MoveSpeedFactor, RightKey)
-					nm_Move((forwardOrBackDist*MoveSpeedFactor), BackKey)
-					if(not nm_activeHoney()) {
-						nm_Reset(0)
-						nm_gotoRamp()
-						if(MoveMethod="walk") {
-							nm_walkTo("spider")
-						} else {
-							nm_gotoCannon()
-							nm_cannonTo("spider")
-						}
-						nm_Move(4500*MoveSpeedFactor, FwdKey)
-						nm_Move(3000*MoveSpeedFactor, LeftKey)
-						goto VBSpiderStart
-					}
-					nm_Move(leftOrRightDist*MoveSpeedFactor, LeftKey)
-					if(A_Index<breps) {
-						nm_Move((forwardOrBackDist*MoveSpeedFactor), BackKey)
-					}
-					if(not nm_activeHoney()) {
-						nm_Reset(0)
-						nm_gotoRamp()
-						if(MoveMethod="walk") {
-							nm_walkTo("spider")
-						} else {
-							nm_gotoCannon()
-							nm_cannonTo("spider")
-						}
-						nm_Move(4500*MoveSpeedFactor, FwdKey)
-						nm_Move(3000*MoveSpeedFactor, LeftKey)
-						goto VBSpiderStart
-					}
-					nm_ViciousCheck()
-					}
-					nm_Move((forwardOrBackDist*2*(breps-0.5)*MoveSpeedFactor), FwdKey)
-				}
-			}
-			click, up
-			;Check CLOVER
-			VBCloverStart:
-			if(VBState=0){
-				nm_setStatus("VBState", %VBState%)
-				break
-			}
-			if(not StingerCloverCheck)
-				break
-			nm_Reset(0)
-			objective:="Vicious Bee (Clover)"
-			nm_gotoRamp()
-			if(MoveMethod="walk") {
-				nm_walkTo("clover")
-			} else {
-				nm_gotoCannon()
-				nm_cannonTo("clover")
-			}
-			nm_setStatus("Searching")
-			;configure
-			reps:=2
-			leftOrRightDist:=3000
-			forwardOrBackDist:=1000
-			;starting point
-			if(!DisableToolUse)
-				click, down
-			nm_Move(1500*MoveSpeedFactor, RightKey)
-			nm_Move(1500*MoveSpeedFactor, FwdKey)
-			;search pattern
-			if(VBState=1){
-				loop, %reps% {
-					nm_Move(leftOrRightDist*MoveSpeedFactor, LeftKey)
-					nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					if(not nm_activeHoney())
-						goto VBCloverStart
-					nm_Move(leftOrRightDist*MoveSpeedFactor, RightKey)
-					if(A_Index<reps) {
-						nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-					}
-					if(not nm_activeHoney())
-						goto VBCloverStart
-					nm_ViciousCheck()
-				}
-				if(VBState=2){
-					nm_Move((forwardOrBackDist*2*(reps-0.5)*MoveSpeedFactor), FwdKey)
-					nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-				}
-			}
-			;battle pattern
-			;configure
-			breps:=1
-			leftOrRightDist:=1800
-			forwardOrBackDist:=1000
-			if(VBState=2){
-				while (VBState=2) {
-					loop, %breps% {
-						nm_Move(leftOrRightDist*MoveSpeedFactor, LeftKey)
-						nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-						if(not nm_activeHoney())
-							goto VBCloverStart
-						nm_Move(leftOrRightDist*MoveSpeedFactor, RightKey)
-						if(A_Index<breps) {
-							nm_Move(forwardOrBackDist*MoveSpeedFactor, BackKey)
-						}
-						if(not nm_activeHoney())
-							goto VBCloverStart
-						nm_ViciousCheck()
-					}
-					nm_Move((forwardOrBackDist*2*(breps-0.5)*MoveSpeedFactor), FwdKey)
-				}
-			}
-		}
-		click, up
-		nm_setStatus("Completed", %VBState%)
-		sleep, 100
-		VBState:=0 ;0=no VB, 1=searching for VB, 2=VB found
-		;nm_setStatus("VBState " . VBState, " <6>")
-		nm_setStatus("Completed", "Vicious Cycle")
-		;send VBState to background.ahk
-		Prev_DetectHiddenWindows := A_DetectHiddenWindows
-		Prev_TitleMatchMode := A_TitleMatchMode
-		DetectHiddenWindows On
-		SetTitleMatchMode 2
-		if WinExist("background.ahk ahk_class AutoHotkey") {
-			SendMessage, 0x4200, 3, %VBState%
-		}
-		DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
-		SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
-		stopTime:=nowUnix()
-		cycleTime:=stopTime-startTime
-		return
-	} else { ;it has been more than 5 minutes since NightLastDetected
-		if((nowUnix()-VBLastKilled)>(300) || (nowUnix()-VBLastKilled)<0) { ;more than 5 minutes since VBLastKilled
+	
+	; confirm night time
+	if(VBState=1){
+		nm_setStatus("Confirming", "Night")
+		nm_Reset(0, 2000, 1)
+		loop 3
+			send, {%RotRight%}
+		loop 3
+			send, {PgDn}
+		findImg := nm_imgSearch("nightsky.png", 50, "abovebuff")
+		if(findImg[1]=0){
+			;night confirmed, proceed!
+			loop 3
+				send, {%RotLeft%}
+			loop 3
+				send, {PgUp}
+			nm_setStatus("Starting", "Vicious Bee Cycle")
+		} else {
+			;false positive, ABORT!
 			VBState:=0
-			;nm_setStatus("VBState " . VBState, " <7>")
-			;send VBState to background.ahk
-			Prev_DetectHiddenWindows := A_DetectHiddenWindows
-			Prev_TitleMatchMode := A_TitleMatchMode
-			DetectHiddenWindows On
-			SetTitleMatchMode 2
-			if WinExist("background.ahk ahk_class AutoHotkey") {
-				SendMessage, 0x4200, 3, %VBState%
-			}
-			DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
-			SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
+			if WinExist("background.ahk ahk_class AutoHotkey")
+				PostMessage, 0x5554, 3, %VBState%
+			NightLastDetected:=nowUnix()-300-1 ;make NightLastDetected older than 5 minutes
+			IniWrite, %NightLastDetected%, settings\nm_config.ini, Collect, NightLastDetected
+			nm_setStatus("Aborting", "Vicious Bee - Not Night")
+			DetectHiddenWindows %Prev_DetectHiddenWindows%
+			SetTitleMatchMode %Prev_TitleMatchMode%
 			return
 		}
 	}
+	
+	PreviousAction:=CurrentAction, CurrentAction:="Stingers"
+	startTime:=nowUnix()
+	
+	fieldsChecked := 0
+	for k,v in ["Pepper","MountainTop","Rose","Cactus","Spider","Clover"]
+	{
+		fieldsChecked++
+		Loop, 10 ; attempt each field a maximum of n (10) times
+		{
+			click, up
+			if(VBState=0) {
+				nm_setStatus("Aborting", "No Vicious Bee")
+				break 2
+			}
+			if !Stinger%v%Check
+				continue 2
+				
+			if ((v = "Spider") && (A_Index = 1) && StingerSpiderCheck && StingerCactusCheck)
+			{
+				;walk to Spider from Cactus
+				nm_setStatus("Traveling", "Vicious Bee (" v ")")
+				movement := "
+				(LTrim Join`r`n
+				" nm_Walk(1500*9/2000, FwdKey) "
+				" nm_Walk(7000*9/2000, LeftKey) "
+				" nm_Walk(2500*9/2000, FwdKey) "
+				Loop, 4
+					Send {" RotLeft "}
+				" nm_Walk(2000*9/2000, RightKey) "
+				" nm_Walk(6500*9/2000, FwdKey) "
+				" nm_Walk(8000*9/2000, LeftKey) "
+				)"
+				nm_createWalk(movement)
+				KeyWait, F14, D T5 L
+				KeyWait, F14, T60 L
+				nm_endWalk()
+			}
+			else
+			{
+				(fieldsChecked > 1 || A_Index > 1) ? nm_Reset(0, 2000, 1)
+				objective := "Vicious Bee (" v ")" ((A_Index > 1) ? " - Attempt " A_Index : "")
+				nm_gotoRamp()
+				
+				if(MoveMethod="walk")
+					nm_walkTo((v = "MountainTop") ? "Mountain Top" : v)
+				else {
+					nm_gotoCannon()
+					nm_cannonTo((v = "MountainTop") ? "Mountain Top" : v)
+					Loop % ((v = "MountainTop") ? 2 : 0)
+						send {%RotLeft%}
+				}
+				
+				if (v = "Spider")
+				{
+					movement := "
+					(LTrim Join`r`n
+					" nm_Walk(3500*9/2000, FwdKey) "
+					" nm_Walk(3000*9/2000, LeftKey) "
+					)"
+					nm_createWalk(movement)
+					KeyWait, F14, D T5 L
+					KeyWait, F14, T60 L
+					nm_endWalk()
+				}
+			}
+			
+			if(!DisableToolUse)
+				click, down
+			
+			;search pattern
+			if (VBState=1)
+			{
+				nm_setStatus("Searching", "Vicious Bee (" v ")")
+			
+				;configure
+				reps := (v = "Pepper") ? 2 : (v = "MountainTop") ? 1 : (v = "Rose") ? 2 : (v = "Cactus") ? 1 : (v = "Spider") ? 2 : 2
+				leftOrRightDist := (v = "Pepper") ? 4000 : (v = "MountainTop") ? 3500 : (v = "Rose") ? 2750 : (v = "Cactus") ? 4000 : (v = "Spider") ? 3750 : 3000
+				forwardOrBackDist := (v = "Pepper") ? 900 : (v = "MountainTop") ? 1500 : (v = "Rose") ? 1500 : (v = "Cactus") ? 1500 : (v = "Spider") ? 1500 : 1000
+				
+				movement := "
+				(LTrim Join`r`n
+				" nm_Walk(((v = "Pepper") ? 1700 : (v = "MountainTop") ? 2000 : (v = "Rose") ? 1300 : (v = "Cactus") ? 2000 : (v = "Spider") ? 1000 : 1500)*9/2000, RightKey) "
+				" nm_Walk(((v = "Pepper") ? 1600 : (v = "MountainTop") ? 1600 : (v = "Rose") ? 1875 : (v = "Cactus") ? 750 : (v = "Spider") ? 1000 : 1500)*9/2000, (v = "Spider") ? BackKey : FwdKey) "
+				)"
+				nm_createWalk(movement)
+				KeyWait, F14, D T5 L
+				KeyWait, F14, T60 L
+				nm_endWalk()
+				
+				if ((v = "Pepper") || (v = "Rose") || (v = "Clover") || v = "Cactus")
+				{
+					loop, %reps% {
+						movement := "
+						(LTrim Join`r`n
+						" nm_Walk(leftOrRightDist*9/2000, LeftKey) "
+						" nm_Walk(forwardOrBackDist*9/2000, BackKey) "
+						)"
+						nm_createWalk(movement)
+						KeyWait, F14, D T5 L
+						KeyWait, F14, T60 L
+						nm_endWalk()
+						if(not nm_activeHoney())
+							continue 2
+						movement := "
+						(LTrim Join`r`n
+						" nm_Walk(leftOrRightDist*9/2000, RightKey) "
+						" ((A_Index < reps) ? nm_Walk(forwardOrBackDist*9/2000, BackKey) : "") "
+						)"
+						nm_createWalk(movement)
+						KeyWait, F14, D T5 L
+						KeyWait, F14, T60 L
+						nm_endWalk()
+						if(not nm_activeHoney())
+							continue 2
+						nm_ViciousCheck()
+					}
+					if(VBState=2){
+						movement := "
+						(LTrim Join`r`n
+						" nm_Walk(forwardOrBackDist*2*(reps-0.5)*9/2000, FwdKey) "
+						" ((v != "Cactus") ? nm_Walk(forwardOrBackDist*9/2000, BackKey) : "") "
+						)"
+						nm_createWalk(movement)
+						KeyWait, F14, D T5 L
+						KeyWait, F14, T60 L
+						nm_endWalk()
+					}
+				}
+				else if (v = "MountainTop")
+				{
+					loop, %reps% {
+						movement := "
+						(LTrim Join`r`n
+						" nm_Walk(leftOrRightDist*9/2000, LeftKey) "
+						" nm_Walk(forwardOrBackDist*9/2000, BackKey) "
+						" nm_Walk(leftOrRightDist*9/2000, RightKey) "
+						)"
+						nm_createWalk(movement)
+						KeyWait, F14, D T5 L
+						KeyWait, F14, T60 L
+						nm_endWalk()
+						if(not nm_activeHoney())
+							continue 2
+						movement := "
+						(LTrim Join`r`n
+						" nm_Walk(forwardOrBackDist*9/2000, BackKey) "
+						" nm_Walk(leftOrRightDist*9/2000, LeftKey) "
+						)"
+						nm_createWalk(movement)
+						KeyWait, F14, D T5 L
+						KeyWait, F14, T60 L
+						nm_endWalk()
+						if(not nm_activeHoney())
+							continue 2
+						nm_ViciousCheck()
+					}
+					if(VBState=2){
+						movement := "
+						(LTrim Join`r`n
+						" nm_Walk(leftOrRightDist*9/2000, RightKey) "
+						" nm_Walk(forwardOrBackDist*9/2000, FwdKey) "
+						)"
+						nm_createWalk(movement)
+						KeyWait, F14, D T5 L
+						KeyWait, F14, T60 L
+						nm_endWalk()
+					}
+				}
+				else ; spider
+				{
+					loop, %reps% {
+						movement := "
+						(LTrim Join`r`n
+						" nm_Walk(leftOrRightDist*9/2000, RightKey) "
+						" ((A_Index < reps) ? nm_Walk(forwardOrBackDist*9/2000, BackKey) : "") "
+						)"
+						nm_createWalk(movement)
+						KeyWait, F14, D T5 L
+						KeyWait, F14, T60 L
+						nm_endWalk()
+						if (A_Index < reps)
+						{
+							if(not nm_activeHoney())
+								continue 2
+							movement := "
+							(LTrim Join`r`n
+							" nm_Walk(leftOrRightDist*9/2000, LeftKey) "
+							" nm_Walk(forwardOrBackDist*9/2000, BackKey) "
+							)"
+							nm_createWalk(movement)
+							KeyWait, F14, D T5 L
+							KeyWait, F14, T60 L
+							nm_endWalk()
+						}
+						if(not nm_activeHoney())
+							continue 2
+						nm_ViciousCheck()
+					}
+					if(VBState=2){
+						movement := "
+						(LTrim Join`r`n
+						" nm_Walk(forwardOrBackDist*2*(reps-0.5)*9/2000, FwdKey) "
+						" nm_Walk(leftOrRightDist*9/2000, LeftKey) "
+						" nm_Walk(forwardOrBackDist*9/2000, BackKey) "
+						)"
+						nm_createWalk(movement)
+						KeyWait, F14, D T5 L
+						KeyWait, F14, T60 L
+						nm_endWalk()
+					}
+				}
+			}
+			
+			;battle pattern
+			if (VBState=2) {
+				nm_setStatus("Attacking", "Vicious Bee (" v ")" ((A_Index > 1) ? " - Round " A_Index : ""))
+				startBattle := (A_Index = 1) ? nowUnix() : startBattle
+				
+				;configure
+				breps := 1
+				leftOrRightDist := (v = "Pepper") ? 3000 : (v = "MountainTop") ? 3000 : (v = "Rose") ? 2500 : (v = "Cactus") ? 3250 : (v = "Spider") ? 2500 : 1800
+				forwardOrBackDist := (v = "Pepper") ? 1000 : (v = "MountainTop") ? 1000 : (v = "Rose") ? 1000 : (v = "Cactus") ? 750 : (v = "Spider") ? 1000 : 1000
+				
+				while (VBState=2) {
+					loop, %breps% {
+						movement := "
+						(LTrim Join`r`n
+						" nm_Walk(leftOrRightDist*9/2000, (v = "Spider") ? RightKey : LeftKey) "
+						" nm_Walk(forwardOrBackDist*9/2000, BackKey) "
+						)"
+						nm_createWalk(movement)
+						KeyWait, F14, D T5 L
+						KeyWait, F14, T60 L
+						nm_endWalk()
+						if(not nm_activeHoney())
+							continue 3
+						movement := "
+						(LTrim Join`r`n
+						" nm_Walk(leftOrRightDist*9/2000, (v = "Spider") ? LeftKey : RightKey) "
+						" ((A_Index < breps) ? nm_Walk(forwardOrBackDist*9/2000, BackKey) : "") "
+						)"
+						nm_createWalk(movement)
+						KeyWait, F14, D T5 L
+						KeyWait, F14, T60 L
+						nm_endWalk()
+						if(not nm_activeHoney())
+							continue 3
+						killed := nm_ViciousCheck()
+					}
+					movement := "
+					(LTrim Join`r`n
+					" nm_Walk(forwardOrBackDist*2*(breps-0.5)*9/2000, FwdKey) "
+					)"
+					nm_createWalk(movement)
+					KeyWait, F14, D T5 L
+					KeyWait, F14, T60 L
+					nm_endWalk()
+				}
+				if killed
+				{
+					VarSetCapacity(duration,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",(nowUnix() - startBattle)*10000000,"wstr","mm:ss","str",duration,"int",256)
+					nm_SetStatus("Defeated", "Vicious Bee - Time: " duration)
+				}
+				break 2
+			}
+			break
+		}
+	}
+	click, up
+	VarSetCapacity(duration,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",(nowUnix() - startTime)*10000000,"wstr","mm:ss","str",duration,"int",256)
+	nm_setStatus("Completed", "Vicious Bee Cycle`nTime: " duration " - Fields: " fieldsChecked " - Defeated: " ((killed) ? "Yes" : "No"))
+	VBState:=0 ;0=no VB, 1=searching for VB, 2=VB found
+	if WinExist("background.ahk ahk_class AutoHotkey")
+		PostMessage, 0x5554, 3, %VBState%
+	DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+	SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
+	return
 }
 nm_hotbar(boost:=0){
 	global state, fieldOverrideReason, GatherStartTime
@@ -13533,7 +12876,7 @@ nm_gotoQuestgiver(giver){
 					send {%RotLeft%}
 				}
 				DllCall("Sleep",UInt,2500)
-				nm_Move(2000*MoveSpeedFactor, BackKey, LeftKey)
+				nm_Move(2500*MoveSpeedFactor, BackKey, LeftKey)
 				nm_Move(500*MoveSpeedFactor, FwdKey, RightKey)
 			} else {
 				msgbox GotoQuestGiver: MoveMethod undefined!
@@ -14043,7 +13386,7 @@ FieldDriftCheck3=1
 CurrentFieldNum=1
 
 [Collect]
-ClockCheck=0
+ClockCheck=1
 LastClock=1
 MondoBuffCheck=0
 MondoAction=Buff
@@ -14261,6 +13604,74 @@ LastSatisfyingField=None
 LastMotivatingField=None
 LastInvigoratingField=None
 ), settings\nm_config.ini
+}
+nm_import() ; ~ at every start of macro, import paths and patterns
+{
+	If !FileExist("settings\imported") ; make sure the import folders exists
+	{
+		FileCreateDir, settings\imported
+		If ErrorLevel
+		{
+			msgbox, 0x30, , Couldn't create the directory for imported files! Make sure the script is elevated if it needs to be.
+			ExitApp
+		}
+	}
+	If !FileExist("settings\imported\paths") ; make sure the imported folder exists
+	{
+		FileCreateDir, settings\imported\paths
+		If ErrorLevel
+		{
+			msgbox, 0x30, , Couldn't create the directory for imported paths! Make sure the script is elevated if it needs to be.
+			ExitApp
+		}
+	}
+	init := 0
+	new_patterns := 0
+	new_paths := 0
+	
+	; patterns
+	newString := ""
+	Loop, Files, %A_ScriptDir%\patterns\*.ahk
+		tempFile := FileOpen(A_LoopFilePath, 0), newString .= tempFile.Read() "`r`n`r`n", tempFile.Close()
+	init += FileExist(A_ScriptDir "\settings\imported\patterns.ahk") ? 0 : newString ? 1 : 0
+	tempfile := FileOpen(A_ScriptDir "\settings\imported\patterns.ahk", 0), checkString := tempFile.Read(), tempFile.Close()
+	if (newString != checkString)
+	{
+		FileDelete, % A_ScriptDir "\settings\imported\patterns.ahk"
+		FileAppend, % newString, % A_ScriptDir "\settings\imported\patterns.ahk"
+		new_patterns := newString ? 1 : 0
+	}
+	
+	; paths
+	newString := ""
+	Loop, Files, %A_ScriptDir%\paths\walkfrom\*.ahk
+		tempFile := FileOpen(A_LoopFilePath, 0), newString .= tempFile.Read() "`r`n`r`n", tempFile.Close()
+	init += FileExist(A_ScriptDir "\settings\imported\paths\walkfrom.ahk") ? 0 : newString ? 1 : 0
+	tempfile := FileOpen(A_ScriptDir "\settings\imported\paths\walkfrom.ahk", 0), checkString := tempFile.Read(), tempFile.Close()
+	if (newString != checkString)
+	{
+		FileDelete, % A_ScriptDir "\settings\imported\paths\walkfrom.ahk"
+		FileAppend, % newString, % A_ScriptDir "\settings\imported\paths\walkfrom.ahk"
+		new_paths := newString ? 1 : 0
+	}
+	
+	if init
+	{
+		Reload
+		Sleep, 10000
+	}
+	
+	if (new_patterns || new_paths)
+	{
+		msgbox, 0x1034, , % "Change in " (new_patterns ? "patterns" : "") ((new_patterns && new_paths) ? " and " : "") (new_paths ? "paths" : "") " detected! Reload to update?"
+		ifMsgBox Yes
+		{
+			Reload
+			Sleep, 10000
+		}
+		else
+			ExitApp
+	}
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; NATRO ENHANCEMENT FUNCTIONS
@@ -16505,7 +15916,7 @@ IfWinNotExist, Roblox
 	disconnectCheck()
 }
 WinActivate, Roblox
-WinWaitActive, Roblox
+;WinWaitActive, Roblox
 Roblox:=[]
 Roblox:=nm_imgSearch("roblox2.png",10,"buff")
 global WindowedScreen
@@ -17021,6 +16432,7 @@ if(AutoFieldBoostActive){
     }
 }
 ;start ancillary macros
+run, %A_ScriptDir%\submacros\background.ahk, %A_ScriptDir%\submacros
 if(AnnounceGuidingStar){
 	run guidingStarDetect.ahk, %A_ScriptDir%\submacros
 }
@@ -17032,7 +16444,7 @@ if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(canary\.|ptb\.)?(discord|
 }
 ;sendMessage commands
 if WinExist("background.ahk ahk_class AutoHotkey") {
-	SendMessage, 0x4200, 4, %StingerCheck%
+	PostMessage, 0x5554, 4, %StingerCheck%
 }
 ;start main loop
 nm_setStatus(0, "Main Loop")
@@ -17040,7 +16452,10 @@ nm_Start()
 return
 ;STOP MACRO
 f3::
-global TotalGatherTime, SessionGatherTime, TotalConvertTime, SessionConvertTime
+nm_endWalk() ; ~ end walk script
+send {%FwdKey% up}{%BackKey% up}{%LeftKey% up}{%RightKey% up}{space up}
+click, up
+;nm_releaseKeys()
 if(MacroRunning) {
 	TotalRuntime:=TotalRuntime+(nowUnix()-MacroStartTime)
 	SessionRuntime:=SessionRuntime+(nowUnix()-MacroStartTime)
@@ -17053,27 +16468,20 @@ if(MacroRunning) {
 	TotalConvertTime:=TotalConvertTime+(nowUnix()-ConvertStartTime)
 	SessionConvertTime:=SessionConvertTime+(nowUnix()-ConvertStartTime)
 }
-IniWrite, %TotalRuntime%, settings\nm_config.ini, Status, TotalRuntime
 MacroRunning:=0
-nm_endWalk() ; ~ end walk script
-send {%FwdKey% up}
-send {%BackKey% up}
-send {%LeftKey% up}
-send {%RightKey% up}
-send {space up}
-click up
-;nm_releaseKeys()
+IniWrite, %TotalRuntime%, settings\nm_config.ini, Status, TotalRuntime
 IniWrite, %SessionRuntime%, settings\nm_config.ini, Status, SessionRuntime
 IniWrite, %TotalGatherTime%, settings\nm_config.ini, Status, TotalGatherTime
 IniWrite, %SessionGatherTime%, settings\nm_config.ini, Status, SessionGatherTime
 IniWrite, %TotalConvertTime%, settings\nm_config.ini, Status, TotalConvertTime
 IniWrite, %SessionConvertTime%, settings\nm_config.ini, Status, SessionConvertTime
 nm_setStatus("End", "Macro")
-Prev_DetectHiddenWindows := A_DetectHiddenWindows ; ~ need to detect hidden windows to close guidingStarDetect.ahk
-DetectHiddenWindows, On
+DetectHiddenWindows, On ; ~ need to detect hidden windows to close guidingStarDetect.ahk
+SetTitleMatchMode, 2
 WinClose guidingStarDetect.ahk
-DetectHiddenWindows, %Prev_DetectHiddenWindows%
+WinClose StatMonitor.ahk
 Reload
+Sleep, 10000
 return
 ;PAUSE MACRO
 f2::
@@ -17081,7 +16489,9 @@ global state
 if(state="startup")
 	return
 Prev_DetectHiddenWindows := A_DetectHiddenWindows
+Prev_TitleMatchMode := A_TitleMatchMode
 DetectHiddenWindows, On
+SetTitleMatchMode, 2
 if(A_IsPaused) {
 	if WinExist("ahk_class AutoHotkey ahk_pid " currentWalk["pid"])
 		Send {F15} ; ~ unpause walk script
@@ -17109,24 +16519,15 @@ if(A_IsPaused) {
 		Send {F15} ; ~ pause walk script
 	else
 	{
-		FwdKeyState:=GetKeyState(FwdKey)
-		BackKeyState:=GetKeyState(BackKey)
-		LeftKeyState:=GetKeyState(LeftKey)
-		RightKeyState:=GetKeyState(RightKey)
-		SpaceKeyState:=GetKeyState(Space)
-		PauseState:=state
-		PauseObjective:=objective
-		send {%FwdKey% up}
-		send {%BackKey% up}
-		send {%LeftKey% up}
-		send {%RightKey% up}
-		send {space up}
-		click up
+		FwdKeyState:=GetKeyState(FwdKey), BackKeyState:=GetKeyState(BackKey), LeftKeyState:=GetKeyState(LeftKey), RightKeyState:=GetKeyState(RightKey), SpaceKeyState:=GetKeyState(Space)
+		send {%FwdKey% up}{%BackKey% up}{%LeftKey% up}{%RightKey% up}{space up}
+		click, up
 	}
 	
 	WinClose guidingStarDetect.ahk
-	
 	MacroRunning:=0
+	PauseState:=state
+	PauseObjective:=objective
 	;manage runtimes
 	TotalRuntime:=TotalRuntime+(nowUnix()-MacroStartTime)
 	PausedRuntime:=PausedRuntime+(nowUnix()-MacroStartTime)
@@ -17140,6 +16541,7 @@ if(A_IsPaused) {
 	nm_setStatus("Paused", "Press F2 to Continue")
 }
 DetectHiddenWindows, %Prev_DetectHiddenWindows%
+SetTitleMatchMode, %Prev_TitleMatchMode%
 Pause, Toggle, 1
 return
 f4::
@@ -17157,6 +16559,8 @@ nm_WM_COPYDATA(wParam, lParam){
 	if(wParam=1){ ;guiding star detected
 		nm_setStatus("Detected", "Guiding Star in " . StringText)
 		;pause
+		Prev_DetectHiddenWindows := A_DetectHiddenWindows
+		DetectHiddenWindows, On
 		if WinExist("ahk_class AutoHotkey ahk_pid " currentWalk["pid"])
 			Send {F15} ; ~ pause walk script
 		else
@@ -17175,6 +16579,7 @@ nm_WM_COPYDATA(wParam, lParam){
 			send {space up}
 			click up
 		}
+		DetectHiddenWindows, %Prev_DetectHiddenWindows%
 		;Announce Guiding Star
 		;calculate mins
 		if(A_Min>=50) {
@@ -17186,6 +16591,7 @@ nm_WM_COPYDATA(wParam, lParam){
 			if(GSMins<10)
 				GSMins:=("0" . GSMins)
 		}
+		Sleep, 200
 		send, /
 		sleep 200
 		Send {Text} <<Guiding Star>> in %StringText% until __:%GSMins% ;{blind}

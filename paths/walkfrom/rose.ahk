@@ -1,0 +1,15 @@
+﻿paths["rose"] := "
+(LTrim Join`r`n
+send {" RotLeft " 2}
+" nm_Walk(6.75, FwdKey) "
+" nm_Walk(6.75, LeftKey) "
+" nm_Walk(27, BackKey, LeftKey) "
+" nm_Walk(40.5, FwdKey) "
+" nm_Walk(4.5, BackKey) "
+" nm_Walk(6.75, LeftKey) "
+" nm_Walk(6.75, RightKey) "
+" nm_Walk(49.5, FwdKey, LeftKey) "
+" nm_Walk(2.25, BackKey) "
+" nm_Walk(27, RightKey) "
+" nm_Walk(4.5, FwdKey) "
+)"

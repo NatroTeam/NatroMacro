@@ -1,3 +1,23 @@
+0.8.3 Patch Notes
+
+New Features
+-Walk paths from field to hive are now customisable! They are stored in the 'paths' folder and can be edited or distributed just like patterns from v0.8.0+.
+
+Bugs
+-Night Detection and Stingers functionality should now be fixed! An issue with inter-script communication was causing this.
+-Fixed recurring left drift in the default Typewriter pattern.
+-Fixed an issue with Bug Run Gather Interrupt check which allowed gather to be interrupted by Quests even if they are disabled.
+-Fixed time remaining for Daily Reconnect shown in Planter Timers window to use UTC Time instead of local system time.
+-Fixed an issue where background.ahk would not be started by the main macro script on first launch.
+-Fixed an issue with gather where the macro would use the last gather field's settings if they shared the same pattern.
+
+Other
+-Optimised speed of F2 and F3 hotkeys to pause and stop the macro respectively.
+-Improved reliability of cannon paths to clock and fields to reach the intended position with less error.
+-Added short delay to improve alignment when talking to Polar Bear for quests.
+-Optimised external 'walk' scripts to close more seamlessly in order to prevent keys being held down at the end of gather.
+
+
 0.8.2 Patch Notes
 
 Bugs

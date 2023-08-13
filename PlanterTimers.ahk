@@ -161,7 +161,9 @@ Loop {
 	{
 		IniRead, ReconnectHour, settings\nm_config.ini, Settings, ReconnectHour
 		IniRead, ReconnectMin, settings\nm_config.ini, Settings, ReconnectMin
-		pservertimer := Mod(24-((A_Min < ReconnectMin) ? 0 : 1)+ReconnectHour-A_Hour, 24)*3600 + Mod(59+ReconnectMin-A_Min, 60)*60 + (60 - Mod(A_Sec, 60)), VarSetCapacity(pservertimerstring,256), DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",pservertimer*10000000,"wstr",(pservertimer > 86400) ? "'N/A'" : ((pservertimer >= 3600) ? "h'h' " : "") . ((pservertimer >= 60) ? "mm'm' " : "") . "ss's'","str",pservertimerstring,"int",256)
+		FormatTime, UTCHour, %A_NowUTC%, HH
+		FormatTime, UTCMin, %A_NowUTC%, mm
+		pservertimer := Mod(24-((UTCMin < ReconnectMin) ? 0 : 1)+ReconnectHour-UTCHour, 24)*3600 + Mod(59+ReconnectMin-UTCMin, 60)*60 + (60 - Mod(A_Sec, 60)), VarSetCapacity(pservertimerstring,256), DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",pservertimer*10000000,"wstr",(pservertimer > 86400) ? "'N/A'" : ((pservertimer >= 3600) ? "h'h' " : "") . ((pservertimer >= 60) ? "mm'm' " : "") . "ss's'","str",pservertimerstring,"int",256)
 		GuiControl,ptimers:,pservertimer, % pservertimerstring
 	}
 	

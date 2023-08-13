@@ -3,14 +3,11 @@
 loop " reps " {
 	send {" TCFBKey " down}
 	Walk(" 5 * size " + A_Index)
-	send {" TCLRKey " down}
-	send {" TCFBKey " up}
+	send {" TCFBKey " up}{" TCLRKey " down}
 	Walk(" 5 * size " + A_Index)
-	send {" AFCFBKey " down}
-	send {" TCLRKey " up}
+	send {" TCLRKey " up}{" AFCFBKey " down}
 	Walk(" 5 * size " + A_Index)
-	send {" AFCLRKey " down}
-	send {" AFCFBKey " up}
+	send {" AFCFBKey " up}{" AFCLRKey " down}
 	Walk(" 5 * size " + A_Index)
 	send {" AFCLRKey " up}
 }

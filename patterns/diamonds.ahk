@@ -1,19 +1,14 @@
 ﻿patterns["diamonds"] := "
 (LTrim Join`r`n
 loop " reps " {
-	send {" TCFBKey " down}
-	send {" TCLRKey " down}
+	send {" TCFBKey " down}{" TCLRKey " down}
 	Walk(" 5 * size " + A_Index)
-	send {" TCLRKey " up}
-	send {" AFCLRKey " down}
+	send {" TCLRKey " up}{" AFCLRKey " down}
 	Walk(" 5 * size " + A_Index)
-	send {" TCFBKey " up}
-	send {" AFCFBKey " down}
+	send {" TCFBKey " up}{" AFCFBKey " down}
 	Walk(" 5 * size " + A_Index)
-	send {" AFCLRKey " up}
-	send {" TCLRKey " down}
+	send {" AFCLRKey " up}{" TCLRKey " down}
 	Walk(" 5 * size " + A_Index)
-	send {" TCLRKey " up}
-	send {" AFCFBKey " up}
+	send {" TCLRKey " up}{" AFCFBKey " up}
 }
 )"

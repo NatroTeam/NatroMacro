@@ -1,6 +1,7 @@
 #NoEnv
 #SingleInstance force
 ;SetBatchLines -1
+#MaxThreads 255
 
 RunWith(32)
 runWith(version){	
@@ -15,8 +16,8 @@ runWith(version){
 	ExitApp
 }
 
-global ResetTime:=nowUnix()
-global windowX, windowY, windowWidth, windowHeight, NightLastDetected
+global resetTime:=nowUnix()
+global windowX, windowY, windowWidth, windowHeight, NightLastDetected, VBState:=0
 global confirm:=0
 global PackFilterArray:=[]
 global imgfolder:="..\nm_image_assets"
@@ -25,47 +26,51 @@ IniRead, VBLastKilled, ..\settings\nm_config.ini, Collect, VBLastKilled
 IniRead, StingerCheck, ..\settings\nm_config.ini, Collect, StingerCheck
 IniRead, WindowedScreen, ..\settings\nm_config.ini, Settings, WindowedScreen
 
-
 CoordMode, Pixel, Relative
-WinGetPos, windowX, windowY, windowWidth, windowHeight, Roblox
 DetectHiddenWindows On
 SetTitleMatchMode 2
 
 ;OnMessages
-OnMessage(0x4200, "nm_setGlobalNum")
+OnMessage(0x5554, "nm_setGlobalNum", 255)
 
 while 1 {
+	WinGetPos, windowX, windowY, windowWidth, windowHeight, Roblox
 	nm_deathCheck()
 	nm_dayOrNight()
 	nm_backpackPercentFilter()
 	nm_guidCheck()
 	nm_popStarCheck()
+	;tooltip % "VBState: " vbstate "`nNightLastDetected: " nightlastdetected "`nVBLastKilled: " vblastkilled ; ~~
 	sleep, 1000
 }
 
 nm_setGlobalNum(wParam, lParam){
 	global resetTime, NightLastDetected, VBState, StingerCheck, VBLastKilled
+	static arr := ["resetTime", "NightLastDetected", "VBState", "StingerCheck", "VBLastKilled"]
 	
-	;set resetTime
-	if(wParam=1){
+	var := arr[wParam], %var% := lParam
+	
+	/*
+	switch wParam
+	{
+		case 1:
 		resetTime:=lParam
-	}
-	;set NightLastDetected
-	else if(wParam=2){
+		
+		case 2:
 		NightLastDetected:=lParam
-	}
-	;set VBState
-	else if(wParam=3){
+		
+		case 3:
 		VBState:=lParam
-	}
-	;set StingerCheck
-	else if(wParam=4){
+		
+		case 4:
 		StingerCheck:=lParam
-	}
-	;set VBLastKilled
-	else if(wParam=5){
+		
+		case 5:
 		VBLastKilled:=lParam
 	}
+	*/
+		
+	return 0
 }
 
 nm_deathCheck(){
@@ -81,7 +86,7 @@ nm_deathCheck(){
 }
 
 nm_guidCheck(){
-	global windowX, windowY, windowWidth, windowHeight, LastFieldGuidDetected, GuidStrike
+	global windowX, windowY, windowWidth, windowHeight, LastFieldGuidDetected
 	ImageSearch, FoundX, FoundY, 0, 0, windowWidth, 100, *50 %imgfolder%\boostguidingstar.png	
 	if(ErrorLevel=0){ ;Guid Detected
 		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
@@ -136,7 +141,7 @@ nm_dayOrNight(){
 	}
 	if(confirm>=5) {
 		dayOrNight:="Night"
-		if((nowUnix()-NightLastDetected)>(300) || (nowUnix()-NightLastDetected)<0) { ;at least 5 minutes since last time it was night
+		if((nowUnix()-NightLastDetected)>(300) || (nowUnix()-NightLastDetected)<0) {
 			NightLastDetected:=nowUnix()
 			IniWrite, %NightLastDetected%, ..\settings\nm_config.ini, Collect, NightLastDetected
 ;temp:=nowUnix()-NightLastDetected
@@ -158,7 +163,7 @@ nm_dayOrNight(){
 		}
 	}
 	;GuiControl,Text, timeOfDay, %dayOrNight%
-	if(winexist("Timers")) {
+	if(winexist("PlanterTimers.ahk ahk_class AutoHotkey")) {
 		IniWrite, %dayOrNight%, ..\settings\nm_config.ini, gui, DayOrNight
 	}
 }

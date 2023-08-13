@@ -1,4 +1,4 @@
-﻿patterns["typewriter"] := "
+﻿patterns["e_lol"] := "
 (LTrim Join`r`n
 spacingDelay:=274 ;183
 send {" TCLRKey " down}
