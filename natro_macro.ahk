@@ -1,5 +1,6 @@
 #NoEnv
 #SingleInstance force
+#Requires AutoHotkey v1.1.31+
 SetBatchLines -1
 #MaxThreads 255
 #include %A_ScriptDir%\lib\Gdip_All.ahk
@@ -41,7 +42,7 @@ If !FileExist("settings") ; ~ make sure the settings folder exists
 		ExitApp
 	}
 }
-VersionID:="0.8.6"
+VersionID:="0.8.7"
 currentWalk:={"pid":"", "name":""} ; ~ stores "pid" (script process ID) and "name" (pattern/movement name)
 nm_import() ; ~ import patterns
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -441,12 +442,6 @@ for k,v in config ; overwrite any existing .ini with updated one with all new ke
 }
 FileDelete, %A_ScriptDir%\settings\nm_config.ini
 FileAppend, %ini%, %A_ScriptDir%\settings\nm_config.ini
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; RUN ANCILLARY MACROS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-if(TimersOpen)
-    run, submacros\PlanterTimers.ahk
-run, submacros\StatusUpdater.ahk
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; DISABLE ROBLOX BETA APP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1319,7 +1314,7 @@ bitmaps["no"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAB4AAAAQAQMAAAA7
 Menu, tray, Icon, %A_ScriptDir%\nm_image_assets\auryn.ico, 1, 1
 ;https://www.autohotkey.com/boards/viewtopic.php?f=6&t=5841&hilit=gui+skin
 SkinForm(Apply, A_ScriptDir . "\styles\USkin.dll", A_ScriptDir . "\styles\" . GuiTheme . ".msstyles")
-OnExit, GetOut
+OnExit("GetOut")
 if (AlwaysOnTop)
 	gui +AlwaysOnTop
 gui +border +hwndhGUI +OwnDialogs
@@ -1351,7 +1346,7 @@ Gui, Add, Button, x75 y275 w60 h20 gf3, Stop (F3)
 Gui, Add, Button, x140 y275 w60 h20 gf2, Pause (F2)
 ;gui mode
 Gui, Add, Button, x315 y260 w100 h30 vGuiModeButton gnm_guiModeButton, % GuiMode ? "Current Mode:`nADVANCED" : "EASY MODE"
-
+nm_createStatusUpdater()
 
 ;ADD TABS
 Gui, Add, Tab, x1 y-1 w550 h240 vTab gnm_TabSelect, Gather|Collect/Kill|Boost|Quest|Planters+|Status|Settings|Contributors
@@ -1519,7 +1514,7 @@ Gui, Font, s6
 Gui, Add, Text, x185 y57 w80 +right +BackgroundTrans,(WITHOUT HASTE)
 Gui, Add, Text, x62 y118 w60 +left +BackgroundTrans,(6-5-4-3-2-1)
 Gui, Font, s8 cDefault Norm, Tahoma
-Gui, Add, Edit, x278 y45 w36 r1 limit4 vMoveSpeedNum gnm_moveSpeed Disabled, %MoveSpeedNum%
+Gui, Add, Edit, x278 y45 w40 r1 limit5 vMoveSpeedNum gnm_moveSpeed Disabled, %MoveSpeedNum%
 Gui, Add, CheckBox, x185 y69 w125 h15 vNewWalk gnm_saveConfig +BackgroundTrans Checked%NewWalk%, MoveSpeed Correction
 Gui, Add, Button, x315 y68 w10 h15 gnm_NewWalkHelp, ?
 Gui, Add, Text, x185 y90 w110 +left +BackgroundTrans,Move Method:
@@ -1969,6 +1964,9 @@ nm_TabBoostUnLock()
 nm_TabPlantersPlusUnLock()
 nm_TabSettingsUnLock()
 nm_setStatus()
+
+if(TimersOpen)
+    run, "%A_AhkPath%" "submacros\PlanterTimers.ahk" "%hwndstate%"
 
 if (A_ScreenDPI*100//96 != 100)
 	msgbox, 0x1030, WARNING!!, Your Display Scale seems to be a value other than 100`%. This means the macro will NOT work correctly!`n`nTo change this, right click on your Desktop -> Click 'Display Settings' -> Under 'Scale & Layout', set Scale to 100`% -> Close and Restart Roblox before starting the macro.
@@ -2524,7 +2522,7 @@ nm_TimeFromSeconds(secs)
     return secs//3600 ":" mmss
 }
 nm_setStatus(newState:=0, newObjective:=0){
-	global state, objective, StatusLogReverse, hwndstate
+	global state, objective, StatusLogReverse, hwndstate, StatusPID
 	static statuslog:=[], status_number:=0
 	
 	if (statuslog.Length() = 0) {
@@ -2552,7 +2550,7 @@ nm_setStatus(newState:=0, newObjective:=0){
 	Gui, +LastFound
 	DllCall("MapWindowPoints","uint",0,"uint",WinExist(),"uint",&rect,"int",2)
 	DllCall("InvalidateRect","uint",WinExist(),"uint",&rect,"int",1)
-	ControlSetText, static4, %stateString%
+	ControlSetText, , %stateString%, ahk_id %hwndstate%
 	GuiControl, , statuslog, %statuslogtext%
 	
 	; update status
@@ -2572,11 +2570,179 @@ nm_setStatus(newState:=0, newObjective:=0){
 			}
 		}
 	}
-	if WinExist("StatusUpdater.ahk ahk_class AutoHotkey") {
+	if WinExist("ahk_pid " StatusPID " ahk_class AutoHotkey") {
 		PostMessage, 0x5554
 	}
 	DetectHiddenWindows %Prev_DetectHiddenWindows%
     SetTitleMatchMode %Prev_TitleMatchMode%
+}
+nm_createStatusUpdater()
+{
+	global webhook, discordUID, webhookCheck, ssCheck, ssDebugging, WebhookEasterEgg, hwndstate, StatusPID
+	
+	if StatusPID
+	{
+		Prev_DetectHiddenWindows := A_DetectHiddenWindows
+		DetectHiddenWindows On
+		WinClose % "ahk_class AutoHotkey ahk_pid " StatusPID
+		DetectHiddenWindows %Prev_DetectHiddenWindows%
+	}
+	
+	script := "
+	(LTrim Join`r`n
+	#NoEnv
+	#NoTrayIcon
+	SetBatchLines -1
+	#MaxThreads 255
+	SetWorkingDir " A_ScriptDir "\submacros
+	#Include " A_ScriptDir "\lib\Gdip_All.ahk
+	#Include " A_ScriptDir "\lib\CreateFormData.ahk
+
+	;initialization
+	webhook := """ webhook """
+	discordUID := """ discordUID """
+	webhookCheck := (" WebhookCheck " && " RegExMatch(webhook, "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$") ") ? 1 : 0
+	ssCheck := " ssCheck "
+	ssDebugging := " ssDebugging "
+	WebhookEasterEgg := " WebhookEasterEgg "
+	pToken := Gdip_Startup()
+	OnExit(""ExitFunc"")
+	OnMessage(0x5554, ""nm_setStatus"", 255)
+
+	nm_status(stateString)
+	{
+		global webhook, discordUID, webhookCheck, ssCheck, ssDebugging, WebhookEasterEgg
+		static statuslog:=[]
+		
+		if (statuslog.Length() = 0)
+		{
+			FileRead, log, ..\settings\status_log.txt
+			statuslog := StrSplit(log, ""``r``n"")
+		}
+		
+		state := SubStr(stateString, 1, InStr(stateString, "": "")-1), objective := SubStr(stateString, InStr(stateString, "": "")+2)
+		
+		;manage status_log
+		statuslog.Push(""["" A_Hour "":"" A_Min "":"" A_Sec ""] "" (InStr(stateString, ""``n"") ? SubStr(stateString, 1, InStr(stateString, ""``n"")-1) : stateString))
+		statuslog.RemoveAt(1,(statuslog.MaxIndex()>20) ? statuslog.MaxIndex()-20 : 0)
+		statuslogtext:=""""
+		for k,v in statuslog
+			statuslogtext .= ((A_Index>1) ? ""``r``n"" : """") v
+			
+		FileDelete, ..\settings\status_log.txt
+		FileAppend, %statuslogtext%, ..\settings\status_log.txt
+		FileAppend ``[%A_MM%/%A_DD%``]``[%A_Hour%:%A_Min%:%A_Sec%``] %stateString%``n, ..\settings\debug_log.txt
+		
+		;;;;;;;;
+		;webhook
+		;;;;;;;;
+		static lastCritical:=0, colorIndex:=0		
+		if WebhookCheck {
+			; set colour based on state string
+			if WebhookEasterEgg
+			{
+				color := (colorIndex = 0) ? 16711680 ; red
+				: (colorIndex = 1) ? 16744192 ; orange
+				: (colorIndex = 2) ? 16776960 ; yellow
+				: (colorIndex = 3) ? 65280 ; green
+				: (colorIndex = 4) ? 255 ; blue
+				: (colorIndex = 5) ? 4915330 ; indigo
+				: 9699539 ; violet
+				colorIndex := Mod(colorIndex+1, 7)
+			}
+			else
+			{
+				color := ((state = ""Disconnected"") || (state = ""You Died"") || (state = ""Failed"") || (state = ""Error"") || (state = ""Aborting"") || (state = ""Missing"") || (state = ""Canceling"") || InStr(objective, ""Phantom"")) ? 15085139 ; red - error
+				: (InStr(objective, ""Tunnel Bear"") || InStr(objective, ""King Beetle"") || InStr(objective, ""Vicious Bee"") || InStr(objective, ""Snail"") || InStr(objective, ""Crab"") || InStr(objective, ""Mondo"") || InStr(objective, ""Commando"")) ? 7036559 ; purple - boss / attacking
+				: (InStr(objective, ""Planter"") || (state = ""Placing"") || (state = ""Collecting"")) ? 48355 ; blue - planters
+				: ((state = ""Interupted"")) ? 14408468 ; yellow - alert
+				: ((state = ""Gathering"")) ? 9755247 ; light green - gathering
+				: ((state = ""Converting"")) ? 8871681 ; yellow-brown - converting
+				: ((state = ""Boosted"") || (state = ""Looting"") || (state = ""Keeping"") || (state = ""Claimed"") || (state = ""Completed"") || (state = ""Collected"") || InStr(stateString,""confirmed"") || InStr(stateString,""found"")) ? 48128 ; green - success
+				: ((state = ""Starting"")) ? 16366336 ; orange - quests
+				: ((state = ""Startup"") || (state = ""GUI"") || (state = ""Detected"") || (state = ""Closing"") || (state = ""Begin"") || (state = ""End"")) ? 15658739 ; white - startup / utility
+				: 3223350
+			}
+
+			; check if event needs screenshot
+			critical_event := ((state = ""Error"") || ((nowUnix() - lastCritical > 300) && ((state = ""Disconnected"") || (InStr(stateString, ""Resetting: Character"") && (SubStr(objective, InStr(objective, "" "")+1) > 4)) || InStr(stateString, ""Phantom"")))) ? 1 : 0
+			if critical_event
+				lastCritical := nowUnix()
+			content := (discordUID && critical_event) ? ""<@"" discordUID "">"" : """"
+			debug_event := (ssDebugging && ((state = ""Placing"") || (state = ""Collecting"") || (state = ""Failed"") || InStr(stateString, ""Next Quest Step""))) ? 1 : 0
+			ss_event := (InStr(stateString, ""Amulet"") && (state != ""You Died"")) ? 1 : 0
+			
+			; create postdata and send to discord
+			message := ""["" A_Hour "":"" A_Min "":"" A_Sec ""] "" StrReplace(StrReplace(StrReplace(StrReplace(stateString, ""\"", ""\\""), ""``n"", ""\n""), Chr(9), ""  ""), ""``r"")
+			if ((critical_event && ssCheck) || debug_event || ss_event)
+			{
+				SysGet, pmonN, MonitorPrimary
+				pBM := Gdip_BitmapFromScreen(pmonN)
+				Gdip_SaveBitmapToFile(pBM, ""ss.png"")
+				Gdip_DisposeImage(pBM)
+				
+				path := ""ss.png""
+				
+				payload_json = {""content"": ""`%content`%"", ""embeds"": [{""description"": ""`%message`%"", ""color"": ""`%color`%"", ""image"": {""url"": ""attachment://ss.png""}}]}
+				
+				try
+				{
+					objParam := {payload_json: payload_json, file: [path]}
+					CreateFormData(postdata, hdr_ContentType, objParam)
+					
+					wr := ComObjCreate(""WinHTTP.WinHTTPRequest.5.1"")
+					wr.Option(9) := 2048
+					wr.Open(""POST"", webhook)
+					wr.SetRequestHeader(""User-Agent"", ""AHK"")
+					wr.SetRequestHeader(""Content-Type"", hdr_ContentType)
+					wr.Send(postdata)
+				}
+				
+				FileDelete, ss.png
+			}
+			else
+			{
+				postdata = {""content"": ""`%content`%"", ""embeds"": [{""description"": ""`%message`%"", ""color"": ""`%color`%""}]}
+			
+				; post to webhook
+				try
+				{
+					wr := ComObjCreate(""WinHTTP.WinHTTPRequest.5.1"")
+					wr.Option(9) := 2048
+					wr.Open(""POST"", webhook)
+					wr.SetRequestHeader(""User-Agent"", ""AHK"")
+					wr.SetRequestHeader(""Content-Type"", ""application/json"")
+					wr.Send(postdata)
+				}
+			}
+		}
+	}
+
+	nm_setStatus() {
+		Critical
+		VarSetCapacity(stateString, 1024)
+		ControlGetText, stateString, , `% ""ahk_id"" " hwndstate "
+		stateString ? nm_status(stateString)
+		return 0
+	}
+
+	nowUnix(){
+		Time := A_NowUTC
+		EnvSub, Time, 19700101000000, Seconds
+		return Time
+	}
+
+	ExitFunc()
+	{
+		Process, Close, % DllCall(""GetCurrentProcessId"")
+	}
+	)"
+	
+	shell := ComObjCreate("WScript.Shell")
+    exec := shell.Exec(A_AhkPath " *")
+    exec.StdIn.Write(script), exec.StdIn.Close()
+	
+	return (StatusPID := exec.ProcessID)
 }
 nm_StatusLogReverseCheck(){
 	global StatusLogReverse
@@ -5166,93 +5332,6 @@ ba_OCRStringExists(findString, aim:="full")
 	}
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; WEBHOOK
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; CreateFormData() by tmplinshi modified by SKAN
-; for sending images to webhook
-CreateFormData(ByRef retData, ByRef retHeader, objParam) {
-	New CreateFormData(retData, retHeader, objParam)
-}
-Class CreateFormData {
-
-	__New(ByRef retData, ByRef retHeader, objParam) {
-
-		Local CRLF := "`r`n", i, k, v, str, pvData
-		; Create a random Boundary
-		Local Boundary := this.RandomBoundary()
-		Local BoundaryLine := "------------------------------" . Boundary
-
-    this.Len := 0 ; GMEM_ZEROINIT|GMEM_FIXED = 0x40
-    this.Ptr := DllCall( "GlobalAlloc", "UInt",0x40, "UInt",1, "Ptr"  )          ; allocate global memory
-
-		; Loop input paramters
-		For k, v in objParam
-		{
-			If IsObject(v) {
-				For i, FileName in v
-				{
-					str := BoundaryLine . CRLF
-					     . "Content-Disposition: form-data; name=""" . k . """; filename=""" . FileName . """" . CRLF
-					     . "Content-Type: " . this.MimeType(FileName) . CRLF . CRLF
-          this.StrPutUTF8( str )
-          this.LoadFromFile( Filename )
-          this.StrPutUTF8( CRLF )
-				}
-			} Else {
-				str := BoundaryLine . CRLF
-				     . "Content-Disposition: form-data; name=""" . k """" . CRLF . CRLF
-				     . v . CRLF
-        this.StrPutUTF8( str )
-			}
-		}
-
-		this.StrPutUTF8( BoundaryLine . "--" . CRLF )
-
-    ; Create a bytearray and copy data in to it.
-    retData := ComObjArray( 0x11, this.Len ) ; Create SAFEARRAY = VT_ARRAY|VT_UI1
-    pvData  := NumGet( ComObjValue( retData ) + 8 + A_PtrSize )
-    DllCall( "RtlMoveMemory", "Ptr",pvData, "Ptr",this.Ptr, "Ptr",this.Len )
-
-    this.Ptr := DllCall( "GlobalFree", "Ptr",this.Ptr, "Ptr" )                   ; free global memory 
-
-    retHeader := "multipart/form-data; boundary=----------------------------" . Boundary
-	}
-
-  StrPutUTF8( str ) {
-    Local ReqSz := StrPut( str, "utf-8" ) - 1
-    this.Len += ReqSz                                  ; GMEM_ZEROINIT|GMEM_MOVEABLE = 0x42
-    this.Ptr := DllCall( "GlobalReAlloc", "Ptr",this.Ptr, "UInt",this.len + 1, "UInt", 0x42 )   
-    StrPut( str, this.Ptr + this.len - ReqSz, ReqSz, "utf-8" )
-  }
-  
-  LoadFromFile( Filename ) {
-    Local objFile := FileOpen( FileName, "r" )
-    this.Len += objFile.Length                     ; GMEM_ZEROINIT|GMEM_MOVEABLE = 0x42 
-    this.Ptr := DllCall( "GlobalReAlloc", "Ptr",this.Ptr, "UInt",this.len, "UInt", 0x42 )
-    objFile.RawRead( this.Ptr + this.Len - objFile.length, objFile.length )
-    objFile.Close()       
-  }
-
-	RandomBoundary() {
-		str := "0|1|2|3|4|5|6|7|8|9|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z"
-		Sort, str, D| Random
-		str := StrReplace(str, "|")
-		Return SubStr(str, 1, 12)
-	}
-
-	MimeType(FileName) {
-		n := FileOpen(FileName, "r").ReadUInt()
-		Return (n        = 0x474E5089) ? "image/png"
-		     : (n        = 0x38464947) ? "image/gif"
-		     : (n&0xFFFF = 0x4D42    ) ? "image/bmp"
-		     : (n&0xFFFF = 0xD8FF    ) ? "image/jpeg"
-		     : (n&0xFFFF = 0x4949    ) ? "image/tiff"
-		     : (n&0xFFFF = 0x4D4D    ) ? "image/tiff"
-		     : "application/octet-stream"
-	}
-
-}
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 nm_imgSearch(fileName,v,aim := "full", trans:="none"){
@@ -5731,7 +5810,7 @@ nm_claimHiveSlot(slotnum:=0){
 			SendInput {e down}
 			Sleep, 100
 			SendInput {e up}
-			HiveSlot := A_Index
+			HiveSlot := A_Index, HiveConfirmed := 1
 			return HiveSlot
 		}
 		Gdip_DisposeImage(pBMScreen)
@@ -6067,7 +6146,7 @@ nm_Collect(){
 		}
 	}
 	;ant pass
-	if(((((AntPassNum<10) && AntPassCheck) || (AntPassAction="challenge")) && (nowUnix()-LastAntPass>7200)) || (QuestAnt && (AntPassNum>0))){ ;2 hours OR ant quest
+	if(((AntPassCheck && ((AntPassNum<10) || (AntPassAction="challenge"))) && (nowUnix()-LastAntPass>7200)) || (QuestAnt && (AntPassNum>0))){ ;2 hours OR ant quest
 		Loop, 2 {
 			nm_Reset()
 			objective := (QuestAnt ? "Ant Challenge" : ("Ant " . AntPassAction)) ((A_Index > 1) ? " (Attempt 2)" : "")
@@ -6165,7 +6244,7 @@ nm_Collect(){
 		}
 	}
 	;robo pass
-	if (RoboPassCheck && (nowUnix()-LastRoboPass)>86400) { ;24 hours
+	if (RoboPassCheck && (nowUnix()-LastRoboPass)>79200) { ;22 hours
 		loop, 2 {
 			nm_Reset()
 			objective:="Robo Pass" ((A_Index > 1) ? " (Attempt 2)" : "")
@@ -8848,7 +8927,7 @@ nm_Mondo(){
 	}
 }
 nm_cannonTo(location){
-	global FwdKey, LeftKey, BackKey, RightKey, RotLeft, RotRight, ZoomIn, ZoomOut, KeyDelay, MoveSpeedFactor, ShiftLockEnabled, state, objective
+	global FwdKey, LeftKey, BackKey, RightKey, RotLeft, RotRight, ZoomIn, ZoomOut, KeyDelay, MoveSpeedFactor, ShiftLockEnabled, HiveConfirmed, state, objective
 	static paths := {}
 	
 	if (ShiftLockEnabled) {
@@ -8876,6 +8955,8 @@ nm_cannonTo(location){
 		#Include %A_ScriptDir%\paths\ct-stump.ahk
 		#Include %A_ScriptDir%\paths\ct-sunflower.ahk
 	}
+	
+	HiveConfirmed:=0
 	
 	InStr(paths[location], "gotoramp") ? nm_gotoRamp()
 	InStr(paths[location], "gotocannon") ? nm_gotoCannon()
@@ -10179,6 +10260,9 @@ nm_createWalk(movement, name:="") ; ~ this function generates the 'walk' code an
 	Prev_DetectHiddenWindows := A_DetectHiddenWindows
 	DetectHiddenWindows, On ; allow communication with walk script
 	
+	if WinExist("ahk_pid " currentWalk["pid"] " ahk_class AutoHotkey")
+		nm_endWalk()
+	
 	if NewWalk
 	{
 		; #Include Walk.ahk performs most of the initialisation, i.e. creating bitmaps and storing the necessary functions
@@ -10187,7 +10271,6 @@ nm_createWalk(movement, name:="") ; ~ this function generates the 'walk' code an
 		script := "
 		(LTrim Join`r`n
 		#NoEnv
-		#SingleInstance, force
 		SendMode Input
 		SetBatchLines -1
 		Process, Priority, , AboveNormal
@@ -10296,7 +10379,7 @@ nm_createWalk(movement, name:="") ; ~ this function generates the 'walk' code an
 	}
 	
 	shell := ComObjCreate("WScript.Shell")
-    exec := shell.Exec("AutoHotkey.exe /ErrorStdOut *")
+    exec := shell.Exec(A_AhkPath " *")
     exec.StdIn.Write(script), exec.StdIn.Close()
 	
 	WinWait, % "ahk_class AutoHotkey ahk_pid " exec.ProcessID, , 2
@@ -10611,7 +10694,7 @@ nm_fieldDriftCompensation(){
 	winRight := windowWidth / 1.88
 	PrevKeyDelay:=A_KeyDelay
 	SetKeyDelay, 5
-	saturatorFinder := nm_imgSearch("saturator.png",40)
+	saturatorFinder := nm_imgSearch("saturator.png",50)
 	If (saturatorFinder[1] = 0){
 		while (saturatorFinder[1] = 0 && A_Index<=PFieldDriftSteps) {
 			if(saturatorFinder[2] >= winleft && saturatorFinder[2] <= winRight && saturatorFinder[3] >= winUp && saturatorFinder[3] <= winDown) {
@@ -10637,7 +10720,7 @@ nm_fieldDriftCompensation(){
 			send {%FwdKey% up}
 			send {%BackKey% up}
 			click up
-			saturatorFinder := nm_imgSearch("saturator.png",40)
+			saturatorFinder := nm_imgSearch("saturator.png",50)
 		}
 	} ;else if(not (saturatorFinder[2] >= winleft && saturatorFinder[2] <= winRight && saturatorFinder[3] >= winUp && saturatorFinder[3] <= winDown)){
 		;ba_fieldDriftCompensation()
@@ -10785,7 +10868,7 @@ DisconnectCheck(){
 			IfWinNotExist, StatMonitor.ahk
 			{
 				if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) { ; ~ changed RegEx
-					Run, submacros\StatMonitor.ahk
+					run, "%A_AhkPath%" "submacros\StatMonitor.ahk"
 				}
 			}
 			;}
@@ -11154,13 +11237,12 @@ nm_locateVB(){
 				nm_setStatus("Traveling", "Vicious Bee (" v ")")
 				movement := "
 				(LTrim Join`r`n
-				" nm_Walk(9, FwdKey) "
-				" nm_Walk(31.5, LeftKey) "
-				" nm_Walk(10, FwdKey) "
+				" nm_Walk(16, LeftKey) "
+				" nm_Walk(40, FwdKey, LeftKey) "
 				Loop, 4
 					Send {" RotLeft "}
-				" nm_Walk(14, RightKey) "
-				" nm_Walk(30, FwdKey, LeftKey) "
+				" nm_Walk(20, FwdKey) "
+				" nm_Walk(20, LeftKey) "
 				)"
 				nm_createWalk(movement)
 				KeyWait, F14, D T5 L
@@ -14929,7 +15011,7 @@ ba_placePlanter(fieldName, planter, planterNum, atField:=0){
 	{
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
 		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+150 "|320|" windowHeight-150)
-		if (Gdip_ImageSearch(pBMScreen, bitmaps[planterName], planterPos, , , , , 10, , 5) = 1) {
+		if (Gdip_ImageSearch(pBMScreen, bitmaps[planterName], planterPos, , , , , 20, , 5) = 1) {
 			found:=1
 			Gdip_DisposeImage(pBMScreen)
 			break
@@ -14970,7 +15052,7 @@ ba_placePlanter(fieldName, planter, planterNum, atField:=0){
 	{
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
 		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+150 "|320|" windowHeight-150)
-		if (Gdip_ImageSearch(pBMScreen, bitmaps[planterName], planterPos, , , , , 10, , 5) = 0) {
+		if (Gdip_ImageSearch(pBMScreen, bitmaps[planterName], planterPos, , , , , 20, , 5) = 0) {
 			Gdip_DisposeImage(pBMScreen)
 			break
 		}
@@ -14984,7 +15066,7 @@ ba_placePlanter(fieldName, planter, planterNum, atField:=0){
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
 		pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+windowHeight//2-250 "|500|500")
 		if (Gdip_ImageSearch(pBMScreen, bitmaps["yes"], pos, , , , , 5, , 2) = 1) {
-			MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+windowHeight//2-250+SubStr(pos, InStr(pos, ",")+1)
+			MouseMove, windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowHeight//2-250+SubStr(pos, InStr(pos, ",")+1)
 			loop 3 {
 				Click
 				sleep 100
@@ -15071,7 +15153,7 @@ ba_harvestPlanter(planterNum){
 		{
 			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
 			pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+150 "|320|" windowHeight-150)
-			if (Gdip_ImageSearch(pBMScreen, bitmaps[planterName], , , , , , 10, , 5) = 1) {
+			if (Gdip_ImageSearch(pBMScreen, bitmaps[planterName], , , , , , 20, , 5) = 1) {
 				found := 1
 				Gdip_DisposeImage(pBMScreen)
 				break
@@ -15138,7 +15220,7 @@ ba_harvestPlanter(planterNum){
 		pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+windowHeight//2-250 "|500|500")
 		if (HarvestFullGrown = 1) {
 			if (Gdip_ImageSearch(pBMScreen, bitmaps["no"], pos, , , , , 5, , 3) = 1) {
-				MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+windowHeight//2-250+SubStr(pos, InStr(pos, ",")+1)
+				MouseMove, windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowHeight//2-250+SubStr(pos, InStr(pos, ",")+1)
 				loop 3 {
 					Click
 					sleep 100
@@ -15151,7 +15233,7 @@ ba_harvestPlanter(planterNum){
 		}
 		else {
 			if (Gdip_ImageSearch(pBMScreen, bitmaps["yes"], pos, , , , , 5, , 2) = 1) {
-				MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+windowHeight//2-250+SubStr(pos, InStr(pos, ",")+1)
+				MouseMove, windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowHeight//2-250+SubStr(pos, InStr(pos, ",")+1)
 				loop 3 {
 					Click
 					sleep 100
@@ -15339,12 +15421,13 @@ ba_SavePlacedPlanter(fieldName, planter, planterNum, nectar){
 	IniWrite, %fieldname%, settings\nm_config.ini, Planters, Last%nectar%Field
 }
 ba_showPlanterTimers(){
+	global
 	Prev_DetectHiddenWindows := A_DetectHiddenWindows
 	Prev_TitleMatchMode := A_TitleMatchMode
 	DetectHiddenWindows, On
 	SetTitleMatchMode, 2
 	if !WinExist("PlanterTimers.ahk ahk_class AutoHotkey")
-		run, submacros\PlanterTimers.ahk
+		run, "%A_AhkPath%" "submacros\PlanterTimers.ahk" "%hwndstate%"
 	else
 		WinClose
 	DetectHiddenWindows, %Prev_DetectHiddenWindows%
@@ -15353,12 +15436,12 @@ ba_showPlanterTimers(){
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; LABELS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-getout:
-GuiClose:
+getout(){
+global
 if(winexist("Timers") && not pass) {
 if(fileexist("settings\nm_config.ini"))
     IniWrite, 1, settings\nm_config.ini, gui, TimersOpen
-    winclose, PlanterTimers.ahk ahk_class AutoHotkeyGUI
+    winclose, PlanterTimers.ahk ahk_class AutoHotkey
     pass:=1
 } else if (not winexist("Timers") && not pass){
 if(fileexist("settings\nm_config.ini"))
@@ -15370,12 +15453,16 @@ Prev_DetectHiddenWindows := A_DetectHiddenWindows
 Prev_TitleMatchMode := A_TitleMatchMode
 DetectHiddenWindows On
 SetTitleMatchMode 2
-WinClose background.ahk ahk_class AutoHotkey
-WinClose StatusUpdater.ahk ahk_class AutoHotkey
-;WinClose test.ahk ahk_class AutoHotkey ; ~ close test script when done, can comment out if no need to test
-WinClose StatMonitor.ahk ahk_class AutoHotkey
+WinGet, script_list, List, ahk_class AutoHotkey
+Loop %script_list%
+	if ((script_hwnd := script_list%A_Index%) != A_ScriptHwnd)
+		WinClose, ahk_id %script_hwnd%
 Gdip_Shutdown(pToken)
+}
+
+GuiClose:
 ExitApp
+return
 
 StartBackground:
 settimer, Background, 2000
@@ -15408,7 +15495,7 @@ return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\
 ;START MACRO
 f1::
-run, submacros\StatusUpdater.ahk
+nm_createStatusUpdater()
 ControlFocus
 SetKeyDelay, 100+KeyDelay
 send ^{Alt}
@@ -15567,12 +15654,12 @@ if(AutoFieldBoostActive){
     }
 }
 ;start ancillary macros
-run, submacros\background.ahk
+run, "%A_AhkPath%" "submacros\background.ahk"
 ;(re)start stat monitor ~ moved from previous position (around line 1464) to avoid duplicate startup reports
 ;myOS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)
 ;if((myOS*1)>=10) { ~ new StatMonitors do not require win10 or above
 if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) { ; ~ changed RegEx
-	Run, submacros\StatMonitor.ahk
+	run, "%A_AhkPath%" "submacros\StatMonitor.ahk"
 }
 ;sendMessage commands
 if WinExist("background.ahk ahk_class AutoHotkey") {
@@ -15613,7 +15700,9 @@ IniWrite, %SessionConvertTime%, settings\nm_config.ini, Status, SessionConvertTi
 nm_setStatus("End", "Macro")
 DetectHiddenWindows, On
 SetTitleMatchMode, 2
-WinClose StatMonitor.ahk ahk_class AutoHotkey
+WinClose % "ahk_class AutoHotkey ahk_pid " StatusPID
+WinClose, StatMonitor.ahk ahk_class AutoHotkey
+getout()
 Reload
 Sleep, 10000
 return

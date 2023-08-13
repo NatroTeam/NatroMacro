@@ -1,3 +1,20 @@
+0.8.7 Patch Notes
+
+Bugs
+-Fixed an issue where GUI status updates were not obtained properly by webhook and Planter Timers window.
+-Changed some file references to enable the macro to work when AHK v2.0 and v1.1 are both installed on a system.
+-Fixed an issue where the macro would not close all external scripts launched on exit.
+
+Other
+-Added a check for correct version of AutoHotkey installed using #Requires (built-in error message).
+-Embedded StatusUpdater.ahk into the main script to further reduce antivirus false positives.
+-Allowed input of 5 characters in Movement Speed control so that values with 4 digits can be entered.
+-Fixed an issue where planter Yes or No would not be clicked when not in fullscreen.
+-Updated path from Cactus to Spider during stinger run.
+-Added Free Robo Pass Dispenser path and changed cooldown to 22 hours.
+-Slightly increased variation of planter images to facilitate detection when character gets damaged by mob.
+
+
 0.8.6 Patch Notes
 
 New Features

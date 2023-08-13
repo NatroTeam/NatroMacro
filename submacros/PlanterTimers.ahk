@@ -146,7 +146,7 @@ Loop {
 	IniRead, dayOrNight, settings\nm_config.ini, gui, dayOrNight
 	GuiControl,ptimers:,dayOrNight,%dayOrNight%
 	
-	ControlGetText, val, static4, Natro Macro
+	ControlGetText, val, , % "ahk_id " A_Args[1]
 	GuiControl,ptimers:,pstatus,%val%
 	
 	Sleep, 1000
@@ -176,14 +176,14 @@ setTimerGuiTransparency(){
 		IniWrite, %TimerGuiTransparency%, settings\nm_config.ini, Gui, TimerGuiTransparency
 }
 ba_resetPlanterTimer1(){
-	IniRead, PlanterName1, settings\nm_config.ini, Planters, PlanterName3
+	IniRead, PlanterName1, settings\nm_config.ini, Planters, PlanterName1
 	if (PlanterName1 != "None") {
 		PlanterHarvestTime1 := toUnix_()-1
 		IniWrite, %PlanterHarvestTime1%, settings\nm_config.ini, Planters, PlanterHarvestTime1
 	}
 }
 ba_resetPlanterTimer2(){
-	IniRead, PlanterName2, settings\nm_config.ini, Planters, PlanterName3
+	IniRead, PlanterName2, settings\nm_config.ini, Planters, PlanterName2
 	if (PlanterName2 != "None") {
 		PlanterHarvestTime2 := toUnix_()-1
 		IniWrite, %PlanterHarvestTime2%, settings\nm_config.ini, Planters, PlanterHarvestTime2
