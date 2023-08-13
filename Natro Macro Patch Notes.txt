@@ -1,3 +1,26 @@
+0.6.1 Patch Notes
+
+New Features
+-Added new "Auryn" gathering pattern.  Shaped like my discord pfp.
+
+Other
+-The Ant Challenge objective for quests will bypass the normal 2 hour timeout as long as you have ant passes and the quest objective is not yet complete.  If not, it will do them every 2 hours whenever you get a free ant pass.
+-Riley & Bucko quests steps that collect tokens will now use your Gather Field1 selections to gather the tokens somewhat passively.  Previously it would have you go to a respective red or blue field instead.
+-Riley "Rampage" quest will now do bugruns for rage tokens rather than just collect in Strawberry until complete.
+-Adjusted pathing to Blue field booster to be more reliable.
+-Adjusted pathing to Glue dispenser to be more reliable.
+-Upon a disconnect the Roblox window will be maximized when restarted.
+
+Bugs
+-I accidently included settings for my alt in the last release for Black Bear Quests.  The blue/red collection field selections were sub-optimal.
+-Fixed issue where bug cooldown gather interruptions were not working properly for quests.
+-Fixed issue where if not all of the quest steps were visible in the log you would not return to the questgiver even if the quest was complete.
+-Fixed and issue causing an error in the webhook send commands for some people. (it is recommended to make sure your windows installation is up to date)
+-Fixed issue where you would go back to check for King Beetle even after it was killed.
+-Fixed an issue where gifted vicious hive bonus was causing excessive tunnel bear checks.
+-Fixed an issue where automatic microconverters were preventing the return to hive if they are all used up and the backpack was full.
+
+
 0.6.0 Patch Notes
 
 New Features
