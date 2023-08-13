@@ -25,7 +25,8 @@ OnMessage(0x4299, "nm_setLastHeartbeat")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.6.8"
+VersionID:="0.6.9"
+#include *i personal.ahk
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; DISABLE ROBLOX BETA APP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -312,6 +313,8 @@ loop 3 {
 	IniRead, FieldPatternSize%A_Index%, nm_config.ini, Gather, FieldPatternSize%A_Index%
 	IniRead, FieldPatternReps%A_Index%, nm_config.ini, Gather, FieldPatternReps%A_Index%
 	IniRead, FieldPatternShift%A_Index%, nm_config.ini, Gather, FieldPatternShift%A_Index%
+	IniRead, FieldPatternInvertFB%A_Index%, nm_config.ini, Gather, FieldPatternInvertFB%A_Index%
+	IniRead, FieldPatternInvertLR%A_Index%, nm_config.ini, Gather, FieldPatternInvertLR%A_Index%
 	IniRead, FieldUntilMins%A_Index%, nm_config.ini, Gather, FieldUntilMins%A_Index%
 	IniRead, FieldUntilPack%A_Index%, nm_config.ini, Gather, FieldUntilPack%A_Index%
 	IniRead, FieldReturnType%A_Index%, nm_config.ini, Gather, FieldReturnType%A_Index%
@@ -492,12 +495,27 @@ Gui, Add, Checkbox, x20 y140 +BackgroundTrans vFieldDriftCheck2 gnm_SaveGather C
 GuiControl, disable, FieldDriftCheck2
 Gui, Add, Checkbox, x20 y200 +BackgroundTrans vFieldDriftCheck3 gnm_SaveGather Checked%FieldDriftCheck3%,Field Drift`nCompensation
 GuiControl, disable, FieldDriftCheck3
-Gui, Add, Checkbox, x115 y85 +BackgroundTrans vFieldPatternShift1 gnm_SaveGather Checked%FieldPatternShift1%, Gather w/Shift-Lock
+Gui, Add, Checkbox, x115 y80 +BackgroundTrans vFieldPatternShift1 gnm_SaveGather Checked%FieldPatternShift1%, Gather w/Shift-Lock
+Gui, Add, Text, x115 y95, Invert:
+Gui, Add, Checkbox, x145 y95 vFieldPatternInvertFB1 gnm_SaveGather +BackgroundTrans Checked%FieldPatternInvertFB1%, F/B
+Gui, Add, Checkbox, x185 y95 vFieldPatternInvertLR1 gnm_SaveGather +BackgroundTrans Checked%FieldPatternInvertLR1%, L/R
 GuiControl, disable, FieldPatternShift1
-Gui, Add, Checkbox, x115 y145 +BackgroundTrans vFieldPatternShift2 gnm_SaveGather Checked%FieldPatternShift2%, Gather w/Shift-Lock
+GuiControl, disable, FieldPatternInvertFB1
+GuiControl, disable, FieldPatternInvertLR1
+Gui, Add, Checkbox, x115 y140 +BackgroundTrans vFieldPatternShift2 gnm_SaveGather Checked%FieldPatternShift2%, Gather w/Shift-Lock
+Gui, Add, Text, x115 y155, Invert:
+Gui, Add, Checkbox, x145 y155 vFieldPatternInvertFB2 gnm_SaveGather +BackgroundTrans Checked%FieldPatternInvertFB2%, F/B
+Gui, Add, Checkbox, x185 y155 vFieldPatternInvertLR2 gnm_SaveGather +BackgroundTrans Checked%FieldPatternInvertLR2%, L/R
 GuiControl, disable, FieldPatternShift2
-Gui, Add, Checkbox, x115 y205 +BackgroundTrans vFieldPatternShift3 gnm_SaveGather Checked%FieldPatternShift3%, Gather w/Shift-Lock
+GuiControl, disable, FieldPatternInvertFB1
+GuiControl, disable, FieldPatternInvertLR1
+Gui, Add, Checkbox, x115 y200 +BackgroundTrans vFieldPatternShift3 gnm_SaveGather Checked%FieldPatternShift3%, Gather w/Shift-Lock
+Gui, Add, Text, x115 y215, Invert:
+Gui, Add, Checkbox, x145 y215 vFieldPatternInvertFB3 gnm_SaveGather +BackgroundTrans Checked%FieldPatternInvertFB3%, F/B
+Gui, Add, Checkbox, x185 y215 vFieldPatternInvertLR3 gnm_SaveGather +BackgroundTrans Checked%FieldPatternInvertLR3%, L/R
 GuiControl, disable, FieldPatternShift3
+GuiControl, disable, FieldPatternInvertFB1
+GuiControl, disable, FieldPatternInvertLR1
 Gui, Add, Text, x235 y80 vrotateCam1, Before Gathering,`n    Rotate Camera:
 Gui, Add, Text, x235 y140 vrotateCam2, Before Gathering,`n    Rotate Camera:
 Gui, Add, Text, x235 y200 vrotateCam3, Before Gathering,`n    Rotate Camera:
@@ -1494,6 +1512,8 @@ nm_guiModeButton(toggle:=1){
 		loop 3 {
 			GuiControl, hide, FieldPatternReps%A_Index%
 			GuiControl, hide, FieldPatternShift%A_Index%
+			GuiControl, hide, FieldPatternInvertFB%A_Index%
+			GuiControl, hide, FieldPatternInvertLR%A_Index%
 			GuiControl, hide, FieldUntilPack%A_Index%
 			GuiControl, hide, FieldSprinklerLoc%A_Index%
 			GuiControl, hide, FieldSprinklerDist%A_Index%
@@ -1687,6 +1707,8 @@ nm_guiModeButton(toggle:=1){
 		loop 3 {
 			GuiControl, show, FieldPatternReps%A_Index%
 			GuiControl, show, FieldPatternShift%A_Index%
+			GuiControl, show, FieldPatternInvertFB%A_Index%
+			GuiControl, show, FieldPatternInvertLR%A_Index%
 			GuiControl, show, FieldUntilPack%A_Index%
 			GuiControl, show, FieldSprinklerLoc%A_Index%
 			GuiControl, show, FieldSprinklerDist%A_Index%
@@ -2231,6 +2253,8 @@ nm_TabGatherLock(){
 	GuiControl, Disable, FieldPatternSize1
 	GuiControl, Disable, FieldPatternReps1
 	GuiControl, Disable, FieldPatternShift1
+	GuiControl, Disable, FieldPatternInvertFB1
+	GuiControl, Disable, FieldPatternInvertLR1
 	GuiControl, Disable, FieldUntilMins1
 	GuiControl, Disable, FieldUntilPack1
 	GuiControl, Disable, FieldReturnType1
@@ -2244,6 +2268,8 @@ nm_TabGatherLock(){
 	GuiControl, Disable, FieldPatternSize2
 	GuiControl, Disable, FieldPatternReps2
 	GuiControl, Disable, FieldPatternShift2
+	GuiControl, Disable, FieldPatternInvertFB2
+	GuiControl, Disable, FieldPatternInvertLR2
 	GuiControl, Disable, FieldUntilMins2
 	GuiControl, Disable, FieldUntilPack2
 	GuiControl, Disable, FieldReturnType2
@@ -2257,6 +2283,8 @@ nm_TabGatherLock(){
 	GuiControl, Disable, FieldPatternSize3
 	GuiControl, Disable, FieldPatternReps3
 	GuiControl, Disable, FieldPatternShift3
+	GuiControl, Disable, FieldPatternInvertFB3
+	GuiControl, Disable, FieldPatternInvertLR3
 	GuiControl, Disable, FieldUntilMins3
 	GuiControl, Disable, FieldUntilPack3
 	GuiControl, Disable, FieldReturnType3
@@ -2274,6 +2302,8 @@ nm_FieldUnlock(){
 	GuiControl, Enable, FieldPatternSize1
 	GuiControl, Enable, FieldPatternReps1
 	GuiControl, Enable, FieldPatternShift1
+	GuiControl, Enable, FieldPatternInvertFB1
+	GuiControl, Enable, FieldPatternInvertLR1
 	GuiControl, Enable, FieldUntilMins1
 	GuiControl, Enable, FieldUntilPack1
 	GuiControl, Enable, FieldReturnType1
@@ -2288,6 +2318,8 @@ nm_FieldUnlock(){
 		GuiControl, Enable, FieldPatternSize2
 		GuiControl, Enable, FieldPatternReps2
 		GuiControl, Enable, FieldPatternShift2
+		GuiControl, Enable, FieldPatternInvertFB2
+		GuiControl, Enable, FieldPatternInvertLR2
 		GuiControl, Enable, FieldUntilMins2
 		GuiControl, Enable, FieldUntilPack2
 		GuiControl, Enable, FieldReturnType2
@@ -2302,6 +2334,8 @@ nm_FieldUnlock(){
 		GuiControl, Enable, FieldPatternSize3
 		GuiControl, Enable, FieldPatternReps3
 		GuiControl, Enable, FieldPatternShift3
+		GuiControl, Enable, FieldPatternInvertFB3
+		GuiControl, Enable, FieldPatternInvertLR3
 		GuiControl, Enable, FieldUntilMins3
 		GuiControl, Enable, FieldUntilPack3
 		GuiControl, Enable, FieldReturnType3
@@ -2321,6 +2355,8 @@ nm_FieldSelect2(){
 		GuiControl, Enable, FieldPatternSize2
 		GuiControl, Enable, FieldPatternReps2
 		GuiControl, Enable, FieldPatternShift2
+		GuiControl, Enable, FieldPatternInvertFB2
+		GuiControl, Enable, FieldPatternInvertLR2
 		GuiControl, Enable, FieldUntilMins2
 		GuiControl, Enable, FieldUntilPack2
 		GuiControl, Enable, FieldReturnType2
@@ -2339,6 +2375,8 @@ nm_FieldSelect2(){
 		GuiControl, Disable, FieldPatternSize2
 		GuiControl, Disable, FieldPatternReps2
 		GuiControl, Disable, FieldPatternShift2
+		GuiControl, Disable, FieldPatternInvertFB2
+		GuiControl, Disable, FieldPatternInvertLR2
 		GuiControl, Disable, FieldUntilMins2
 		GuiControl, Disable, FieldUntilPack2
 		GuiControl, Disable, FieldReturnType2
@@ -2362,6 +2400,8 @@ nm_FieldSelect3(){
 		GuiControl, Enable, FieldPatternSize3
 		GuiControl, Enable, FieldPatternReps3
 		GuiControl, Enable, FieldPatternShift3
+		GuiControl, Enable, FieldPatternInvertFB3
+		GuiControl, Enable, FieldPatternInvertLR3
 		GuiControl, Enable, FieldUntilMins3
 		GuiControl, Enable, FieldUntilPack3
 		GuiControl, Enable, FieldReturnType3
@@ -2380,6 +2420,8 @@ nm_FieldSelect3(){
 		GuiControl, Disable, FieldPatternSize3
 		GuiControl, Disable, FieldPatternReps3
 		GuiControl, Disable, FieldPatternShift3
+		GuiControl, Disable, FieldPatternInvertFB3
+		GuiControl, Disable, FieldPatternInvertLR3
 		GuiControl, Disable, FieldUntilMins3
 		GuiControl, Disable, FieldUntilPack3
 		GuiControl, Disable, FieldReturnType3
@@ -2393,13 +2435,15 @@ nm_FieldSelect3(){
 	IniWrite, %FieldName3%, nm_config.ini, Gather, FieldName3
 }
 nm_FieldDefaults(num){
-	global FieldDefault, FieldPattern1, FieldPattern2, FieldPattern3, FieldPatternSize1, FieldPatternSize2, FieldPatternSize3, FieldPatternReps1, FieldPatternReps2, FieldPatternReps3, FieldPatternShift1, FieldPatternShift2, FieldPatternShift3, FieldUntilMins1, FieldUntilMins2, FieldUntilMins3, FieldUntilPack1, FieldUntilPack2, FieldUntilPack3, FieldReturnType1, FieldReturnType2, FieldReturnType3, FieldSprinklerLoc1, FieldSprinklerLoc2, FieldSprinklerLoc3, FieldSprinklerDist1, FieldSprinklerDist2, FieldSprinklerDist3, FieldRotateDirection1, FieldRotateDirection2, FieldRotateDirection3, FieldRotateTimes1, FieldRotateTimes2, FieldRotateTimes3, FieldDriftCheck1, FieldDriftCheck2, FieldDriftCheck3
+	global FieldDefault, FieldPattern1, FieldPattern2, FieldPattern3, FieldPatternSize1, FieldPatternSize2, FieldPatternSize3, FieldPatternReps1, FieldPatternReps2, FieldPatternReps3, FieldPatternShift1, FieldPatternShift2, FieldPatternShift3, FieldPatternInvertFB1, FieldPatternInvertFB2, FieldPatternInvertFB3, FieldPatternInvertLR1, FieldPatternInvertLR2, FieldPatternInvertLR3, FieldUntilMins1, FieldUntilMins2, FieldUntilMins3, FieldUntilPack1, FieldUntilPack2, FieldUntilPack3, FieldReturnType1, FieldReturnType2, FieldReturnType3, FieldSprinklerLoc1, FieldSprinklerLoc2, FieldSprinklerLoc3, FieldSprinklerDist1, FieldSprinklerDist2, FieldSprinklerDist3, FieldRotateDirection1, FieldRotateDirection2, FieldRotateDirection3, FieldRotateTimes1, FieldRotateTimes2, FieldRotateTimes3, FieldDriftCheck1, FieldDriftCheck2, FieldDriftCheck3
 	GuiControlGet, FieldName%num%
 	if(FieldName%num%="none") {
 		FieldPattern%num%:="Lines"
 		FieldPatternSize%num%:="M"
 		FieldPatternReps%num%:=3
 		FieldPatternShift%num%:=0
+		FieldPatternInvertFB%num%:=0
+		FieldPatternInvertLR%num%:=0
 		FieldUntilMins%num%:=15
 		FieldUntilPack%num%:=100
 		FieldReturnType%num%:="Walk"
@@ -2413,6 +2457,8 @@ nm_FieldDefaults(num){
 		FieldPatternSize%num%:=FieldDefault[FieldName%num%]["pattern"][2]
 		FieldPatternReps%num%:=FieldDefault[FieldName%num%]["pattern"][3]
 		FieldPatternShift%num%:=0
+		FieldPatternInvertFB%num%:=0
+		FieldPatternInvertLR%num%:=0
 		FieldUntilMins%num%:=15
 		FieldUntilPack%num%:=100
 		FieldReturnType%num%:="Walk"
@@ -2426,6 +2472,8 @@ nm_FieldDefaults(num){
 	GuiControl, ChooseString, FieldPatternSize%num%, % FieldPatternSize%num%
 	GuiControl, ChooseString, FieldPatternReps%num%, % FieldPatternReps%num%
 	GuiControl, ChooseString, FieldPatternShift%num%, % FieldPatternShift%num%
+	GuiControl, ChooseString, FieldPatternInvertFB%num%, % FieldPatternInvertFB%num%
+	GuiControl, ChooseString, FieldPatternInvertLR%num%, % FieldPatternInvertLR%num%
 	GuiControl, ChooseString, FieldUntilMins%num%, % FieldUntilMins%num%
 	GuiControl, ChooseString, FieldUntilPack%num%, % FieldUntilPack%num%
 	GuiControl, ChooseString, FieldReturnType%num%, % FieldReturnType%num%
@@ -2438,6 +2486,8 @@ nm_FieldDefaults(num){
 	FieldPatternSizeN:=FieldPatternSize%num%
 	FieldPatternRepsN:=FieldPatternReps%num%
 	FieldPatternShiftN:=FieldPatternShift%num%
+	FieldPatternInvertFBN:=FieldPatternInvertFB%num%
+	FieldPatternInvertLRN:=FieldPatternInvertLR%num%
 	FieldUntilMinsN:=FieldUntilMins%num%
 	FieldUntilPackN:=FieldUntilPack%num%
 	FieldReturnTypeN:=FieldReturnType%num%
@@ -2450,6 +2500,8 @@ nm_FieldDefaults(num){
 	IniWrite, %FieldPatternSizeN%, nm_config.ini, Gather, FieldPatternSize%num%
 	IniWrite, %FieldPatternRepsN%, nm_config.ini, Gather, FieldPatternReps%num%
 	IniWrite, %FieldPatternShiftN%, nm_config.ini, Gather, FieldPatternShift%num%
+	IniWrite, %FieldPatternInvertFBN%, nm_config.ini, Gather, FieldPatternInvertFB%num%
+	IniWrite, %FieldPatternInvertLRN%, nm_config.ini, Gather, FieldPatternInvertLR%num%
 	IniWrite, %FieldUntilMinsN%, nm_config.ini, Gather, FieldUntilMins%num%
 	IniWrite, %FieldUntilPackN%, nm_config.ini, Gather, FieldUntilPack%num%
 	IniWrite, %FieldReturnTypeN%, nm_config.ini, Gather, FieldReturnType%num%
@@ -2810,6 +2862,8 @@ nm_SaveGather(){
 		GuiControlGet, FieldPatternSize%A_Index%
 		GuiControlGet, FieldPatternReps%A_Index%
 		GuiControlGet, FieldPatternShift%A_Index%
+		GuiControlGet, FieldPatternInvertFB%A_Index%
+		GuiControlGet, FieldPatternInvertLR%A_Index%
 		GuiControlGet, FieldUntilMins%A_Index%
 		GuiControlGet, FieldUntilPack%A_Index%
 		GuiControlGet, FieldReturnType%A_Index%
@@ -2823,6 +2877,8 @@ nm_SaveGather(){
 		FieldPatternSizeN:=FieldPatternSize%A_Index%
 		FieldPatternRepsN:=FieldPatternReps%A_Index%
 		FieldPatternShiftN:=FieldPatternShift%A_Index%
+		FieldPatternInvertFBN:=FieldPatternInvertFB%A_Index%
+		FieldPatternInvertLRN:=FieldPatternInvertLR%A_Index%
 		FieldUntilMinsN:=FieldUntilMins%A_Index%
 		FieldUntilPackN:=FieldUntilPack%A_Index%
 		FieldReturnTypeN:=FieldReturnType%A_Index%
@@ -2836,6 +2892,8 @@ nm_SaveGather(){
 		IniWrite, %FieldPatternSizeN%, nm_config.ini, Gather, FieldPatternSize%A_Index%
 		IniWrite, %FieldPatternRepsN%, nm_config.ini, Gather, FieldPatternReps%A_Index%
 		IniWrite, %FieldPatternShiftN%, nm_config.ini, Gather, FieldPatternShift%A_Index%
+		IniWrite, %FieldPatternInvertFBN%, nm_config.ini, Gather, FieldPatternInvertFB%A_Index%
+		IniWrite, %FieldPatternInvertLRN%, nm_config.ini, Gather, FieldPatternInvertLR%A_Index%
 		IniWrite, %FieldUntilMinsN%, nm_config.ini, Gather, FieldUntilMins%A_Index%
 		IniWrite, %FieldUntilPackN%, nm_config.ini, Gather, FieldUntilPack%A_Index%
 		IniWrite, %FieldReturnTypeN%, nm_config.ini, Gather, FieldReturnType%A_Index%
@@ -4008,6 +4066,59 @@ nm_fieldBoostCheck(fieldName, variant:=0){
 			imgName:="boostsunflower1.png"
 		}
 		imgFound:=nm_imgSearch(imgName,30,"buff")
+	} else if (variant=3) {
+		if(fieldName="Bamboo"){
+			imgName:="boostbamboo3.png"
+		}
+		else if (fieldName="Blue Flower"){
+			imgName:="boostblueflower3.png"
+		}
+		else if (fieldName="Cactus"){
+			imgName:="boostcactus3.png"
+		}
+		else if (fieldName="Clover"){
+			imgName:="boostclover3.png"
+		}
+		else if (fieldName="Coconut"){
+			imgName:="boostcoconut3.png"
+		}
+		else if (fieldName="Dandelion"){
+			imgName:="boostdandelion3.png"
+		}
+		else if (fieldName="Mountain Top"){
+			imgName:="boostmountaintop3.png"
+		}
+		else if (fieldName="Mushroom"){
+			imgName:="boostmushroom3.png"
+		}
+		else if (fieldName="Pepper"){
+			imgName:="boostpepper3.png"
+		}
+		else if (fieldName="Pine Tree"){
+			imgName:="boostpinetree3.png"
+		}
+		else if (fieldName="Pineapple"){
+			imgName:="boostpineapple3.png"
+		}
+		else if (fieldName="Pumpkin"){
+			imgName:="boostpumpkin3.png"
+		}
+		else if (fieldName="Rose"){
+			imgName:="boostrose3.png"
+		}
+		else if (fieldName="Spider"){
+			imgName:="boostspider3.png"
+		}
+		else if (fieldName="Strawberry"){
+			imgName:="booststrawberry3.png"
+		}
+		else if (fieldName="Stump"){
+			imgName:="booststump3.png"
+		}
+		else if (fieldName="Sunflower"){
+			imgName:="boostsunflower3.png"
+		}
+		imgFound:=nm_imgSearch(imgName,30,"buff")
 	}
 	if(imgFound[1]=0){
 		return 1
@@ -4908,127 +5019,6 @@ nm_testButton(){
 	IniRead, MoveSpeedFactor, nm_config.ini, Settings, MoveSpeedFactor
 	GuiControlGet MoveMethod
 	
-	;get ini data
-	IniRead, PWindShrineDonate, nm_personal.ini, Personal, PWindShrineDonate
-	IniRead, PWindShrineDonateNum, nm_personal.ini, Personal, PWindShrineDonateNum
-	
-	nm_Reset(0)
-	objective:="Wind Shrine"
-	nm_gotoRamp()
-	if(MoveMethod="walk"){
-		nm_walkTo("pepper")
-	} else if(MoveMethod="cannon"){
-		nm_gotoCannon()
-		nm_cannonTo("pepper")
-	}
-	nm_Move(5000*MoveSpeedFactor, FwdKey)
-	nm_Move(4000*MoveSpeedFactor, RightKey)
-	nm_Move(700*MoveSpeedFactor, LeftKey)
-	Send, {%RightKey% down}
-	DllCall("Sleep",UInt,150)
-	Send, {space down}
-	DllCall("Sleep",UInt,50)
-	Send, {space up}
-	DllCall("Sleep",UInt,150)
-	Send, {%RightKey% up}
-	nm_Move(2500*MoveSpeedFactor, RightKey)
-	nm_Move(2000*MoveSpeedFactor, BackKey)
-	;locate shrine platform
-	loop 10 {
-		if(A_Index>=10){
-			nm_setStatus("Canceling", "WindShrine Not Found")
-			return
-		}
-		searchRet := nm_imgSearch("e_button.png",30,"high")
-		If (searchRet[1] = 0 ) {
-			break
-		}
-		nm_Move(200*MoveSpeedFactor, BackKey)
-		sleep, 100
-	}
-	;open shrine donations
-	sleep, 500
-	Send, {e}
-	sleep, 1500
-	;click on pop-up box
-	dialog := nm_imgSearch("dialog.png",30,"center")
-	If (dialog[1] = 0) {
-		MouseMove, dialog[2],dialog[3]
-		click
-		sleep, 100
-		MouseMove, 350, (Roblox[3]+70)
-		sleep, 250
-	}
-	;check for shrine cooldown
-	imgFound := nm_imgSearch("cancel.png",30,"center")
-	If (imgFound[1] = 1) { ;shrine not ready, return
-		nm_setStatus("Canceling", "WindShrine on Cooldown")
-		return
-	}
-	nm_setStatus("Donating", PWindShrineDonateNum . " " . PWindShrineDonate)
-	;find item to donate
-	loop 100 {
-		if(A_Index>=100) {
-			nm_setStatus("Canceling", "Cannot locate Donation")
-			return
-		}
-		imgFound := nm_imgSearch("WS" . PWindShrineDonate . ".png",30,"center")
-		If (imgFound[1] = 0) {
-			break
-		}
-		ArrowFound := nm_imgSearch("WSright_arrow.png",30,"center")
-		If (ArrowFound[1] = 0) {
-			MouseMove, ArrowFound[2],ArrowFound[3]
-			click
-			sleep, 100
-			MouseMove, 350, (Roblox[3]+70)
-			sleep, 250
-		}
-	}
-	;set donation number
-	imgFound := nm_imgSearch("WSplus.png",30,"center")
-	If (imgFound[1] = 0) {
-		MouseMove, imgFound[2],imgFound[3]
-		sleep, 500
-	}
-	donateNum:=PWindShrineDonateNum-1
-	loop %donateNum% {
-		sleep, 100
-		click
-	}
-	sleep, 100
-	MouseMove, 350, (Roblox[3]+70)
-	sleep, 250
-	;donate
-	imgFound := nm_imgSearch("WSdonate.png",30,"center")
-	If (imgFound[1] = 0) {
-		MouseMove, imgFound[2],imgFound[3]
-		click
-		sleep, 100
-		MouseMove, 350, (Roblox[3]+70)
-		sleep, 250
-	}
-	loop 10 {
-		dialog := nm_imgSearch("dialog.png",30,"center")
-		If (dialog[1] = 0) {
-			MouseMove, dialog[2],dialog[3]
-			click
-			sleep, 100
-			MouseMove, 350, (Roblox[3]+70)
-			sleep, 250
-		} else {
-			break
-		}
-	}
-	;pickup tokens
-	global TCFBKey:=BackKey
-	global AFCFBKey:=FwdKey
-	global TCLRKey:=LeftKey
-	global AFCLRKey:=RightKey
-	sleep, 1000
-	nm_Move(1000*MoveSpeedFactor, RightKey)
-	nm_gather("snake", "M", 3)
-	
 	
 	;settimer, heartbeat, off
 	/*
@@ -5167,7 +5157,11 @@ nm_Reset(checkAll:=1, wait:=2000){
 	global AFBuseBooster
 	global currentField
 	global MyField:="None"
-	global HiveConfirmed, WebhookCheck
+	global HiveConfirmed, WebhookCheck, ShiftLockEnabled
+	if (ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	SetKeyDelay , (170+KeyDelay)
 	DisconnectCheck()
 	if(youDied && not instr(objective, "mondo") && VBState=0){
@@ -6061,7 +6055,8 @@ nm_toAnyBooster(){
 	global objective
 	if (QuestGatherField!="None" && QuestGatherField)
 		return
-	nm_WindShrine()
+	MyFunc := "nm_WindShrine"
+	%MyFunc%()
 	loop 3 {
 		if(FieldBooster%A_Index%="none")
 			break
@@ -6078,133 +6073,6 @@ nm_toAnyBooster(){
 		else if(FieldBooster%A_Index%="mount"  && (nowUnix()-LastMountainBoost)>3600 && (nowUnix()-LastBooster)>(FieldBoosterMins*60)){ ;1 hour
 			nm_toBooster("mount")
 		}
-	}
-}
-nm_WindShrine(){
-	global PWindShrine, PWindShrineDonate, PWindShrineDonateNum, LastWindShrine
-	if(!PWindShrine)
-		return
-	if((nowUnix()-LastWindShrine)>3630) {
-		nm_Reset(0)
-		objective:="Wind Shrine"
-		nm_gotoRamp()
-		if(MoveMethod="walk"){
-			nm_walkTo("pepper")
-		} else if(MoveMethod="cannon"){
-			nm_gotoCannon()
-			nm_cannonTo("pepper")
-		}
-		nm_Move(5000*MoveSpeedFactor, FwdKey)
-		nm_Move(4000*MoveSpeedFactor, RightKey)
-		nm_Move(700*MoveSpeedFactor, LeftKey)
-		Send, {%RightKey% down}
-		DllCall("Sleep",UInt,150)
-		Send, {space down}
-		DllCall("Sleep",UInt,50)
-		Send, {space up}
-		DllCall("Sleep",UInt,150)
-		Send, {%RightKey% up}
-		nm_Move(2500*MoveSpeedFactor, RightKey)
-		nm_Move(2000*MoveSpeedFactor, BackKey)
-		;locate shrine platform
-		loop 10 {
-			if(A_Index>=10){
-				nm_setStatus("Canceling", "WindShrine Not Found")
-				return
-			}
-			searchRet := nm_imgSearch("e_button.png",30,"high")
-			If (searchRet[1] = 0 ) {
-				break
-			}
-			nm_Move(200*MoveSpeedFactor, BackKey)
-			sleep, 100
-		}
-		;open shrine donations
-		sleep, 500
-		Send, {e}
-		sleep, 1000
-		;click on pop-up box
-		dialog := nm_imgSearch("dialog.png",30,"center")
-		If (dialog[1] = 0) {
-			MouseMove, dialog[2],dialog[3]
-			click
-			sleep, 100
-			MouseMove, 350, (Roblox[3]+70)
-			sleep, 100
-		}
-		;check for shrine cooldown
-		imgFound := nm_imgSearch("cancel.png",30,"center")
-		If (imgFound[1] = 1) { ;shrine not ready, return
-			nm_setStatus("Canceling", "WindShrine on Cooldown")
-			return
-		}
-		nm_setStatus("Donating", PWindShrineDonateNum . " " . PWindShrineDonate)
-		;find item to donate
-		loop 100 {
-			if(A_Index>=100) {
-				nm_setStatus("Canceling", "Cannot locate Donation")
-				;LastWindShrine:=nowUnix()
-				;IniWrite, %LastWindShrine%, nm_config.ini, Boost, LastWindShrine
-				return
-			}
-			imgFound := nm_imgSearch("WS" . PWindShrineDonate . ".png",30,"center")
-			If (imgFound[1] = 0) {
-				break
-			}
-			ArrowFound := nm_imgSearch("WSright_arrow.png",30,"center")
-			If (ArrowFound[1] = 0) {
-				MouseMove, ArrowFound[2],ArrowFound[3]
-				click
-				sleep, 100
-				MouseMove, 350, (Roblox[3]+70)
-				sleep, 100
-			}
-		}
-		;set donation number
-		imgFound := nm_imgSearch("WSplus.png",30,"center")
-		If (imgFound[1] = 0) {
-			MouseMove, imgFound[2],imgFound[3]
-			sleep, 500
-		}
-		donateNum:=PWindShrineDonateNum-1
-		loop %donateNum% {
-			sleep, 100
-			click
-		}
-		sleep, 100
-		MouseMove, 350, (Roblox[3]+70)
-		sleep, 250
-		;donate
-		imgFound := nm_imgSearch("WSdonate.png",30,"center")
-		If (imgFound[1] = 0) {
-			MouseMove, imgFound[2],imgFound[3]
-			click
-			sleep, 100
-			MouseMove, 350, (Roblox[3]+70)
-			sleep, 100
-			LastWindShrine:=nowUnix()
-			IniWrite, %LastWindShrine%, nm_config.ini, Boost, LastWindShrine
-		}
-		loop 10 {
-			dialog := nm_imgSearch("dialog.png",30,"center")
-			If (dialog[1] = 0) {
-				MouseMove, dialog[2],dialog[3]
-				click
-				sleep, 100
-				MouseMove, 350, (Roblox[3]+70)
-				sleep, 100
-			} else {
-				break
-			}
-		}
-		;pickup tokens
-		global TCFBKey:=BackKey
-		global AFCFBKey:=FwdKey
-		global TCLRKey:=LeftKey
-		global AFCLRKey:=RightKey
-		sleep, 1000
-		nm_Move(1100*MoveSpeedFactor, RightKey)
-		nm_gather("snake", "M", 3)
 	}
 }
 nm_toCollect(){
@@ -6227,7 +6095,11 @@ nm_walkToCollect(){
 	global MoveSpeedFactor
 	global objective
 	global WindowedScreen
-	global Roblox
+	global Roblox, ShiftLockEnabled
+	if (ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	;COLLECT
 	;clock
 	global ClockCheck
@@ -6619,8 +6491,12 @@ nm_Bugrun(){
 	global BugrunLadybugsLoot
 	global LastBugrunLadybugs
 	global GiftedViciousCheck
-	global TunnelBearCheck, TunnelBearBabyCheck, KingBeetleCheck, KingBeetleBabyCheck, LastTunnelBear, LastKingBeetle
+	global TunnelBearCheck, TunnelBearBabyCheck, KingBeetleCheck, KingBeetleBabyCheck, LastTunnelBear, LastKingBeetle, ShiftLockEnabled
 	global TotalBossKills, SessionBossKills, TotalBugKills, SessionBugKills
+	if (ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	bypass:=0
 	if(((BugrunSpiderCheck || QuestSpider || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1830*(1-GiftedViciousCheck*.15))) && HiveBees>=5){ ;30 minutes
 		loop 1 {
@@ -7899,7 +7775,11 @@ nm_cannonToCollect(){
 	WinGetPos , windowX, windowY, windowWidth, windowHeight, Roblox
 	;clock
 	global ClockCheck
-	global LastClock
+	global LastClock, ShiftLockEnabled
+	if (ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	if(ClockCheck && (nowUnix()-LastClock)>3630){ ;1 hour
 		loop, 2 {
 			nm_Reset()
@@ -8325,7 +8205,11 @@ nm_cannonTo(location){
 	global RotLeft
 	global RotRight
 	global KeyDelay
-	global MoveSpeedFactor
+	global MoveSpeedFactor, ShiftLockEnabled
+	if (ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	SetKeyDelay, 10
 	if(location="sunflower"){
 		send, {e}
@@ -8998,6 +8882,8 @@ nm_GoGather(){
 	GuiControlGet, FieldPatternSize1
 	GuiControlGet, FieldPatternReps1
 	GuiControlGet, FieldPatternShift1
+	GuiControlGet, FieldPatternInvertFB1
+	GuiControlGet, FieldPatternInvertLR1
 	GuiControlGet, FieldUntilMins1
 	GuiControlGet, FieldUntilPack1
 	GuiControlGet, FieldReturnType1
@@ -9010,6 +8896,8 @@ nm_GoGather(){
 	GuiControlGet, FieldPatternSize2
 	GuiControlGet, FieldPatternReps2
 	GuiControlGet, FieldPatternShift2
+	GuiControlGet, FieldPatternInvertFB2
+	GuiControlGet, FieldPatternInvertLR2
 	GuiControlGet, FieldUntilMins2
 	GuiControlGet, FieldUntilPack2
 	GuiControlGet, FieldReturnType2
@@ -9022,6 +8910,8 @@ nm_GoGather(){
 	GuiControlGet, FieldPatternSize3
 	GuiControlGet, FieldPatternReps3
 	GuiControlGet, FieldPatternShift3
+	GuiControlGet, FieldPatternInvertFB3
+	GuiControlGet, FieldPatternInvertLR3
 	GuiControlGet, FieldUntilMins3
 	GuiControlGet, FieldUntilPack3
 	GuiControlGet, FieldReturnType3
@@ -9040,7 +8930,7 @@ nm_GoGather(){
 	global QuestMantis
 	global QuestScorpions
 	global QuestWerewolf
-	global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, BugrunInterruptCheck, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BlackQuestCheck, BlackQuestComplete, QuestGatherField, BuckoQuestCheck, RileyQuestCheck, RotateQuest, QuestGatherMins, QuestGatherReturnBy, BuckoRhinoBeetles, BuckoMantis, RileyLadybugs, RileyScorpions, RileyAll
+	global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, BugrunInterruptCheck, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BlackQuestCheck, BlackQuestComplete, QuestGatherField, BuckoQuestCheck, RileyQuestCheck, RotateQuest, QuestGatherMins, QuestGatherReturnBy, BuckoRhinoBeetles, BuckoMantis, RileyLadybugs, RileyScorpions, RileyAll, ShiftLockEnabled
 	global GatherStartTime, TotalGatherTime, SessionGatherTime, ConvertStartTime, TotalConvertTime, SessionConvertTime
 	;BUGS GatherInterruptCheck
 	if((PolarQuestGatherInterruptCheck || BuckoQuestGatherInterruptCheck || RileyQuestGatherInterruptCheck || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck || BuckoRhinoBeetles || RileyAll) && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1830*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck || RileyScorpions || RileyAll) && (nowUnix()-LastBugrunScorpions)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck || RileyAll) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
@@ -9103,6 +8993,8 @@ nm_GoGather(){
 				FieldPatternSize%CurrentFieldNum%:=FieldDefault[BoostChaserField]["pattern"][2]
 				FieldPatternReps%CurrentFieldNum%:=FieldDefault[BoostChaserField]["pattern"][3]
 				FieldPatternShift%CurrentFieldNum%:=0
+				FieldPatternInvertFB%CurrentFieldNum%:=0
+				FieldPatternInvertLR%CurrentFieldNum%:=0
 				FieldUntilMins%CurrentFieldNum%:=15
 				FieldUntilPack%CurrentFieldNum%:=100
 				FieldReturnType%CurrentFieldNum%:=FieldReturnType1
@@ -9123,6 +9015,8 @@ nm_GoGather(){
 				FieldPatternSize%CurrentFieldNum%:=FieldPatternSize1
 				FieldPatternReps%CurrentFieldNum%:=FieldPatternReps1
 				FieldPatternShift%CurrentFieldNum%:=FieldPatternShift1
+				FieldPatternInvertFB%CurrentFieldNum%:=FieldPatternInvertFB1
+				FieldPatternInvertLR%CurrentFieldNum%:=FieldPatternInvertLR1
 				FieldUntilMins%CurrentFieldNum%:=FieldUntilMins1
 				FieldUntilPack%CurrentFieldNum%:=FieldUntilPack1
 				FieldReturnType%CurrentFieldNum%:=FieldReturnType1
@@ -9136,6 +9030,8 @@ nm_GoGather(){
 				FieldPatternSize%CurrentFieldNum%:=FieldDefault[QuestGatherField]["pattern"][2]
 				FieldPatternReps%CurrentFieldNum%:=FieldDefault[QuestGatherField]["pattern"][3]
 				FieldPatternShift%CurrentFieldNum%:=0
+				FieldPatternInvertFB%CurrentFieldNum%:=0
+				FieldPatternInvertLR%CurrentFieldNum%:=0
 				FieldUntilMins%CurrentFieldNum%:=QuestGatherMins
 				FieldUntilPack%CurrentFieldNum%:=100
 				FieldReturnType%CurrentFieldNum%:=QuestGatherReturnBy
@@ -9158,6 +9054,8 @@ nm_GoGather(){
 					GuiControlGet, FieldPatternSize1
 					GuiControlGet, FieldPatternReps1
 					GuiControlGet, FieldPatternShift1
+					GuiControlGet, FieldPatternInvertFB1
+					GuiControlGet, FieldPatternInvertLR1
 					GuiControlGet, FieldUntilMins1
 					GuiControlGet, FieldUntilPack1
 					GuiControlGet, FieldReturnType1
@@ -9169,6 +9067,8 @@ nm_GoGather(){
 					FieldPatternSize%CurrentFieldNum%:=FieldPatternSize1
 					FieldPatternReps%CurrentFieldNum%:=FieldPatternReps1
 					FieldPatternShift%CurrentFieldNum%:=FieldPatternShift1
+					FieldPatternInvertFB%CurrentFieldNum%:=FieldPatternInvertFB1
+					FieldPatternInvertLR%CurrentFieldNum%:=FieldPatternInvertLR1
 					FieldUntilMins%CurrentFieldNum%:=FieldUntilMins1
 					FieldUntilPack%CurrentFieldNum%:=FieldUntilPack1
 					FieldReturnType%CurrentFieldNum%:=FieldReturnType1
@@ -9193,7 +9093,7 @@ nm_GoGather(){
 			GatherFieldBoosted:=0
 			;blue
 			for key, value in blueBoosterFields {
-				if(nm_fieldBoostCheck(value, 1) && FieldName%CurrentFieldNum%=value) {
+				if(nm_fieldBoostCheck(value, 3) && FieldName%CurrentFieldNum%=value) {
 					if((nowUnix()-GatherFieldBoostedStart)>2700 && nm_fieldBoostCheck(value, 0)) {
 						GatherFieldBoostedStart:=nowUnix()
 					}
@@ -9207,7 +9107,7 @@ nm_GoGather(){
 				break
 			;mountain
 			for key, value in mountainBoosterFields {
-				if(nm_fieldBoostCheck(value, 1) && FieldName%CurrentFieldNum%=value) {
+				if(nm_fieldBoostCheck(value, 3) && FieldName%CurrentFieldNum%=value) {
 					if((nowUnix()-GatherFieldBoostedStart)>2700  && nm_fieldBoostCheck(value, 0)) {
 						GatherFieldBoostedStart:=nowUnix()
 					}
@@ -9221,7 +9121,7 @@ nm_GoGather(){
 				break
 			;red
 			for key, value in redBoosterFields {
-				if(nm_fieldBoostCheck(value, 1) && FieldName%CurrentFieldNum%=value) {
+				if(nm_fieldBoostCheck(value, 3) && FieldName%CurrentFieldNum%=value) {
 					if((nowUnix()-GatherFieldBoostedStart)>2700  && nm_fieldBoostCheck(value, 0)) {
 						GatherFieldBoostedStart:=nowUnix()
 					}
@@ -9284,14 +9184,14 @@ nm_GoGather(){
 	}
 	;set direction keys
 	;foward/back
-	if(InStr(FieldSprinklerLoc%CurrentFieldNum%, "Upper")){
+	if(FieldPatternInvertFB%CurrentFieldNum%){
 		TCFBKey:=BackKey
 		AFCFBKey:=FwdKey
 	} else {
 		TCFBKey:=FwdKey
 		AFCFBKey:=BackKey
 	}
-	if(InStr(FieldSprinklerLoc%CurrentFieldNum%, "Left")){
+	if(FieldPatternInvertLR%CurrentFieldNum%){
 		TCLRKey:=RightKey
 		AFCLRKey:=LeftKey
 	} else {
@@ -9303,9 +9203,10 @@ nm_GoGather(){
 	bypass:=0
 	gatherStart:=nowUnix() ; used to control how long to gather in this cycle
 	GatherStartTime:=nowUnix() ; used to track total and session gathering time metrics
-	if(FieldPatternShift%CurrentFieldNum%)
+	if(FieldPatternShift%CurrentFieldNum% && ShiftLockEnabled=0) {
+		ShiftLockEnabled:=1
 		send, {shift}
-	;BackpackPercentFiltered:=0
+	}
 	while(((nowUnix()-gatherStart)<(FieldUntilMins%CurrentFieldNum%*60))){
 		nm_gather(FieldPattern%CurrentFieldNum%, FieldPatternSize%CurrentFieldNum%, FieldPatternReps%CurrentFieldNum%)
 		nm_autoFieldBoost(FieldName%CurrentFieldNum%)
@@ -9361,6 +9262,10 @@ nm_GoGather(){
 		;Black Bear quest
 		if(RotateQuest="Black" && BlackQuestCheck && fieldOverrideReason="Quest"){
 			nm_BlackQuestProg()
+			if(FieldPatternShift%CurrentFieldNum% && ShiftLockEnabled=0) {
+				ShiftLockEnabled:=1
+				send, {shift}
+			}
 			;interrupt if
 			if (thisfield!=QuestGatherField || QuestGatherField="none" || BlackQuestComplete){ ;change fields or this field is complete
 				nm_setStatus("Interupted", "Next Quest Step")
@@ -9370,6 +9275,10 @@ nm_GoGather(){
 		;Bucko Bee quest
 		if(RotateQuest="Bucko" && BuckoQuestCheck && fieldOverrideReason="Quest"){
 			nm_BuckoQuestProg()
+			if(FieldPatternShift%CurrentFieldNum% && ShiftLockEnabled=0) {
+				ShiftLockEnabled:=1
+				send, {shift}
+			}
 			;interrupt if
 			if (thisfield!=QuestGatherField || QuestGatherField="none" || BuckoQuestComplete=1){ ;change fields or this field is complete
 				nm_setStatus("Interupted", "Next Quest Step")
@@ -9379,6 +9288,10 @@ nm_GoGather(){
 		;Riley Bee quest
 		if(RotateQuest="Riley" && RileyQuestCheck && fieldOverrideReason="Quest"){
 			nm_RileyQuestProg()
+			if(FieldPatternShift%CurrentFieldNum% && ShiftLockEnabled=0) {
+				ShiftLockEnabled:=1
+				send, {shift}
+			}
 			;interrupt if
 			if (thisfield!=QuestGatherField || QuestGatherField="none" || RileyQuestComplete=1){ ;change fields or this field is complete
 				nm_setStatus("Interupted", "Next Quest Step")
@@ -9391,8 +9304,10 @@ nm_GoGather(){
 		SessionGatherTime:=SessionGatherTime+(nowUnix()-GatherStartTime)
 	}
 	GatherStartTime:=0
-	if(FieldPatternShift%CurrentFieldNum%)
+	if(FieldPatternShift%CurrentFieldNum% && ShiftLockEnabled) {
+		ShiftLockEnabled:=0
 		send, {shift}
+	}
 	if(not bypass){
 		;rotate back
 		num:=FieldRotateTimes%CurrentFieldNum%
@@ -9770,10 +9685,6 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 			send {%AFCLRKey% up}
 		}
 	} else if(pattern="typewriter"){
-		;;;;;; invert pattern ;;;;;;;;;;;
-		temp:=TCFBKey
-		TCFBKey:=AFCFBKey
-		AFCFBKey:=temp
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		spacingDelay:=274 ;183
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -9820,87 +9731,59 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 	} else if(pattern="auryn"){
 		;Auryn Gathering Path
 		AurynDelay:=175
-		;invert cus im lazy
-		temp:=TCFBKey
-		TCFBKey:=AFCFBKey
-		AFCFBKey:=temp
 		loop %reps% {
 			;infinity
 			send {%TCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%TCLRKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%TCFBKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%AFCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4
 			send {%AFCFBKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%TCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%TCLRKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%AFCLRKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%TCFBKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%AFCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4
 			send {%AFCFBKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%TCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%AFCLRKey% up}
 			;big circle
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%TCLRKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%TCFBKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%AFCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			;sleep AurynDelay*MoveSpeedFacto*sizer*(A_Index*1.1)*2*1.4
 			send {%TCLRKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%AFCLRKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%AFCFBKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%TCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%AFCLRKey% up}
 			;FLIP!!
 			;move to other side (half circle)
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%TCLRKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%TCFBKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%AFCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%TCLRKey% up}
 			send {%AFCFBKey% up}
 			;pause here
@@ -9908,79 +9791,55 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 			;reverse infinity
 			send {%AFCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%AFCLRKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%AFCFBKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%TCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4
 			send {%TCFBKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%AFCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%AFCLRKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%TCLRKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%AFCFBKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%TCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4
 			send {%TCFBKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)
 			send {%AFCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4
 			send {%TCLRKey% up}
 			;big circle
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%AFCLRKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%AFCFBKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%TCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%AFCLRKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%TCLRKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%TCFBKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%AFCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%TCLRKey% up}
 			;FLIP!!
 			;move to other side (half circle)
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			;sleep AurynDelay*MoveSpeedFactor*size*size*(A_Index*1.1)*2
 			send {%AFCLRKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%AFCFBKey% up}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2
 			send {%TCFBKey% down}
 			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			;sleep AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4
 			send {%AFCLRKey% up}
 			send {%TCFBKey% up}
 		}
@@ -10173,6 +10032,8 @@ nm_setSprinkler(quest:=0){
 		FieldPatternSize%CurrentFieldNum%:=FieldDefault[QuestGatherField]["pattern"][2]
 		FieldPatternReps%CurrentFieldNum%:=FieldDefault[QuestGatherField]["pattern"][3]
 		FieldPatternShift%CurrentFieldNum%:=0
+		FieldPatternInvertFB%CurrentFieldNum%:=0
+		FieldPatternInvertLR%CurrentFieldNum%:=0
 		FieldUntilMins%CurrentFieldNum%:=5
 		FieldUntilPack%CurrentFieldNum%:=100
 		FieldReturnType%CurrentFieldNum%:=FieldReturnType1
@@ -10424,7 +10285,7 @@ nm_Move(MoveTime, MoveKey1, MoveKey2:="None"){
 }
 nm_releaseKeys(){
 	global state
-	global CurrentFieldNum
+	global CurrentFieldNum, ShiftLockEnabled
 	GuiControlGet, FieldPatternShift%CurrentFieldNum%
 	global FwdKey
 	global LeftKey
@@ -10436,8 +10297,10 @@ nm_releaseKeys(){
 	send, {%RightKey% up}
 	send, {space up}
 	send, {click up}
-	if(state="Gathering" && FieldPatternShift%CurrentFieldNum%)
+	if(state="Gathering" && FieldPatternShift%CurrentFieldNum% && ShiftLockEnabled) {
+		ShiftLockEnabled:=0
 		send, {shift}
+	}
 }
 DisconnectCheck(){
 	global FwdKey
@@ -10448,11 +10311,6 @@ DisconnectCheck(){
 	global WindowedScreen, HiveSlot
 	global Roblox, StartOnReload
 	GuiControlGet, PrivServer
-	if(not RegExMatch(PrivServer, "i)^((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\?privateServerLinkCode=\d{32}$")){
-		;null out the private server link for this disconnect
-		PrivServer:=
-		nm_setStatus("Error", "Private Server Link Invalid")
-	}
 	global ReloadRobloxSecs
 	global TotalDisconnects, SessionDisconnects
 	PublicServer:="https://www.roblox.com/games/4189852503?privateServerLinkCode=94175309348158422142147035472390"
@@ -10483,32 +10341,48 @@ DisconnectCheck(){
 				;winwaitclose, ahk_exe %value%
 			}
 		}
+		if(not RegExMatch(PrivServer, "i)^((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\?privateServerLinkCode=\d{32}$")){
+			;null out the private server link for this disconnect
+			PrivServer:=
+			nm_setStatus("Error", "Private Server Link Invalid")
+		}
 		StringLen, linklen, PrivServer
 		if (linklen > 0 && A_Index<10){
 			;WinClose, Roblox
 			WinKill, Roblox
+			nm_setStatus("Attempting", "Private Server Link")
 			run, %PrivServer%
 			WinClose StatMonitor.ahk
 		} else {
 			;WinClose, Roblox
 			WinKill, Roblox
+			nm_setStatus("Attempting", "Public Server Link")
 			run, %PublicServer%
 			WinClose StatMonitor.ahk
 			sleep, ReloadRobloxSecs * 1000
 		}
 		sleep, ReloadRobloxSecs * 1000
-		;if (linklen > 0){
-			browsers := ["msedge.exe","chrome.exe","ieplore.exe","firefox.exe","opera.exe","brave.exe"]
-			for i, value in browsers {
-				if (WinExist("ahk_exe " . value)){
-					winactivate, ahk_exe %value%
-					;winwaitactive, ahk_exe %value%
-					send ^w
-				}
-			}
-		;}
 		sleep, 3000
+		robloxopen:=0
 		if WinExist("Roblox"){
+			robloxopen:=1
+		} else {
+			nm_setStatus("Refreshing", "Private Server Link")
+			send ^r
+			sleep, ReloadRobloxSecs * 1000
+			if WinExist("Roblox"){
+				robloxopen:=1
+			}
+		}
+		browsers := ["msedge.exe","chrome.exe","ieplore.exe","firefox.exe","opera.exe","brave.exe"]
+		for i, value in browsers {
+			if (WinExist("ahk_exe " . value)){
+				winactivate, ahk_exe %value%
+				;winwaitactive, ahk_exe %value%
+				send ^w
+			}
+		}
+		if (robloxopen) {
 			nm_setStatus("Detected", "Roblox Open")
 			WinActivate, Roblox
 			WinWaitActive, Roblox
@@ -10553,6 +10427,8 @@ DisconnectCheck(){
 		} else {
 			slotnum:=nm_findHiveslot()
 		}
+		if(slotnum=0)
+			slotnum:=6
 		;set hiveslot
 		If (nm_imgSearch("e_button.png",30,"high")[1] = 0){
 			LastClock:=nowUnix()
@@ -10560,6 +10436,7 @@ DisconnectCheck(){
 			HiveSlot:=slotnum
 			GuiControl,,HiveSlot, %HiveSlot%
 			IniWrite, %HiveSlot%, nm_config.ini, Settings, HiveSlot
+			nm_setStatus("Claimed", "Hive Slot " . HiveSlot)
 			;;;;; Natro so broke :weary:
 			send, /
 			sleep 200
@@ -11474,7 +11351,11 @@ nm_HoneyQuest(){
 	global QuestBarGapSize
 	global QuestBarInset
 	global Roblox
-	global state
+	global state, ShiftLockEnabled
+	if(ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	if(!HoneyQuestCheck)
 		return
 	imgPos := nm_imgSearch("questlog.png",10, "left")
@@ -11618,7 +11499,11 @@ nm_PolarQuestProg(){
 	global QuestBarGapSize
 	global QuestBarInset
 	global Roblox
-	global state
+	global state, ShiftLockEnabled
+	if(ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	if(!PolarQuestCheck)
 		return
 	imgPos := nm_imgSearch("questlog.png",10, "left")
@@ -11826,9 +11711,13 @@ nm_PolarQuest(){
 	global GiftedViciousCheck
 	global PolarQuestComplete
 	global RotateQuest
-	global Roblox
+	global Roblox, ShiftLockEnabled
 	if(!PolarQuestCheck)
 		return
+	if(ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	RotateQuest:="Polar"
 	nm_PolarQuestProg()
 	if(PolarQuestComplete) {
@@ -11895,7 +11784,11 @@ nm_QuestRotate(){
 	;ba_planter()
 }
 nm_Feed(food){
-	global Roblox
+	global Roblox, ShiftLockEnabled
+	if(ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	WinGetPos , windowX, windowY, windowWidth, windowHeight, Roblox
 	nm_Reset()
 	imgPos := nm_imgSearch("ItemMenu.png",10, "left")
@@ -11981,9 +11874,13 @@ nm_RileyQuestProg(){
 	global QuestBarGapSize
 	global QuestBarInset
 	global Roblox
-	global state
+	global state, ShiftLockEnabled
 	if(!RileyQuestCheck)
 		return
+	if(ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	imgPos := nm_imgSearch("questlog.png",10, "quest")
 	If (imgPos[1] != 0){
 		MouseMove, 140, (Roblox[3]+120)
@@ -12280,9 +12177,13 @@ nm_BuckoQuestProg(){
 	global QuestBarGapSize
 	global QuestBarInset
 	global Roblox
-	global state
+	global state, ShiftLockEnabled
 	if(!BuckoQuestCheck)
 		return
+	if(ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	imgPos := nm_imgSearch("questlog.png",10, "quest")
 	If (imgPos[1] != 0){
 		MouseMove, 140, (Roblox[3]+120)
@@ -12578,9 +12479,13 @@ nm_BlackQuestProg(){
 	global QuestBarGapSize
 	global QuestBarInset
 	global Roblox
-	global state
+	global state, ShiftLockEnabled
 	if(!BlackQuestCheck)
 		return
+	if(ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	imgPos := nm_imgSearch("questlog.png",10, "quest")
 	If (imgPos[1] != 0){
 		MouseMove, 140, (Roblox[3]+120)
@@ -12956,7 +12861,11 @@ nm_gotoQuestgiver(giver){
 	global KeyDelay
 	global MoveSpeedFactor
 	global MoveMethod
-	global QuestGatherField, LastBlackQuest
+	global QuestGatherField, LastBlackQuest, ShiftLockEnabled
+	if(ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	success:=0
 	loop 2 {
 		;reset
@@ -13469,6 +13378,12 @@ FieldPatternReps3=3
 FieldPatternShift1=0
 FieldPatternShift2=0
 FieldPatternShift3=0
+FieldPatternInvertFB1=0
+FieldPatternInvertFB2=0
+FieldPatternInvertFB3=0
+FieldPatternInvertLR1=0
+FieldPatternInvertLR2=0
+FieldPatternInvertLR3=0
 FieldUntilMins1=20
 FieldUntilMins2=20
 FieldUntilMins3=20
@@ -15174,7 +15089,11 @@ ba_placeInventoryPlanter(planterName, planterNum){
 	global MaxAllowedPlanters
 	global LostPlanters
 	global Roblox
-	global WindowedScreen
+	global WindowedScreen, ShiftLockEnabled
+	if(ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	planterImg:= (planterName . ".png")
 	WinActivate, Roblox
 	WinGetPos , windowX, windowY, windowWidth, windowHeight, Roblox
@@ -15355,7 +15274,11 @@ ba_harvestPlanter(planterNum){
 	global MovespeedFactor
 	global objective
 	global WindowedScreen
-	global TotalPlantersCollected, SessionPlantersCollected
+	global TotalPlantersCollected, SessionPlantersCollected, ShiftLockEnabled
+	if(ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
 	GuiControlGet, HarvestFullGrown
 	;goto specified field
 	;ba_locateVB()
@@ -15904,6 +15827,10 @@ If(Roblox[3]>30)
 else
 	WindowedScreen:=0
 IniWrite, %WindowedScreen%, nm_config.ini, Settings, WindowedScreen
+if(ShiftLockEnabled) {
+	ShiftLockEnabled:=0
+	send, {shift}
+}
 MouseMove, 350, (Roblox[3]+70)
 ;set stats
 MacroRunning:=1
@@ -15998,6 +15925,7 @@ global LastKingBeetle
 global LastClock
 global LastMondoBuff
 global LastAntPass
+global LastAntPassInventory:=0
 global LastHoneyDis
 global LastTreatDis
 global LastBlueberryDis
@@ -16037,6 +15965,8 @@ global FieldPatternReps3
 global FieldPatternShift1
 global FieldPatternShift2
 global FieldPatternShift3
+global ShiftLockEnabled:=0
+global FieldPatternInvertFB1, FieldPatternInvertFB2, FieldPatternInvertFB3, FieldPatternInvertLR1, FieldPatternInvertLR2, FieldPatternInvertLR3
 global FieldUntilMins1
 global FieldUntilMins2
 global FieldUntilMins3
@@ -16197,6 +16127,8 @@ loop 3 {
 	GuiControlGet, FieldPatternSize%A_Index%
 	GuiControlGet, FieldPatternReps%A_Index%
 	GuiControlGet, FieldPatternShift%A_Index%
+	GuiControlGet, FieldPatternInvertFB%A_Index%
+	GuiControlGet, FieldPatternInvertLR%A_Index%
 	GuiControlGet, FieldUntilMins%A_Index%
 	GuiControlGet, FieldUntilPack%A_Index%
 	GuiControlGet, FieldReturnType%A_Index%

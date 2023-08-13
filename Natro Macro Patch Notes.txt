@@ -1,3 +1,17 @@
+0.6.9 Patch Notes
+
+New Features
+-Added ability to invert gathering patterns for fields.  This can be done separately for Forward/Back (F/B) and/or for Left/Right (L/R) directions.  With this change the automatic inversion for the "Upper" and "Right" directions was removed from all patterns.
+
+Bugs
+-Reconnect should work more reliably now.  I added an additional browser refresh if the initial attempt to open the server link fails.  Frequently the link does not fully open on the first attempt. This has resulted in many cases of never getting reconnected.
+-Ant Challenges should now work properly for Bucko/Riley quests.
+-Gathering with Shift-Lock should now work properly when gathering in fields while quests are enabled.
+
+Other
+-Added more status messages to reconnect code to help with future debugging.
+
+
 0.6.8 Patch Notes
 
 Bugs
@@ -8,6 +22,7 @@ Bugs
 
 Other
 -Updated some images that broke due to recent BSS GUI update. Specifically windowed mode detection and in-shop detection upon reset.
+-Moved the Private Server validity check to avoid excessive error spamming.
 
 
 0.6.7 Patch Notes
