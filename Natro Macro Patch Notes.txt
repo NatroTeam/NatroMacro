@@ -1,3 +1,27 @@
+0.8.0 Patch Notes
+
+New Features
+-Added a new gather system to supersede the previous one. This will launch all gather cycles in a new AHK script, allowing it to run uninterrupted which results in much more accurate timings for all gather patterns. This should significantly reduce drift.
+-Implemented "MoveSpeed Correction" in Settings! This is a new feature that detects all movespeed altering buffs in game real-time and adjusts your movement accordingly. This will drastically improve all sections in the macro which require sensitive movements; at the moment it is just applied in gather patterns. It has also been applied to most planter travels, thanks to Zaappiix!
+-There is now separation for "critical" status updates in the webhook. In general, these are status updates that require immediate attention such as disconnects or multiple reset attempts. There are now options in the GUI to enable the webhook to ping a user or send a screenshot in these cases.
+-Patterns have been completely revamped! Now, all patterns are stored in the 'patterns' folder and are loaded into the macro. This allows users to create and distribute Natro Macro patterns easily, without even having to touch natro_macro.ahk.
+-This version comes included with Noob's Timers v2.0! This features theme support, graphical planter/field displays and newly added integration to obtain 'Honey Per Hour' and 'Session Honey' minutely from StatMonitor.
+
+Bugs
+-Fixed an issue which resulted in unwanted usage of hotbar items due to random numbers being sent. It is now safe again to put items in your hotbar slots and use consumables with the macro.
+-Fixed an issue where the character would try to travel to the red cannon after gather end (thanks Zaappiix).
+-Removed a duplicate key (FieldBoostStacks) in ba_config.ini, thanks to MaraSorg#9041 for finding.
+
+Other
+-Modified status update for 'Gathering: Field' to show extra information (time limit, pattern name and size) and added 'Gathering: Ended' status to show time gathered and end reason.
+-Moved .inis and .txt files to a 'settings' folder to clean up the main directory and provide a folder for future additional files.
+-Updated RegEx patterns for Discord Webhook and Roblox private server links to allow recognition of a wider range of valid URLs.
+-Allowed StatMonitor to run on earlier versions of Windows to allow buff tracking access (honey detection still requires OCR), as well as fixing the issue of duplicate 'Startup Reports'.
+-Updated StatMonitor to v2.2 which includes various fixes and improvements, including fixed 'Mondo' and 'Guiding Star' detection and error handling for OCR and CreateFormData.
+-Tweaked cannon travel to 'Pineapple' planter to improve reliability and allow lower level users to survive mobs with Zaappiix's modification.
+-Special thanks to Noob, Zaappiix, SuperDadof6 and El Gato for helping me test this release. Almost all of these features were their ideas!
+
+
 0.7.4 Patch Notes
 
 Natro Macro now has its own discord server!! The invite link is contained in the macro itself.

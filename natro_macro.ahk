@@ -3,6 +3,7 @@
 SetBatchLines -1
 #MaxThreads 255
 #include %A_ScriptDir%\lib\Gdip_All.ahk
+SetWorkingDir %A_ScriptDir% ; ~ recommended, working directory will be correct more often
 ;check if correct AHK version is installed before running anything
 RunWith(32)
 runWith(version){	
@@ -18,15 +19,46 @@ runWith(version){
 }
 
 OnMessage(0x004A, "nm_WM_COPYDATA")
-OnMessage(0x4201, "nm_backgroundEvent")
-OnMessage(0x4299, "nm_setLastHeartbeat")
+OnMessage(0x5555, "nm_backgroundEvent") ; ~ trying new message number, replace all 'SendMessage, 0x4201' with 'PostMessage, 0x5555' in background.ahk
+OnMessage(0x5556, "nm_setLastHeartbeat") ; same as above, replace all "SendMessage, 0x4299' with 'PostMessage, 0x5556' in heartbeat.ahk
+;run, test.ahk ; ~ run the test script for debugging issues, can comment this and 'WinClose, test.ahk' out when fixed or not want to test
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; CONFIG FILE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-if(not fileexist("nm_config.ini"))
+If !FileExist("settings") ; ~ make sure the settings folder exists for stability
+{
+	FileCreateDir, settings
+	If ErrorLevel
+	{
+		msgbox, 0x30, , Couldn't create the settings directory! Make sure the script is elevated if it needs to be.
+		ExitApp
+	}
+}
+if(not fileexist("settings\nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.7.4"
+VersionID:="0.8.0"
 #include *i personal.ahk
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; UPDATE PATTERNS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ~ at every start of macro, ensure all patterns are loaded into 'patterns.ahk'
+tempfile := FileOpen(A_ScriptDir "\settings\patterns.ahk", 0), checkString := tempFile.Read(), tempFile.Close()
+patternString := ""
+Loop, Files, %A_ScriptDir%\patterns\*.ahk
+	tempFile := FileOpen(A_LoopFilePath, 0), patternString .= tempFile.Read() "`r`n`r`n", tempFile.Close()
+if (patternString != checkString)
+{
+	FileDelete, % A_ScriptDir "\settings\patterns.ahk"
+	FileAppend, % patternString, % A_ScriptDir "\settings\patterns.ahk"
+	if checkString
+	{
+		msgbox, 0x34, , Change in patterns detected! Reload to update patterns?
+		ifMsgBox Yes
+			Reload
+		else
+			ExitApp
+	}
+}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; DISABLE ROBLOX BETA APP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -34,9 +66,9 @@ RegWrite, REG_SZ, HKEY_CURRENT_USER\SOFTWARE\ROBLOX Corporation\Environments\rob
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; NATRO ENHANCEMENT STUFF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-if(not fileexist("ba_config.ini"))
+if(not fileexist("settings\ba_config.ini"))
 	ba_resetConfig()
-IniRead TimersOpen, ba_config.ini, gui, TimersOpen
+IniRead TimersOpen, settings\ba_config.ini, gui, TimersOpen
 if(TimersOpen)
     run, %A_ScriptDir%\PlanterTimers.ahk
 global EnablePlantersPlus:=0
@@ -52,6 +84,7 @@ global MoveSpeedFactor:=1
 global MoveSpeedFactorNum:=1
 global MoveSpeed
 global MoveSpeedNum
+global WalkPID:=0 ; ~ must be accessed by nm_gather() and nm_endWalk
 global DayOrNight:=Day
 ;global disableDayorNight:=0
 ;global StingerCheck:=0
@@ -169,37 +202,37 @@ global nectarnames:=["Comforting", "Refreshing", "Satisfying", "Motivating", "In
 global planternames:=["PlasticPlanter", "CandyPlanter", "BlueClayPlanter", "RedClayPlanter", "TackyPlanter", "PesticidePlanter", "PetalPlanter", "PlanterOfPlenty", "PaperPlanter", "TicketPlanter"]
 global fieldnames:=["dandelion", "sunflower", "mushroom", "blueflower", "clover", "strawberry", "spider", "bamboo", "pineapple", "stump", "cactus", "pumpkin", "pinetree", "rose", "mountaintop", "pepper", "coconut"]
 Guicontrol,, SysTabControl321, Planters+
-IniRead, nPreset, ba_config.ini, gui, nPreset
-IniRead, n1priority, ba_config.ini, gui, n1priority
-IniRead, n2priority, ba_config.ini, gui, n2priority
-IniRead, n3priority, ba_config.ini, gui, n3priority
-IniRead, n4priority, ba_config.ini, gui, n4priority
-IniRead, n5priority, ba_config.ini, gui, n5priority
-IniRead, n1string, ba_config.ini, gui, n1string
-IniRead, n2string, ba_config.ini, gui, n2string
-IniRead, n3string, ba_config.ini, gui, n3string
-IniRead, n4string, ba_config.ini, gui, n4string
-IniRead, n5string, ba_config.ini, gui, n5string
-IniRead, n1minPercent, ba_config.ini, gui, n1minPercent
-IniRead, n2minPercent, ba_config.ini, gui, n2minPercent
-IniRead, n3minPercent, ba_config.ini, gui, n3minPercent
-IniRead, n4minPercent, ba_config.ini, gui, n4minPercent
-IniRead, n5minPercent, ba_config.ini, gui, n5minPercent
+IniRead, nPreset, settings\ba_config.ini, gui, nPreset
+IniRead, n1priority, settings\ba_config.ini, gui, n1priority
+IniRead, n2priority, settings\ba_config.ini, gui, n2priority
+IniRead, n3priority, settings\ba_config.ini, gui, n3priority
+IniRead, n4priority, settings\ba_config.ini, gui, n4priority
+IniRead, n5priority, settings\ba_config.ini, gui, n5priority
+IniRead, n1string, settings\ba_config.ini, gui, n1string
+IniRead, n2string, settings\ba_config.ini, gui, n2string
+IniRead, n3string, settings\ba_config.ini, gui, n3string
+IniRead, n4string, settings\ba_config.ini, gui, n4string
+IniRead, n5string, settings\ba_config.ini, gui, n5string
+IniRead, n1minPercent, settings\ba_config.ini, gui, n1minPercent
+IniRead, n2minPercent, settings\ba_config.ini, gui, n2minPercent
+IniRead, n3minPercent, settings\ba_config.ini, gui, n3minPercent
+IniRead, n4minPercent, settings\ba_config.ini, gui, n4minPercent
+IniRead, n5minPercent, settings\ba_config.ini, gui, n5minPercent
 For key, value in planternames
 {
-	IniRead, %value%Check, ba_config.ini, gui, %value%Check
+	IniRead, %value%Check, settings\ba_config.ini, gui, %value%Check
 }
 For key, value in nectarnames
 {
-	IniRead, %value%Fields, ba_config.ini, Planters, %value%Fields
+	IniRead, %value%Fields, settings\ba_config.ini, Planters, %value%Fields
 	%value%Fields := StrSplit(%value%Fields , ", ")
-	IniRead, Last%value%Field, ba_config.ini, Planters, Last%value%Field
+	IniRead, Last%value%Field, settings\ba_config.ini, Planters, Last%value%Field
 }
 For key, value in fieldnames
 {
-	;IniRead, %value%Planters, ba_config.ini, Planters, %value%Planters
+	;IniRead, %value%Planters, settings\ba_config.ini, Planters, %value%Planters
 	;%value%Planters := StrSplit(%value%Planters , ", ")
-	IniRead, TempPlanters, ba_config.ini, Planters, %value%Planters
+	IniRead, TempPlanters, settings\ba_config.ini, Planters, %value%Planters
 	;msgbox %TempPlanters%
 	TempPlanters := StrSplit(TempPlanters , "; ")
 	;MsgBox % TempPlanters[1]
@@ -208,34 +241,34 @@ For key, value in fieldnames
 		tempstring:=TempPlanters[A_Index]
 		%value%Planters.InsertAt(A_Index, StrSplit(TempPlanters[A_Index], ", "))
 	}
-	IniRead, %value%FieldCheck, ba_config.ini, gui, %value%FieldCheck
+	IniRead, %value%FieldCheck, settings\ba_config.ini, gui, %value%FieldCheck
 }
 loop, 3 {
-	IniRead, PlanterName%A_Index%, ba_config.ini, Planters, PlanterName%A_Index%
-	IniRead, PlanterField%A_Index%, ba_config.ini, Planters, PlanterField%A_Index%
-	IniRead, PlanterHarvestTime%A_Index%, ba_config.ini, Planters, PlanterHarvestTime%A_Index%
-	IniRead, PlanterNectar%A_Index%, ba_config.ini, Planters, PlanterNectar%A_Index%
-	IniRead, PlanterEstPercent%A_Index%, ba_config.ini, Planters, PlanterEstPercent%A_Index%
+	IniRead, PlanterName%A_Index%, settings\ba_config.ini, Planters, PlanterName%A_Index%
+	IniRead, PlanterField%A_Index%, settings\ba_config.ini, Planters, PlanterField%A_Index%
+	IniRead, PlanterHarvestTime%A_Index%, settings\ba_config.ini, Planters, PlanterHarvestTime%A_Index%
+	IniRead, PlanterNectar%A_Index%, settings\ba_config.ini, Planters, PlanterNectar%A_Index%
+	IniRead, PlanterEstPercent%A_Index%, settings\ba_config.ini, Planters, PlanterEstPercent%A_Index%
 }
-IniRead, EnablePlantersPlus, ba_config.ini, gui, EnablePlantersPlus
-IniRead, MaxAllowedPlanters, ba_config.ini, gui, MaxAllowedPlanters
-IniRead, HarvestInterval, ba_config.ini, gui, HarvestInterval
-IniRead, AutomaticHarvestInterval, ba_config.ini, gui, AutomaticHarvestInterval
-IniRead, HarvestFullGrown, ba_config.ini, gui, HarvestFullGrown
-IniRead, GotoPlanterField, ba_config.ini, gui, GotoPlanterField
-IniRead, GatherFieldSipping, ba_config.ini, gui, GatherFieldSipping
-IniRead, HiveDistance, ba_config.ini, gui, HiveDistance
-;IniRead, MoveSpeedFactorNum, ba_config.ini, gui, MoveSpeedFactor
-;IniRead, MoveSpeedFactor, ba_config.ini, gui, MoveSpeedFactor
-IniRead, MoveSpeedNum, ba_config.ini, gui, MoveSpeed
-;IniRead, StingerCheck, ba_config.ini, gui, StingerCheck
-IniRead, StatusLogReverse, ba_config.ini, gui, StatusLogReverse
-IniRead, FieldDriftCompensation, ba_config.ini, gui, FieldDriftCompensation
-IniRead, FDCMoveDirFB, ba_config.ini, gui, FDCMoveDirFB
-IniRead, FDCMoveDirLR, ba_config.ini, gui, FDCMoveDirLR
-IniRead, FDCMoveDurFB, ba_config.ini, gui, FDCMoveDurFB
-IniRead, FDCMoveDurLR, ba_config.ini, gui, FDCMoveDurLR
-IniRead, AltPineStart, ba_config.ini, gui, AltPineStart
+IniRead, EnablePlantersPlus, settings\ba_config.ini, gui, EnablePlantersPlus
+IniRead, MaxAllowedPlanters, settings\ba_config.ini, gui, MaxAllowedPlanters
+IniRead, HarvestInterval, settings\ba_config.ini, gui, HarvestInterval
+IniRead, AutomaticHarvestInterval, settings\ba_config.ini, gui, AutomaticHarvestInterval
+IniRead, HarvestFullGrown, settings\ba_config.ini, gui, HarvestFullGrown
+IniRead, GotoPlanterField, settings\ba_config.ini, gui, GotoPlanterField
+IniRead, GatherFieldSipping, settings\ba_config.ini, gui, GatherFieldSipping
+IniRead, HiveDistance, settings\ba_config.ini, gui, HiveDistance
+;IniRead, MoveSpeedFactorNum, settings\ba_config.ini, gui, MoveSpeedFactor
+;IniRead, MoveSpeedFactor, settings\ba_config.ini, gui, MoveSpeedFactor
+IniRead, MoveSpeedNum, settings\ba_config.ini, gui, MoveSpeed
+;IniRead, StingerCheck, settings\ba_config.ini, gui, StingerCheck
+IniRead, StatusLogReverse, settings\ba_config.ini, gui, StatusLogReverse
+IniRead, FieldDriftCompensation, settings\ba_config.ini, gui, FieldDriftCompensation
+IniRead, FDCMoveDirFB, settings\ba_config.ini, gui, FDCMoveDirFB
+IniRead, FDCMoveDirLR, settings\ba_config.ini, gui, FDCMoveDirLR
+IniRead, FDCMoveDurFB, settings\ba_config.ini, gui, FDCMoveDurFB
+IniRead, FDCMoveDurLR, settings\ba_config.ini, gui, FDCMoveDurLR
+IniRead, AltPineStart, settings\ba_config.ini, gui, AltPineStart
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; END NATRO ENHANCEMENT STUFF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -284,24 +317,24 @@ global PreviousAction:="None"
 global CurrentAction:="Startup"
 state:="Startup"
 objective:="UI"
-IniRead, StartOnReload, nm_config.ini, gui, StartOnReload
-IniRead, GuiTheme, nm_config.ini, Settings, GuiTheme
-IniRead, GuiTransparency, nm_config.ini, Settings, GuiTransparency
-IniRead, AlwaysOnTop, nm_config.ini, Settings, AlwaysOnTop
-IniRead, GuiX, nm_config.ini, Settings, GuiX
-IniRead, GuiY, nm_config.ini, Settings, GuiY
-IniRead, MoveSpeedFactor, nm_config.ini, Settings, MoveSpeedFactor
-if(fileexist("nm_personal.ini")) {
-	IniRead, PFieldBoosted, nm_personal.ini, Personal, PFieldBoosted
-	IniRead, PWindShrine, nm_personal.ini, Personal, PWindShrine
-	IniRead, PWindShrineDonate, nm_personal.ini, Personal, PWindShrineDonate
-	IniRead, PWindShrineDonateNum, nm_personal.ini, Personal, PWindShrineDonateNum
-	IniRead, PMondoGuid, nm_personal.ini, Personal, PMondoGuid
-	IniRead, PFieldDriftSteps, nm_personal.ini, Personal, PFieldDriftSteps
-	IniRead, PFieldGuidExtend, nm_personal.ini, Personal, PFieldGuidExtend
-	IniRead, PFieldGuidExtendMins, nm_personal.ini, Personal, PFieldGuidExtendMins
-	IniRead, PFieldBoostExtend, nm_personal.ini, Personal, PFieldBoostExtend
-	IniRead, PPopStarExtend, nm_personal.ini, Personal, PPopStarExtend
+IniRead, StartOnReload, settings\nm_config.ini, gui, StartOnReload
+IniRead, GuiTheme, settings\nm_config.ini, Settings, GuiTheme
+IniRead, GuiTransparency, settings\nm_config.ini, Settings, GuiTransparency
+IniRead, AlwaysOnTop, settings\nm_config.ini, Settings, AlwaysOnTop
+IniRead, GuiX, settings\nm_config.ini, Settings, GuiX
+IniRead, GuiY, settings\nm_config.ini, Settings, GuiY
+IniRead, MoveSpeedFactor, settings\nm_config.ini, Settings, MoveSpeedFactor
+if(fileexist("settings\nm_personal.ini")) {
+	IniRead, PFieldBoosted, settings\nm_personal.ini, Personal, PFieldBoosted
+	IniRead, PWindShrine, settings\nm_personal.ini, Personal, PWindShrine
+	IniRead, PWindShrineDonate, settings\nm_personal.ini, Personal, PWindShrineDonate
+	IniRead, PWindShrineDonateNum, settings\nm_personal.ini, Personal, PWindShrineDonateNum
+	IniRead, PMondoGuid, settings\nm_personal.ini, Personal, PMondoGuid
+	IniRead, PFieldDriftSteps, settings\nm_personal.ini, Personal, PFieldDriftSteps
+	IniRead, PFieldGuidExtend, settings\nm_personal.ini, Personal, PFieldGuidExtend
+	IniRead, PFieldGuidExtendMins, settings\nm_personal.ini, Personal, PFieldGuidExtendMins
+	IniRead, PFieldBoostExtend, settings\nm_personal.ini, Personal, PFieldBoostExtend
+	IniRead, PPopStarExtend, settings\nm_personal.ini, Personal, PPopStarExtend
 }
 ;ensure Gui will be visible
 SysGet, MonNum, MonitorCount
@@ -322,31 +355,31 @@ loop %MonNum% {
 	}
 }
 loop 3 {
-	IniRead, FieldName%A_Index%, nm_config.ini, Gather, FieldName%A_Index%
-	IniRead, FieldPattern%A_Index%, nm_config.ini, Gather, FieldPattern%A_Index%
-	IniRead, FieldPatternSize%A_Index%, nm_config.ini, Gather, FieldPatternSize%A_Index%
-	IniRead, FieldPatternReps%A_Index%, nm_config.ini, Gather, FieldPatternReps%A_Index%
-	IniRead, FieldPatternShift%A_Index%, nm_config.ini, Gather, FieldPatternShift%A_Index%
-	IniRead, FieldPatternInvertFB%A_Index%, nm_config.ini, Gather, FieldPatternInvertFB%A_Index%
-	IniRead, FieldPatternInvertLR%A_Index%, nm_config.ini, Gather, FieldPatternInvertLR%A_Index%
-	IniRead, FieldUntilMins%A_Index%, nm_config.ini, Gather, FieldUntilMins%A_Index%
-	IniRead, FieldUntilPack%A_Index%, nm_config.ini, Gather, FieldUntilPack%A_Index%
-	IniRead, FieldReturnType%A_Index%, nm_config.ini, Gather, FieldReturnType%A_Index%
-	IniRead, FieldSprinklerLoc%A_Index%, nm_config.ini, Gather, FieldSprinklerLoc%A_Index%
-	IniRead, FieldSprinklerDist%A_Index%, nm_config.ini, Gather, FieldSprinklerDist%A_Index%
-	IniRead, FieldRotateDirection%A_Index%, nm_config.ini, Gather, FieldRotateDirection%A_Index%
-	IniRead, FieldRotateTimes%A_Index%, nm_config.ini, Gather, FieldRotateTimes%A_Index%
-	IniRead, FieldDriftCheck%A_Index%, nm_config.ini, Gather, FieldDriftCheck%A_Index%
+	IniRead, FieldName%A_Index%, settings\nm_config.ini, Gather, FieldName%A_Index%
+	IniRead, FieldPattern%A_Index%, settings\nm_config.ini, Gather, FieldPattern%A_Index%
+	IniRead, FieldPatternSize%A_Index%, settings\nm_config.ini, Gather, FieldPatternSize%A_Index%
+	IniRead, FieldPatternReps%A_Index%, settings\nm_config.ini, Gather, FieldPatternReps%A_Index%
+	IniRead, FieldPatternShift%A_Index%, settings\nm_config.ini, Gather, FieldPatternShift%A_Index%
+	IniRead, FieldPatternInvertFB%A_Index%, settings\nm_config.ini, Gather, FieldPatternInvertFB%A_Index%
+	IniRead, FieldPatternInvertLR%A_Index%, settings\nm_config.ini, Gather, FieldPatternInvertLR%A_Index%
+	IniRead, FieldUntilMins%A_Index%, settings\nm_config.ini, Gather, FieldUntilMins%A_Index%
+	IniRead, FieldUntilPack%A_Index%, settings\nm_config.ini, Gather, FieldUntilPack%A_Index%
+	IniRead, FieldReturnType%A_Index%, settings\nm_config.ini, Gather, FieldReturnType%A_Index%
+	IniRead, FieldSprinklerLoc%A_Index%, settings\nm_config.ini, Gather, FieldSprinklerLoc%A_Index%
+	IniRead, FieldSprinklerDist%A_Index%, settings\nm_config.ini, Gather, FieldSprinklerDist%A_Index%
+	IniRead, FieldRotateDirection%A_Index%, settings\nm_config.ini, Gather, FieldRotateDirection%A_Index%
+	IniRead, FieldRotateTimes%A_Index%, settings\nm_config.ini, Gather, FieldRotateTimes%A_Index%
+	IniRead, FieldDriftCheck%A_Index%, settings\nm_config.ini, Gather, FieldDriftCheck%A_Index%
 }
-IniRead, CurrentFieldNum, nm_config.ini, Gather, CurrentFieldNum
-IniRead, MoveMethod, nm_config.ini, Settings, MoveMethod
-IniRead, SprinklerType, nm_config.ini, Settings, SprinklerType
-IniRead, ConvertBalloon, nm_config.ini, Settings, ConvertBalloon
-IniRead, ConvertMins, nm_config.ini, Settings, ConvertMins
-IniRead, PrivServer, nm_config.ini, Settings, PrivServer
-IniRead, ReloadRobloxSecs, nm_config.ini, Settings, ReloadRobloxSecs
-IniRead, ReconnectHour, nm_config.ini, Settings, ReconnectHour
-IniRead, ReconnectMin, nm_config.ini, Settings, ReconnectMin
+IniRead, CurrentFieldNum, settings\nm_config.ini, Gather, CurrentFieldNum
+IniRead, MoveMethod, settings\nm_config.ini, Settings, MoveMethod
+IniRead, SprinklerType, settings\nm_config.ini, Settings, SprinklerType
+IniRead, ConvertBalloon, settings\nm_config.ini, Settings, ConvertBalloon
+IniRead, ConvertMins, settings\nm_config.ini, Settings, ConvertMins
+IniRead, PrivServer, settings\nm_config.ini, Settings, PrivServer
+IniRead, ReloadRobloxSecs, settings\nm_config.ini, Settings, ReloadRobloxSecs
+IniRead, ReconnectHour, settings\nm_config.ini, Settings, ReconnectHour
+IniRead, ReconnectMin, settings\nm_config.ini, Settings, ReconnectMin
 ;set initial windowed mode
 global Roblox:=[]
 WinActivate, Roblox
@@ -393,7 +426,7 @@ Gui, Add, Button, x10 y275 w60 h20 gf1, Start (F1)
 Gui, Add, Button, x75 y275 w60 h20 gf3, Stop (F3)
 Gui, Add, Button, x140 y275 w60 h20 gf2, Pause (F2)
 ;gui mode
-IniRead, GuiMode, nm_config.ini, Settings, GuiMode
+IniRead, GuiMode, settings\nm_config.ini, Settings, GuiMode
 if(GuiMode)
 	buttonText:=("Current Mode:`nADVANCED")
 else if(not AutoFieldBoostActive)
@@ -488,11 +521,14 @@ Gui, Add, DropDownList, x18 y115 w90 vFieldName2 gnm_FieldSelect2, %FieldName2%|
 GuiControl, disable, FieldName2
 Gui, Add, DropDownList, x18 y175 w90 vFieldName3 gnm_FieldSelect3, %FieldName3%||None|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower
 GuiControl, disable, FieldName3
-Gui, Add, DropDownList, x118 y57 w60 vFieldPattern1 gnm_SaveGather, %FieldPattern1%||Lines|Snake|Diamonds|Squares|Typewriter|Auryn|Stationary
+patternlist := "" ; ~ retrieve list of patterns from 'patterns' folder
+Loop, Files, %A_ScriptDir%\patterns\*.ahk
+	patternlist .= RegExReplace(StrReplace(A_LoopFileName, ".ahk"), "(?:^|\.|\R)[- 0-9\*\(]*\K(.)([^\.\r\n]*)", "$U1$L2") "|"
+Gui, Add, DropDownList, x118 y57 w60 vFieldPattern1 gnm_SaveGather, % FieldPattern1 "||" patternlist "Stationary"
 GuiControl, disable, FieldPattern1
-Gui, Add, DropDownList, x118 y115 w60 vFieldPattern2 gnm_SaveGather, %FieldPattern2%||Lines|Snake|Diamonds|Squares|Typewriter|Auryn|Stationary
+Gui, Add, DropDownList, x118 y115 w60 vFieldPattern2 gnm_SaveGather, % FieldPattern2 "||" patternlist "Stationary"
 GuiControl, disable, FieldPattern2
-Gui, Add, DropDownList, x118 y175 w60 vFieldPattern3 gnm_SaveGather, %FieldPattern3%||Lines|Snake|Diamonds|Squares|Typewriter|Auryn|Stationary
+Gui, Add, DropDownList, x118 y175 w60 vFieldPattern3 gnm_SaveGather, % FieldPattern3 "||" patternlist "Stationary"
 GuiControl, disable, FieldPattern3
 Gui, Add, DropDownList, x180 y57 w40 vFieldPatternSize1 gnm_SaveGather, %FieldPatternSize1%||XS|S|M|L|XL
 GuiControl, disable, FieldPatternSize1
@@ -593,7 +629,7 @@ Gui, Font, w700
 Gui, Add, GroupBox, x3 y23 w160 h215, Development
 Gui, Add, GroupBox, x163 y23 w335 h215, Contributors
 Gui, Font
-Gui, Add, Text, x5 y38 w155 +wrap +backgroundtrans, Special Thanks for your contributions in the development and testing of this project.  Your feedback and ideas have been invaluable in the design process!`n`nzez#8710`nFHL09#4061`nLittleChurch#1631 (N00b)`nZaappiix#2372`nSP#0305`nZiz | Jake#9154`nBlackBeard6#2691
+Gui, Add, Text, x5 y38 w155 +wrap +backgroundtrans, Special Thanks for your contributions in the development and testing of this project.  Your feedback and ideas have been invaluable in the design process!`n`nzez#8710`nFHL09#4061`nLittleChurch#1631 (N00b)`nZaappiix#2372`nSP#0305`nZiz | Jake#9154`nBlackBeard6#2691`nbaguetto#8775
 Gui, Add, Text, x170 y38 w330 +wrap +backgroundtrans, Thank you for your donations to this project!`n`nFHL09#4061`nNick 9#9476`nwilalwil2#4175`nAshtonishing#4420`nTheRealXoli#1017`nK_Money#0001`nHeat#9350`nSasuel#5393`nDisco#9130
 
 
@@ -602,30 +638,33 @@ Gui, Add, Text, x170 y38 w330 +wrap +backgroundtrans, Thank you for your donatio
 ;------------------------
 Gui, Tab, Status
 GuiControl,focus, Tab
-IniRead, StatusLogReverse, nm_config.ini, Status, StatusLogReverse
-IniRead, TotalRuntime, nm_config.ini, Status, TotalRuntime
-IniRead, SessionRuntime, nm_config.ini, Status, SessionRuntime
-IniRead, TotalGatherTime, nm_config.ini, Status, TotalGatherTime
-IniRead, SessionGatherTime, nm_config.ini, Status, SessionGatherTime
-IniRead, TotalConvertTime, nm_config.ini, Status, TotalConvertTime
-IniRead, SessionConvertTime, nm_config.ini, Status, SessionConvertTime
-IniRead, TotalViciousKills, nm_config.ini, Status, TotalViciousKills
-IniRead, SessionViciousKills, nm_config.ini, Status, SessionViciousKills
-IniRead, TotalBossKills, nm_config.ini, Status, TotalBossKills
-IniRead, SessionBossKills, nm_config.ini, Status, SessionBossKills
-IniRead, TotalBugKills, nm_config.ini, Status, TotalBugKills
-IniRead, SessionBugKills, nm_config.ini, Status, SessionBugKills
-IniRead, TotalPlantersCollected, nm_config.ini, Status, TotalPlantersCollected
-IniRead, SessionPlantersCollected, nm_config.ini, Status, SessionPlantersCollected
-IniRead, TotalQuestsComplete, nm_config.ini, Status, TotalQuestsComplete
-IniRead, SessionQuestsComplete, nm_config.ini, Status, SessionQuestsComplete
-IniRead, TotalDisconnects, nm_config.ini, Status, TotalDisconnects
-IniRead, SessionDisconnects, nm_config.ini, Status, SessionDisconnects
-IniRead, Webhook, nm_config.ini, Status, Webhook
-IniRead, WebhookCheck, nm_config.ini, Status, WebhookCheck
+IniRead, StatusLogReverse, settings\nm_config.ini, Status, StatusLogReverse
+IniRead, TotalRuntime, settings\nm_config.ini, Status, TotalRuntime
+IniRead, SessionRuntime, settings\nm_config.ini, Status, SessionRuntime
+IniRead, TotalGatherTime, settings\nm_config.ini, Status, TotalGatherTime
+IniRead, SessionGatherTime, settings\nm_config.ini, Status, SessionGatherTime
+IniRead, TotalConvertTime, settings\nm_config.ini, Status, TotalConvertTime
+IniRead, SessionConvertTime, settings\nm_config.ini, Status, SessionConvertTime
+IniRead, TotalViciousKills, settings\nm_config.ini, Status, TotalViciousKills
+IniRead, SessionViciousKills, settings\nm_config.ini, Status, SessionViciousKills
+IniRead, TotalBossKills, settings\nm_config.ini, Status, TotalBossKills
+IniRead, SessionBossKills, settings\nm_config.ini, Status, SessionBossKills
+IniRead, TotalBugKills, settings\nm_config.ini, Status, TotalBugKills
+IniRead, SessionBugKills, settings\nm_config.ini, Status, SessionBugKills
+IniRead, TotalPlantersCollected, settings\nm_config.ini, Status, TotalPlantersCollected
+IniRead, SessionPlantersCollected, settings\nm_config.ini, Status, SessionPlantersCollected
+IniRead, TotalQuestsComplete, settings\nm_config.ini, Status, TotalQuestsComplete
+IniRead, SessionQuestsComplete, settings\nm_config.ini, Status, SessionQuestsComplete
+IniRead, TotalDisconnects, settings\nm_config.ini, Status, TotalDisconnects
+IniRead, SessionDisconnects, settings\nm_config.ini, Status, SessionDisconnects
+IniRead, Webhook, settings\nm_config.ini, Status, Webhook
+IniRead, WebhookCheck, settings\nm_config.ini, Status, WebhookCheck
+IniRead, ssCheck, settings\nm_config.ini, Status, ssCheck ; ~ new options
+IniRead, discordUID, settings\nm_config.ini, Status, discordUID
 Gui, Font, w700
 Gui, Add, GroupBox, x5 y23 w250 h214, Status Log
-Gui, Add, GroupBox, x255 y23 w240 h179, Stats
+Gui, Add, GroupBox, x255 y23 w240 h160, Stats
+Gui, Add, GroupBox, x255 y183 w240 h54, Discord Webhook ; ~ new groupbox for webhook options, 'Discord' hopefully results in fewer "wHaT iS wEbHoOk?" questions
 Gui, Font
 Gui, Add, Checkbox, x85 y23 vStatusLogReverse gnm_StatusLogReverseCheck Checked%StatusLogReverse%, Reverse Order
 Gui, Add, Text, x10 y37 w240 h198 left vstatuslog,
@@ -633,11 +672,16 @@ Gui, font, w700
 Gui, Add, Text, x260 y37, Total
 Gui, Add, Text, x380 y37, Session
 Gui, Font
-Gui, Add, Text, x260 y52 w230 h148 left vstats,
+Gui, Add, Text, x260 y52 w230 h130 left vstats,
 Gui, Add, Button, x290 y37 w50 h15 vResetTotalStats gnm_ResetTotalStats, Reset
-Gui, Add, Text, x260 y202 w160 +left +BackgroundTrans,Webhook Link (full address):
-Gui, Add, Checkbox, x400 y202 +BackgroundTrans vWebhookCheck gnm_webhookcheck Checked%WebhookCheck%, Enable
-Gui, Add, Edit, x260 y215 w160 r1 +BackgroundTrans vWebhook gnm_saveConfig, %Webhook%
+Gui, Add, Checkbox, x375 y183 +BackgroundTrans vWebhookCheck gnm_saveWebhook Checked%WebhookCheck%, Enable
+Gui, Add, Button, x437 y183 w10 h15 gnm_WebhookHelp, ?
+Gui, Add, Text, x260 y199 w100 +left +BackgroundTrans, Link (full address):
+Gui, Add, Edit, % "x348 y198 w142 h16 +BackgroundTrans vWebhook gnm_saveWebhook Disabled" !WebhookCheck, %Webhook%
+Gui, Add, Text, x260 y217 w50 +left +BackgroundTrans, Critical:
+Gui, Add, Checkbox, % "x296 y217 w70 +BackgroundTrans vssCheck gnm_saveWebhook Checked" ssCheck " Disabled" !WebhookCheck, Screenshot
+Gui, Add, Text, x370 y217 w40 +left +BackgroundTrans, User ID:
+Gui, Add, Edit, % "x410 y216 w80 h16 +BackgroundTrans vdiscordUID Limit20 Number gnm_saveWebhook Disabled" !WebhookCheck, %discordUID%
 nm_setStatus()
 nm_setStats()
 
@@ -653,16 +697,16 @@ GuiControl, disable, GuiTheme
 Gui, Add, Text, x5 y70 w70 +left +BackgroundTrans,Transparency:
 Gui, Add, DropDownList, x70 y65 w40 h100 vGuiTransparency gnm_guiTransparencySet, %GuiTransparency%||0|5|10|15|20|25|30|35|40|45|50|55|60|65|70
 GuiControl, disable, GuiTransparency
-IniRead, KeyboardLayout, nm_config.ini, Keys, KeyboardLayout
-IniRead, FwdKey, nm_config.ini, Keys, FwdKey
-IniRead, BackKey, nm_config.ini, Keys, BackKey
-IniRead, LeftKey, nm_config.ini, Keys, LeftKey
-IniRead, RightKey, nm_config.ini, Keys, RightKey
-IniRead, RotLeft, nm_config.ini, Keys, RotLeft
-IniRead, RotRight, nm_config.ini, Keys, RotRight
-IniRead, ZoomIn, nm_config.ini, Keys, ZoomIn
-IniRead, ZoomOut, nm_config.ini, Keys, ZoomOut
-IniRead, KeyDelay, nm_config.ini, Keys, KeyDelay
+IniRead, KeyboardLayout, settings\nm_config.ini, Keys, KeyboardLayout
+IniRead, FwdKey, settings\nm_config.ini, Keys, FwdKey
+IniRead, BackKey, settings\nm_config.ini, Keys, BackKey
+IniRead, LeftKey, settings\nm_config.ini, Keys, LeftKey
+IniRead, RightKey, settings\nm_config.ini, Keys, RightKey
+IniRead, RotLeft, settings\nm_config.ini, Keys, RotLeft
+IniRead, RotRight, settings\nm_config.ini, Keys, RotRight
+IniRead, ZoomIn, settings\nm_config.ini, Keys, ZoomIn
+IniRead, ZoomOut, settings\nm_config.ini, Keys, ZoomOut
+IniRead, KeyDelay, settings\nm_config.ini, Keys, KeyDelay
 ;Gui, Add, Text, x340 y25 w80 +left +BackgroundTrans,KEY SETTINGS
 Gui, Add, GroupBox, x340 y25 w150 h210, KEY SETTINGS
 Gui, Add, Text, x340 y35 w100 +left +BackgroundTrans,______________________
@@ -698,34 +742,37 @@ GuiControl, disable, KeyDelay
 ;Gui, Add, Text, x175 y25 w110 +left +BackgroundTrans,CHARACTER STATS
 Gui, Add, GroupBox, x170 y25 w150 h210, CHARACTER STATS
 Gui, Add, Text, x175 y27 w100 +left +BackgroundTrans,______________________
-IniRead, MoveSpeedNum, nm_config.ini, Settings, MoveSpeed
-IniRead, HiveSlot, nm_config.ini, Settings, HiveSlot
-IniRead, HiveVariation, nm_config.ini, Settings, HiveVariation
-IniRead, HiveBees, nm_config.ini, Settings, HiveBees
-IniRead, DisableToolUse, nm_config.ini, Settings, DisableToolUse
-IniRead, AnnounceGuidingStar, nm_config.ini, Settings, AnnounceGuidingStar
+IniRead, MoveSpeedNum, settings\nm_config.ini, Settings, MoveSpeed
+IniRead, HiveSlot, settings\nm_config.ini, Settings, HiveSlot
+IniRead, HiveVariation, settings\nm_config.ini, Settings, HiveVariation
+IniRead, HiveBees, settings\nm_config.ini, Settings, HiveBees
+IniRead, DisableToolUse, settings\nm_config.ini, Settings, DisableToolUse
+IniRead, AnnounceGuidingStar, settings\nm_config.ini, Settings, AnnounceGuidingStar
+IniRead, NewWalk, settings\nm_config.ini, Settings, NewWalk ; ~ new option
 Gui, Add, Text, x175 y42 w110 +left +BackgroundTrans,Movement Speed:
 Gui, Font, s6
 Gui, Add, Text, x175 y57 w80 +right +BackgroundTrans,(WITHOUT HASTE)
 Gui, Add, Text, x57 y118 w60 +left +BackgroundTrans,(6-5-4-3-2-1)
 Gui, Font
 Gui, Add, Edit, x265 y45 w30 limit4 vMoveSpeed gnm_moveSpeed, %MoveSpeedNum%
+Gui, Add, CheckBox, x175 y69 w125 h15 vNewWalk gnm_saveConfig +BackgroundTrans Checked%NewWalk%, MoveSpeed Correction ; ~ new option
+Gui, Add, Button, x305 y68 w10 h15 gnm_NewWalkHelp, ?
 GuiControl, disable, MoveSpeed
-Gui, Add, Text, x175 y75 w110 +left +BackgroundTrans,Move Method:
-Gui, Add, DropDownList, x247 y70 w65 vMoveMethod gnm_saveConfig, %MoveMethod%||Walk|Cannon
+Gui, Add, Text, x175 y90 w110 +left +BackgroundTrans,Move Method:
+Gui, Add, DropDownList, x247 y85 w65 vMoveMethod gnm_saveConfig, %MoveMethod%||Walk|Cannon
 GuiControl, disable, MoveMethod
-Gui, Add, Text, x175 y95 w110 +left +BackgroundTrans,Sprinkler Type:
-Gui, Add, DropDownList, x247 y90 w65 vSprinklerType gnm_saveConfig, %SprinklerType%||None|Basic|Silver|Golden|Diamond|Supreme
+Gui, Add, Text, x175 y110 w110 +left +BackgroundTrans,Sprinkler Type:
+Gui, Add, DropDownList, x247 y105 w65 vSprinklerType gnm_saveConfig, %SprinklerType%||None|Basic|Silver|Golden|Diamond|Supreme
 GuiControl, disable, SprinklerType
-Gui, Add, Text, x175 y115 w110 +left +BackgroundTrans,Convert Balloon:
-Gui, Add, Text, x200 y127 w110 +left +BackgroundTrans,\____\___
-Gui, Add, DropDownList, x252 y110 w60 vConvertBalloon gnm_convertBalloon, %ConvertBalloon%||Always|Never|Every
+Gui, Add, Text, x175 y130 w110 +left +BackgroundTrans,Convert Balloon:
+Gui, Add, Text, x200 y142 w110 +left +BackgroundTrans,\____\___
+Gui, Add, DropDownList, x252 y125 w60 vConvertBalloon gnm_convertBalloon, %ConvertBalloon%||Always|Never|Every
 GuiControl, disable, ConvertBalloon
-Gui, Add, Edit, x252 y130 w25 r1 number +BackgroundTrans vConvertMins gnm_saveConfig, %ConvertMins%
+Gui, Add, Edit, x252 y145 w25 r1 number +BackgroundTrans vConvertMins gnm_saveConfig, %ConvertMins%
 GuiControl, disable, ConvertMins
-Gui, Add, Text, x282 y135, Mins
-Gui, Add, CheckBox, x175 y155 vDisableToolUse gnm_saveConfig +BackgroundTrans Checked%DisableToolUse%, Disable Tool Use
-Gui, Add, CheckBox, x175 y170 vAnnounceGuidingStar gnm_saveConfig +BackgroundTrans Checked%AnnounceGuidingStar%, Announce Guiding Star
+Gui, Add, Text, x282 y150, Mins
+Gui, Add, CheckBox, x175 y170 vDisableToolUse gnm_saveConfig +BackgroundTrans Checked%DisableToolUse%, Disable Tool Use
+Gui, Add, CheckBox, x175 y185 vAnnounceGuidingStar gnm_saveConfig +BackgroundTrans Checked%AnnounceGuidingStar%, Announce Guiding Star
 
 ;hive settings
 Gui, Add, Text, x10 y95 w110 +left +BackgroundTrans,HIVE SETTINGS
@@ -773,18 +820,18 @@ global BlueberryDisCheck
 global StrawberryDisCheck
 global RoyalJellyDisCheck
 global CoconutDisCheck
-IniRead, ClockCheck, nm_config.ini, Collect, ClockCheck
-IniRead, MondoBuffCheck, nm_config.ini, Collect, MondoBuffCheck
-IniRead, MondoAction, nm_config.ini, Collect, MondoAction
-IniRead, AntPassCheck, nm_config.ini, Collect, AntPassCheck
-IniRead, AntPassAction, nm_config.ini, Collect, AntPassAction
-IniRead, HoneyDisCheck, nm_config.ini, Collect, HoneyDisCheck
-IniRead, TreatDisCheck, nm_config.ini, Collect, TreatDisCheck
-IniRead, BlueberryDisCheck, nm_config.ini, Collect, BlueberryDisCheck
-IniRead, StrawberryDisCheck, nm_config.ini, Collect, StrawberryDisCheck
-IniRead, CoconutDisCheck, nm_config.ini, Collect, CoconutDisCheck
-IniRead, RoyalJellyDisCheck, nm_config.ini, Collect, RoyalJellyDisCheck
-IniRead, GlueDisCheck, nm_config.ini, Collect, GlueDisCheck
+IniRead, ClockCheck, settings\nm_config.ini, Collect, ClockCheck
+IniRead, MondoBuffCheck, settings\nm_config.ini, Collect, MondoBuffCheck
+IniRead, MondoAction, settings\nm_config.ini, Collect, MondoAction
+IniRead, AntPassCheck, settings\nm_config.ini, Collect, AntPassCheck
+IniRead, AntPassAction, settings\nm_config.ini, Collect, AntPassAction
+IniRead, HoneyDisCheck, settings\nm_config.ini, Collect, HoneyDisCheck
+IniRead, TreatDisCheck, settings\nm_config.ini, Collect, TreatDisCheck
+IniRead, BlueberryDisCheck, settings\nm_config.ini, Collect, BlueberryDisCheck
+IniRead, StrawberryDisCheck, settings\nm_config.ini, Collect, StrawberryDisCheck
+IniRead, CoconutDisCheck, settings\nm_config.ini, Collect, CoconutDisCheck
+IniRead, RoyalJellyDisCheck, settings\nm_config.ini, Collect, RoyalJellyDisCheck
+IniRead, GlueDisCheck, settings\nm_config.ini, Collect, GlueDisCheck
 
 Gui, Tab, Collect/Kill
 GuiControl,focus, Tab
@@ -851,12 +898,12 @@ Gui, Add, Checkbox, x135 y165 +BackgroundTrans vGlueDisCheck gnm_saveCollect Che
 GuiControl, disable, GlueDisCheck
 
 ;BEESMAS (Reserved = Not implemented) 
-IniRead, StockingsCheck, nm_config.ini, Collect, StockingsCheck
-IniRead, WreathCheck, nm_config.ini, Collect, WreathCheck
-IniRead, FeastCheck, nm_config.ini, Collect, FeastCheck
-IniRead, CandlesCheck, nm_config.ini, Collect, CandlesCheck
-IniRead, SamovarCheck, nm_config.ini, Collect, SamovarCheck
-IniRead, LidArtCheck, nm_config.ini, Collect, LidArtCheck
+IniRead, StockingsCheck, settings\nm_config.ini, Collect, StockingsCheck
+IniRead, WreathCheck, settings\nm_config.ini, Collect, WreathCheck
+IniRead, FeastCheck, settings\nm_config.ini, Collect, FeastCheck
+IniRead, CandlesCheck, settings\nm_config.ini, Collect, CandlesCheck
+IniRead, SamovarCheck, settings\nm_config.ini, Collect, SamovarCheck
+IniRead, LidArtCheck, settings\nm_config.ini, Collect, LidArtCheck
 Gui, Add, Checkbox, x15 y125 +BackgroundTrans vStockingsCheck gnm_saveCollect Checked%StockingsCheck%, Stockings
 Gui, Add, Checkbox, x15 y140 +BackgroundTrans vWreathCheck gnm_saveCollect Checked%WreathCheck%, Wreath
 Gui, Add, Checkbox, x15 y155 +BackgroundTrans vFeastCheck gnm_saveCollect Checked%FeastCheck%, Feast
@@ -896,26 +943,26 @@ global BugrunMantisLoot
 global BugrunScorpionsLoot
 global BugrunWerewolfLoot
 global StingerCheck
-IniRead, BugRunCheck, nm_config.ini, Collect, BugRunCheck
-IniRead, GiftedViciousCheck, nm_config.ini, Collect, GiftedViciousCheck
-IniRead, BugrunInterruptCheck, nm_config.ini, Collect, BugrunInterruptCheck
-IniRead, BugrunLadybugsCheck, nm_config.ini, Collect, BugrunLadybugsCheck
-IniRead, BugrunRhinoBeetlesCheck, nm_config.ini, Collect, BugrunRhinoBeetlesCheck
-IniRead, BugrunSpiderCheck, nm_config.ini, Collect, BugrunSpiderCheck
-IniRead, BugrunMantisCheck, nm_config.ini, Collect, BugrunMantisCheck
-IniRead, BugrunScorpionsCheck, nm_config.ini, Collect, BugrunScorpionsCheck
-IniRead, BugrunWerewolfCheck, nm_config.ini, Collect, BugrunWerewolfCheck
-IniRead, BugrunLadybugsLoot, nm_config.ini, Collect, BugrunLadybugsLoot
-IniRead, BugrunRhinoBeetlesLoot, nm_config.ini, Collect, BugrunRhinoBeetlesLoot
-IniRead, BugrunSpiderLoot, nm_config.ini, Collect, BugrunSpiderLoot
-IniRead, BugrunMantisLoot, nm_config.ini, Collect, BugrunMantisLoot
-IniRead, BugrunScorpionsLoot, nm_config.ini, Collect, BugrunScorpionsLoot
-IniRead, BugrunWerewolfLoot, nm_config.ini, Collect, BugrunWerewolfLoot
-IniRead, StingerCheck, nm_config.ini, Collect, StingerCheck
-IniRead, TunnelBearCheck, nm_config.ini, Collect, TunnelBearCheck
-IniRead, TunnelBearBabyCheck, nm_config.ini, Collect, TunnelBearBabyCheck
-IniRead, KingBeetleCheck, nm_config.ini, Collect, KingBeetleCheck
-IniRead, KingBeetleBabyCheck, nm_config.ini, Collect, KingBeetleBabyCheck
+IniRead, BugRunCheck, settings\nm_config.ini, Collect, BugRunCheck
+IniRead, GiftedViciousCheck, settings\nm_config.ini, Collect, GiftedViciousCheck
+IniRead, BugrunInterruptCheck, settings\nm_config.ini, Collect, BugrunInterruptCheck
+IniRead, BugrunLadybugsCheck, settings\nm_config.ini, Collect, BugrunLadybugsCheck
+IniRead, BugrunRhinoBeetlesCheck, settings\nm_config.ini, Collect, BugrunRhinoBeetlesCheck
+IniRead, BugrunSpiderCheck, settings\nm_config.ini, Collect, BugrunSpiderCheck
+IniRead, BugrunMantisCheck, settings\nm_config.ini, Collect, BugrunMantisCheck
+IniRead, BugrunScorpionsCheck, settings\nm_config.ini, Collect, BugrunScorpionsCheck
+IniRead, BugrunWerewolfCheck, settings\nm_config.ini, Collect, BugrunWerewolfCheck
+IniRead, BugrunLadybugsLoot, settings\nm_config.ini, Collect, BugrunLadybugsLoot
+IniRead, BugrunRhinoBeetlesLoot, settings\nm_config.ini, Collect, BugrunRhinoBeetlesLoot
+IniRead, BugrunSpiderLoot, settings\nm_config.ini, Collect, BugrunSpiderLoot
+IniRead, BugrunMantisLoot, settings\nm_config.ini, Collect, BugrunMantisLoot
+IniRead, BugrunScorpionsLoot, settings\nm_config.ini, Collect, BugrunScorpionsLoot
+IniRead, BugrunWerewolfLoot, settings\nm_config.ini, Collect, BugrunWerewolfLoot
+IniRead, StingerCheck, settings\nm_config.ini, Collect, StingerCheck
+IniRead, TunnelBearCheck, settings\nm_config.ini, Collect, TunnelBearCheck
+IniRead, TunnelBearBabyCheck, settings\nm_config.ini, Collect, TunnelBearBabyCheck
+IniRead, KingBeetleCheck, settings\nm_config.ini, Collect, KingBeetleCheck
+IniRead, KingBeetleBabyCheck, settings\nm_config.ini, Collect, KingBeetleBabyCheck
 Gui, Add, Checkbox, x310 y25 vBugRunCheck gnm_BugRunCheck Checked%BugRunCheck%, Select All
 Gui, Add, Checkbox, x260 y43 w110 +border vGiftedViciousCheck gnm_saveCollect Checked%GiftedViciousCheck%, Apply Hive Bonus:`nGifted Vicious Bee
 Gui, Add, Checkbox, x257 y70 w120 h15 +BackgroundTrans vBugrunInterruptCheck gnm_saveCollect Checked%BugrunInterruptCheck%, Allow Gather Interrupt
@@ -987,11 +1034,11 @@ global FieldBooster1
 global FieldBooster2
 global FieldBooster3
 global FieldBoosterMins
-IniRead, FieldBooster1, nm_config.ini, Boost, FieldBooster1
-IniRead, FieldBooster2, nm_config.ini, Boost, FieldBooster2
-IniRead, FieldBooster3, nm_config.ini, Boost, FieldBooster3
-IniRead, FieldBoosterMins, nm_config.ini, Boost, FieldBoosterMins
-IniRead, BoostChaserCheck, nm_config.ini, Boost, BoostChaserCheck
+IniRead, FieldBooster1, settings\nm_config.ini, Boost, FieldBooster1
+IniRead, FieldBooster2, settings\nm_config.ini, Boost, FieldBooster2
+IniRead, FieldBooster3, settings\nm_config.ini, Boost, FieldBooster3
+IniRead, FieldBoosterMins, settings\nm_config.ini, Boost, FieldBoosterMins
+IniRead, BoostChaserCheck, settings\nm_config.ini, Boost, BoostChaserCheck
 Gui, Font, W700
 Gui, Add, GroupBox, x5 y25 w120 h135, HQ Field Boosters
 Gui, Add, GroupBox, x130 y25 w170 h155, Hotbar Slots
@@ -1037,24 +1084,24 @@ global HotkeyWhile4
 global HotkeyWhile5
 global HotkeyWhile6
 global HotkeyWhile7
-IniRead, HotkeyTime2, nm_config.ini, Boost, HotkeyTime2
-IniRead, HotkeyTime3, nm_config.ini, Boost, HotkeyTime3
-IniRead, HotkeyTime4, nm_config.ini, Boost, HotkeyTime4
-IniRead, HotkeyTime5, nm_config.ini, Boost, HotkeyTime5
-IniRead, HotkeyTime6, nm_config.ini, Boost, HotkeyTime6
-IniRead, HotkeyTime7, nm_config.ini, Boost, HotkeyTime7
-IniRead, HotkeyTimeUnits2, nm_config.ini, Boost, HotkeyTimeUnits2
-IniRead, HotkeyTimeUnits3, nm_config.ini, Boost, HotkeyTimeUnits3
-IniRead, HotkeyTimeUnits4, nm_config.ini, Boost, HotkeyTimeUnits4
-IniRead, HotkeyTimeUnits5, nm_config.ini, Boost, HotkeyTimeUnits5
-IniRead, HotkeyTimeUnits6, nm_config.ini, Boost, HotkeyTimeUnits6
-IniRead, HotkeyTimeUnits7, nm_config.ini, Boost, HotkeyTimeUnits7
-IniRead, HotkeyWhile2, nm_config.ini, Boost, HotkeyWhile2
-IniRead, HotkeyWhile3, nm_config.ini, Boost, HotkeyWhile3
-IniRead, HotkeyWhile4, nm_config.ini, Boost, HotkeyWhile4
-IniRead, HotkeyWhile5, nm_config.ini, Boost, HotkeyWhile5
-IniRead, HotkeyWhile6, nm_config.ini, Boost, HotkeyWhile6
-IniRead, HotkeyWhile7, nm_config.ini, Boost, HotkeyWhile7
+IniRead, HotkeyTime2, settings\nm_config.ini, Boost, HotkeyTime2
+IniRead, HotkeyTime3, settings\nm_config.ini, Boost, HotkeyTime3
+IniRead, HotkeyTime4, settings\nm_config.ini, Boost, HotkeyTime4
+IniRead, HotkeyTime5, settings\nm_config.ini, Boost, HotkeyTime5
+IniRead, HotkeyTime6, settings\nm_config.ini, Boost, HotkeyTime6
+IniRead, HotkeyTime7, settings\nm_config.ini, Boost, HotkeyTime7
+IniRead, HotkeyTimeUnits2, settings\nm_config.ini, Boost, HotkeyTimeUnits2
+IniRead, HotkeyTimeUnits3, settings\nm_config.ini, Boost, HotkeyTimeUnits3
+IniRead, HotkeyTimeUnits4, settings\nm_config.ini, Boost, HotkeyTimeUnits4
+IniRead, HotkeyTimeUnits5, settings\nm_config.ini, Boost, HotkeyTimeUnits5
+IniRead, HotkeyTimeUnits6, settings\nm_config.ini, Boost, HotkeyTimeUnits6
+IniRead, HotkeyTimeUnits7, settings\nm_config.ini, Boost, HotkeyTimeUnits7
+IniRead, HotkeyWhile2, settings\nm_config.ini, Boost, HotkeyWhile2
+IniRead, HotkeyWhile3, settings\nm_config.ini, Boost, HotkeyWhile3
+IniRead, HotkeyWhile4, settings\nm_config.ini, Boost, HotkeyWhile4
+IniRead, HotkeyWhile5, settings\nm_config.ini, Boost, HotkeyWhile5
+IniRead, HotkeyWhile6, settings\nm_config.ini, Boost, HotkeyWhile6
+IniRead, HotkeyWhile7, settings\nm_config.ini, Boost, HotkeyWhile7
 Gui, Add, Text, x155 y40 w140 left +BackgroundTrans, Use
 Gui, Add, Text, x235 y40 w140 left +BackgroundTrans, Mins/Secs
 Gui, Add, Text, x135 y42 w50 left +BackgroundTrans, ___________________________
@@ -1129,7 +1176,7 @@ GuiControl, disable, HotkeyTimeUnits7
 nm_HotkeyWhile2(), nm_HotkeyWhile3(), nm_HotkeyWhile4(), nm_HotkeyWhile5(), nm_HotkeyWhile6(), nm_HotkeyWhile7()
 ;Gui, Add, CheckBox, x135 y185, Unlock Active Play Hotbar
 ;auto field boost
-IniRead, AutoFieldBoostActive, nm_config.ini, Boost, AutoFieldBoostActive
+IniRead, AutoFieldBoostActive, settings\nm_config.ini, Boost, AutoFieldBoostActive
 if(AutoFieldBoostActive)
 	buttonText:=("Auto Field Boost`n[ON]")
 else if(not AutoFieldBoostActive)
@@ -1146,23 +1193,23 @@ Gui, Font
 ;------------------------
 Gui, Tab, Quest
 GuiControl,focus, Tab
-IniRead, PolarQuestCheck, nm_config.ini, Quests, PolarQuestCheck
-IniRead, PolarQuestGatherInterruptCheck, nm_config.ini, Quests, PolarQuestGatherInterruptCheck
-IniRead, PolarQuestProgress, nm_config.ini, Quests, PolarQuestProgress
+IniRead, PolarQuestCheck, settings\nm_config.ini, Quests, PolarQuestCheck
+IniRead, PolarQuestGatherInterruptCheck, settings\nm_config.ini, Quests, PolarQuestGatherInterruptCheck
+IniRead, PolarQuestProgress, settings\nm_config.ini, Quests, PolarQuestProgress
 PolarQuestProgress := StrReplace(PolarQuestProgress, "|", "`n")
-IniRead, HoneyQuestCheck, nm_config.ini, Quests, HoneyQuestCheck
-IniRead, BlackQuestCheck, nm_config.ini, Quests, BlackQuestCheck
-IniRead, BlackQuestProgress, nm_config.ini, Quests, BlackQuestProgress
+IniRead, HoneyQuestCheck, settings\nm_config.ini, Quests, HoneyQuestCheck
+IniRead, BlackQuestCheck, settings\nm_config.ini, Quests, BlackQuestCheck
+IniRead, BlackQuestProgress, settings\nm_config.ini, Quests, BlackQuestProgress
 BlackQuestProgress := StrReplace(BlackQuestProgress, "|", "`n")
-IniRead, BuckoQuestCheck, nm_config.ini, Quests, BuckoQuestCheck
-IniRead, BuckoQuestGatherInterruptCheck, nm_config.ini, Quests, BuckoQuestGatherInterruptCheck
-IniRead, BuckoQuestProgress, nm_config.ini, Quests, BuckoQuestProgress
+IniRead, BuckoQuestCheck, settings\nm_config.ini, Quests, BuckoQuestCheck
+IniRead, BuckoQuestGatherInterruptCheck, settings\nm_config.ini, Quests, BuckoQuestGatherInterruptCheck
+IniRead, BuckoQuestProgress, settings\nm_config.ini, Quests, BuckoQuestProgress
 BuckoQuestProgress := StrReplace(BuckoQuestProgress, "|", "`n")
-IniRead, RileyQuestCheck, nm_config.ini, Quests, RileyQuestCheck
-IniRead, RileyQuestGatherInterruptCheck, nm_config.ini, Quests, RileyQuestGatherInterruptCheck
-IniRead, RileyQuestProgress, nm_config.ini, Quests, RileyQuestProgress
-IniRead, QuestGatherMins, nm_config.ini, Quests, QuestGatherMins
-IniRead, QuestGatherReturnBy, nm_config.ini, Quests, QuestGatherReturnBy
+IniRead, RileyQuestCheck, settings\nm_config.ini, Quests, RileyQuestCheck
+IniRead, RileyQuestGatherInterruptCheck, settings\nm_config.ini, Quests, RileyQuestGatherInterruptCheck
+IniRead, RileyQuestProgress, settings\nm_config.ini, Quests, RileyQuestProgress
+IniRead, QuestGatherMins, settings\nm_config.ini, Quests, QuestGatherMins
+IniRead, QuestGatherReturnBy, settings\nm_config.ini, Quests, QuestGatherReturnBy
 RileyQuestProgress := StrReplace(RileyQuestProgress, "|", "`n")
 Gui, Font, w700
 Gui, Add, GroupBox, x5 y23 w150 h108, Polar Bear
@@ -1366,17 +1413,17 @@ if(EnablePlantersPlus) {
 Gui, Tab, Planters
 GuiControl,focus, Tab
 loop 3 {
-	IniRead, PlanterPlacedBy%A_Index%, nm_config.ini, Planters, PlanterPlacedBy%A_Index%
-	IniRead, PlanterHotkeySlot%A_Index%, nm_config.ini, Planters, PlanterHotkeySlot%A_Index%
-	IniRead, PlanterSelectedName%A_Index%, nm_config.ini, Planters, PlanterSelectedName%A_Index%
-	IniRead, Planter%A_Index%Field1, nm_config.ini, Planters, Planter%A_Index%Field1
-	IniRead, Planter%A_Index%Field2, nm_config.ini, Planters, Planter%A_Index%Field2
-	IniRead, Planter%A_Index%Field3, nm_config.ini, Planters, Planter%A_Index%Field3
-	IniRead, Planter%A_Index%Field4, nm_config.ini, Planters, Planter%A_Index%Field4
-	IniRead, Planter%A_Index%Until1, nm_config.ini, Planters, Planter%A_Index%Until1
-	IniRead, Planter%A_Index%Until2, nm_config.ini, Planters, Planter%A_Index%Until2
-	IniRead, Planter%A_Index%Until3, nm_config.ini, Planters, Planter%A_Index%Until3
-	IniRead, Planter%A_Index%Until4, nm_config.ini, Planters, Planter%A_Index%Until4
+	IniRead, PlanterPlacedBy%A_Index%, settings\nm_config.ini, Planters, PlanterPlacedBy%A_Index%
+	IniRead, PlanterHotkeySlot%A_Index%, settings\nm_config.ini, Planters, PlanterHotkeySlot%A_Index%
+	IniRead, PlanterSelectedName%A_Index%, settings\nm_config.ini, Planters, PlanterSelectedName%A_Index%
+	IniRead, Planter%A_Index%Field1, settings\nm_config.ini, Planters, Planter%A_Index%Field1
+	IniRead, Planter%A_Index%Field2, settings\nm_config.ini, Planters, Planter%A_Index%Field2
+	IniRead, Planter%A_Index%Field3, settings\nm_config.ini, Planters, Planter%A_Index%Field3
+	IniRead, Planter%A_Index%Field4, settings\nm_config.ini, Planters, Planter%A_Index%Field4
+	IniRead, Planter%A_Index%Until1, settings\nm_config.ini, Planters, Planter%A_Index%Until1
+	IniRead, Planter%A_Index%Until2, settings\nm_config.ini, Planters, Planter%A_Index%Until2
+	IniRead, Planter%A_Index%Until3, settings\nm_config.ini, Planters, Planter%A_Index%Until3
+	IniRead, Planter%A_Index%Until4, settings\nm_config.ini, Planters, Planter%A_Index%Until4
 }
 Gui, Font, w700
 Gui, Add, Text, x20 y25 w100 +left +BackgroundTrans,Planter 1
@@ -1467,18 +1514,13 @@ SetTitleMatchMode 2
 ;}
 DetectHiddenWindows %Prev_DetectHiddenWindows%
 SetTitleMatchMode %Prev_TitleMatchMode%
-myOS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)
-if((myOS*1)>=10) {
-	if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) {
-		Run, %A_ScriptDir%\StatMonitor.ahk
-	}
-}
+;}
 ;;; start on reload if enabled
 ;sleep, 5000
 ;msgbox StartOnReload=%StartOnReload%
 ;if(StartOnReload) {
 ;	StartOnReload:=0
-;	IniWrite, %StartOnReload%, nm_config.ini, Gui, StartOnReload
+;	IniWrite, %StartOnReload%, settings\nm_config.ini, Gui, StartOnReload
 ;	Send {F1}
 ;}
 return
@@ -1624,7 +1666,7 @@ nm_guiModeButton(toggle:=1){
 		;disble AFB
 		GuiControl,afb:, AutoFieldBoostActive, 0
 		GuiControl,, AutoFieldBoostActive, 0
-		IniWrite, %AutoFieldBoostActive%, nm_config.ini, Boost, AutoFieldBoostActive
+		IniWrite, %AutoFieldBoostActive%, settings\nm_config.ini, Boost, AutoFieldBoostActive
 		GuiControl,1:,AutoFieldBoostButton, Auto Field Boost`n[OFF]
 		GuiControl,disable,Boost
 		;hide
@@ -1846,7 +1888,7 @@ nm_guiModeButton(toggle:=1){
 		GuiControl,show,CoconutFieldCheck
 		GuiControl,show,PepperFieldCheck
 	}
-	IniWrite, %GuiMode%, nm_config.ini, Settings, GuiMode
+	IniWrite, %GuiMode%, settings\nm_config.ini, Settings, GuiMode
 }
 nm_setState(newState){
 	global state
@@ -1915,74 +1957,122 @@ nm_setStatus(newState:=0, newObjective:=0){
 	stateString:=(state . ": " . objective)
 	GuiControl, text, state, %stateString%
 	;manage status_log
-    if FileExist("status_log.txt"){
+    if FileExist("settings\status_log.txt"){
         ;count lines in log file
-        FileRead, Var, status_log.txt
+        FileRead, Var, settings\status_log.txt
         StringReplace, Var, Var, `n,`n, UseErrorLevel
         logLines := ErrorLevel+1
         Var= ; empty it
         newLine:="`n"
         if(logLines>20) { ;only keep last X entries
             newText:=""
-            Loop, Read, status_log.txt   ; read file line by line
+            Loop, Read, settings\status_log.txt   ; read file line by line
             {
                 if(A_Index>1) {
-                    FileReadLine, lineText, status_log.txt, A_Index
+                    FileReadLine, lineText, settings\status_log.txt, A_Index
                     newText:=(newText . lineText . newLine)
                 }
             }
-            FileDelete, status_log.txt
-            FileAppend %newText%, status_log.txt
+            FileDelete, settings\status_log.txt
+            FileAppend %newText%, settings\status_log.txt
         }
     }
-    FileAppend `[%A_Hour%:%A_Min%:%A_Sec%`] %stateString%`n, status_log.txt
-	FileAppend `[%A_MM%/%A_DD%`]`[%A_Hour%:%A_Min%:%A_Sec%`] %stateString%`n, debug_log.txt
+    FileAppend `[%A_Hour%:%A_Min%:%A_Sec%`] %stateString%`n, settings\status_log.txt
+	FileAppend `[%A_MM%/%A_DD%`]`[%A_Hour%:%A_Min%:%A_Sec%`] %stateString%`n, settings\debug_log.txt
     GuiControlGet, StatusLogReverse
     displayText:=""
-    Loop, Read, status_log.txt   ; read file line by line
+    Loop, Read, settings\status_log.txt   ; read file line by line
     {
         if(A_Index>(logLines-15)) {
             if(StatusLogReverse)
                 lineNum:=(logLines*2-(A_Index+14))
             else
                 lineNum:=A_Index
-            FileReadLine, lineText, status_log.txt, lineNum
+            FileReadLine, lineText, settings\status_log.txt, lineNum
             displayText:=(displayText . lineText . newLine)
         }
     }
     GuiControl,,statuslog,%displayText%
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;webhook test
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	global webhook, webhookCheck, lastHourlyUpdate
-	static lastSuccess := 0
-	global totalCom, totalMot, totalRef, totalSat, totalInv
-	global TotalRuntime, SessionRuntime, MacroStartTime, TotalGatherTime, SessionGatherTime, GatherStartTime, TotalConvertTime, SessionConvertTime, ConvertStartTime, TotalViciousKills, SessionViciousKills, TotalBossKills, SessionBossKills, TotalBugKills, SessionBugKills, TotalPlantersCollected, SessionPlantersCollected, TotalQuestsComplete, SessionQuestsComplete, TotalDisconnects, SessionDisconnects
-	if (WebhookCheck) {
-		if(RegExMatch(webhook, "i)^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) {
-			; update status
-			newState ? Send_WM_COPYDATA("status " . ((newState = "gathering") ? "1" : (newState = "converting") ? "2" : "0"), "StatMonitor.ahk ahk_class AutoHotkey")
-			if(GatherStartTime)
-				SessionGatherTimeWHT:=(SessionGatherTime+(nowUnix()-GatherStartTime))
-			else
-				SessionGatherTimeWHT:=SessionGatherTime
-			if(ConvertStartTime)
-				SessionConvertTimeWHT:=(SessionConvertTime+(nowUnix()-ConvertStartTime))
-			else
-				SessionConvertTimeWHT:=SessionConvertTime
-			; create postdata for normal message
-			color := (InStr(stateString,"disconnected") || InStr(stateString,"failed") || InStr(stateString,"died")) ? 15085139 : (InStr(stateString,"checking") || InStr(stateString,"holding") || InStr(stateString,"searching")) ? 14408468 : (InStr(stateString,"confirmed") || InStr(stateString,"found")) ? 9755247 : (InStr(stateString,"engaged") || InStr(stateString,"full")) ? 16366336 : (InStr(stateString,"mondo") || InStr(stateString,"boss") || InStr(stateString,"vb dead")) ? 7036559 : (InStr(stateString,"gathering") || InStr(stateString,"converting")) ? 8871681 : (InStr(stateString,"startup")) ? 15658739 : 3223350
-			eventFormatted := StrReplace(stateString, "`r`n", "\n")
-			postdata =
+	;;;;;;;;
+	;webhook
+	;;;;;;;;
+	; ~ i gave this section a massive cleanup and revamp, a lot of old hourly report stuff is now obsolete, colours still need reworking
+	global webhook, webhookCheck, ssCheck, discordUID
+	
+	if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) { ; ~ changed RegEx
+		; update status
+		newState ? Send_WM_COPYDATA("status " . ((newState = "gathering") ? "1" : (newState = "converting") ? "2" : "0"), "StatMonitor.ahk ahk_class AutoHotkey")
+		
+		; set colour based on state string
+		color := (InStr(stateString,"disconnect") || InStr(stateString,"fail") || InStr(stateString,"died") || InStr(stateString,"error")) ? 15085139 
+		: (InStr(stateString,"checking") || InStr(stateString,"holding") || InStr(stateString,"searching")) ? 14408468
+		: (InStr(stateString,"confirmed") || InStr(stateString,"found")) ? 9755247
+		: (InStr(stateString,"engaged") || InStr(stateString,"full")) ? 16366336
+		: (InStr(stateString,"mondo") || InStr(stateString,"boss") || InStr(stateString,"vb dead")) ? 7036559
+		: (InStr(stateString,"gathering") || InStr(stateString,"converting")) ? 8871681
+		: (InStr(stateString,"startup")) ? 15658739
+		: 3223350
+
+		; check if event needs screenshot
+		IniRead, ssCooldown, settings\nm_config.ini, Status, ssCooldown, 0
+		critical_event := ((nowUnix() - ssCooldown > 300) && ((newState = "Disconnected") || (InStr(stateString, "Resetting: Character") && (SubStr(newObjective, InStr(newObjective, " ")+1) > 2)) || InStr(stateString, "Phantom"))) ? 1 : 0
+		if critical_event
+			IniWrite, % nowUnix(), settings\nm_config.ini, Status, ssCooldown ; ssCooldown acts as critical cooldown, decided to keep the name
+		content := (discordUID && critical_event) ? "<@" discordUID ">" : ""
+		
+		; create postdata and send to discord
+		message := "[" A_Hour ":" A_Min ":" A_Sec "] " StrReplace(stateString, "`n", "\n")
+		if (ssCheck && critical_event)
+		{
+			pToken := Gdip_Startup()
+			SysGet, pmonN, MonitorPrimary
+			pBM := Gdip_BitmapFromScreen(pmonN)
+			Gdip_SaveBitmapToFile(pBM, "ss.png")
+			Gdip_DisposeImage(pBM)
+			Gdip_Shutdown(pToken)
+			
+			path := "ss.png"
+			
+			payload_json =
 			(
 			{
+				"content": "%content%",
 				"embeds": [{
-					"description": "[%A_Hour%:%A_Min%:%A_Sec%] %eventFormatted%",
-					"color": "%color%"
+					"description": "%message%",
+					"color": "%color%",
+					"image": {"url": "attachment://ss.png"}
 				}]
 			}
 			)
 			
+			try
+			{
+				objParam := {payload_json: payload_json, file: [path]}
+				CreateFormData(postdata, hdr_ContentType, objParam)
+				
+				wr := ComObjCreate("WinHTTP.WinHTTPRequest.5.1")
+				wr.Open("POST", webhook)
+				wr.SetRequestHeader("User-Agent", "AHK")
+				wr.SetRequestHeader("Content-Type", hdr_ContentType)
+				wr.Send(postdata)
+				wr.WaitForResponse()
+			}
+			
+			FileDelete, ss.png
+		}
+		else
+		{
+			postdata =
+			(
+			{
+				"content": "%content%",
+				"embeds": [{
+					"description": "%message%",
+					"color": "%color%"
+				}]
+			}
+			)
+		
 			; post to webhook
 			try
 			{
@@ -1994,235 +2084,6 @@ nm_setStatus(newState:=0, newObjective:=0){
 				wr.Send(postdata)
 				wr.WaitForResponse()
 			}
-			; check if event needs screenshot
-			IniRead, ssCooldown, nm_config.ini, Status, ssCooldown, 0
-			if (nowUnix() - ssCooldown > 300)
-			{
-				ssEvents := ["Startup", "Disconnected"]
-				for k,v in ssEvents
-				{
-					if (stateString = v)
-					{
-						; save screenshot to temporary file (could use A_Temp if you want cleaner directory)
-						pToken := Gdip_Startup()
-						SysGet, pmonN, MonitorPrimary
-						pBitmap := Gdip_BitmapFromScreen(pmonN)
-						Gdip_SaveBitmapToFile(pBitmap, "file.png")
-						Gdip_Shutdown(pToken)
-						
-						; create multipart/form-data for image
-						path := A_ScriptDir . "\file.png"
-						objParam := {file: [path]}
-						CreateFormData(postdata, hdr_ContentType, objParam)
-						
-						; post to webhook
-						try
-						{
-							wr := ComObjCreate("WinHTTP.WinHTTPRequest.5.1")
-							wr.Option(9) := 2048
-							wr.Open("POST", webhook)
-							wr.SetRequestHeader("User-Agent", "AHK")
-							wr.SetRequestHeader("Content-Type", hdr_ContentType)
-							wr.Send(postdata)
-							wr.WaitForResponse()
-						}
-						
-						; delete the temporary image file and update cooldown
-						FileDelete, file.png
-						IniWrite, % nowUnix(), nm_config.ini, Status, ssCooldown
-						break
-					}
-				}
-			}
-			/*
-			; check if it is time for hourly update
-			timeBetween := nowUnix() - lastHourlyUpdate
-			if ((timeBetween >= 3600) && !InStr(stateString, "Startup"))
-			{
-				; initialise variables
-				rblxid := WinExist("Roblox")
-				if !rblxid
-					return
-				WinActivate, ahk_id %rblxid%
-				WinGetPos, x, y, w, , ahk_id %rblxid%
-				WinGet, style, Style, ahk_id %rblxid%
-				y += (style & 0x20800000) ? 22 : 0
-				static startHoney, lastHoney, lastGath, lastCon
-				global totalTime, totalGath, totalCon, totalKills, totalBoss, totalVic, totalQuests, totalDcs, totalPlants, totalCom, totalMot, totalRef, totalSat, totalInv
-				
-				; detect honey, enlarge image if necessary
-				detectedValues := {}
-				pToken := Gdip_Startup()
-				pBM := Gdip_BitmapFromScreen(w//2 - 300 "|" y "|300|100")
-				pEffect := Gdip_CreateEffect(5,-80,40)
-				Gdip_BitmapApplyEffect(pBM, pEffect)
-				Gdip_DisposeEffect(pEffect)
-				
-				Loop, 100
-				{
-					pBMNew := Gdip_ResizeBitmap(pBM, 300 + A_Index * 3, 100 + A_Index, 0, 7)
-					hBM := Gdip_CreateHBITMAPFromBitmap(pBMNew)
-					Gdip_DisposeImage(pBMNew)
-					pIRandomAccessStream := HBitmapToRandomAccessStream(hBM)
-					DllCall("DeleteObject", "Ptr", hBM)
-					ocrtext := StrReplace(StrReplace("L" . StrReplace(StrReplace(ocr(pIRandomAccessStream), " ", "L"), "`n", "L"), "o", "0"), ".", ",")
-					RegexMatch(ocrtext, "(?<=L)\d{1,3}(,\d{3})+(?=L)", detectedHoney)
-					if detectedHoney
-					{
-						if (detectedValues.HasKey(detectedHoney))
-							detectedValues[detectedHoney]++
-						else
-							detectedValues[detectedHoney]:=1
-					}
-				}
-				
-				for k,v in detectedValues
-					if (v > detectedValues[mode])
-						mode := k
-				currentHoney := StrReplace(mode, ",")
-				
-				Gdip_DisposeImage(pBM)
-				Gdip_Shutdown(pToken)
-				; check that it is appropriate to calculate metrics
-				if (currentHoney && lastHourlyUpdate)
-				{
-					; calculate honey earned during last hour
-					honeyEarned := (currentHoney - lastHoney) // (lastSuccess + 1)
-					
-					; calculate hourly average
-					honeyTotal := currentHoney - startHoney
-					honeyAverage := honeyTotal // ((SessionRuntime+(nowUnix()-MacroStartTime)) / 3600)
-					lastSuccess := 0
-					
-					; format numerical stats for display
-					numnames := ["Million","Billion","Trillion","Quadrillion","Quintillion"]
-					for i,x in ["currentHoney","honeyTotal","honeyEarned","honeyAverage"]
-					{
-						digit := floor(log(abs(%x%)))+1
-						if (digit > 6)
-						{
-							numname := (digit-4)//3
-							numstring := SubStr((round(%x%,4-digit)) / 10**(3*numname+3), 1, 5)
-							numformat := (SubStr(numstring, 0) = ".") ? 1.000 : numstring, numname += (SubStr(numstring, 0) = ".") ? 1 : 0
-							%x%Formatted := SubStr((round(%x%,4-digit)) / 10**(3*numname+3), 1, 5) " " numnames[numname]
-						}
-						else
-						{
-							VarSetCapacity(%x%Formatted,32),DllCall("GetNumberFormatEx","str","!x-sys-default-locale","uint",0,"str",%x%,"ptr",0,"str",%x%Formatted,"int",32)
-							%x%Formatted := SubStr(%x%Formatted, 1, -3)
-						}
-					}
-					honeyEarnedFormatted .= lastSuccess ? " *(Adjusted for " . lastSuccess . "fails)*" : ""		
-					; format time stats for display
-					hourGath := SessionGatherTimeWHT - lastGath, hourCon := SessionConvertTimeWHT - lastCon
-					VarSetCapacity(totalTimeFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",(SessionRuntime+(nowUnix()-MacroStartTime))*10000000,"wstr","hh:mm:ss","str",totalTimeFormatted,"int",256)
-					VarSetCapacity(totalGathFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",(SessionGatherTimeWHT)*10000000,"wstr","hh:mm:ss","str",totalGathFormatted,"int",256)
-					VarSetCapacity(totalConFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",SessionConvertTimeWHT*10000000,"wstr","hh:mm:ss","str",totalConFormatted,"int",256)
-					VarSetCapacity(hourGathFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",hourGath*10000000,"wstr","hh:mm:ss","str",hourGathFormatted,"int",256)
-					VarSetCapacity(hourConFormatted,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",hourCon*10000000,"wstr","hh:mm:ss","str",hourConFormatted,"int",256)
-					totalGathFormatted .= (SessionRuntime+(nowUnix()-MacroStartTime)) ? " (" . Round((SessionGatherTimeWHT) * 100 / (SessionRuntime+(nowUnix()-MacroStartTime))) . "%)" : ""
-					totalConFormatted .= (SessionRuntime+(nowUnix()-MacroStartTime)) ? " (" . Round(SessionConvertTimeWHT * 100 / (SessionRuntime+(nowUnix()-MacroStartTime))) . "%)" : ""
-					hourGathFormatted .= timeBetween ? " (" . Round(hourGath * 100 / timeBetween) . "%)" : ""
-					hourConFormatted .= timeBetween ? " (" . Round(hourCon * 100 / timeBetween) . "%)" : ""
-					;Determine Bloat
-					WinGetPos, windowX, windowY, windowWidth, windowHeight, Roblox
-					bloatColor:=0xCC8048
-					PixelSearch, bx2, by2, 0, 0, %windowWidth%, 150, %bloatColor%,0, Fast
-					If (ErrorLevel=0) {
-						nexty:=by2+1
-						pixels:=1
-						loop 38 {
-							PixelGetColor, OutputVar, %bx2%, %nexty%, fast
-							If (OutputVar=bloatColor) {
-								nexty:=nexty+1
-								pixels:=pixels+1
-							} else {
-								bloatPercent:=round(pixels/38*100, 0)
-								break
-							}
-						}
-					} else {
-						bloatPercent:=0
-					}
-					bloatNum:=round((bloatPercent/100)*6, 2)
-					; create postdata for hourly report
-					message := "[" A_Hour ":" A_Min ":" A_Sec "]\n"
-					. "**HOURLY REPORT:**\n"
-					. "Hourly Average: " honeyAverageFormatted "\n"
-					. "Last Hour Honey: " honeyEarnedFormatted "\n"
-					. "Last Hour Gather: " hourGathFormatted "\n"
-					. "Last Hour Convert: " hourConFormatted "\n"
-					. "--------------------\n"
-					. "Current Honey: " currentHoneyFormatted "\n"
-					. "Session Time: " totalTimeFormatted "\n"
-					. "Session Honey: " honeyTotalFormatted "\n"
-					. "Session Gather: " totalGathFormatted "\n"
-					. "Session Convert: " totalConFormatted "\n"
-					. "--------------------\n"
-					. "Total Vicious Kills:" SessionViciousKills "\n"
-					. "Total Boss Kills:" SessionBossKills "\n"
-					. "Total Bug Kills: " SessionBugKills "\n"
-					. "Total Planters: " SessionPlantersCollected "\n"
-					. "Quests Done: " SessionQuestsComplete "\n"
-					. "Disconnects: " SessionDisconnects "\n"
-					. "--------------------\n"
-					. "Bloat: " bloatNum "\n"
-					. "Nectars: Com " totalCom "%\nMot " totalMot "`% - Sat " totalSat "%\nRef " totalRef "`% - Inv " totalInv "%\n"
-					. "**END OF REPORT**"
-					
-					postdata =
-					(
-					{
-						"embeds": [{
-							"description": "%message%",
-							"color": "14052794"
-						}]
-					}
-					)
-				}
-				else
-				{
-					; possibilities are first run or failed OCR
-					if (currentHoney = 0)
-					{
-						; if next OCR succeeds, set divisor for Recent Hour honey
-						lastSuccess += 1
-						postdata =
-						(
-						{
-							"embeds": [{
-								"description": "[%A_Hour%:%A_Min%:%A_Sec%] Honey OCR Failed!\nHourly Update was skipped.\n**Debugging:**%ocrtext%",
-								"color": "15085139"
-							}]
-						}
-						)
-					}
-					else
-					{
-						; initialise honey variables
-						startHoney := currentHoney
-						honeyAverage := 0
-					}
-				}
-				
-				; update variables for future hourly updates
-				lastHoney := (currentHoney) ? currentHoney : lastHoney
-				lastGath := SessionGatherTimeWHT
-				lastCon := SessionConvertTimeWHT
-				lastHourlyUpdate := nowUnix()			
-				; post to webhook
-				try
-				{
-					wr := ComObjCreate("WinHTTP.WinHTTPRequest.5.1")
-					wr.Option(9) := 2048
-					wr.Open("POST", webhook)
-					wr.SetRequestHeader("User-Agent", "AHK")
-					wr.SetRequestHeader("Content-Type", "application/json")
-					wr.Send(postdata)
-					wr.WaitForResponse()
-				}
-			}
-			*/
 		}
 	}
 }
@@ -2253,7 +2114,7 @@ nm_sendHeartbeat(paused:=0){
 nm_StatusLogReverseCheck(){
 	global StatusLogReverse
 	GuiControlGet, StatusLogReverse
-	IniWrite, %StatusLogReverse%, nm_config.ini, Status, StatusLogReverse
+	IniWrite, %StatusLogReverse%, settings\nm_config.ini, Status, StatusLogReverse
 	if (StatusLogReverse) {
 		nm_setStatus("GUI", "Status Log Reversed")
 	} else {
@@ -2264,9 +2125,9 @@ nm_FieldSelect1(){
 	global CurrentFieldNum
 	global CurrentField
 	GuiControlGet, FieldName1
-	IniWrite, %FieldName1%, nm_config.ini, Gather, FieldName1
+	IniWrite, %FieldName1%, settings\nm_config.ini, Gather, FieldName1
 	CurrentFieldNum:=1
-	IniWrite, %CurrentFieldNum%, nm_config.ini, Gather, CurrentFieldNum
+	IniWrite, %CurrentFieldNum%, settings\nm_config.ini, Gather, CurrentFieldNum
 	GuiControl,,CurrentField, %FieldName1%
 	CurrentField:=FieldName1
 	nm_FieldDefaults(1)
@@ -2392,7 +2253,7 @@ nm_FieldSelect2(){
 	} else {
 		GuiControlGet, FieldName1
 		CurrentFieldNum:=1
-		IniWrite, %CurrentFieldNum%, nm_config.ini, Gather, CurrentFieldNum
+		IniWrite, %CurrentFieldNum%, settings\nm_config.ini, Gather, CurrentFieldNum
 		GuiControl,,CurrentField, %FieldName1%
 		CurrentField:=FieldName1
 		GuiControl, Disable, FieldPattern2
@@ -2414,7 +2275,7 @@ nm_FieldSelect2(){
 		nm_fieldSelect3()
 	}
 	nm_FieldDefaults(2)
-	IniWrite, %FieldName2%, nm_config.ini, Gather, FieldName2
+	IniWrite, %FieldName2%, settings\nm_config.ini, Gather, FieldName2
 }
 nm_FieldSelect3(){
 	global CurrentField, CurrentFieldNum
@@ -2437,7 +2298,7 @@ nm_FieldSelect3(){
 	} else {
 		GuiControlGet, FieldName1
 		CurrentFieldNum:=1
-		IniWrite, %CurrentFieldNum%, nm_config.ini, Gather, CurrentFieldNum
+		IniWrite, %CurrentFieldNum%, settings\nm_config.ini, Gather, CurrentFieldNum
 		GuiControl,,CurrentField, %FieldName1%
 		CurrentField:=FieldName1
 		GuiControl, Disable, FieldPattern3
@@ -2456,7 +2317,7 @@ nm_FieldSelect3(){
 		GuiControl, Disable, FieldDriftCheck3
 	}
 	nm_FieldDefaults(3)
-	IniWrite, %FieldName3%, nm_config.ini, Gather, FieldName3
+	IniWrite, %FieldName3%, settings\nm_config.ini, Gather, FieldName3
 }
 nm_FieldDefaults(num){
 	global FieldDefault, FieldPattern1, FieldPattern2, FieldPattern3, FieldPatternSize1, FieldPatternSize2, FieldPatternSize3, FieldPatternReps1, FieldPatternReps2, FieldPatternReps3, FieldPatternShift1, FieldPatternShift2, FieldPatternShift3, FieldPatternInvertFB1, FieldPatternInvertFB2, FieldPatternInvertFB3, FieldPatternInvertLR1, FieldPatternInvertLR2, FieldPatternInvertLR3, FieldUntilMins1, FieldUntilMins2, FieldUntilMins3, FieldUntilPack1, FieldUntilPack2, FieldUntilPack3, FieldReturnType1, FieldReturnType2, FieldReturnType3, FieldSprinklerLoc1, FieldSprinklerLoc2, FieldSprinklerLoc3, FieldSprinklerDist1, FieldSprinklerDist2, FieldSprinklerDist3, FieldRotateDirection1, FieldRotateDirection2, FieldRotateDirection3, FieldRotateTimes1, FieldRotateTimes2, FieldRotateTimes3, FieldDriftCheck1, FieldDriftCheck2, FieldDriftCheck3
@@ -2520,20 +2381,20 @@ nm_FieldDefaults(num){
 	FieldRotateDirectionN:=FieldRotateDirection%num%
 	FieldRotateTimesN:=FieldRotateTimes%num%
 	FieldDriftCheckN:=FieldDriftCheck%num%
-	IniWrite, %FieldPatternN%, nm_config.ini, Gather, FieldPattern%num%
-	IniWrite, %FieldPatternSizeN%, nm_config.ini, Gather, FieldPatternSize%num%
-	IniWrite, %FieldPatternRepsN%, nm_config.ini, Gather, FieldPatternReps%num%
-	IniWrite, %FieldPatternShiftN%, nm_config.ini, Gather, FieldPatternShift%num%
-	IniWrite, %FieldPatternInvertFBN%, nm_config.ini, Gather, FieldPatternInvertFB%num%
-	IniWrite, %FieldPatternInvertLRN%, nm_config.ini, Gather, FieldPatternInvertLR%num%
-	IniWrite, %FieldUntilMinsN%, nm_config.ini, Gather, FieldUntilMins%num%
-	IniWrite, %FieldUntilPackN%, nm_config.ini, Gather, FieldUntilPack%num%
-	IniWrite, %FieldReturnTypeN%, nm_config.ini, Gather, FieldReturnType%num%
-	IniWrite, %FieldSprinklerLocN%, nm_config.ini, Gather, FieldSprinklerLoc%num%
-	IniWrite, %FieldSprinklerDistN%, nm_config.ini, Gather, FieldSprinklerDist%num%
-	IniWrite, %FieldRotateDirectionN%, nm_config.ini, Gather, FieldRotateDirection%num%
-	IniWrite, %FieldRotateTimesN%, nm_config.ini, Gather, FieldRotateTimes%num%
-	IniWrite, %FieldDriftCheckN%, nm_config.ini, Gather, FieldDriftCheck%num%
+	IniWrite, %FieldPatternN%, settings\nm_config.ini, Gather, FieldPattern%num%
+	IniWrite, %FieldPatternSizeN%, settings\nm_config.ini, Gather, FieldPatternSize%num%
+	IniWrite, %FieldPatternRepsN%, settings\nm_config.ini, Gather, FieldPatternReps%num%
+	IniWrite, %FieldPatternShiftN%, settings\nm_config.ini, Gather, FieldPatternShift%num%
+	IniWrite, %FieldPatternInvertFBN%, settings\nm_config.ini, Gather, FieldPatternInvertFB%num%
+	IniWrite, %FieldPatternInvertLRN%, settings\nm_config.ini, Gather, FieldPatternInvertLR%num%
+	IniWrite, %FieldUntilMinsN%, settings\nm_config.ini, Gather, FieldUntilMins%num%
+	IniWrite, %FieldUntilPackN%, settings\nm_config.ini, Gather, FieldUntilPack%num%
+	IniWrite, %FieldReturnTypeN%, settings\nm_config.ini, Gather, FieldReturnType%num%
+	IniWrite, %FieldSprinklerLocN%, settings\nm_config.ini, Gather, FieldSprinklerLoc%num%
+	IniWrite, %FieldSprinklerDistN%, settings\nm_config.ini, Gather, FieldSprinklerDist%num%
+	IniWrite, %FieldRotateDirectionN%, settings\nm_config.ini, Gather, FieldRotateDirection%num%
+	IniWrite, %FieldRotateTimesN%, settings\nm_config.ini, Gather, FieldRotateTimes%num%
+	IniWrite, %FieldDriftCheckN%, settings\nm_config.ini, Gather, FieldDriftCheck%num%
 }
 nm_currentFieldUp(){
 	global CurrentField
@@ -2560,7 +2421,7 @@ nm_currentFieldUp(){
 		CurrentField:=FieldName2
 	}
 	GuiControl,,CurrentField, %CurrentField%
-	IniWrite, %CurrentFieldNum%, nm_config.ini, Gather, CurrentFieldNum
+	IniWrite, %CurrentFieldNum%, settings\nm_config.ini, Gather, CurrentFieldNum
 }
 nm_currentFieldDown(){
 	global CurrentField
@@ -2589,7 +2450,7 @@ nm_currentFieldDown(){
 		CurrentField:=FieldName1
 	}
 	GuiControl,,CurrentField, %CurrentField%
-	IniWrite, %CurrentFieldNum%, nm_config.ini, Gather, CurrentFieldNum
+	IniWrite, %CurrentFieldNum%, settings\nm_config.ini, Gather, CurrentFieldNum
 }
 nm_savePlanters(){
 	GuiControlGet PlanterHotkeySlot1
@@ -2598,12 +2459,12 @@ nm_savePlanters(){
 	;GuiControlGet PlanterSelectedName1
 	;GuiControlGet PlanterSelectedName2
 	;GuiControlGet PlanterSelectedName3
-	IniWrite, %PlanterHotkeySlot1%, nm_config.ini, Planters, PlanterHotkeySlot1
-	IniWrite, %PlanterHotkeySlot2%, nm_config.ini, Planters, PlanterHotkeySlot2
-	IniWrite, %PlanterHotkeySlot3%, nm_config.ini, Planters, PlanterHotkeySlot3
-	;IniWrite, %PlanterSelectedName1%, nm_config.ini, Planters, PlanterSelectedName1
-	;IniWrite, %PlanterSelectedName2%, nm_config.ini, Planters, PlanterSelectedName2
-	;IniWrite, %PlanterSelectedName3%, nm_config.ini, Planters, PlanterSelectedName3
+	IniWrite, %PlanterHotkeySlot1%, settings\nm_config.ini, Planters, PlanterHotkeySlot1
+	IniWrite, %PlanterHotkeySlot2%, settings\nm_config.ini, Planters, PlanterHotkeySlot2
+	IniWrite, %PlanterHotkeySlot3%, settings\nm_config.ini, Planters, PlanterHotkeySlot3
+	;IniWrite, %PlanterSelectedName1%, settings\nm_config.ini, Planters, PlanterSelectedName1
+	;IniWrite, %PlanterSelectedName2%, settings\nm_config.ini, Planters, PlanterSelectedName2
+	;IniWrite, %PlanterSelectedName3%, settings\nm_config.ini, Planters, PlanterSelectedName3
 }
 nm_plantersPlacedBy1(){
 	GuiControlGet, PlanterPlacedBy1
@@ -2635,8 +2496,8 @@ nm_plantersPlacedBy1(){
 		}
 		GuiControl, enable, Planter1Until1
 	}
-	IniWrite, %PlanterPlacedBy1%, nm_config.ini, Planters, PlanterPlacedBy1
-	IniWrite, %PlanterSelectedName1%, nm_config.ini, Planters, PlanterSelectedName1
+	IniWrite, %PlanterPlacedBy1%, settings\nm_config.ini, Planters, PlanterPlacedBy1
+	IniWrite, %PlanterSelectedName1%, settings\nm_config.ini, Planters, PlanterSelectedName1
 }
 nm_plantersPlacedBy2(){
 	GuiControlGet, PlanterPlacedBy2
@@ -2668,8 +2529,8 @@ nm_plantersPlacedBy2(){
 		}
 		GuiControl, enable, Planter2Until1
 	}
-	IniWrite, %PlanterPlacedBy2%, nm_config.ini, Planters, PlanterPlacedBy2
-	IniWrite, %PlanterSelectedName2%, nm_config.ini, Planters, PlanterSelectedName2
+	IniWrite, %PlanterPlacedBy2%, settings\nm_config.ini, Planters, PlanterPlacedBy2
+	IniWrite, %PlanterSelectedName2%, settings\nm_config.ini, Planters, PlanterSelectedName2
 }
 nm_plantersPlacedBy3(){
 	GuiControlGet, PlanterPlacedBy3
@@ -2701,8 +2562,8 @@ nm_plantersPlacedBy3(){
 		}
 		GuiControl, enable, Planter3Until1
 	}
-	IniWrite, %PlanterPlacedBy3%, nm_config.ini, Planters, PlanterPlacedBy3
-	IniWrite, %PlanterSelectedName3%, nm_config.ini, Planters, PlanterSelectedName3
+	IniWrite, %PlanterPlacedBy3%, settings\nm_config.ini, Planters, PlanterPlacedBy3
+	IniWrite, %PlanterSelectedName3%, settings\nm_config.ini, Planters, PlanterSelectedName3
 }
 nm_Planter1Field1(){
 	GuiControlGet Planter1Field1
@@ -2723,8 +2584,8 @@ nm_Planter1Field1(){
 		GuiControl,enable, Planter1Until2
 	}
 	nm_Planter1Field2()
-	IniWrite, %Planter1Field1%, nm_config.ini, Planters, Planter1Field1
-	IniWrite, %Planter1Until1%, nm_config.ini, Planters, Planter1Until1
+	IniWrite, %Planter1Field1%, settings\nm_config.ini, Planters, Planter1Field1
+	IniWrite, %Planter1Until1%, settings\nm_config.ini, Planters, Planter1Until1
 }
 nm_Planter1Field2(){
 	GuiControlGet Planter1Field2
@@ -2738,8 +2599,8 @@ nm_Planter1Field2(){
 		GuiControl,enable, Planter1Field3
 		GuiControl,enable, Planter1Until3
 	}
-	IniWrite, %Planter1Field2%, nm_config.ini, Planters, Planter1Field2
-	IniWrite, %Planter1Until2%, nm_config.ini, Planters, Planter1Until2
+	IniWrite, %Planter1Field2%, settings\nm_config.ini, Planters, Planter1Field2
+	IniWrite, %Planter1Until2%, settings\nm_config.ini, Planters, Planter1Until2
 }
 nm_Planter1Field3(){
 	GuiControlGet Planter1Field3
@@ -2753,14 +2614,14 @@ nm_Planter1Field3(){
 		GuiControl,enable, Planter1Field4
 		GuiControl,enable, Planter1Until4
 	}
-	IniWrite, %Planter1Field3%, nm_config.ini, Planters, Planter1Field3
-	IniWrite, %Planter1Until3%, nm_config.ini, Planters, Planter1Until3
+	IniWrite, %Planter1Field3%, settings\nm_config.ini, Planters, Planter1Field3
+	IniWrite, %Planter1Until3%, settings\nm_config.ini, Planters, Planter1Until3
 }
 nm_Planter1Field4(){
 	GuiControlGet Planter1Field4
 	GuiControlGet Planter1Until4
-	IniWrite, %Planter1Field4%, nm_config.ini, Planters, Planter1Field4
-	IniWrite, %Planter1Until4%, nm_config.ini, Planters, Planter1Until4
+	IniWrite, %Planter1Field4%, settings\nm_config.ini, Planters, Planter1Field4
+	IniWrite, %Planter1Until4%, settings\nm_config.ini, Planters, Planter1Until4
 
 }
 nm_Planter2Field1(){
@@ -2782,8 +2643,8 @@ nm_Planter2Field1(){
 		GuiControl,enable, Planter2Until2
 	}
 	nm_Planter2Field2()
-	IniWrite, %Planter2Field1%, nm_config.ini, Planters, Planter2Field1
-	IniWrite, %Planter2Until1%, nm_config.ini, Planters, Planter2Until1
+	IniWrite, %Planter2Field1%, settings\nm_config.ini, Planters, Planter2Field1
+	IniWrite, %Planter2Until1%, settings\nm_config.ini, Planters, Planter2Until1
 }
 nm_Planter2Field2(){
 	GuiControlGet Planter2Field2
@@ -2797,8 +2658,8 @@ nm_Planter2Field2(){
 		GuiControl,enable, Planter1Field3
 		GuiControl,enable, Planter1Until3
 	}
-	IniWrite, %Planter2Field2%, nm_config.ini, Planters, Planter2Field2
-	IniWrite, %Planter2Until2%, nm_config.ini, Planters, Planter2Until2
+	IniWrite, %Planter2Field2%, settings\nm_config.ini, Planters, Planter2Field2
+	IniWrite, %Planter2Until2%, settings\nm_config.ini, Planters, Planter2Until2
 }
 nm_Planter2Field3(){
 	GuiControlGet Planter2Field3
@@ -2812,14 +2673,14 @@ nm_Planter2Field3(){
 		GuiControl,enable, Planter2Field4
 		GuiControl,enable, Planter2Until4
 	}
-	IniWrite, %Planter2Field3%, nm_config.ini, Planters, Planter2Field3
-	IniWrite, %Planter2Until3%, nm_config.ini, Planters, Planter2Until3
+	IniWrite, %Planter2Field3%, settings\nm_config.ini, Planters, Planter2Field3
+	IniWrite, %Planter2Until3%, settings\nm_config.ini, Planters, Planter2Until3
 }
 nm_Planter2Field4(){
 	GuiControlGet Planter2Field4
 	GuiControlGet Planter2Until4
-	IniWrite, %Planter2Field4%, nm_config.ini, Planters, Planter2Field4
-	IniWrite, %Planter2Until4%, nm_config.ini, Planters, Planter2Until4
+	IniWrite, %Planter2Field4%, settings\nm_config.ini, Planters, Planter2Field4
+	IniWrite, %Planter2Until4%, settings\nm_config.ini, Planters, Planter2Until4
 }
 nm_Planter3Field1(){
 	GuiControlGet Planter3Field1
@@ -2840,8 +2701,8 @@ nm_Planter3Field1(){
 		GuiControl,enable, Planter3Until2
 	}
 	nm_Planter3Field2()
-	IniWrite, %Planter3Field1%, nm_config.ini, Planters, Planter3Field1
-	IniWrite, %Planter3Until1%, nm_config.ini, Planters, Planter3Until1
+	IniWrite, %Planter3Field1%, settings\nm_config.ini, Planters, Planter3Field1
+	IniWrite, %Planter3Until1%, settings\nm_config.ini, Planters, Planter3Until1
 }
 nm_Planter3Field2(){
 	GuiControlGet Planter3Field2
@@ -2855,8 +2716,8 @@ nm_Planter3Field2(){
 		GuiControl,enable, Planter3Field3
 		GuiControl,enable, Planter3Until3
 	}
-	IniWrite, %Planter3Field2%, nm_config.ini, Planters, Planter3Field2
-	IniWrite, %Planter3Until2%, nm_config.ini, Planters, Planter3Until2
+	IniWrite, %Planter3Field2%, settings\nm_config.ini, Planters, Planter3Field2
+	IniWrite, %Planter3Until2%, settings\nm_config.ini, Planters, Planter3Until2
 }
 nm_Planter3Field3(){
 	GuiControlGet Planter3Field3
@@ -2870,14 +2731,14 @@ nm_Planter3Field3(){
 		GuiControl,enable, Planter3Field4
 		GuiControl,enable, Planter3Until4
 	}
-	IniWrite, %Planter3Field3%, nm_config.ini, Planters, Planter3Field3
-	IniWrite, %Planter3Until3%, nm_config.ini, Planters, Planter3Until3
+	IniWrite, %Planter3Field3%, settings\nm_config.ini, Planters, Planter3Field3
+	IniWrite, %Planter3Until3%, settings\nm_config.ini, Planters, Planter3Until3
 }
 nm_Planter3Field4(){
 	GuiControlGet Planter3Field4
 	GuiControlGet Planter3Until4
-	IniWrite, %Planter3Field4%, nm_config.ini, Planters, Planter3Field4
-	IniWrite, %Planter3Until4%, nm_config.ini, Planters, Planter3Until4
+	IniWrite, %Planter3Field4%, settings\nm_config.ini, Planters, Planter3Field4
+	IniWrite, %Planter3Until4%, settings\nm_config.ini, Planters, Planter3Until4
 }
 nm_SaveGather(){
 	loop 3 {
@@ -2911,21 +2772,21 @@ nm_SaveGather(){
 		FieldRotateDirectionN:=FieldRotateDirection%A_Index%
 		FieldRotateTimesN:=FieldRotateTimes%A_Index%
 		FieldDriftCheckN:=FieldDriftCheck%A_Index%
-		;IniWrite, %FieldNameN%, nm_config.ini, Gather, FieldName%A_Index%
-		IniWrite, %FieldPatternN%, nm_config.ini, Gather, FieldPattern%A_Index%
-		IniWrite, %FieldPatternSizeN%, nm_config.ini, Gather, FieldPatternSize%A_Index%
-		IniWrite, %FieldPatternRepsN%, nm_config.ini, Gather, FieldPatternReps%A_Index%
-		IniWrite, %FieldPatternShiftN%, nm_config.ini, Gather, FieldPatternShift%A_Index%
-		IniWrite, %FieldPatternInvertFBN%, nm_config.ini, Gather, FieldPatternInvertFB%A_Index%
-		IniWrite, %FieldPatternInvertLRN%, nm_config.ini, Gather, FieldPatternInvertLR%A_Index%
-		IniWrite, %FieldUntilMinsN%, nm_config.ini, Gather, FieldUntilMins%A_Index%
-		IniWrite, %FieldUntilPackN%, nm_config.ini, Gather, FieldUntilPack%A_Index%
-		IniWrite, %FieldReturnTypeN%, nm_config.ini, Gather, FieldReturnType%A_Index%
-		IniWrite, %FieldSprinklerLocN%, nm_config.ini, Gather, FieldSprinklerLoc%A_Index%
-		IniWrite, %FieldSprinklerDistN%, nm_config.ini, Gather, FieldSprinklerDist%A_Index%
-		IniWrite, %FieldRotateDirectionN%, nm_config.ini, Gather, FieldRotateDirection%A_Index%
-		IniWrite, %FieldRotateTimesN%, nm_config.ini, Gather, FieldRotateTimes%A_Index%
-		IniWrite, %FieldDriftCheckN%, nm_config.ini, Gather, FieldDriftCheck%A_Index%
+		;IniWrite, %FieldNameN%, settings\nm_config.ini, Gather, FieldName%A_Index%
+		IniWrite, %FieldPatternN%, settings\nm_config.ini, Gather, FieldPattern%A_Index%
+		IniWrite, %FieldPatternSizeN%, settings\nm_config.ini, Gather, FieldPatternSize%A_Index%
+		IniWrite, %FieldPatternRepsN%, settings\nm_config.ini, Gather, FieldPatternReps%A_Index%
+		IniWrite, %FieldPatternShiftN%, settings\nm_config.ini, Gather, FieldPatternShift%A_Index%
+		IniWrite, %FieldPatternInvertFBN%, settings\nm_config.ini, Gather, FieldPatternInvertFB%A_Index%
+		IniWrite, %FieldPatternInvertLRN%, settings\nm_config.ini, Gather, FieldPatternInvertLR%A_Index%
+		IniWrite, %FieldUntilMinsN%, settings\nm_config.ini, Gather, FieldUntilMins%A_Index%
+		IniWrite, %FieldUntilPackN%, settings\nm_config.ini, Gather, FieldUntilPack%A_Index%
+		IniWrite, %FieldReturnTypeN%, settings\nm_config.ini, Gather, FieldReturnType%A_Index%
+		IniWrite, %FieldSprinklerLocN%, settings\nm_config.ini, Gather, FieldSprinklerLoc%A_Index%
+		IniWrite, %FieldSprinklerDistN%, settings\nm_config.ini, Gather, FieldSprinklerDist%A_Index%
+		IniWrite, %FieldRotateDirectionN%, settings\nm_config.ini, Gather, FieldRotateDirection%A_Index%
+		IniWrite, %FieldRotateTimesN%, settings\nm_config.ini, Gather, FieldRotateTimes%A_Index%
+		IniWrite, %FieldDriftCheckN%, settings\nm_config.ini, Gather, FieldDriftCheck%A_Index%
 	}
 }
 nm_saveCollect(){
@@ -3002,43 +2863,43 @@ nm_saveCollect(){
 	GuiControlGet TunnelBearBabyCheck
 	GuiControlGet KingBeetleCheck
 	GuiControlGet KingBeetleBabyCheck
-	IniWrite, %ClockCheck%, nm_config.ini, Collect, ClockCheck
-	IniWrite, %MondoBuffCheck%, nm_config.ini, Collect, MondoBuffCheck
-	IniWrite, %MondoAction%, nm_config.ini, Collect, MondoAction
-	IniWrite, %AntPassCheck%, nm_config.ini, Collect, AntPassCheck
-	IniWrite, %AntPassAction%, nm_config.ini, Collect, AntPassAction
-	IniWrite, %HoneyDisCheck%, nm_config.ini, Collect, HoneyDisCheck
-	IniWrite, %TreatDisCheck%, nm_config.ini, Collect, TreatDisCheck
-	IniWrite, %BlueberryDisCheck%, nm_config.ini, Collect, BlueberryDisCheck
-	IniWrite, %StrawberryDisCheck%, nm_config.ini, Collect, StrawberryDisCheck
-	IniWrite, %CoconutDisCheck%, nm_config.ini, Collect, CoconutDisCheck
-	IniWrite, %RoyalJellyDisCheck%, nm_config.ini, Collect, RoyalJellyDisCheck
-	IniWrite, %GlueDisCheck%, nm_config.ini, Collect, GlueDisCheck
-	IniWrite, %StockingsCheck%, nm_config.ini, Collect, StockingsCheck
-	IniWrite, %WreathCheck%, nm_config.ini, Collect, WreathCheck
-	IniWrite, %FeastCheck%, nm_config.ini, Collect, FeastCheck
-	IniWrite, %CandlesCheck%, nm_config.ini, Collect, CandlesCheck
-	IniWrite, %SamovarCheck%, nm_config.ini, Collect, SamovarCheck
-	IniWrite, %LidArtCheck%, nm_config.ini, Collect, LidArtCheck
-	IniWrite, %GiftedViciousCheck%, nm_config.ini, Collect, GiftedViciousCheck
-	IniWrite, %BugrunInterruptCheck%, nm_config.ini, Collect, BugrunInterruptCheck
-	IniWrite, %BugrunLadybugsCheck%, nm_config.ini, Collect, BugrunLadybugsCheck
-	IniWrite, %BugrunRhinoBeetlesCheck%, nm_config.ini, Collect, BugrunRhinoBeetlesCheck
-	IniWrite, %BugrunSpiderCheck%, nm_config.ini, Collect, BugrunSpiderCheck
-	IniWrite, %BugrunMantisCheck%, nm_config.ini, Collect, BugrunMantisCheck
-	IniWrite, %BugrunScorpionsCheck%, nm_config.ini, Collect, BugrunScorpionsCheck
-	IniWrite, %BugrunWerewolfCheck%, nm_config.ini, Collect, BugrunWerewolfCheck
-	IniWrite, %BugrunLadybugsLoot%, nm_config.ini, Collect, BugrunLadybugsLoot
-	IniWrite, %BugrunRhinoBeetlesLoot%, nm_config.ini, Collect, BugrunRhinoBeetlesLoot
-	IniWrite, %BugrunSpiderLoot%, nm_config.ini, Collect, BugrunSpiderLoot
-	IniWrite, %BugrunMantisLoot%, nm_config.ini, Collect, BugrunMantisLoot
-	IniWrite, %BugrunScorpionsLoot%, nm_config.ini, Collect, BugrunScorpionsLoot
-	IniWrite, %BugrunWerewolfLoot%, nm_config.ini, Collect, BugrunWerewolfLoot
-	IniWrite, %StingerCheck%, nm_config.ini, Collect, StingerCheck
-	IniWrite, %TunnelBearCheck%, nm_config.ini, Collect, TunnelBearCheck
-	IniWrite, %TunnelBearBabyCheck%, nm_config.ini, Collect, TunnelBearBabyCheck
-	IniWrite, %KingBeetleCheck%, nm_config.ini, Collect, KingBeetleCheck
-	IniWrite, %KingBeetleBabyCheck%, nm_config.ini, Collect, KingBeetleBabyCheck
+	IniWrite, %ClockCheck%, settings\nm_config.ini, Collect, ClockCheck
+	IniWrite, %MondoBuffCheck%, settings\nm_config.ini, Collect, MondoBuffCheck
+	IniWrite, %MondoAction%, settings\nm_config.ini, Collect, MondoAction
+	IniWrite, %AntPassCheck%, settings\nm_config.ini, Collect, AntPassCheck
+	IniWrite, %AntPassAction%, settings\nm_config.ini, Collect, AntPassAction
+	IniWrite, %HoneyDisCheck%, settings\nm_config.ini, Collect, HoneyDisCheck
+	IniWrite, %TreatDisCheck%, settings\nm_config.ini, Collect, TreatDisCheck
+	IniWrite, %BlueberryDisCheck%, settings\nm_config.ini, Collect, BlueberryDisCheck
+	IniWrite, %StrawberryDisCheck%, settings\nm_config.ini, Collect, StrawberryDisCheck
+	IniWrite, %CoconutDisCheck%, settings\nm_config.ini, Collect, CoconutDisCheck
+	IniWrite, %RoyalJellyDisCheck%, settings\nm_config.ini, Collect, RoyalJellyDisCheck
+	IniWrite, %GlueDisCheck%, settings\nm_config.ini, Collect, GlueDisCheck
+	IniWrite, %StockingsCheck%, settings\nm_config.ini, Collect, StockingsCheck
+	IniWrite, %WreathCheck%, settings\nm_config.ini, Collect, WreathCheck
+	IniWrite, %FeastCheck%, settings\nm_config.ini, Collect, FeastCheck
+	IniWrite, %CandlesCheck%, settings\nm_config.ini, Collect, CandlesCheck
+	IniWrite, %SamovarCheck%, settings\nm_config.ini, Collect, SamovarCheck
+	IniWrite, %LidArtCheck%, settings\nm_config.ini, Collect, LidArtCheck
+	IniWrite, %GiftedViciousCheck%, settings\nm_config.ini, Collect, GiftedViciousCheck
+	IniWrite, %BugrunInterruptCheck%, settings\nm_config.ini, Collect, BugrunInterruptCheck
+	IniWrite, %BugrunLadybugsCheck%, settings\nm_config.ini, Collect, BugrunLadybugsCheck
+	IniWrite, %BugrunRhinoBeetlesCheck%, settings\nm_config.ini, Collect, BugrunRhinoBeetlesCheck
+	IniWrite, %BugrunSpiderCheck%, settings\nm_config.ini, Collect, BugrunSpiderCheck
+	IniWrite, %BugrunMantisCheck%, settings\nm_config.ini, Collect, BugrunMantisCheck
+	IniWrite, %BugrunScorpionsCheck%, settings\nm_config.ini, Collect, BugrunScorpionsCheck
+	IniWrite, %BugrunWerewolfCheck%, settings\nm_config.ini, Collect, BugrunWerewolfCheck
+	IniWrite, %BugrunLadybugsLoot%, settings\nm_config.ini, Collect, BugrunLadybugsLoot
+	IniWrite, %BugrunRhinoBeetlesLoot%, settings\nm_config.ini, Collect, BugrunRhinoBeetlesLoot
+	IniWrite, %BugrunSpiderLoot%, settings\nm_config.ini, Collect, BugrunSpiderLoot
+	IniWrite, %BugrunMantisLoot%, settings\nm_config.ini, Collect, BugrunMantisLoot
+	IniWrite, %BugrunScorpionsLoot%, settings\nm_config.ini, Collect, BugrunScorpionsLoot
+	IniWrite, %BugrunWerewolfLoot%, settings\nm_config.ini, Collect, BugrunWerewolfLoot
+	IniWrite, %StingerCheck%, settings\nm_config.ini, Collect, StingerCheck
+	IniWrite, %TunnelBearCheck%, settings\nm_config.ini, Collect, TunnelBearCheck
+	IniWrite, %TunnelBearBabyCheck%, settings\nm_config.ini, Collect, TunnelBearBabyCheck
+	IniWrite, %KingBeetleCheck%, settings\nm_config.ini, Collect, KingBeetleCheck
+	IniWrite, %KingBeetleBabyCheck%, settings\nm_config.ini, Collect, KingBeetleBabyCheck
 	;send StingerCheck to background.ahk
 	Prev_DetectHiddenWindows := A_DetectHiddenWindows
 	Prev_TitleMatchMode := A_TitleMatchMode
@@ -3188,32 +3049,32 @@ nm_saveBoost(){
 	GuiControlGet HotkeyTimeUnits6
 	GuiControlGet HotkeyTimeUnits7
 	GuiControlGet BoostChaserCheck
-	IniWrite, %FieldBoosterMins%, nm_config.ini, Boost, FieldBoosterMins
-	IniWrite, %HotkeyTime2%, nm_config.ini, Boost, HotkeyTime2
-	IniWrite, %HotkeyTime3%, nm_config.ini, Boost, HotkeyTime3
-	IniWrite, %HotkeyTime4%, nm_config.ini, Boost, HotkeyTime4
-	IniWrite, %HotkeyTime5%, nm_config.ini, Boost, HotkeyTime5
-	IniWrite, %HotkeyTime6%, nm_config.ini, Boost, HotkeyTime6
-	IniWrite, %HotkeyTime7%, nm_config.ini, Boost, HotkeyTime7
-	IniWrite, %HotkeyTimeUnits2%, nm_config.ini, Boost, HotkeyTimeUnits2
-	IniWrite, %HotkeyTimeUnits3%, nm_config.ini, Boost, HotkeyTimeUnits3
-	IniWrite, %HotkeyTimeUnits4%, nm_config.ini, Boost, HotkeyTimeUnits4
-	IniWrite, %HotkeyTimeUnits5%, nm_config.ini, Boost, HotkeyTimeUnits5
-	IniWrite, %HotkeyTimeUnits6%, nm_config.ini, Boost, HotkeyTimeUnits6
-	IniWrite, %HotkeyTimeUnits7%, nm_config.ini, Boost, HotkeyTimeUnits7
-	IniWrite, %BoostChaserCheck%, nm_config.ini, Boost, BoostChaserCheck
+	IniWrite, %FieldBoosterMins%, settings\nm_config.ini, Boost, FieldBoosterMins
+	IniWrite, %HotkeyTime2%, settings\nm_config.ini, Boost, HotkeyTime2
+	IniWrite, %HotkeyTime3%, settings\nm_config.ini, Boost, HotkeyTime3
+	IniWrite, %HotkeyTime4%, settings\nm_config.ini, Boost, HotkeyTime4
+	IniWrite, %HotkeyTime5%, settings\nm_config.ini, Boost, HotkeyTime5
+	IniWrite, %HotkeyTime6%, settings\nm_config.ini, Boost, HotkeyTime6
+	IniWrite, %HotkeyTime7%, settings\nm_config.ini, Boost, HotkeyTime7
+	IniWrite, %HotkeyTimeUnits2%, settings\nm_config.ini, Boost, HotkeyTimeUnits2
+	IniWrite, %HotkeyTimeUnits3%, settings\nm_config.ini, Boost, HotkeyTimeUnits3
+	IniWrite, %HotkeyTimeUnits4%, settings\nm_config.ini, Boost, HotkeyTimeUnits4
+	IniWrite, %HotkeyTimeUnits5%, settings\nm_config.ini, Boost, HotkeyTimeUnits5
+	IniWrite, %HotkeyTimeUnits6%, settings\nm_config.ini, Boost, HotkeyTimeUnits6
+	IniWrite, %HotkeyTimeUnits7%, settings\nm_config.ini, Boost, HotkeyTimeUnits7
+	IniWrite, %BoostChaserCheck%, settings\nm_config.ini, Boost, BoostChaserCheck
 }
 nm_BoostChaserCheck(){
 	global BoostChaserCheck
 	global AutoFieldBoostActive
 	GuiControlGet BoostChaserCheck
-	IniWrite, %BoostChaserCheck%, nm_config.ini, Boost, BoostChaserCheck
+	IniWrite, %BoostChaserCheck%, settings\nm_config.ini, Boost, BoostChaserCheck
 	;disable AutoFieldBoost (mutually exclusive features)
 	if(BoostChaserCheck) {
 		AutoFieldBoostActive:=0
 		GuiControl,afb:, AutoFieldBoostActive, %AutoFieldBoostActive%
 		GuiControl,, AutoFieldBoostActive, %AutoFieldBoostActive%
-		IniWrite, %AutoFieldBoostActive%, nm_config.ini, Boost, AutoFieldBoostActive
+		IniWrite, %AutoFieldBoostActive%, settings\nm_config.ini, Boost, AutoFieldBoostActive
 		if(AutoFieldBoostActive)
 			GuiControl,1:,AutoFieldBoostButton, Auto Field Boost`n[ON]
 		else if(not AutoFieldBoostActive)
@@ -3277,7 +3138,7 @@ nm_FieldBooster1(){
 		GuiControl, enable, FieldBooster2
 	}
 	nm_FieldBooster2()
-	IniWrite, %FieldBooster1%, nm_config.ini, Boost, FieldBooster1
+	IniWrite, %FieldBooster1%, settings\nm_config.ini, Boost, FieldBooster1
 }
 nm_FieldBooster2(){
 	global FieldBooster2
@@ -3293,7 +3154,7 @@ nm_FieldBooster2(){
 		GuiControl, enable, FieldBooster3
 	}
 	nm_FieldBooster3()
-	IniWrite, %FieldBooster2%, nm_config.ini, Boost, FieldBooster2
+	IniWrite, %FieldBooster2%, settings\nm_config.ini, Boost, FieldBooster2
 }
 nm_FieldBooster3(){
 	global FieldBooster3
@@ -3302,7 +3163,7 @@ nm_FieldBooster3(){
 		FieldBooster3=None
 		GuiControl, ChooseString, FieldBooster3, None
 	}
-	IniWrite, %FieldBooster3%, nm_config.ini, Boost, FieldBooster3
+	IniWrite, %FieldBooster3%, settings\nm_config.ini, Boost, FieldBooster3
 }
 nm_HotkeyWhile2(){
 	global HotkeyWhile2, PFieldBoosted
@@ -3346,7 +3207,7 @@ nm_HotkeyWhile2(){
 		GuiControl,show, HotkeyTimeUnits2
 		GuiControl, hide, HBText2
 	}
-	IniWrite, %HotkeyWhile2%, nm_config.ini, Boost, HotkeyWhile2
+	IniWrite, %HotkeyWhile2%, settings\nm_config.ini, Boost, HotkeyWhile2
 }
 nm_HotkeyWhile3(){
 	global HotkeyWhile3, PFieldBoosted
@@ -3390,7 +3251,7 @@ nm_HotkeyWhile3(){
 		GuiControl,show, HotkeyTimeUnits3
 		GuiControl, hide, HBText3
 	}
-	IniWrite, %HotkeyWhile3%, nm_config.ini, Boost, HotkeyWhile3
+	IniWrite, %HotkeyWhile3%, settings\nm_config.ini, Boost, HotkeyWhile3
 }
 nm_HotkeyWhile4(){
 	global HotkeyWhile4, PFieldBoosted
@@ -3434,7 +3295,7 @@ nm_HotkeyWhile4(){
 		GuiControl,show, HotkeyTimeUnits4
 		GuiControl, hide, HBText4
 	}
-	IniWrite, %HotkeyWhile4%, nm_config.ini, Boost, HotkeyWhile4
+	IniWrite, %HotkeyWhile4%, settings\nm_config.ini, Boost, HotkeyWhile4
 }
 nm_HotkeyWhile5(){
 	global HotkeyWhile5, PFieldBoosted
@@ -3478,7 +3339,7 @@ nm_HotkeyWhile5(){
 		GuiControl,show, HotkeyTimeUnits5
 		GuiControl, hide, HBText5
 	}
-	IniWrite, %HotkeyWhile5%, nm_config.ini, Boost, HotkeyWhile5
+	IniWrite, %HotkeyWhile5%, settings\nm_config.ini, Boost, HotkeyWhile5
 }
 nm_HotkeyWhile6(){
 	global HotkeyWhile6, PFieldBoosted
@@ -3522,7 +3383,7 @@ nm_HotkeyWhile6(){
 		GuiControl,show, HotkeyTimeUnits6
 		GuiControl, hide, HBText6
 	}
-	IniWrite, %HotkeyWhile6%, nm_config.ini, Boost, HotkeyWhile6
+	IniWrite, %HotkeyWhile6%, settings\nm_config.ini, Boost, HotkeyWhile6
 }
 nm_HotkeyWhile7(){
 	global HotkeyWhile7, PFieldBoosted
@@ -3566,7 +3427,7 @@ nm_HotkeyWhile7(){
 		GuiControl,show, HotkeyTimeUnits7
 		GuiControl, hide, HBText7
 	}
-	IniWrite, %HotkeyWhile7%, nm_config.ini, Boost, HotkeyWhile7
+	IniWrite, %HotkeyWhile7%, settings\nm_config.ini, Boost, HotkeyWhile7
 }
 nm_savequest(){
 	GuiControlGet, PolarQuestCheck
@@ -3575,16 +3436,16 @@ nm_savequest(){
 	;GuiControlGet, BlackQuestCheck
 	GuiControlGet, QuestGatherMins
 	GuiControlGet, QuestGatherReturnBy
-	IniWrite, %PolarQuestCheck%, nm_config.ini, Quests, PolarQuestCheck
-	IniWrite, %PolarQuestGatherInterruptCheck%, nm_config.ini, Quests, PolarQuestGatherInterruptCheck
-	IniWrite, %HoneyQuestCheck%, nm_config.ini, Quests, HoneyQuestCheck
-	;IniWrite, %BlackQuestCheck%, nm_config.ini, Quests, BlackQuestCheck
-	IniWrite, %QuestGatherMins%, nm_config.ini, Quests, QuestGatherMins
-	IniWrite, %QuestGatherReturnBy%, nm_config.ini, Quests, QuestGatherReturnBy
+	IniWrite, %PolarQuestCheck%, settings\nm_config.ini, Quests, PolarQuestCheck
+	IniWrite, %PolarQuestGatherInterruptCheck%, settings\nm_config.ini, Quests, PolarQuestGatherInterruptCheck
+	IniWrite, %HoneyQuestCheck%, settings\nm_config.ini, Quests, HoneyQuestCheck
+	;IniWrite, %BlackQuestCheck%, settings\nm_config.ini, Quests, BlackQuestCheck
+	IniWrite, %QuestGatherMins%, settings\nm_config.ini, Quests, QuestGatherMins
+	IniWrite, %QuestGatherReturnBy%, settings\nm_config.ini, Quests, QuestGatherReturnBy
 }
 nm_BlackQuestCheck(){
 	GuiControlGet, BlackQuestCheck
-	IniWrite, %BlackQuestCheck%, nm_config.ini, Quests, BlackQuestCheck
+	IniWrite, %BlackQuestCheck%, settings\nm_config.ini, Quests, BlackQuestCheck
 	if(BlackQuestCheck) {
 		msgbox,0,Black Bear Quest, This option only works for the repeatable quests.  You must first complete the main questline before this option will work properly.
 	}
@@ -3592,8 +3453,8 @@ nm_BlackQuestCheck(){
 nm_BuckoQuestCheck(){
 	GuiControlGet, BuckoQuestCheck
 	GuiControlGet, BuckoQuestGatherInterruptCheck
-	IniWrite, %BuckoQuestCheck%, nm_config.ini, Quests, BuckoQuestCheck
-	IniWrite, %BuckoQuestGatherInterruptCheck%, nm_config.ini, Quests, BuckoQuestGatherInterruptCheck
+	IniWrite, %BuckoQuestCheck%, settings\nm_config.ini, Quests, BuckoQuestCheck
+	IniWrite, %BuckoQuestGatherInterruptCheck%, settings\nm_config.ini, Quests, BuckoQuestGatherInterruptCheck
 	if(BuckoQuestCheck) {
 		GuiControl,,AntPassCheck, 1
 		GuiControl,ChooseString, AntPassAction, Pass
@@ -3604,8 +3465,8 @@ nm_BuckoQuestCheck(){
 nm_RileyQuestCheck(){
 	GuiControlGet, RileyQuestCheck
 	GuiControlGet, RileyQuestGatherInterruptCheck
-	IniWrite, %RileyQuestCheck%, nm_config.ini, Quests, RileyQuestCheck
-	IniWrite, %RileyQuestGatherInterruptCheck%, nm_config.ini, Quests, RileyQuestGatherInterruptCheck
+	IniWrite, %RileyQuestCheck%, settings\nm_config.ini, Quests, RileyQuestCheck
+	IniWrite, %RileyQuestGatherInterruptCheck%, settings\nm_config.ini, Quests, RileyQuestGatherInterruptCheck
 	if(RileyQuestCheck) {
 		GuiControl,,AntPassCheck, 1
 		GuiControl,ChooseString, AntPassAction, Pass
@@ -3623,15 +3484,15 @@ nm_ResetTotalStats(){
 	global TotalPlantersCollected:=0
 	global TotalQuestsComplete:=0
 	global TotalDisconnects:=0
-	IniWrite, %TotalRuntime%, nm_config.ini, Status, TotalRuntime
-	IniWrite, %TotalGatherTime%, nm_config.ini, Status, TotalGatherTime
-	IniWrite, %TotalConvertTime%, nm_config.ini, Status, TotalConvertTime
-	IniWrite, %TotalViciousKills%, nm_config.ini, Status, TotalViciousKills
-	IniWrite, %TotalBossKills%, nm_config.ini, Status, TotalBossKills
-	IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-	IniWrite, %TotalPlantersCollected%, nm_config.ini, Status, TotalPlantersCollected
-	IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
-	IniWrite, %TotalDisconnects%, nm_config.ini, Status, TotalDisconnects
+	IniWrite, %TotalRuntime%, settings\nm_config.ini, Status, TotalRuntime
+	IniWrite, %TotalGatherTime%, settings\nm_config.ini, Status, TotalGatherTime
+	IniWrite, %TotalConvertTime%, settings\nm_config.ini, Status, TotalConvertTime
+	IniWrite, %TotalViciousKills%, settings\nm_config.ini, Status, TotalViciousKills
+	IniWrite, %TotalBossKills%, settings\nm_config.ini, Status, TotalBossKills
+	IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+	IniWrite, %TotalPlantersCollected%, settings\nm_config.ini, Status, TotalPlantersCollected
+	IniWrite, %TotalQuestsComplete%, settings\nm_config.ini, Status, TotalQuestsComplete
+	IniWrite, %TotalDisconnects%, settings\nm_config.ini, Status, TotalDisconnects
 	nm_setStats()
 }
 ;;;;;;;;; START AFB
@@ -3659,8 +3520,8 @@ nm_autoFieldBoostGui(){
 	Menu, tray, Icon, auryn.ico, 1, 1
 	gui afb:+border
 	gui afb:font, s8 w400 cBlack
-	IniRead, AutoFieldBoostActive, nm_config.ini, Boost, AutoFieldBoostActive
-	IniRead, AutoFieldBoostRefresh, nm_config.ini, Boost, AutoFieldBoostRefresh
+	IniRead, AutoFieldBoostActive, settings\nm_config.ini, Boost, AutoFieldBoostActive
+	IniRead, AutoFieldBoostRefresh, settings\nm_config.ini, Boost, AutoFieldBoostRefresh
 	Gui, afb:Add, Checkbox, x5 y5 vAutoFieldBoostActive gnm_autoFieldBoostCheck checked%AutoFieldBoostActive%, Activate Automatic Field Boost for Gathering Field:
 	gui afb:font, s8 w800 cBlue
 	Gui, afb:Add, text, x263 y5 left vAFBcurrentField, %currentField%
@@ -3674,9 +3535,9 @@ nm_autoFieldBoostGui(){
 	gui afb:add, text,x20 y70 +left +BackgroundTrans,Use
 	gui afb:add, text,x5 y73 +left +BackgroundTrans,___________________________________________________________
 	gui afb:font, s10 w400 cBlack
-	IniRead, AFBDiceEnable, nm_config.ini, Boost, AFBDiceEnable
-	IniRead, AFBGlitterEnable, nm_config.ini, Boost, AFBGlitterEnable
-	IniRead, AFBFieldEnable, nm_config.ini, Boost, AFBFieldEnable
+	IniRead, AFBDiceEnable, settings\nm_config.ini, Boost, AFBDiceEnable
+	IniRead, AFBGlitterEnable, settings\nm_config.ini, Boost, AFBGlitterEnable
+	IniRead, AFBFieldEnable, settings\nm_config.ini, Boost, AFBFieldEnable
 	Gui, afb:Add, button, x5 y90 w10 h15 gnm_AFBDiceEnableHelpButton, ?
 	Gui, afb:Add, Checkbox, x20 y90 vAFBDiceEnable gnm_AFBDiceEnableCheck checked%AFBDiceEnable%, Dice:
 	Gui, afb:Add, button, x5 y113 w10 h15 gnm_AFBGlitterEnableHelpButton, ?
@@ -3685,8 +3546,8 @@ nm_autoFieldBoostGui(){
 	Gui, afb:Add, Checkbox, x20 y136 vAFBFieldEnable gnm_saveAFBConfig checked%AFBFieldEnable%, Free Field Boosters
 	gui afb:font, s8 w400 cBlack
 	gui afb:add, text,x80 y70 +left +BackgroundTrans,Hotbar Slot
-	IniRead, AFBDiceHotbar, nm_config.ini, Boost, AFBDiceHotbar
-	IniRead, AFBGlitterHotbar, nm_config.ini, Boost, AFBGlitterHotbar
+	IniRead, AFBDiceHotbar, settings\nm_config.ini, Boost, AFBDiceHotbar
+	IniRead, AFBGlitterHotbar, settings\nm_config.ini, Boost, AFBGlitterHotbar
 	Gui, afb:Add, DropDownList, x80 y88 w50 h120 vAFBDiceHotbar gnm_saveAFBConfig, %AFBDiceHotbar%||None|2|3|4|5|6|7
 	Gui, afb:Add, DropDownList, x80 y110 w50 h120 vAFBGlitterHotbar gnm_saveAFBConfig, %AFBGlitterHotbar%||None|2|3|4|5|6|7
 	gui afb:add, text,x160 y73 +left +BackgroundTrans,|
@@ -3705,17 +3566,17 @@ nm_autoFieldBoostGui(){
 	Gui, afb:Add, button, x318 y55 w40 h15 gnm_resetUsedDice, Dice
 	Gui, afb:Add, button, x318 y70 w40 h15 gnm_resetUsedGlitter, Glitter
 	;gui afb:add, text,x155 y40 +left +BackgroundTrans,Set Limits
-	IniRead, AFBDiceLimitEnable, nm_config.ini, Boost, AFBDiceLimitEnable
+	IniRead, AFBDiceLimitEnable, settings\nm_config.ini, Boost, AFBDiceLimitEnable
 	if(not AFBDiceLimitEnable)
 		DiceSel:="None"
 	else
 		DiceSel:="Limit"
-	IniRead, AFBGlitterLimitEnable, nm_config.ini, Boost, AFBGlitterLimitEnable
+	IniRead, AFBGlitterLimitEnable, settings\nm_config.ini, Boost, AFBGlitterLimitEnable
 	if(not AFBGlitterLimitEnable)
 		GlitterSel:="None"
 	else
 		GlitterSel:="Limit"
-	IniRead, AFBHoursLimitEnable, nm_config.ini, Boost, AFBHoursLimitEnable
+	IniRead, AFBHoursLimitEnable, settings\nm_config.ini, Boost, AFBHoursLimitEnable
 	if(not AFBHoursLimitEnable)
 		HoursSel:="None"
 	else
@@ -3732,9 +3593,9 @@ nm_autoFieldBoostGui(){
 	gui afb:add, text,x305 y113 +left +BackgroundTrans,Glitter Used
 	gui afb:add, text,x240 y156 +left +BackgroundTrans,to
 	gui afb:add, text,x305 y156 +left +BackgroundTrans,Hours
-	IniRead, AFBDiceLimit, nm_config.ini, Boost, AFBDiceLimit
-	IniRead, AFBGlitterLimit, nm_config.ini, Boost, AFBGlitterLimit
-	IniRead, AFBHoursLimitNum, nm_config.ini, Boost, AFBHoursLimit
+	IniRead, AFBDiceLimit, settings\nm_config.ini, Boost, AFBDiceLimit
+	IniRead, AFBGlitterLimit, settings\nm_config.ini, Boost, AFBGlitterLimit
+	IniRead, AFBHoursLimitNum, settings\nm_config.ini, Boost, AFBHoursLimit
 	Gui, afb:Add, Edit, x255 y88 w45 h20 limit6 number vAFBDiceLimit gnm_saveAFBConfig, %AFBDiceLimit%
 	Gui, afb:Add, Edit, x255 y110 w45 h20 limit6 number vAFBGlitterLimit gnm_saveAFBConfig, %AFBGlitterLimit%
 	gui afb:add, text,x185 y136 +left +BackgroundTrans,Deactivate Field Boosting After:
@@ -3790,10 +3651,10 @@ nm_AFBHoursLimitEnableHelpButton(){
 nm_resetUsedDice(){
 	global AFBdiceUsed
 	AFBdiceUsed:=0
-	IniWrite, %AFBdiceUsed%, nm_config.ini, Boost, AFBdiceUsed	
+	IniWrite, %AFBdiceUsed%, settings\nm_config.ini, Boost, AFBdiceUsed	
 }
 nm_resetUsedGlitter(){
-	IniWrite, 0, nm_config.ini, Boost, AFBglitterUsed
+	IniWrite, 0, settings\nm_config.ini, Boost, AFBglitterUsed
 }
 nm_autoFieldBoostCheck(){
 	global BoostChaserCheck
@@ -3806,17 +3667,17 @@ nm_autoFieldBoostCheck(){
 		{
 			AutoFieldBoostActive:=1
 			Guicontrol,,AutoFieldBoostActive,1
-			IniWrite, 0, nm_config.ini, Boost, AFBdiceUsed
-			IniWrite, 0, nm_config.ini, Boost, AFBglitterUsed
+			IniWrite, 0, settings\nm_config.ini, Boost, AFBdiceUsed
+			IniWrite, 0, settings\nm_config.ini, Boost, AFBglitterUsed
 			BoostChaserCheck:=0
 			GuiControl,1:,BoostChaserCheck, %BoostChaserCheck%
-			IniWrite, %BoostChaserCheck%, nm_config.ini, Boost, BoostChaserCheck
+			IniWrite, %BoostChaserCheck%, settings\nm_config.ini, Boost, BoostChaserCheck
 		} else {
 			AutoFieldBoostActive:=0
 			Guicontrol,,AutoFieldBoostActive,0
 		}
 	}
-	IniWrite, %AutoFieldBoostActive%, nm_config.ini, Boost, AutoFieldBoostActive
+	IniWrite, %AutoFieldBoostActive%, settings\nm_config.ini, Boost, AutoFieldBoostActive
 	if(AutoFieldBoostActive)
 		GuiControl,1:,AutoFieldBoostButton, Auto Field Boost`n[ON]
 	else if(not AutoFieldBoostActive)
@@ -3833,14 +3694,14 @@ nm_AFBDiceEnableCheck(){
 		GuiControl afb:enable, AFBDiceHotbar
 		GuiControl afb:enable, AFBDiceLimitEnableSel
 		AFBdiceUsed:=0
-		IniWrite, %AFBdiceUsed%, nm_config.ini, Boost, AFBdiceUsed
+		IniWrite, %AFBdiceUsed%, settings\nm_config.ini, Boost, AFBdiceUsed
 		if(AFBDiceLimitEnableSel="None"){
 			GuiControl afb:disable, AFBDiceLimit
 		} else if(AFBDiceLimitEnableSel="Limit"){
 			GuiControl afb:enable, AFBDiceLimit
 		}
 	}
-	IniWrite, %AFBDiceEnable%, nm_config.ini, Boost, AFBDiceEnable
+	IniWrite, %AFBDiceEnable%, settings\nm_config.ini, Boost, AFBDiceEnable
 }
 nm_AFBGlitterEnableCheck(){
 	GuiControlGet, AFBGlitterEnable
@@ -3853,14 +3714,14 @@ nm_AFBGlitterEnableCheck(){
 		GuiControl afb:enable, AFBGlitterHotbar
 		GuiControl afb:enable, AFBGlitterLimitEnableSel
 		AFBglitterUsed:=0
-		IniWrite, %AFBglitterUsed%, nm_config.ini, Boost, AFBglitterUsed
+		IniWrite, %AFBglitterUsed%, settings\nm_config.ini, Boost, AFBglitterUsed
 		if(AFBGlitterLimitEnableSel="None"){
 			GuiControl afb:disable, AFBGlitterLimit
 		} else if(AFBGlitterLimitEnableSel="Limit"){
 			GuiControl afb:enable, AFBGlitterLimit
 		}
 	}
-	IniWrite, %AFBGlitterEnable%, nm_config.ini, Boost, AFBGlitterEnable
+	IniWrite, %AFBGlitterEnable%, settings\nm_config.ini, Boost, AFBGlitterEnable
 }
 nm_AFBDiceLimitEnable(){
 	GuiControlGet, AFBDiceLimitEnableSel
@@ -3871,7 +3732,7 @@ nm_AFBDiceLimitEnable(){
 		GuiControl afb:enable, AFBDiceLimit
 		val:=1
 	}
-	IniWrite, %val%, nm_config.ini, Boost, AFBDiceLimitEnable
+	IniWrite, %val%, settings\nm_config.ini, Boost, AFBDiceLimitEnable
 }
 nm_AFBGlitterLimitEnable(){
 	GuiControlGet, AFBGlitterLimitEnableSel
@@ -3882,7 +3743,7 @@ nm_AFBGlitterLimitEnable(){
 		GuiControl afb:enable, AFBGlitterLimit
 		val:=1
 	}
-	IniWrite, %val%, nm_config.ini, Boost, AFBGlitterLimitEnable
+	IniWrite, %val%, settings\nm_config.ini, Boost, AFBGlitterLimitEnable
 }
 nm_AFBHoursLimitEnable(){
 	global AFBHoursLimitEnable
@@ -3895,7 +3756,7 @@ nm_AFBHoursLimitEnable(){
 		val:=1
 	}
 	AFBHoursLimitEnable:=val
-	IniWrite, %val%, nm_config.ini, Boost, AFBHoursLimitEnable
+	IniWrite, %val%, settings\nm_config.ini, Boost, AFBHoursLimitEnable
 }
 nm_AFBHoursLimit(){
 	global AFBHoursLimitNum
@@ -3921,13 +3782,13 @@ nm_saveAFBConfig(){
 	GuiControlGet, AFBHoursLimit
 	GuiControlGet, AFBDiceHotbar
 	GuiControlGet, AFBGlitterHotbar
-	IniWrite, %AutoFieldBoostRefresh%, nm_config.ini, Boost, AutoFieldBoostRefresh
-	IniWrite, %AFBFieldEnable%, nm_config.ini, Boost, AFBFieldEnable
-	IniWrite, %AFBDiceLimit%, nm_config.ini, Boost, AFBDiceLimit
-	IniWrite, %AFBGlitterLimit%, nm_config.ini, Boost, AFBGlitterLimit
-	IniWrite, %AFBHoursLimit%, nm_config.ini, Boost, AFBHoursLimit
-	IniWrite, %AFBDiceHotbar%, nm_config.ini, Boost, AFBDiceHotbar
-	IniWrite, %AFBGlitterHotbar%, nm_config.ini, Boost, AFBGlitterHotbar
+	IniWrite, %AutoFieldBoostRefresh%, settings\nm_config.ini, Boost, AutoFieldBoostRefresh
+	IniWrite, %AFBFieldEnable%, settings\nm_config.ini, Boost, AFBFieldEnable
+	IniWrite, %AFBDiceLimit%, settings\nm_config.ini, Boost, AFBDiceLimit
+	IniWrite, %AFBGlitterLimit%, settings\nm_config.ini, Boost, AFBGlitterLimit
+	IniWrite, %AFBHoursLimit%, settings\nm_config.ini, Boost, AFBHoursLimit
+	IniWrite, %AFBDiceHotbar%, settings\nm_config.ini, Boost, AFBDiceHotbar
+	IniWrite, %AFBGlitterHotbar%, settings\nm_config.ini, Boost, AFBGlitterHotbar
 }
 nm_AutoFieldBoost(fieldName){
 	global FieldBooster
@@ -3951,7 +3812,7 @@ nm_AutoFieldBoost(fieldName){
 		AutoFieldBoostActive:=0
 		Guicontrol,afb:,AutoFieldBoostActive,%AutoFieldBoostActive%
 		GuiControl,1:,AutoFieldBoostButton, Auto Field Boost`n[OFF]
-		IniWrite, %AutoFieldBoostActive%, nm_config.ini, Boost, AutoFieldBoostActive
+		IniWrite, %AutoFieldBoostActive%, settings\nm_config.ini, Boost, AutoFieldBoostActive
 		return
 	}
 	
@@ -3960,8 +3821,8 @@ nm_AutoFieldBoost(fieldName){
 		if((nowUnix()-FieldLastBoosted)>=(15*60)){ ;longer than 15 mins since last boost buff
 			FieldBoostStacks:=0
 			FieldLastBoostedBy:="None"
-			IniWrite, %FieldBoostStacks%, nm_config.ini, Boost, FieldBoostStacks
-			IniWrite, %FieldLastBoostedBy%, nm_config.ini, Boost, FieldLastBoostedBy
+			IniWrite, %FieldBoostStacks%, settings\nm_config.ini, Boost, FieldBoostStacks
+			IniWrite, %FieldLastBoostedBy%, settings\nm_config.ini, Boost, FieldLastBoostedBy
 		}
 		;free booster first
 		if(AFBFieldEnable){
@@ -3969,7 +3830,7 @@ nm_AutoFieldBoost(fieldName){
 			if(FieldBooster[fieldName].booster!="none") {
 				booster:=FieldBooster[fieldName].booster
 				boosterTimer:=("Last" . booster . "Boost")
-				IniRead, boosterTimer, nm_config.ini, Boost, %boosterTimer%
+				IniRead, boosterTimer, settings\nm_config.ini, Boost, %boosterTimer%
 				if (nowUnix() - boosterTimer > 3600){
 					AFBuseBooster:=1
 				}
@@ -4191,11 +4052,11 @@ nm_fieldBoostBooster(){
 		nm_setStatus(0, "Field was Boosted: Booster")
 		FieldLastBoosted:=nowUnix()
 		FieldLastBoostedBy:=boosterName
-		IniWrite, %FieldLastBoosted%, nm_config.ini, Boost, FieldLastBoosted
-		IniWrite, %FieldLastBoosted%, nm_config.ini, Boost, %boosterTimer%
-		IniWrite, %FieldLastBoostedBy%, nm_config.ini, Boost, FieldLastBoostedBy
+		IniWrite, %FieldLastBoosted%, settings\nm_config.ini, Boost, FieldLastBoosted
+		IniWrite, %FieldLastBoosted%, settings\nm_config.ini, Boost, %boosterTimer%
+		IniWrite, %FieldLastBoostedBy%, settings\nm_config.ini, Boost, FieldLastBoostedBy
 		FieldBoostStacks:=FieldBoostStacks+FieldBooster[CurrentField].stacks
-		IniWrite, %FieldBoostStacks%, nm_config.ini, Boost, FieldBoostStacks
+		IniWrite, %FieldBoostStacks%, settings\nm_config.ini, Boost, FieldBoostStacks
 		if(FieldBoostStacks>4)
 			return
 	}
@@ -4203,17 +4064,17 @@ nm_fieldBoostBooster(){
 	;is it dice?
 	if(AFBDiceEnable && (FieldLastBoostedBy="bbooster" || FieldLastBoostedBy="rbooster" || FieldLastBoostedBy="mbooster"|| FieldLastBoostedBy="glitter" || (FieldLastBoostedBy="dice" && not AFBGlitterEnable))) {
 		FieldNextBoostedBy:="dice"
-		IniWrite, %FieldNextBoostedBy%, nm_config.ini, Boost, FieldNextBoostedBy
+		IniWrite, %FieldNextBoostedBy%, settings\nm_config.ini, Boost, FieldNextBoostedBy
 	}
 	;is it glitter?
 	else if(AFBGlitterEnable && (FieldLastBoostedBy="dice" || ((FieldLastBoostedBy="bbooster" || FieldLastBoostedBy="rbooster" || FieldLastBoostedBy="mbooster")|| not AFBDiceEnable) || (FieldLastBoostedBy="glitter" && not AFBDiceEnable))) {
 		FieldNextBoostedBy:="glitter"
-		IniWrite, %FieldNextBoostedBy%, nm_config.ini, Boost, FieldNextBoostedBy
+		IniWrite, %FieldNextBoostedBy%, settings\nm_config.ini, Boost, FieldNextBoostedBy
 	}
 	;is it booster?
 	else if(AFBFieldEnable && not AFBDiceEnable && not AFBGlitterEnable) {
 		FieldNextBoostedBy:=boosterName
-		IniWrite, %FieldNextBoostedBy%, nm_config.ini, Boost, FieldNextBoostedBy
+		IniWrite, %FieldNextBoostedBy%, settings\nm_config.ini, Boost, FieldNextBoostedBy
 	}
 }
 nm_fieldBoostDice(){
@@ -4236,18 +4097,18 @@ nm_fieldBoostDice(){
 	if(not nm_fieldBoostCheck(CurrentField)) {
 		send, %AFBDiceHotbar%
 		AFBdiceUsed:=AFBdiceUsed+1
-		IniWrite, %AFBdiceUsed%, nm_config.ini, Boost, AFBdiceUsed
+		IniWrite, %AFBdiceUsed%, settings\nm_config.ini, Boost, AFBdiceUsed
 		if(AFBDiceLimitEnable && AFBdiceUsed >= AFBDiceLimit) {
 			AFBrollingDice:=0
 			AFBDiceEnable:=0
 			Guicontrol,afb:,AFBDiceEnable,%AFBDiceEnable%
-			IniWrite, %AFBDiceEnable%, nm_config.ini, Boost, AFBDiceEnable
+			IniWrite, %AFBDiceEnable%, settings\nm_config.ini, Boost, AFBDiceEnable
 		}
 		if(not AFBGlitterEnable and not AFBDiceEnable){
 			AutoFieldBoostActive:=0
 			Guicontrol,afb:,AutoFieldBoostActive,%AutoFieldBoostActive%
 			GuiControl,1:,AutoFieldBoostButton, Auto Field Boost`n[OFF]
-			IniWrite, %AutoFieldBoostActive%, nm_config.ini, Boost, AutoFieldBoostActive
+			IniWrite, %AutoFieldBoostActive%, settings\nm_config.ini, Boost, AutoFieldBoostActive
 		}
 	} else {
 		AFBrollingDice:=0
@@ -4255,38 +4116,38 @@ nm_fieldBoostDice(){
 		if(FieldLastBoostedBy!="dice" || FieldBoostStacks=0) {
 			FieldBoostStacks:=FieldBoostStacks+1
 			FieldLastBoostedBy:="dice"
-			IniWrite, %FieldLastBoostedBy%, nm_config.ini, Boost, FieldLastBoostedBy
-			IniWrite, %FieldBoostStacks%, nm_config.ini, Boost, FieldBoostStacks
+			IniWrite, %FieldLastBoostedBy%, settings\nm_config.ini, Boost, FieldLastBoostedBy
+			IniWrite, %FieldBoostStacks%, settings\nm_config.ini, Boost, FieldBoostStacks
 		}
 		FieldLastBoosted:=nowUnix()
-		IniWrite, %FieldLastBoosted%, nm_config.ini, Boost, FieldLastBoosted
+		IniWrite, %FieldLastBoosted%, settings\nm_config.ini, Boost, FieldLastBoosted
 		;determine next boost item
 		;is it booster?
 		if(FieldBooster[currentField].booster="blue") {
 			boosterName:="bbooster"
-			IniRead, boostTimer, nm_config.ini, Boost, LastBlueBoost
+			IniRead, boostTimer, settings\nm_config.ini, Boost, LastBlueBoost
 		}
 		else if(FieldBooster[currentField].booster="red") {
 			boosterName:="rbooster"
-			IniRead, boostTimer, nm_config.ini, Boost, LastRedBoost
+			IniRead, boostTimer, settings\nm_config.ini, Boost, LastRedBoost
 		}
 		else if(FieldBooster[currentField].booster="mountain") {
 			boosterName:="mbooster"
-			IniRead, boostTimer, nm_config.ini, Boost, LastMountainBoost
+			IniRead, boostTimer, settings\nm_config.ini, Boost, LastMountainBoost
 		}
 		if(AFBFieldEnable && (nowUnix()-boostTimer)>(3600-AutoFieldBoostRefresh*60)) {
 			FieldNextBoostedBy:=boosterName
-			IniWrite, %FieldNextBoostedBy%, nm_config.ini, Boost, FieldNextBoostedBy
+			IniWrite, %FieldNextBoostedBy%, settings\nm_config.ini, Boost, FieldNextBoostedBy
 		}
 		;is it glitter?
 		else if(AFBGlitterEnable) {
 			FieldNextBoostedBy:="glitter"
-			IniWrite, %FieldNextBoostedBy%, nm_config.ini, Boost, FieldNextBoostedBy
+			IniWrite, %FieldNextBoostedBy%, settings\nm_config.ini, Boost, FieldNextBoostedBy
 		}
 		;is it dice?
 		else if(not AFBGlitterEnable) {
 			FieldNextBoostedBy:="dice"
-			IniWrite, %FieldNextBoostedBy%, nm_config.ini, Boost, FieldNextBoostedBy
+			IniWrite, %FieldNextBoostedBy%, settings\nm_config.ini, Boost, FieldNextBoostedBy
 		}
 	}
 }
@@ -4315,52 +4176,52 @@ nm_fieldBoostGlitter(){
 	if(nm_fieldBoostCheck(CurrentField)) {
 		nm_setStatus(0, "Field was Boosted: Glitter")
 		AFBglitterUsed:=AFBglitterUsed+1
-		IniWrite, %AFBglitterUsed%, nm_config.ini, Boost, AFBglitterUsed
+		IniWrite, %AFBglitterUsed%, settings\nm_config.ini, Boost, AFBglitterUsed
 		if(AFBGlitterLimitEnable && AFBglitterUsed >= AFBglitterLimit) {
 			AFBGlitterEnable:=0
 			Guicontrol,afb:,AFBGlitterEnable,%AFBGlitterEnable%
-			IniWrite, %AFBGlitterEnable%, nm_config.ini, Boost, AFBGlitterEnable
+			IniWrite, %AFBGlitterEnable%, settings\nm_config.ini, Boost, AFBGlitterEnable
 		}
 		if(not AFBGlitterEnable and not AFBDiceEnable){
 			AutoFieldBoostActive:=0
 			Guicontrol,afb:,AutoFieldBoostActive,%AutoFieldBoostActive%
 			GuiControl,1:,AutoFieldBoostButton, Auto Field Boost`n[OFF]
-			IniWrite, %AutoFieldBoostActive%, nm_config.ini, Boost, AutoFieldBoostActive
+			IniWrite, %AutoFieldBoostActive%, settings\nm_config.ini, Boost, AutoFieldBoostActive
 		}
 		AFBuseGlitter:=0
 		FieldLastBoosted:=nowUnix()
 		FieldLastBoostedBy:="glitter"
-		IniWrite, %FieldLastBoosted%, nm_config.ini, Boost, FieldLastBoosted
-		IniWrite, %FieldLastBoostedBy%, nm_config.ini, Boost, FieldLastBoostedBy
+		IniWrite, %FieldLastBoosted%, settings\nm_config.ini, Boost, FieldLastBoosted
+		IniWrite, %FieldLastBoostedBy%, settings\nm_config.ini, Boost, FieldLastBoostedBy
 		FieldBoostStacks:=FieldBoostStacks+1
-		IniWrite, %FieldBoostStacks%, nm_config.ini, Boost, FieldBoostStacks
+		IniWrite, %FieldBoostStacks%, settings\nm_config.ini, Boost, FieldBoostStacks
 		;determine next boost item
 		;is it booster?
 		if(FieldBooster[currentField].booster="blue") {
 			boosterName:="bbooster"
-			IniRead, boostTimer, nm_config.ini, Boost, LastBlueBoost
+			IniRead, boostTimer, settings\nm_config.ini, Boost, LastBlueBoost
 		}
 		else if(FieldBooster[currentField].booster="red") {
 			boosterName:="rbooster"
-			IniRead, boostTimer, nm_config.ini, Boost, LastRedBoost
+			IniRead, boostTimer, settings\nm_config.ini, Boost, LastRedBoost
 		}
 		else if(FieldBooster[currentField].booster="mountain") {
 			boosterName:="mbooster"
-			IniRead, boostTimer, nm_config.ini, Boost, LastMountainBoost
+			IniRead, boostTimer, settings\nm_config.ini, Boost, LastMountainBoost
 		}
 		if(AFBFieldEnable && (nowUnix()-boostTimer)>(3600-AutoFieldBoostRefresh*60)) {
 			FieldNextBoostedBy:=boosterName
-			IniWrite, %FieldNextBoostedBy%, nm_config.ini, Boost, FieldNextBoostedBy
+			IniWrite, %FieldNextBoostedBy%, settings\nm_config.ini, Boost, FieldNextBoostedBy
 		}
 		;is it dice?
 		else if(AFBDiceEnable) {
 			FieldNextBoostedBy:="dice"
-			IniWrite, %FieldNextBoostedBy%, nm_config.ini, Boost, FieldNextBoostedBy
+			IniWrite, %FieldNextBoostedBy%, settings\nm_config.ini, Boost, FieldNextBoostedBy
 		}
 		;is it glitter?
 		else if(not AFBDiceEnable) {
 			FieldNextBoostedBy:="glitter"
-			IniWrite, %FieldNextBoostedBy%, nm_config.ini, Boost, FieldNextBoostedBy
+			IniWrite, %FieldNextBoostedBy%, settings\nm_config.ini, Boost, FieldNextBoostedBy
 		}
 		
 	}
@@ -4369,8 +4230,8 @@ nm_fieldBoostGlitter(){
 
 nm_SaveGui(){
 	WinGetPos, windowX, windowY, windowWidth, windowHeight, Natro Macro
-	IniWrite, %windowX%, nm_config.ini, Settings, GuiX
-	IniWrite, %windowY%, nm_config.ini, Settings, GuiY
+	IniWrite, %windowX%, settings\nm_config.ini, Settings, GuiX
+	IniWrite, %windowY%, settings\nm_config.ini, Settings, GuiY
 }
 nm_moveSpeed(){
 	global MoveSpeedNum
@@ -4380,7 +4241,7 @@ nm_moveSpeed(){
 		if MoveSpeed>0 
 		{
 			MoveSpeedNum:=MoveSpeed
-			IniWrite, %MoveSpeed%, nm_config.ini, Settings, MoveSpeed
+			IniWrite, %MoveSpeed%, settings\nm_config.ini, Settings, MoveSpeed
 		} else {
 			GuiControl, Text, MoveSpeed, %MoveSpeedNum%
 		}
@@ -4389,16 +4250,16 @@ nm_moveSpeed(){
 	}
 	;calculate and save MoveSpeedFactor
 	MoveSpeedFactor:=round(18/MoveSpeed, 2)
-	IniWrite, %MoveSpeedFactor%, nm_config.ini, Settings, MoveSpeedFactor
+	IniWrite, %MoveSpeedFactor%, settings\nm_config.ini, Settings, MoveSpeedFactor
 }
 nm_HiveVariation(){
 	GuiControlGet HiveVariation
 	if(HiveVariation<0 || HiveVariation>255){
-		IniRead, HiveVariation, nm_config.ini, Settings, HiveVariation
+		IniRead, HiveVariation, settings\nm_config.ini, Settings, HiveVariation
 		GuiControl,,HiveVariation, %HiveVariation%
 		msgbox Hive Image Variation can only be 0-255.`n`n0 indicates a perfect pixel-by-pixel image match.`n`n255 will match almost anything.`n`nIn general, you want this setting to be as small as possible.
 	} else {
-		IniWrite, %HiveVariation%, nm_config.ini, Settings, HiveVariation
+		IniWrite, %HiveVariation%, settings\nm_config.ini, Settings, HiveVariation
 	}
 }
 nm_saveConfig(){
@@ -4408,8 +4269,7 @@ nm_saveConfig(){
 	global SprinklerType
 	global ConvertMins
 	global ReloadRobloxSecs
-	global DisableToolUse, AnnounceGuidingStar
-	global Webhook
+	global DisableToolUse, AnnounceGuidingStar, NewWalk ; ~ new option
 	GuiControlGet HiveSlot
 	GuiControlGet HiveBees
 	GuiControlGet, MoveMethod
@@ -4418,28 +4278,30 @@ nm_saveConfig(){
 	GuiControlGet, ReloadRobloxSecs
 	GuiControlGet, DisableToolUse
 	GuiControlGet, AnnounceGuidingStar
-	GuiControlGet, Webhook
-	IniWrite, %HiveSlot%, nm_config.ini, Settings, HiveSlot
-	IniWrite, %HiveBees%, nm_config.ini, Settings, HiveBees
-	IniWrite, %MoveMethod%, nm_config.ini, Settings, MoveMethod
-	IniWrite, %SprinklerType%, nm_config.ini, Settings, SprinklerType
-	IniWrite, %ConvertMins%, nm_config.ini, Settings, ConvertMins
-	IniWrite, %ReloadRobloxSecs%, nm_config.ini, Settings, ReloadRobloxSecs
-	IniWrite, %DisableToolUse%, nm_config.ini, Settings, DisableToolUse
-	IniWrite, %AnnounceGuidingStar%, nm_config.ini, Settings, AnnounceGuidingStar
-	IniWrite, %Webhook%, nm_config.ini, Status, Webhook
+	GuiControlGet, NewWalk ; ~ new option
+	IniWrite, %HiveSlot%, settings\nm_config.ini, Settings, HiveSlot
+	IniWrite, %HiveBees%, settings\nm_config.ini, Settings, HiveBees
+	IniWrite, %MoveMethod%, settings\nm_config.ini, Settings, MoveMethod
+	IniWrite, %SprinklerType%, settings\nm_config.ini, Settings, SprinklerType
+	IniWrite, %ConvertMins%, settings\nm_config.ini, Settings, ConvertMins
+	IniWrite, %ReloadRobloxSecs%, settings\nm_config.ini, Settings, ReloadRobloxSecs
+	IniWrite, %DisableToolUse%, settings\nm_config.ini, Settings, DisableToolUse
+	IniWrite, %AnnounceGuidingStar%, settings\nm_config.ini, Settings, AnnounceGuidingStar
+	IniWrite, %NewWalk%, settings\nm_config.ini, Settings, NewWalk ; ~ new option
 }
-nm_webhookcheck(){
+nm_saveWebhook(){ ; ~ replaced nm_webhookcheck to work on whole webhook section in Status tab
+	global webhook, webhookCheck, discordUID, ssCheck
+	GuiControlGet, Webhook
 	GuiControlGet, WebhookCheck
-	if(WebhookCheck){
-		myOS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)
-		if((myOS*1)<10) {
-			;WebhookCheck:=0
-			;Guicontrol,,WebhookCheck,0
-			msgbox The webhook feature will only provide macro state updates.  It will not provide the houry reports since that feature requires Windows 10 or higher.
-		}
-	}
-	IniWrite, %WebhookCheck%, nm_config.ini, Status, WebhookCheck
+	GuiControlGet, discordUID
+	GuiControlGet, ssCheck
+	GuiControl, % webhookCheck ? "Enable" : "Disable", Webhook
+	GuiControl, % webhookCheck ? "Enable" : "Disable", discordUID
+	GuiControl, % webhookCheck ? "Enable" : "Disable", ssCheck
+	IniWrite, %Webhook%, settings\nm_config.ini, Status, Webhook
+	IniWrite, %WebhookCheck%, settings\nm_config.ini, Status, WebhookCheck
+	IniWrite, %discordUID%, settings\nm_config.ini, Status, discordUID
+	IniWrite, %ssCheck%, settings\nm_config.ini, Status, ssCheck
 }
 nm_convertBalloon(){
 	GuiControlGet, ConvertBalloon
@@ -4448,22 +4310,22 @@ nm_convertBalloon(){
 	} else {
 		GuiControl, disable, ConvertMins
 	}
-	IniWrite, %ConvertBalloon%, nm_config.ini, Settings, ConvertBalloon
+	IniWrite, %ConvertBalloon%, settings\nm_config.ini, Settings, ConvertBalloon
 }
 nm_guiThemeSelect(){
 	GuiControlGet, GuiTheme
-	IniWrite, %GuiTheme%, nm_config.ini, Settings, GuiTheme
+	IniWrite, %GuiTheme%, settings\nm_config.ini, Settings, GuiTheme
 	reload
 }
 nm_guiTransparencySet(){
 	GuiControlGet, GuiTransparency
-	IniWrite, %GuiTransparency%, nm_config.ini, Settings, GuiTransparency
+	IniWrite, %GuiTransparency%, settings\nm_config.ini, Settings, GuiTransparency
 	setVal:=255-floor(GuiTransparency*2.55)
 	winset, transparent, %setval%, Natro Macro
 }
 nm_AlwaysOnTop(){
 	GuiControlGet, AlwaysOnTop
-	IniWrite, %AlwaysOnTop%, nm_config.ini, Settings, AlwaysOnTop
+	IniWrite, %AlwaysOnTop%, settings\nm_config.ini, Settings, AlwaysOnTop
 	if(AlwaysOnTop)
 		Gui +AlwaysOnTop
 	else
@@ -4535,14 +4397,14 @@ nm_saveKeys(){
 	GuiControlGet, RotLeft
 	GuiControlGet, RotRight
 	GuiControlGet, KeyDelay
-	IniWrite, %KeyboardLayout%, nm_config.ini, Keys, KeyboardLayout
-	IniWrite, %FwdKey%, nm_config.ini, Keys, FwdKey
-	IniWrite, %LeftKey%, nm_config.ini, Keys, LeftKey
-	IniWrite, %BackKey%, nm_config.ini, Keys, BackKey
-	IniWrite, %RightKey%, nm_config.ini, Keys, RightKey
-	IniWrite, %RotLeft%, nm_config.ini, Keys, RotLeft
-	IniWrite, %RotRight%, nm_config.ini, Keys, RotRight
-	IniWrite, %KeyDelay%, nm_config.ini, Keys, KeyDelay
+	IniWrite, %KeyboardLayout%, settings\nm_config.ini, Keys, KeyboardLayout
+	IniWrite, %FwdKey%, settings\nm_config.ini, Keys, FwdKey
+	IniWrite, %LeftKey%, settings\nm_config.ini, Keys, LeftKey
+	IniWrite, %BackKey%, settings\nm_config.ini, Keys, BackKey
+	IniWrite, %RightKey%, settings\nm_config.ini, Keys, RightKey
+	IniWrite, %RotLeft%, settings\nm_config.ini, Keys, RotLeft
+	IniWrite, %RotRight%, settings\nm_config.ini, Keys, RotRight
+	IniWrite, %KeyDelay%, settings\nm_config.ini, Keys, KeyDelay
 }
 ;https://www.autohotkey.com/boards/viewtopic.php?f=6&t=5841&hilit=gui+skin
 SkinForm(Param1 = "Apply", DLL = "", SkinName = ""){
@@ -4566,7 +4428,7 @@ nm_ServerLink(){
 	}
 	;remove "/Bee-Swarm-Simulator" from link if it exists
 	PrivServer := StrReplace(PrivServer, "/Bee-Swarm-Simulator")
-	IniWrite, %PrivServer%, nm_config.ini, Settings, PrivServer
+	IniWrite, %PrivServer%, settings\nm_config.ini, Settings, PrivServer
 }
 nm_setReconnectHour(){
 	global ReconnectHour
@@ -4576,7 +4438,7 @@ nm_setReconnectHour(){
 		ReconnectHour:= ;deliberately set to NULL
 		msgbox Hours can only be between 00 and 23
 	}
-	IniWrite, %ReconnectHour%, nm_config.ini, Settings, ReconnectHour
+	IniWrite, %ReconnectHour%, settings\nm_config.ini, Settings, ReconnectHour
 }
 nm_setReconnectMin(){
 	global ReconnectMin
@@ -4586,7 +4448,13 @@ nm_setReconnectMin(){
 		ReconnectMin:= ;deliberately set to NULL
 		msgbox Mins can only be between 00 and 59
 	}
-	IniWrite, %ReconnectMin%, nm_config.ini, Settings, ReconnectMin
+	IniWrite, %ReconnectMin%, settings\nm_config.ini, Settings, ReconnectMin
+}
+nm_WebhookHelp(){ ; ~ webhook section information
+	msgbox, 0x40000, Discord Webhook Integration, DESCRIPTION:`nEnable this feature to get status updates and hourly reports sent to your Discord webhook! This is especially useful if you want to monitor the macro remotely, and also monitor the amount of honey you're making or buff uptime. To enable this, tick the checkbox next to 'Discord Webhook' and enter your webhook link below, directly copied from Discord.`n`nCRITICAL OPTIONS:`nThere are some status updates that require immediate attention, e.g. disconnects and Phantom Planter checks. You can choose to have the webhook send a screenshot with a 5 minute cooldown if the Screenshot option is checked and/or ping you on Discord by entering your Discord User ID (18-digit number).
+}
+nm_NewWalkHelp(){ ; ~ movespeed correction information
+	msgbox, 0x40000, MoveSpeed Correction, DESCRIPTION:`nWhen this option is enabled, the macro will detect your Haste, Bear Morph, Coconut Haste, Haste+, Oil and Super Smoothie values real-time. Using this information, it will calculate the distance you have moved and use that for more accurate movements. If working as intended, this option will dramatically reduce drift and make travelling anywhere in game much more accurate.`n`nIMPORTANT:`nIf you have this option enabled, make sure your 'Movement Speed' value is EXACTLY as shown in BSS Settings menu without haste or other temporary buffs (e.g. write 33.6 as 33.6 without any rounding). Also, it is ESSENTIAL that your Display Scale is 100`%, otherwise the buffs will not be detected properly.
 }
 nm_ReconnectTimeHelp(){
 	global ReconnectHour, ReconnectMin
@@ -4633,12 +4501,12 @@ nm_stingerFields(){
 	gui stingerFields:font, s8 w400 cBlack
 	gui stingerFields:add, text,x5 y5 +left +BackgroundTrans,Allowed Stinger Fields
 	gui stingerFields:add, text,x5 y8 +left +BackgroundTrans,___________________
-	IniRead, StingerPepperCheck, nm_config.ini, Collect, StingerPepperCheck
-	IniRead, StingerMountainTopCheck, nm_config.ini, Collect, StingerMountainTopCheck
-	IniRead, StingerRoseCheck, nm_config.ini, Collect, StingerRoseCheck
-	IniRead, StingerCactusCheck, nm_config.ini, Collect, StingerCactusCheck
-	IniRead, StingerSpiderCheck, nm_config.ini, Collect, StingerSpiderCheck
-	IniRead, StingerCloverCheck, nm_config.ini, Collect, StingerCloverCheck
+	IniRead, StingerPepperCheck, settings\nm_config.ini, Collect, StingerPepperCheck
+	IniRead, StingerMountainTopCheck, settings\nm_config.ini, Collect, StingerMountainTopCheck
+	IniRead, StingerRoseCheck, settings\nm_config.ini, Collect, StingerRoseCheck
+	IniRead, StingerCactusCheck, settings\nm_config.ini, Collect, StingerCactusCheck
+	IniRead, StingerSpiderCheck, settings\nm_config.ini, Collect, StingerSpiderCheck
+	IniRead, StingerCloverCheck, settings\nm_config.ini, Collect, StingerCloverCheck
 	Gui, stingerFields:Add, Checkbox, x5 y25 vStingerPepperCheck gnm_stingerFieldsCheck checked%StingerPepperCheck%, Pepper
 	Gui, stingerFields:Add, Checkbox, x5 y40 vStingerMountainTopCheck gnm_stingerFieldsCheck checked%StingerMountainTopCheck%, Mountain Top
 	Gui, stingerFields:Add, Checkbox, x5 y55 vStingerRoseCheck gnm_stingerFieldsCheck checked%StingerRoseCheck%, Rose
@@ -4660,12 +4528,12 @@ nm_stingerFieldsCheck(){
 	GuiControlGet, StingerCactusCheck
 	GuiControlGet, StingerSpiderCheck
 	GuiControlGet, StingerCloverCheck
-	IniWrite, %StingerPepperCheck%, nm_config.ini, Collect, StingerPepperCheck
-	IniWrite, %StingerMountainTopCheck%, nm_config.ini, Collect, StingerMountainTopCheck
-	IniWrite, %StingerRoseCheck%, nm_config.ini, Collect, StingerRoseCheck
-	IniWrite, %StingerCactusCheck%, nm_config.ini, Collect, StingerCactusCheck
-	IniWrite, %StingerSpiderCheck%, nm_config.ini, Collect, StingerSpiderCheck
-	IniWrite, %StingerCloverCheck%, nm_config.ini, Collect, StingerCloverCheck	
+	IniWrite, %StingerPepperCheck%, settings\nm_config.ini, Collect, StingerPepperCheck
+	IniWrite, %StingerMountainTopCheck%, settings\nm_config.ini, Collect, StingerMountainTopCheck
+	IniWrite, %StingerRoseCheck%, settings\nm_config.ini, Collect, StingerRoseCheck
+	IniWrite, %StingerCactusCheck%, settings\nm_config.ini, Collect, StingerCactusCheck
+	IniWrite, %StingerSpiderCheck%, settings\nm_config.ini, Collect, StingerSpiderCheck
+	IniWrite, %StingerCloverCheck%, settings\nm_config.ini, Collect, StingerCloverCheck	
 }
 DiscordLink(){
     run, https://bit.ly/NatroMacro
@@ -4722,6 +4590,7 @@ nm_TabSettingsLock(){
 	GuiControl, disable, ConvertMins
 	GuiControl, disable, DisableToolUse
 	GuiControl, disable, AnnounceGuidingStar
+	GuiControl, disable, NewWalk ; ~ new option
 	GuiControl, disable, HiveSlot
 	GuiControl, disable, HiveVariation
 	GuiControl, disable, HiveBees
@@ -4752,6 +4621,7 @@ nm_TabSettingsUnLock(){
 		GuiControl, enable, ConvertMins
 	GuiControl, enable, DisableToolUse
 	GuiControl, enable, AnnounceGuidingStar
+	GuiControl, enable, NewWalk ; ~ new option
 	GuiControl, enable, HiveSlot
 	GuiControl, enable, HiveVariation
 	GuiControl, enable, HiveBees
@@ -4991,6 +4861,127 @@ ba_OCRStringExists(findString, aim:="full")
 		return 0
 	}
 }
+/* Function: ExecScript ~ necessary function for new walk system
+ *     Run/execute AutoHotkey script[file, through named pipe(s) or from stdin]
+ *     Mod of/inspired by HotKeyIt's DynaRun()
+ * License:
+ *     WTFPL [http://wtfpl.net/]
+ * Syntax:
+ *     exec := ExecScript( code [ , args, kwargs* ] )
+ * Parameter(s)/Return Value:
+ *     exec           [retval] - a WshScriptExec object [http://goo.gl/GlEzk5]
+ *                               if WshShell.Exec() method is used else 0 for
+ *                               WshShell.Run()
+ *     script             [in] - AHK script(file) or code(string) to run/execute.
+ *                               When running from stdin(*), if code contains
+ *                               unicode characters, WshShell will raise an
+ *                               exception.
+ *     args          [in, opt] - array of command line arguments to pass to the
+ *                               script. Quotes(") are automatically escaped(\").
+ *     kwargs*  [in, variadic] - string in the following format: 'option=value',
+ *                               where 'option' is one or more of the following
+ *                               listed in the next section.
+ * Options(kwargs* parameter):
+ *     ahk   - path to the AutoHotkey executable to use which is relative to
+ *             A_WorkingDir if an absolute path isn't specified.
+ *     name  - when running through named pipes, 'name' specifies the pipe name.
+ *             If omitted, a random value is generated. Otherwise, specify an
+ *             asterisk(*) to run from stdin. This option is ignored when a file
+ *             is specified for the 'script' parameter.
+ *     dir   - working directory which is assumed to be relative to A_WorkingDir
+ *             if an absolute path isn't specified.
+ *     cp    - codepage [UTF-8, UTF-16, CPnnn], default is 'CP0'. 'CP' may be
+ *             omitted when passing in 'CPnnn' format. Omit or use 'CP0' when
+ *             running code from stdin(*).
+ *     child - if 1(true), WshShell.Exec() method is used, otherwise .Run().
+ *             Default is 1. Value is ignored and .Exec() is always used when
+ *             running code from stdin.
+ * Example:
+ *     exec := ExecScript("MsgBox", ["arg"], "name=some_name", "dir=C:\Users")
+ * Credits:
+ *     - Lexikos for his demonstration [http://goo.gl/5IkP5R]
+ *     - HotKeyIt for DynaRun() [http://goo.gl/92BBMr]
+ */
+ExecScript(script, args:="", kwargs*)
+{
+	;// Set default values for options first
+	child  := true ;// use WshShell.Exec(), otherwise .Run()
+	, name := "AHK_" . A_TickCount
+	, dir  := ""
+	, ahk  := A_AhkPath
+	, cp   := 0
+
+	for i, kwarg in kwargs
+		if ( option := SubStr(kwarg, 1, (i := InStr(kwarg, "="))-1) )
+		; the RegEx check is not really needed but is done anyways to avoid
+		; accidental override of internal local var(s)
+		&& ( option ~= "i)^child|name|dir|ahk|cp$" )
+			%option% := SubStr(kwarg, i+1)
+
+	pipe := (run_file := FileExist(script)) || (name == "*") ? 0 : []
+	Loop % pipe ? 2 : 0
+	{
+		;// Create named pipe(s), throw exception on failure
+		if (( pipe[A_Index] := DllCall(
+		(Join, Q C
+			"CreateNamedPipe"            ; http://goo.gl/3aJQg7
+			"Str",  "\\.\pipe\" . name   ; lpName
+			"UInt", 2                    ; dwOpenMode = PIPE_ACCESS_OUTBOUND
+			"UInt", 0                    ; dwPipeMode = PIPE_TYPE_BYTE
+			"UInt", 255                  ; nMaxInstances
+			"UInt", 0                    ; nOutBufferSize
+			"UInt", 0                    ; nInBufferSize
+			"Ptr",  0                    ; nDefaultTimeOut
+			"Ptr",  0                    ; lpSecurityAttributes
+		)) ) == -1) ; INVALID_HANDLE_VALUE
+			throw Exception("ExecScript() - Failed to create named pipe", -1, A_LastError)
+	}
+
+	; Command = {ahk_exe} /ErrorStdOut /CP{codepage} {file}
+	static fso := ComObjCreate("Scripting.FileSystemObject")
+	static q := Chr(34) ;// quotes("), for v1.1 and v2.0-a compatibility
+	cmd := Format("{4}{1}{4} /ErrorStdOut /CP{2} {4}{3}{4}"
+	    , fso.GetAbsolutePathName(ahk)
+	    , cp="UTF-8" ? 65001 : cp="UTF-16" ? 1200 : cp := Round(LTrim(cp, "CPcp"))
+	    , pipe ? "\\.\pipe\" . name : run_file ? script : "*", q)
+	
+	; Process and append parameters to pass to the script
+	for each, arg in args
+	{
+		i := 0
+		while (i := InStr(arg, q,, i+1)) ;// escape '"' with '\'
+			if (SubStr(arg, i-1, 1) != "\")
+				arg := SubStr(arg, 1, i-1) . "\" . SubStr(arg, i++)
+		cmd .= " " . (InStr(arg, " ") ? q . arg . q : arg)
+	}
+
+	if cwd := (dir != "" ? A_WorkingDir : "") ;// change working directory if needed
+		SetWorkingDir %dir%
+
+	static WshShell := ComObjCreate("WScript.Shell")
+	exec := (child || name == "*") ? WshShell.Exec(cmd) : WshShell.Run(cmd)
+	
+	if cwd ;// restore working directory if altered above
+		SetWorkingDir %cwd%
+	
+	if !pipe ;// file or stdin(*)
+	{
+		if !run_file ;// run stdin
+			exec.StdIn.WriteLine(script), exec.StdIn.Close()
+		return exec
+	}
+
+	DllCall("ConnectNamedPipe", "Ptr", pipe[1], "Ptr", 0) ;// http://goo.gl/pwTnxj
+	DllCall("CloseHandle", "Ptr", pipe[1])
+	DllCall("ConnectNamedPipe", "Ptr", pipe[2], "Ptr", 0)
+
+	if !(f := FileOpen(pipe[2], "h", cp))
+		return A_LastError
+	f.Write(script) ;// write dynamic code into pipe
+	f.Close(), DllCall("CloseHandle", "Ptr", pipe[2]) ;// close pipe
+
+	return exec
+}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; WEBHOOK
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -5102,7 +5093,7 @@ nm_testButton(){
 	GuiControlGet RotLeft
 	GuiControlGet RotRight
 	GuiControlGet KeyDelay
-	IniRead, MoveSpeedFactor, nm_config.ini, Settings, MoveSpeedFactor
+	IniRead, MoveSpeedFactor, settings\nm_config.ini, Settings, MoveSpeedFactor
 	GuiControlGet MoveMethod
 	
 	;FormatTime, temp, %A_NowUTC%, hh
@@ -5164,7 +5155,7 @@ nm_testButton(){
 	/*
 	global VBState
 	NightLastDetected:=nowUnix()
-	IniWrite, %NightLastDetected%, nm_config.ini, Collect, NightLastDetected
+	IniWrite, %NightLastDetected%, settings\nm_config.ini, Collect, NightLastDetected
 	VBState:=1
 	nm_locateVB()
 	*/
@@ -5285,15 +5276,15 @@ nm_Reset(checkAll:=1, wait:=2000){
 		if WinExist("background.ahk ahk_class AutoHotkey") {
 			SendMessage, 0x4200, 1, %resetTime%
 		}
-		myOS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)
-		if((myOS*1)>=10) {
-			IfWinNotExist, StatMonitor.ahk
-			{
-				if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) {
-					Run, %A_ScriptDir%\StatMonitor.ahk
-				}
+		;myOS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)
+		;if((myOS*1)>=10) { ~ see previous commenting of this
+		IfWinNotExist, StatMonitor.ahk
+		{
+			if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) { ; ~ changed RegEx
+				Run, %A_ScriptDir%\StatMonitor.ahk
 			}
 		}
+		;}
 		DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
 		SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
 		;failsafe game frozen
@@ -6102,7 +6093,7 @@ nm_toBooster(location){
 			}
 		}
 		LastBlueBoost:=nowUnix()
-		IniWrite, %LastBlueBoost%, nm_config.ini, Boost, LastBlueBoost
+		IniWrite, %LastBlueBoost%, settings\nm_config.ini, Boost, LastBlueBoost
 	} 
 	;red booster
 	else if(location="red"){
@@ -6129,7 +6120,7 @@ nm_toBooster(location){
 			}
 		}
 		LastRedBoost:=nowUnix()
-		IniWrite, %LastRedBoost%, nm_config.ini, Boost, LastRedBoost
+		IniWrite, %LastRedBoost%, settings\nm_config.ini, Boost, LastRedBoost
 	}
 	;mountain booster
 	else if(location="mount"){
@@ -6156,7 +6147,7 @@ nm_toBooster(location){
 			}
 		}
 		LastMountainBoost:=nowUnix()
-		IniWrite, %LastMountainBoost%, nm_config.ini, Boost, LastMountainBoost
+		IniWrite, %LastMountainBoost%, settings\nm_config.ini, Boost, LastMountainBoost
 	}
 }
 nm_toAnyBooster(){
@@ -6295,7 +6286,7 @@ nm_walkToCollect(){
 			}
 		}
 		LastClock:=nowUnix()
-		IniWrite, %LastClock%, nm_config.ini, Collect, LastClock
+		IniWrite, %LastClock%, settings\nm_config.ini, Collect, LastClock
 	}
 	;ant pass
 	global AntPassCheck, AntPassAction, QuestAnt
@@ -6339,7 +6330,7 @@ nm_walkToCollect(){
 			}
 		}
 		LastAntPass:=nowUnix()
-		IniWrite, %LastAntPass%, nm_config.ini, Collect, LastAntPass
+		IniWrite, %LastAntPass%, settings\nm_config.ini, Collect, LastAntPass
 		if((QuestAnt || AntPassAction="challenge") && newAntPass){
 			QuestAnt:=0
 			nm_Move(4000*MoveSpeedFactor, FwdKey)
@@ -6402,7 +6393,7 @@ nm_walkToCollect(){
 			}
 		}
 		LastHoneyDis:=nowUnix()
-		IniWrite, %LastHoneyDis%, nm_config.ini, Collect, LastHoneyDis
+		IniWrite, %LastHoneyDis%, settings\nm_config.ini, Collect, LastHoneyDis
 	}
 	;Treat
 	global TreatDisCheck
@@ -6447,7 +6438,7 @@ nm_walkToCollect(){
 			}
 		}
 		LastTreatDis:=nowUnix()
-		IniWrite, %LastTreatDis%, nm_config.ini, Collect, LastTreatDis
+		IniWrite, %LastTreatDis%, settings\nm_config.ini, Collect, LastTreatDis
 	}
 	;Blueberry
 	global BlueberryDisCheck
@@ -6472,7 +6463,7 @@ nm_walkToCollect(){
 			}
 		}
 		LastBlueberryDis:=nowUnix()
-		IniWrite, %LastBlueberryDis%, nm_config.ini, Collect, LastBlueberryDis
+		IniWrite, %LastBlueberryDis%, settings\nm_config.ini, Collect, LastBlueberryDis
 	}
 	;Strawberry
 	global StrawberryDisCheck
@@ -6501,7 +6492,7 @@ nm_walkToCollect(){
 			}
 		}
 		LastStrawberryDis:=nowUnix()
-		IniWrite, %LastStrawberryDis%, nm_config.ini, Collect, LastStrawberryDis
+		IniWrite, %LastStrawberryDis%, settings\nm_config.ini, Collect, LastStrawberryDis
 	}
 	;Coconut
 	global CoconutDisCheck
@@ -6528,7 +6519,7 @@ nm_walkToCollect(){
 			}
 		}
 		LastCoconutDis:=nowUnix()
-		IniWrite, %LastCoconutDis%, nm_config.ini, Collect, LastCoconutDis
+		IniWrite, %LastCoconutDis%, settings\nm_config.ini, Collect, LastCoconutDis
 	}
 	;Glue
 	global GlueDisCheck
@@ -6625,11 +6616,11 @@ nm_walkToCollect(){
 				send {e}
 				sleep, 1000
 				LastGlueDis:=nowUnix()
-				IniWrite, %LastGlueDis%, nm_config.ini, Collect, LastGlueDis
+				IniWrite, %LastGlueDis%, settings\nm_config.ini, Collect, LastGlueDis
 				break
 			} else { ;try again in 2 hours
 				LastGlueDis:=nowUnix()-72000
-				IniWrite, %LastGlueDis%, nm_config.ini, Collect, LastGlueDis
+				IniWrite, %LastGlueDis%, settings\nm_config.ini, Collect, LastGlueDis
 			}
 		}
 		SetKeyDelay, 5
@@ -6723,12 +6714,12 @@ nm_Bugrun(){
 					break
 			}
 			LastBugrunSpider:=nowUnix()
-			IniWrite, %LastBugrunSpider%, nm_config.ini, Collect, LastBugrunSpider
+			IniWrite, %LastBugrunSpider%, settings\nm_config.ini, Collect, LastBugrunSpider
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+			IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 			if(BugrunSpiderLoot){
 				if(!DisableToolUse)
 					click, down
@@ -6809,8 +6800,8 @@ nm_Bugrun(){
 				SessionBugKills:=SessionBugKills+2
 				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+				IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+				IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 				if(BugrunLadybugsLoot){
 					if(!DisableToolUse)
 						click, down
@@ -6877,8 +6868,8 @@ nm_Bugrun(){
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+			IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 			if(BugrunLadybugsLoot){
 				if(!DisableToolUse)
 					click, down
@@ -6965,13 +6956,13 @@ nm_Bugrun(){
 			}
 			;done with ladybugs
 			LastBugrunLadybugs:=nowUnix()
-			IniWrite, %LastBugrunLadybugs%, nm_config.ini, Collect, LastBugrunLadybugs
+			IniWrite, %LastBugrunLadybugs%, settings\nm_config.ini, Collect, LastBugrunLadybugs
 			TotalBugKills:=TotalBugKills+2
 			SessionBugKills:=SessionBugKills+2
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+			IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 			;loot
 			if(((BugrunLadybugsCheck || QuestLadybugs || RileyLadybugs || RileyAll) && BugrunLadybugsLoot) || ((BugrunRhinoBeetlesCheck || QuestRhinoBeetles || BuckoRhinoBeetles || RileyAll) && BugrunRhinoBeetlesLoot)){
 				if(!DisableToolUse)
@@ -7040,13 +7031,13 @@ nm_Bugrun(){
 			;done with Rhino Beetles if Hive has less than 5 bees
 			if(HiveBees<5){
 				LastBugrunRhinoBeetles:=nowUnix()
-				IniWrite, %LastBugrunRhinoBeetles%, nm_config.ini, Collect, LastBugrunRhinoBeetles
+				IniWrite, %LastBugrunRhinoBeetles%, settings\nm_config.ini, Collect, LastBugrunRhinoBeetles
 			}
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+			IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 			;loot
 			if(BugrunRhinoBeetlesLoot){
 				if(!DisableToolUse)
@@ -7104,14 +7095,14 @@ nm_Bugrun(){
 				;done with Rhino Beetles if Hive has less than 10 bees
 				if(HiveBees<10){
 					LastBugrunRhinoBeetles:=nowUnix()
-					IniWrite, %LastBugrunRhinoBeetles%, nm_config.ini, Collect, LastBugrunRhinoBeetles
+					IniWrite, %LastBugrunRhinoBeetles%, settings\nm_config.ini, Collect, LastBugrunRhinoBeetles
 				}
 				TotalBugKills:=TotalBugKills+2
 				SessionBugKills:=SessionBugKills+2
 				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+				IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+				IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 				;loot
 				if(BugrunRhinoBeetlesLoot){
 					if(!DisableToolUse)
@@ -7228,18 +7219,18 @@ nm_Bugrun(){
 			}
 			;done with Rhino Beetles
 			LastBugrunRhinoBeetles:=nowUnix()
-			IniWrite, %LastBugrunRhinoBeetles%, nm_config.ini, Collect, LastBugrunRhinoBeetles
+			IniWrite, %LastBugrunRhinoBeetles%, settings\nm_config.ini, Collect, LastBugrunRhinoBeetles
 			;done with Mantis if Hive is smaller than 15 bees
 			if((BugrunMantisCheck || QuestMantis || BuckoMantis || RileyAll) && HiveBees<15){
 				LastBugrunMantis:=nowUnix()
-				IniWrite, %LastBugrunMantis%, nm_config.ini, Collect, LastBugrunMantis
+				IniWrite, %LastBugrunMantis%, settings\nm_config.ini, Collect, LastBugrunMantis
 			}
 			TotalBugKills:=TotalBugKills+2
 			SessionBugKills:=SessionBugKills+2
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+			IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 			;loot
 			if(((BugrunMantisCheck || QuestMantis || BuckoMantis || RileyAll) && BugrunMantisLoot) || ((BugrunRhinoBeetlesCheck || QuestRhinoBeetles || BuckoRhinoBeetles) && BugrunRhinoBeetlesLoot || RileyAll)){
 				if(!DisableToolUse)
@@ -7328,12 +7319,12 @@ nm_Bugrun(){
 						break
 				}
 				LastBugrunWerewolf:=nowUnix()
-				IniWrite, %LastBugrunWerewolf%, nm_config.ini, Collect, LastBugrunWerewolf
+				IniWrite, %LastBugrunWerewolf%, settings\nm_config.ini, Collect, LastBugrunWerewolf
 				TotalBugKills:=TotalBugKills+1
 				SessionBugKills:=SessionBugKills+1
 				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+				IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+				IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 				if(BugrunWerewolfLoot){
 					if(!DisableToolUse)
 						click, down
@@ -7406,13 +7397,13 @@ nm_Bugrun(){
 				}
 				;done with Mantis
 				LastBugrunMantis:=nowUnix()
-				IniWrite, %LastBugrunMantis%, nm_config.ini, Collect, LastBugrunMantis
+				IniWrite, %LastBugrunMantis%, settings\nm_config.ini, Collect, LastBugrunMantis
 				TotalBugKills:=TotalBugKills+2
 				SessionBugKills:=SessionBugKills+2
 				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+				IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+				IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 				;loot
 				if(BugrunMantisLoot){
 					if(!DisableToolUse)
@@ -7523,13 +7514,13 @@ nm_Bugrun(){
 				}
 				;done with Scorpions
 				LastBugrunScorpions:=nowUnix()
-				IniWrite, %LastBugrunScorpions%, nm_config.ini, Collect, LastBugrunScorpions
+				IniWrite, %LastBugrunScorpions%, settings\nm_config.ini, Collect, LastBugrunScorpions
 				TotalBugKills:=TotalBugKills+2
 				SessionBugKills:=SessionBugKills+2
 				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-				IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-				IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+				IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+				IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 				;loot
 				if(BugrunScorpionsLoot){
 					if(!DisableToolUse)
@@ -7637,20 +7628,20 @@ nm_Bugrun(){
 					}
 				} else { ;No TunnelBear here...try again in 2 hours
 					LastTunnelBear:=nowUnix()-floor(172800*(1-GiftedViciousCheck*.15))+7200
-					IniWrite %LastTunnelBear%, nm_config.ini, Collect, LastTunnelBear
+					IniWrite %LastTunnelBear%, settings\nm_config.ini, Collect, LastTunnelBear
 				}
 				;loot
 				if(TBdead) {
 					TotalBossKills:=TotalBossKills+1
 					SessionBossKills:=SessionBossKills+1
 					Send_WM_COPYDATA("incrementstat Total Boss Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-					IniWrite, %TotalBossKills%, nm_config.ini, Status, TotalBossKills
-					IniWrite, %SessionBossKills%, nm_config.ini, Status, SessionBossKills
+					IniWrite, %TotalBossKills%, settings\nm_config.ini, Status, TotalBossKills
+					IniWrite, %SessionBossKills%, settings\nm_config.ini, Status, SessionBossKills
 					nm_setStatus("Looting")
 					nm_Move(12000*MoveSpeedFactor, FwdKey)
 					nm_Move(18000*MoveSpeedFactor, BackKey)
 					LastTunnelBear:=nowUnix()
-					IniWrite %LastTunnelBear%, nm_config.ini, Collect, LastTunnelBear
+					IniWrite %LastTunnelBear%, settings\nm_config.ini, Collect, LastTunnelBear
 					break
 				}
 			}
@@ -7729,7 +7720,7 @@ nm_Bugrun(){
 				if(!found) { ;No King Beetle here...try again in 2 hours
 					if(A_Index=2){
 						LastKingBeetle:=nowUnix()-floor(79200*(1-GiftedViciousCheck*.15))+7200
-						IniWrite %LastKingBeetle%, nm_config.ini, Collect, LastKingBeetle
+						IniWrite %LastKingBeetle%, settings\nm_config.ini, Collect, LastKingBeetle
 					}
 					continue 	
 				}
@@ -7816,10 +7807,10 @@ nm_Bugrun(){
 					TotalBossKills:=TotalBossKills+1
 					SessionBossKills:=SessionBossKills+1
 					Send_WM_COPYDATA("incrementstat Total Boss Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-					IniWrite, %TotalBossKills%, nm_config.ini, Status, TotalBossKills
-					IniWrite, %SessionBossKills%, nm_config.ini, Status, SessionBossKills
+					IniWrite, %TotalBossKills%, settings\nm_config.ini, Status, TotalBossKills
+					IniWrite, %SessionBossKills%, settings\nm_config.ini, Status, SessionBossKills
 					LastKingBeetle:=nowUnix()
-					IniWrite %LastKingBeetle%, nm_config.ini, Collect, LastKingBeetle
+					IniWrite %LastKingBeetle%, settings\nm_config.ini, Collect, LastKingBeetle
 					break
 				}
 			}
@@ -7835,7 +7826,7 @@ nm_Mondo(){
 		mondobuff := nm_imgSearch("mondobuff.png",50,"buff")
 		If (mondobuff[1] = 0) {
 			LastMondoBuff:=nowUnix()
-			IniWrite, %LastMondoBuff%, nm_config.ini, Collect, LastMondoBuff
+			IniWrite, %LastMondoBuff%, settings\nm_config.ini, Collect, LastMondoBuff
 			return
 		}
 		repeat:=1
@@ -7947,7 +7938,7 @@ nm_Mondo(){
 			}
 		}
 		LastMondoBuff:=nowUnix()
-		IniWrite, %LastMondoBuff%, nm_config.ini, Collect, LastMondoBuff
+		IniWrite, %LastMondoBuff%, settings\nm_config.ini, Collect, LastMondoBuff
 	}
 }
 nm_cannonToCollect(){
@@ -8006,7 +7997,7 @@ nm_cannonToCollect(){
 			}
 		}
 		LastClock:=nowUnix()
-		IniWrite, %LastClock%, nm_config.ini, Collect, LastClock
+		IniWrite, %LastClock%, settings\nm_config.ini, Collect, LastClock
 	}
 	;ant pass
 	global AntPassCheck, AntPassAction, QuestAnt, LastAntPass, LastAntPassInventory
@@ -8103,7 +8094,7 @@ nm_cannonToCollect(){
 			}
 		}
 		LastAntPass:=nowUnix()
-		IniWrite, %LastAntPass%, nm_config.ini, Collect, LastAntPass
+		IniWrite, %LastAntPass%, settings\nm_config.ini, Collect, LastAntPass
 		;do ant challenge
 		if((QuestAnt || AntPassAction="challenge") && (newAntPass || doAntChallenge)){
 			QuestAnt:=0
@@ -8168,7 +8159,7 @@ nm_cannonToCollect(){
 			}
 		}
 		LastHoneyDis:=nowUnix()
-		IniWrite, %LastHoneyDis%, nm_config.ini, Collect, LastHoneyDis
+		IniWrite, %LastHoneyDis%, settings\nm_config.ini, Collect, LastHoneyDis
 	}
 	;Treat
 	global TreatDisCheck
@@ -8204,7 +8195,7 @@ nm_cannonToCollect(){
 			}
 		}
 		LastTreatDis:=nowUnix()
-		IniWrite, %LastTreatDis%, nm_config.ini, Collect, LastTreatDis
+		IniWrite, %LastTreatDis%, settings\nm_config.ini, Collect, LastTreatDis
 	}
 	;Blueberry
 	global BlueberryDisCheck
@@ -8242,7 +8233,7 @@ nm_cannonToCollect(){
 			}
 		}
 		LastBlueberryDis:=nowUnix()
-		IniWrite, %LastBlueberryDis%, nm_config.ini, Collect, LastBlueberryDis
+		IniWrite, %LastBlueberryDis%, settings\nm_config.ini, Collect, LastBlueberryDis
 	}
 	;Strawberry
 	global StrawberryDisCheck
@@ -8281,7 +8272,7 @@ nm_cannonToCollect(){
 			}
 		}
 		LastStrawberryDis:=nowUnix()
-		IniWrite, %LastStrawberryDis%, nm_config.ini, Collect, LastStrawberryDis
+		IniWrite, %LastStrawberryDis%, settings\nm_config.ini, Collect, LastStrawberryDis
 	}
 	;Coconut
 	global CoconutDisCheck
@@ -8309,7 +8300,7 @@ nm_cannonToCollect(){
 			}
 		}
 		LastCoconutDis:=nowUnix()
-		IniWrite, %LastCoconutDis%, nm_config.ini, Collect, LastCoconutDis
+		IniWrite, %LastCoconutDis%, settings\nm_config.ini, Collect, LastCoconutDis
 	}
 	;Royal Jelly
 	global RoyalJellyDisCheck
@@ -8347,7 +8338,7 @@ nm_cannonToCollect(){
 			}
 		}
 		LastRoyalJellyDis:=nowUnix()
-		IniWrite, %LastRoyalJellyDis%, nm_config.ini, Collect, LastRoyalJellyDis
+		IniWrite, %LastRoyalJellyDis%, settings\nm_config.ini, Collect, LastRoyalJellyDis
 	}
 	;Glue
 	global GlueDisCheck
@@ -8425,11 +8416,11 @@ nm_cannonToCollect(){
 				send {e}
 				sleep, 1000
 				LastGlueDis:=nowUnix()
-				IniWrite, %LastGlueDis%, nm_config.ini, Collect, LastGlueDis
+				IniWrite, %LastGlueDis%, settings\nm_config.ini, Collect, LastGlueDis
 				break
 			} else { ;try again in 2 hours
 				LastGlueDis:=nowUnix()-72000
-				IniWrite, %LastGlueDis%, nm_config.ini, Collect, LastGlueDis
+				IniWrite, %LastGlueDis%, settings\nm_config.ini, Collect, LastGlueDis
 			}
 		}
 	}
@@ -8771,7 +8762,7 @@ nm_cannonTo(location){
 	}
 	SetKeyDelay, 5
 }
-nm_cannonToPlanter(location){
+nm_cannonToPlanter(location){ ; ~ zaappiix planter path rework
 	global FwdKey, LeftKey, BackKey, RightKey, RotLeft, RotRight, KeyDelay, MoveSpeedFactor, ShiftLockEnabled
 	if (ShiftLockEnabled) {
 		ShiftLockEnabled:=0
@@ -8779,185 +8770,212 @@ nm_cannonToPlanter(location){
 	}
 	SetKeyDelay, 10
 	if(location="sunflower"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%RightKey% down}
-		DllCall("Sleep",UInt,325) ;425
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,900)
-		send {%RightKey% up}
-		send {space}
-		DllCall("Sleep",UInt,1000)
-		loop 2 {
-			send, {%RotRight%}
+	movement := "
+	(LTrim Join`r`n
+		" nm_Walk(14, BackKey) "
+		loop 1 {
+			send, {" RotRight "}
 		}
-		nm_Move(3000*MoveSpeedFactor, FwdKey)
-		nm_Move(6000*MoveSpeedFactor, LeftKey)
-		nm_Move(2000*MoveSpeedFactor, RightKey, BackKey)
+		" nm_Walk(24, RightKey) "
+		" nm_Walk(15, FwdKey) "
+		" nm_Walk(7, BackKey) "
+    )"
+    nm_createWalk(movement)
+    KeyWait, F14, D T5 L ; wait for pattern start
+    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
+    nm_endWalk()
 	}
 	else if(location="dandelion"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%LeftKey% down}
-		DllCall("Sleep",UInt,325) ;275
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,1000)
-		send {%FwdKey% down}
-		DllCall("Sleep",UInt,500)
-		send {%FwdKey% up}
-		DllCall("Sleep",UInt,1250) ;1750
-		send {%LeftKey% up}
-		send {space}
-		loop 2 {
-			send, {%RotLeft%}
+	movement := "
+	(LTrim Join`r`n
+		loop 1 {
+			send, {" RotRight "}
 		}
-		DllCall("Sleep",UInt,1500)
-		nm_Move(1500*MoveSpeedFactor, FwdKey, RightKey)
-		nm_Move(2000*MoveSpeedFactor, FwdKey)
-		nm_Move(1500*MoveSpeedFactor, FwdKey, RightKey)
-		nm_Move(1500*MoveSpeedFactor, BackKey, LeftKey)
-		nm_Move(1000*MoveSpeedFactor, BackKey)
+		" nm_Walk(45, BackKey) "
+    )"
+    nm_createWalk(movement)
+    KeyWait, F14, D T5 L ; wait for pattern start
+    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
+    nm_endWalk()
 	}
 	else if(location="mushroom"){
-		send, {e}
-		DllCall("Sleep",UInt,50)	
-		send {%FwdKey% down}
-		DllCall("Sleep",UInt,775) ;725
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,150)
-		send {%FwdKey% up}
-		send {space}
-		DllCall("Sleep",UInt,2000)
-		loop 4 {
-			send, {%RotLeft%}
+	movement := "
+	(LTrim Join`r`n
+		loop 1 {
+			send, {" RotRight "}
 		}
-		nm_Move(3000*MoveSpeedFactor, FwdKey, RightKey)
-		nm_Move(3000*MoveSpeedFactor, RightKey)
-		nm_Move(1000*MoveSpeedFactor, BackKey, LeftKey)
+		" nm_Walk(41, BackKey) "
+		loop 3 {
+			send, {" RotRight "}
+		}
+		" nm_Walk(35, FwdKey) "
+    )"
+    nm_createWalk(movement)
+    KeyWait, F14, D T5 L ; wait for pattern start
+    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
+    nm_endWalk()
 	}
 	else if(location="blue flower"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%LeftKey% down}
-		DllCall("Sleep",UInt,675)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,3250)
-		send {%LeftKey% up}
-		send {space}
-		DllCall("Sleep",UInt,1000)
-		loop 2 {
-			send, {%RotLeft%}
-		}
-		nm_Move(3000*MoveSpeedFactor, LeftKey)
-		nm_Move(4500*MoveSpeedFactor, RightKey)
-		nm_Move(3000*MoveSpeedFactor, BackKey)
-		nm_Move(1000*MoveSpeedFactor, LeftKey)
+	movement := "
+	(LTrim Join`r`n
+		" nm_Walk(90, BackKey, LeftKey) "
+		" nm_Walk(28, LeftKey) "		
+		" nm_Walk(12, FwdKey) "		
+		" nm_Walk(17, RightKey) "		
+		" nm_Walk(7, BackKey, LeftKey) "		
+    )"
+    nm_createWalk(movement)
+    KeyWait, F14, D T5 L ; wait for pattern start
+    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
+    nm_endWalk()
 	}
 	else if(location="clover"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%LeftKey% down}
-		send {%FwdKey% down}
-		DllCall("Sleep",UInt,475) ;575
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,1500) ;1200
-		send {%FwdKey% up}
-		DllCall("Sleep",UInt,3500) ;4000
-		send {%LeftKey% up}
-		send {space}
-		DllCall("Sleep",UInt,1000)
-		nm_Move(1000*MoveSpeedFactor, FwdKey, LeftKey)
-		nm_Move(3000*MoveSpeedFactor, LeftKey)
-		nm_Move(2000*MoveSpeedFactor, FwdKey)
-		nm_Move(1000*MoveSpeedFactor, BackKey, RightKey)
-		nm_Move(2500*MoveSpeedFactor, RightKey)
-		
-		
+	movement := "
+	(LTrim Join`r`n
+		" nm_Walk(43, LeftKey, BackKey) "
+		" nm_Walk(43, LeftKey) "
+        Send {" LeftKey " down}
+		Walk(2)
+		send {space down}
+		Walk(2)
+		send {space up}
+		Walk(2)
+		" nm_Walk(3, BackKey) "
+		Walk(5)
+		send {space down}
+		Walk(2)
+		send {space up}
+		Walk(2)
+		send {" LeftKey " up}
+		" nm_Walk(15, LeftKey) "
+		" nm_Walk(15, FwdKey) "		
+		" nm_Walk(15, FwdKey, RightKey) "
+		" nm_Walk(8, BackKey) "
+    )"
+    nm_createWalk(movement)
+    KeyWait, F14, D T5 L ; wait for pattern start
+    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
+    nm_endWalk()
 	}
 	else if(location="spider"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%BackKey% down}
-		DllCall("Sleep",UInt,850) ;1050
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,750) ;150
-		send {space}
-		send {%BackKey% up}
-		loop 4 {
-			send, {%RotRight%}
+	movement := "
+	(LTrim Join`r`n
+		loop 1 {
+			send, {" RotRight "}
 		}
-		DllCall("Sleep",UInt,3000)
-		nm_Move(4000*MoveSpeedFactor, FwdKey)
-		nm_Move(2000*MoveSpeedFactor, FwdKey, LeftKey)
-		nm_Move(2000*MoveSpeedFactor, LeftKey)
-		nm_Move(1000*MoveSpeedFactor, BackKey, RightKey)
+		" nm_Walk(41, BackKey) "
+		loop 3 {
+			send, {" RotRight "}
+		}
+		Send {" FwdKey " down}
+		Walk(45)
+		send {space down}
+		Walk(3)
+		send {space up}
+		Walk(5)
+		Send {" RightKey " down}
+		Walk(10)
+		Send {" RightKey " up}
+		Walk(10)
+		Send {" LeftKey " down}
+		Walk(18)
+		send {" LeftKey " up}{" FwdKey " up}
+		" nm_Walk(8, BackKey, RightKey) "
+    )"
+    nm_createWalk(movement)
+    KeyWait, F14, D T5 L ; wait for pattern start
+    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
+    nm_endWalk()
 	}
 	else if(location="strawberry"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%RightKey% down}
-		send {%BackKey% down}
-		DllCall("Sleep",UInt,750)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,1800)
-		send {%RightKey% up}
-		send {%BackKey% up}
-		send {space}
-		DllCall("Sleep",UInt,500)
-		loop 4 {
-			send, {%RotRight%}
+	movement := "
+	(LTrim Join`r`n
+		loop 1 {
+			send, {" RotRight "}
 		}
-		nm_Move(5000*MoveSpeedFactor, FwdKey, LeftKey)
-		nm_Move(2000*MoveSpeedFactor, LeftKey)
-		nm_Move(1500*MoveSpeedFactor, BackKey, RightKey)
+		" nm_Walk(41, BackKey) "
+		loop 3 {
+			send, {" RotRight "}
+		}
+		Send {" FwdKey " down}
+		Walk(45)
+		send {space down}
+		Walk(3)
+		send {space up}
+		Walk(4)
+		loop 2 {
+			send, {" RotLeft "}
+		}
+		Walk(17)
+		Send {" RightKey " down}
+		Walk(10)
+		Send {" RightKey " up}
+		Walk(17)
+		Send {" FwdKey " up}{" LeftKey " down}
+		Walk(10)
+		send {" LeftKey " up}
+		" nm_Walk(10, BackKey, RightKey) "
+    )"
+    nm_createWalk(movement)
+    KeyWait, F14, D T5 L ; wait for pattern start
+    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
+    nm_endWalk()
 	}
 	else if(location="bamboo"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%LeftKey% down}
-		DllCall("Sleep",UInt,1200)
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,2500)
-		send {%LeftKey% up}
-		send {space}
-		loop 4 {
-			send, {%RotLeft%}
+	movement := "
+	(LTrim Join`r`n
+		loop 1 {
+			send, {" RotRight "}
 		}
-		DllCall("Sleep",UInt,1500)
-		nm_Move(3500*MoveSpeedFactor, FwdKey)
-		nm_Move(1000*MoveSpeedFactor, BackKey)
-		nm_Move(4000*MoveSpeedFactor, RightKey)
-		nm_Move(1000*MoveSpeedFactor, LeftKey)
+		" nm_Walk(41, BackKey) "
+		loop 3 {
+			send, {" RotRight "}
+		}
+		Send {" FwdKey " down}
+		Walk(45)
+		send {space down}
+		Walk(3)
+		send {space up}
+		Walk(4)
+		loop 2 {
+			send, {" RotRight "}
+		}
+		Send {" LeftKey " down}
+		Walk(23)
+		Send {" LeftKey " up}
+		Walk(28)
+		Send {" FwdKey " up}
+    )"
+    nm_createWalk(movement)
+    KeyWait, F14, D T5 L ; wait for pattern start
+    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
+    nm_endWalk()
 	}
 	else if(location="pineapple"){
+		nm_gotoCannon()
+		DllCall("Sleep",UInt,500)
 		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%LeftKey% down}
-		DllCall("Sleep",UInt,1950) ;1850
-		send {space}
-		send {space}
-		DllCall("Sleep",UInt,2000) ;2750
-		send {%LeftKey% up}
-		send {%BackKey% down}
-		DllCall("Sleep",UInt,1000) ;1150
-		send {%BackKey% up}
-		send {space}
-		loop 4 {
-			send, {%RotLeft%}
+        DllCall("Sleep",UInt,2500)
+	movement := "
+	(LTrim Join`r`n
+		loop 3 {
+			send, {" RotRight "}
 		}
-		DllCall("Sleep",UInt,1000)
-		nm_Move(4000*MoveSpeedFactor, FwdKey, LeftKey)
-		nm_Move(1000*MoveSpeedFactor, BackKey, RightKey)
+		" nm_Walk(8, BackKey) "
+		" nm_Walk(10, BackKey, RightKey) "
+		" nm_Walk(24, RightKey) "
+		" nm_Walk(10, FwdKey) "
+		" nm_Walk(5, FwdKey, RightKey) "
+		" nm_Walk(8, BackKey) "
+    )"
+    nm_createWalk(movement)
+    KeyWait, F14, D T5 L ; wait for pattern start
+    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
+    nm_endWalk()
 	}
 	else if(location="stump"){
+		nm_gotoCannon()
+		DllCall("Sleep",UInt,500)
 		send, {e}
 		DllCall("Sleep",UInt,50)
 		send {%LeftKey% down}
@@ -8979,6 +8997,8 @@ nm_cannonToPlanter(location){
 		DllCall("Sleep",UInt,1000)
 	}
 	else if(location="cactus"){
+		nm_gotoCannon()
+		DllCall("Sleep",UInt,500)
 		send, {e}
 		DllCall("Sleep",UInt,50)
 		send {%RightKey% down}
@@ -8998,6 +9018,8 @@ nm_cannonToPlanter(location){
 
 	}
 	else if(location="pumpkin"){
+		nm_gotoCannon()
+		DllCall("Sleep",UInt,500)
 		send, {e}
 		DllCall("Sleep",UInt,50)
 		send {%RightKey% down}
@@ -9018,9 +9040,10 @@ nm_cannonToPlanter(location){
 		nm_Move(900*MoveSpeedFactor, BackKey)
 		nm_Move(4000*MoveSpeedFactor, RightKey)
 		nm_Move(2000*MoveSpeedFactor, LeftKey)
-		
 	}
 	else if(location="pine tree"){
+		nm_gotoCannon()
+		DllCall("Sleep",UInt,500)
 		send, {e}
 		DllCall("Sleep",UInt,50)
 		send {%RightKey% down}
@@ -9033,17 +9056,18 @@ nm_cannonToPlanter(location){
 		DllCall("Sleep",UInt,1500)
 		send {%RightKey% up}
 		send {space}
-		loop 2 {
+		loop 3 {
 			send, {%RotRight%}
 		}
 		DllCall("Sleep",UInt,1000)
-		nm_Move(6000*MoveSpeedFactor, RightKey)
-		nm_Move(4000*MoveSpeedFactor, FwdKey)
-		nm_Move(3000*MoveSpeedFactor, LeftKey)
-		
-		
+		nm_Move(6000*MoveSpeedFactor, FwdKey, RightKey)
+		nm_Move(4000*MoveSpeedFactor, FwdKey, LeftKey)
+		nm_Move(2000*MoveSpeedFactor, FwdKey)
+		nm_Move(2000*MoveSpeedFactor, BackKey)
 	}
 	else if(location="rose"){
+		nm_gotoCannon()
+		DllCall("Sleep",UInt,500)
 		send, {e}
 		DllCall("Sleep",UInt,50)
 		send {%RightKey% down}
@@ -9062,59 +9086,72 @@ nm_cannonToPlanter(location){
 		nm_Move(1000*MoveSpeedFactor, BackKey, LeftKey)
 	}
 	else if(location="mountain top"){
+		nm_gotoCannon()
+		DllCall("Sleep",UInt,500)
 		send, {e}
 		DllCall("Sleep",UInt,4000)
 	}
 	else if(location="pepper"){
-		send, {e}
-		DllCall("Sleep",UInt,50)
-		send {%FwdKey% down}
-		DllCall("Sleep",UInt,500)
-		send {space}
-		send {space}
+		nm_gotoCannon()
+		DllCall("Sleep",UInt,150)
 		send {%RightKey% down}
-		DllCall("Sleep",UInt,3900)
-		send {%RightKey% up}
-		DllCall("Sleep",UInt,2000)
-		send {%RightKey% down}
-		DllCall("Sleep",UInt,2000)
-		send {%RightKey% up}
-		send {space down}
-		DllCall("Sleep",UInt,50)
-		send {space up}
-		DllCall("Sleep",UInt,750)
-		send {space down}
-		DllCall("Sleep",UInt,50)
-		send {space up}
-		DllCall("Sleep",UInt,750)
-		send {space down}
-		DllCall("Sleep",UInt,50)
-		send {space up}
-		DllCall("Sleep",UInt,3000*MovespeedFactor)
-		send {%RightKey% down}
-		send {space down}
-		DllCall("Sleep",UInt,50)
-		send {space up}
-		DllCall("Sleep",UInt,5000*MovespeedFactor)
+		sleep, 5000*MovespeedFactor
 		send {space down}
 		DllCall("Sleep",UInt,100)
 		send {space up}
 		DllCall("Sleep",UInt,1500*MovespeedFactor)
+		send {%FwdKey% down}
+		send {%RightKey% up}
+		DllCall("Sleep",UInt,1000*MovespeedFactor)
+		send {space down}
+		DllCall("Sleep",UInt,100)
+		send {space up}
+		DllCall("Sleep",UInt,1500*MovespeedFactor)
+		nm_Move(700*MoveSpeedFactor, LeftKey)
+		DllCall("Sleep",UInt,3000*MovespeedFactor)
+		nm_Move(1500*MoveSpeedFactor, RightKey)
+		send {space down}
+		DllCall("Sleep",UInt,100)
+		send {space up}
+		DllCall("Sleep",UInt,750)
+		send {space down}
+		DllCall("Sleep",UInt,100)
+		send {space up}
+		DllCall("Sleep",UInt,850)
+		send {space down}
+		DllCall("Sleep",UInt,100)
+		send {space up}
+		DllCall("Sleep",UInt,2500*MovespeedFactor)		
+		send {space down}
+		DllCall("Sleep",UInt,100)
+		send {space up}
+		DllCall("Sleep",UInt,5500*MovespeedFactor)
+		send {%RightKey% down}
+		DllCall("Sleep",UInt,500)
+		send {space down}
+		DllCall("Sleep",UInt,100)
+		send {space up}
+		DllCall("Sleep",UInt,100)
 		send {%FwdKey% up}
-		DllCall("Sleep",UInt,2000*MovespeedFactor)
+		send {space down}
+		DllCall("Sleep",UInt,100)
+		send {space up}
+		DllCall("Sleep",UInt,5800*MovespeedFactor)
 		send {space down}
 		DllCall("Sleep",UInt,100)
 		send {space up}
 		DllCall("Sleep",UInt,1000*MovespeedFactor)
 		send {%RightKey% up}
-		send {%FwdKey% up}
 		loop 2 {
 			send {%RotRight%}
 		}
-		nm_Move(6000*MoveSpeedFactor, FwdKey)
-		nm_Move(1500*MoveSpeedFactor, BackKey)
+		nm_Move(7000*MoveSpeedFactor, FwdKey)
+		nm_Move(5000*MoveSpeedFactor, RightKey)
+		nm_Move(3000*MoveSpeedFactor, LeftKey, BackKey)
 	}
 	else if(location="coconut"){
+		nm_gotoCannon()
+		DllCall("Sleep",UInt,500)
 		send, {e}
 		DllCall("Sleep",UInt,50)
 		send {%FwdKey% down}
@@ -9660,7 +9697,7 @@ nm_GoGather(){
 		if(gotoPlanterField && EnablePlantersPlus){
 			loop, 3{
 				inverseIndex:=(4-A_Index)
-				IniRead, PlanterField%inverseIndex%, ba_config.ini, planters, PlanterField%inverseIndex%
+				IniRead, PlanterField%inverseIndex%, settings\ba_config.ini, planters, PlanterField%inverseIndex%
 				If(PlanterField%inverseIndex%="dandelion" || PlanterField%inverseIndex%="sunflower" || PlanterField%inverseIndex%="mushroom" || PlanterField%inverseIndex%="blue flower" || PlanterField%inverseIndex%="clover" || PlanterField%inverseIndex%="strawberry" || PlanterField%inverseIndex%="spider" || PlanterField%inverseIndex%="bamboo" || PlanterField%inverseIndex%="pineapple" || PlanterField%inverseIndex%="stump" || PlanterField%inverseIndex%="cactus" || PlanterField%inverseIndex%="pumpkin" || PlanterField%inverseIndex%="pine tree" || PlanterField%inverseIndex%="rose" || PlanterField%inverseIndex%="mountain top" || PlanterField%inverseIndex%="pepper" || PlanterField%inverseIndex%="coconut"){
 					fieldOverrideReason:="Planter"
 					FieldName%CurrentFieldNum%:=PlanterField%inverseIndex%
@@ -9709,9 +9746,9 @@ nm_GoGather(){
 	MouseMove, 350, (Roblox[3]+100)
 	;reset
 	if(fieldOverrideReason="None") {
-		if(CurrentAction!=PreviousAction){
+		;if(CurrentAction!=PreviousAction){
 			nm_Reset(2)
-		}
+		;} ~ fix reset for gather end, thanks @zaap for finding
 		;check if gathering field is boosted
 		blueBoosterFields:=["Pine Tree", "Bamboo", "Blue Flower"]
 		redBoosterFields:=["Rose", "Strawberry", "Mushroom"]
@@ -9792,7 +9829,8 @@ nm_GoGather(){
 	nm_fieldBoostGlitter()
 	;set sprinkler
 	if(fieldOverrideReason="None") {
-		nm_setStatus("Gathering", FieldName%CurrentFieldNum% . " " . GatherFieldBoosted)
+		VarSetCapacity(field_limit,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",FieldUntilMins%CurrentFieldNum%*60*10000000,"wstr","mm:ss","str",field_limit,"int",256)
+		nm_setStatus("Gathering", FieldName%CurrentFieldNum% "`nLimit " field_limit " - " FieldPattern%CurrentFieldNum% " - " FieldPatternSize%CurrentFieldNum% (GatherFieldBoosted ? " - Boosted" : "")) ; ~ added gather start info
 	} else if(fieldOverrideReason="Quest") {
 		nm_setStatus("Gathering", RotateQuest . " " . fieldOverrideReason . " - " . FieldName%CurrentFieldNum%)
 	} else {
@@ -9834,6 +9872,7 @@ nm_GoGather(){
 	
 	;gather loop
 	bypass:=0
+	interruptReason := ""
 	gatherStart:=nowUnix() ; used to control how long to gather in this cycle
 	GatherStartTime:=nowUnix() ; used to track total and session gathering time metrics
 	if(FieldPatternShift%CurrentFieldNum% && ShiftLockEnabled=0) {
@@ -9844,32 +9883,37 @@ nm_GoGather(){
 		if(PFieldBoosted && (nowUnix()-GatherFieldBoostedStart)>525 && (nowUnix()-GatherFieldBoostedStart)<900 && (nowUnix()-LastGlitter)>900 && GlitterKey!="none" && fieldOverrideReason="None") { ;between 9 and 15 mins (-minus an extra 15 seconds)
 			Send {%GlitterKey%}
 			LastGlitter:=nowUnix()
-			IniWrite, %LastGlitter%, nm_config.ini, Boost, LastGlitter
+			IniWrite, %LastGlitter%, settings\nm_config.ini, Boost, LastGlitter
 		}
 		nm_gather(FieldPattern%CurrentFieldNum%, FieldPatternSize%CurrentFieldNum%, FieldPatternReps%CurrentFieldNum%, FacingFieldCorner)
 		nm_autoFieldBoost(FieldName%CurrentFieldNum%)
 		nm_fieldDriftCompensation()
 		nm_fieldBoostGlitter()
-		;interrupt if...
+		;interrupt if... ~ used interruptReason variable to setStatus after gather end message, also improves stability as loop is ended before nesting a function
 		if(DisconnectCheck() || youDied || VBState=1 || PMondoGuidComplete) {
 			bypass:=1
 			if(DisconnectCheck())
-				nm_setStatus("Interupted", "Disconnect")
+				interruptReason := "Disconnect"
+				;nm_setStatus("Interupted", "Disconnect")
 			else if (youDied)
-				nm_setStatus("Interupted", "You Died!")
+				interruptReason := "You Died!"
+				;nm_setStatus("Interupted", "You Died!")
 			else if (VBState=1)
-				nm_setStatus("Interupted", "Vicious Bee")
+				interruptReason := "Vicious Bee"
+				;nm_setStatus("Interupted", "Vicious Bee")
 			else if (PMondoGuidComplete)
 				PMondoGuidComplete:=0
 			break
 		}
 		if((MondoBuffCheck && A_Min>=0 && A_Min<14 && (nowUnix()-LastMondoBuff)>960) && (MondoAction="Buff" || MondoAction="Kill")){
-			nm_setStatus("Interupted", "Mondo")
+			interruptReason := "Mondo"
+			;nm_setStatus("Interupted", "Mondo")
 			break
 		}
 		;GatherInterruptCheck
 		if((PolarQuestGatherInterruptCheck || BuckoQuestGatherInterruptCheck || RileyQuestGatherInterruptCheck || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck || BuckoRhinoBeetles || RileyAll) && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1830*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck || RileyScorpions || RileyAll) && (nowUnix()-LastBugrunScorpions)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck || RileyAll) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
-			nm_setStatus("Interupted", "Kill Bugs")
+			interruptReason := "Kill Bugs"
+			;nm_setStatus("Interupted", "Kill Bugs")
 			break
 		}
 		;special hotkeys
@@ -9878,18 +9922,20 @@ nm_GoGather(){
 			PackFilterArray:=[]
 			sleep, 500
 			LastMicroConverter:=nowUnix()
-			IniWrite, %LastMicroConverter%, nm_config.ini, Boost, LastMicroConverter
+			IniWrite, %LastMicroConverter%, settings\nm_config.ini, Boost, LastMicroConverter
 			continue
 		}
 		;full backpack
 		else if (BackpackPercentFiltered>=(FieldUntilPack%CurrentFieldNum%-2)) {
 			tempstring:=("Backpack exceeds " .  FieldUntilPack%CurrentFieldNum% . " percent")
-			nm_setStatus("Interupted", tempstring)
+			interruptReason := tempstring
+			;nm_setStatus("Interupted", tempstring)
 			break
 		}
 		;active honey
 		if(not nm_activeHoney() && (BackpackPercentFiltered<FieldUntilPack%CurrentFieldNum%)){
-			nm_setStatus("Interupted", "Inactive Honey")
+			interruptReason := "Inactive Honey"
+			;nm_setStatus("Interupted", "Inactive Honey")
 			GameFrozenCounter:=GameFrozenCounter+1
 			break
 		}
@@ -9902,7 +9948,8 @@ nm_GoGather(){
 			}
 			;interrupt if
 			if (thisfield!=QuestGatherField || QuestGatherField="none" || BlackQuestComplete){ ;change fields or this field is complete
-				nm_setStatus("Interupted", "Next Quest Step")
+				interruptReason := "Next Quest Step"
+				;nm_setStatus("Interupted", "Next Quest Step")
 				break
 			}
 		}
@@ -9915,7 +9962,8 @@ nm_GoGather(){
 			}
 			;interrupt if
 			if (thisfield!=QuestGatherField || QuestGatherField="none" || BuckoQuestComplete=1){ ;change fields or this field is complete
-				nm_setStatus("Interupted", "Next Quest Step")
+				interruptReason := "Next Quest Step"
+				;nm_setStatus("Interupted", "Next Quest Step")
 				break
 			}
 		}
@@ -9928,11 +9976,20 @@ nm_GoGather(){
 			}
 			;interrupt if
 			if (thisfield!=QuestGatherField || QuestGatherField="none" || RileyQuestComplete=1){ ;change fields or this field is complete
-				nm_setStatus("Interupted", "Next Quest Step")
+				interruptReason := "Next Quest Step"
+				;nm_setStatus("Interupted", "Next Quest Step")
 				break
 			}
 		}
 	}
+	nm_endWalk() ; ~ close walk script
+	
+	; ~ set gather ended status
+	VarSetCapacity(gatherDuration,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",(nowUnix()-GatherStartTime)*10000000,"wstr","mm:ss","str",gatherDuration,"int",256)
+	gatherEndReason := interruptReason ? (InStr(interruptReason, "Backpack exceeds") ? "Bag Limit" : interruptReason) : "Time Limit"
+	nm_setStatus("Gathering", "Ended`nTime " gatherDuration " - " gatherEndReason " - Return: " FieldReturnType%CurrentFieldNum%)
+	interruptReason ? nm_setStatus("Interupted", interruptReason) ; taken out of while loop
+	
 	if(GatherStartTime) {
 		TotalGatherTime:=TotalGatherTime+(nowUnix()-GatherStartTime)
 		SessionGatherTime:=SessionGatherTime+(nowUnix()-GatherStartTime)
@@ -10034,7 +10091,7 @@ nm_GoGather(){
 				}
 				send {%WhirligigKey%}
 				LastWhirligig:=nowUnix()
-				IniWrite, %LastWhirligig%, nm_config.ini, Boost, LastWhirligig
+				IniWrite, %LastWhirligig%, settings\nm_config.ini, Boost, LastWhirligig
 				sleep, 1000
 			} else { ;walk to hive
 				nm_walkFrom(FieldName%CurrentFieldNum%)
@@ -10124,7 +10181,7 @@ nm_GoGather(){
 				}
 				send {%WhirligigKey%}
 				LastWhirligig:=nowUnix()
-				IniWrite, %LastWhirligig%, nm_config.ini, Boost, LastWhirligig
+				IniWrite, %LastWhirligig%, settings\nm_config.ini, Boost, LastWhirligig
 				sleep, 1000
 				;convert
 				nm_convert(1)
@@ -10183,288 +10240,156 @@ nm_loot(length, reps, direction){
 	}
 }
 nm_gather(pattern, patternsize:="M", reps:=1, facingcorner:=0){
-	global TCFBKey, AFCFBKey, TCLRKey, AFCLRKey, KeyDelay, MoveSpeedFactor, DisableToolUse, FwdKey
-	;set size
-	if(patternsize="XS")
-		size:=0.25
-	else if (patternsize="S")
-		size:=0.5
-	else if (patternsize="L")
-		size:=1.5
-	else if (patternsize="XL")
-		size:=2
-	else ;medium (default)
-		size:=1
-	setKeyDelay, 2
-	if(!DisableToolUse)
-		click, down
-	if(pattern="lines"){
-		;toward center
-		loop %reps% {
-			send {%TCFBKey% down}
-			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			send {%TCLRKey% down}
-			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			send {%AFCFBKey% down}
-			send {%TCLRKey% up}
-			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			send {%TCLRKey% down}
-			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			send {%TCLRKey% up}
-		}
-		;away from center
-		loop %reps% {
-			send {%TCFBKey% down}
-			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			send {%AFCLRKey% down}
-			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			send {%AFCFBKey% down}
-			send {%AFCLRKey% up}
-			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			send {%AFCLRKey% down}
-			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			send {%AFCLRKey% up}
-		}
-	} else if(pattern="snake"){
-		;toward center
-		loop %reps% {
-			send {%TCLRKey% down}
-			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			send {%TCFBKey% down}
-			send {%TCLRKey% up}
-			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			send {%AFCLRKey% down}
-			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			send {%TCFBKey% down}
-			send {%AFCLRKey% up}
-			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			send {%TCFBKey% up}
-		}
-		;away from center
-		loop %reps% {
-			send {%TCLRKey% down}
-			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			send {%AFCFBKey% down}
-			send {%TCLRKey% up}
-			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			send {%AFCLRKey% down}
-			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			send {%AFCFBKey% down}
-			send {%AFCLRKey% up}
-			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			send {%AFCFBKey% up}
-		}
-	} else if(pattern="diamonds"){
-		loop %reps% {
-			send {%TCFBKey% down}
-			send {%TCLRKey% down}
-			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			send {%TCLRKey% up}
-			send {%AFCLRKey% down}
-			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			send {%TCFBKey% up}
-			send {%AFCFBKey% down}
-			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			send {%AFCLRKey% up}
-			send {%TCLRKey% down}
-			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			send {%TCLRKey% up}
-			send {%AFCFBKey% up}
-		}
-	} else if(pattern="squares"){
-		loop %reps% {
-			send {%TCFBKey% down}
-			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			send {%TCLRKey% down}
-			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			send {%AFCFBKey% down}
-			send {%TCLRKey% up}
-			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			send {%AFCLRKey% down}
-			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			send {%AFCLRKey% up}
-		}
-	} else if(pattern="typewriter"){
-		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-		spacingDelay:=274 ;183
-		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-		send {%TCLRKey% down}
-		DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor*(reps*2+1.25))
-		send {%AFCFBKey% down}
-		send {%TCLRKey% up}
-		DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
-		send {%AFCFBKey% up}
-		loop %reps% {
-			send {%AFCLRKey% down}
-			DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor)
-			send {%TCFBKey% down}
-			send {%AFCLRKey% up}
-			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
-			send {%AFCLRKey% down}
-			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor)
-			send {%AFCLRKey% up}
-			send {%AFCFBKey% down}
-			DllCall("Sleep",UInt,(1094+25*facingcorner)*MoveSpeedFactor*size)
-			send {%AFCFBKey% up}
-		}
-		send {%TCLRKey% down}
-		DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor*(reps*2+1))
-		send {%TCFBKey% down}
-		send {%TCLRKey% up}
-		DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
-		send {%TCFBKey% up}
-		loop %reps% {
-			send {%AFCLRKey% down}
-			DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor)
-			send {%AFCFBKey% down}
-			send {%AFCLRKey% up}
-			DllCall("Sleep",UInt,(1094+25*facingcorner)*MoveSpeedFactor*size)
-			send {%AFCLRKey% down}
-			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor)
-			send {%TCFBKey% down}
-			send {%AFCLRKey% up}
-			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
-			send {%TCFBKey% up}
-		}
-	} else if(pattern="auryn"){
-		;Auryn Gathering Path
-		AurynDelay:=175
-		loop %reps% {
-			;infinity
-			send {%TCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			send {%TCLRKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			send {%AFCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4)
-			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			send {%TCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			send {%TCLRKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			send {%AFCLRKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			send {%AFCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4)
-			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			send {%TCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			send {%AFCLRKey% up}
-			;big circle
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			send {%TCLRKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			send {%AFCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			send {%TCLRKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			send {%AFCLRKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			send {%TCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			send {%AFCLRKey% up}
-			;FLIP!!
-			;move to other side (half circle)
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			send {%TCLRKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			send {%AFCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			send {%TCLRKey% up}
-			send {%AFCFBKey% up}
-			;pause here
-			DllCall("Sleep",UInt,50)
-			;reverse infinity
-			send {%AFCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			send {%AFCLRKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			send {%TCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*3*1.4)
-			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			send {%AFCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			send {%AFCLRKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			send {%TCLRKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			send {%TCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1))
-			send {%AFCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*1.4)
-			send {%TCLRKey% up}
-			;big circle
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			send {%AFCLRKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			send {%TCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			send {%AFCLRKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			send {%TCLRKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			send {%TCFBKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			send {%AFCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			send {%TCLRKey% up}
-			;FLIP!!
-			;move to other side (half circle)
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			send {%AFCLRKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			send {%AFCFBKey% up}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2)
-			send {%TCFBKey% down}
-			DllCall("Sleep",UInt,AurynDelay*MoveSpeedFactor*size*(A_Index*1.1)*2*1.4)
-			send {%AFCLRKey% up}
-			send {%TCFBKey% up}
-		}
-	} else if(pattern="stationary"){
+	global TCFBKey, AFCFBKey, TCLRKey, AFCLRKey, KeyDelay, MoveSpeedFactor, DisableToolUse, FwdKey, MoveSpeedNum, WalkPID, NewWalk ; ~ new walk requires movespeednum, WalkPID variable needed to check if external gather script is running
+	static patterns := {}
+	
+	if(pattern="stationary"){
 		loop 10 {
 			click
 			sleep 1000
 		}
+		return
 	}
+	
+	;set size ~ replaced if-else with ternary, slightly speeds up delay between cycles
+	size := (patternsize="XS") ? 0.25
+		: (patternsize="S") ? 0.5
+		: (patternsize="L") ? 1.5
+		: (patternsize="XL") ? 2
+		: 1 ; medium (default)
+		
+	;setKeyDelay, 2 ~ keys are no longer sent by this script
+	if(!DisableToolUse)
+		click, down
+	
+	; ~ obtain all patterns, which are stored as code in settings\patterns.ahk
+	; Walk(" n * size ")" / "Walk(n)" - new general form, can alter to include variables
+	; DllCall(""Sleep"",UInt," 222*MoveSpeedFactor*walkparam ") - old form derived from new form (see RegExMatch below)
+	; ask me if you need any help with translating old form to new form or vice versa
+	; almost all of this function has been revamped to improve gathering timing inaccuracies, feel free to ask about anything
+	
+	if (patterns.Count() = 0)
+	{
+		#Include *i settings\patterns.ahk
+	}
+	
+	Prev_DetectHiddenWindows := A_DetectHiddenWindows
+	DetectHiddenWindows, On	
+	if !WinExist("ahk_class AutoHotkey ahk_pid " WalkPID)
+		nm_createWalk(patterns[pattern]) ; create cycled walk script for this gather session
+	else
+		Send {F13} ; start new cycle
+	DetectHiddenWindows, %Prev_DetectHiddenWindows%
+	
+	KeyWait, F14, D T5 L ; wait for pattern start
+	if ErrorLevel
+		nm_endWalk()
+	KeyWait, F14, T90 L ; wait for pattern finish
+	if ErrorLevel
+		nm_endWalk()
+	
 	click, up
+}
+nm_Walk(tiles, MoveKey1, MoveKey2:=0){ ; ~ this function returns a string of AHK code which holds MoveKey1 (and optionally MoveKey2) down for 'tiles' tiles. NOTE: this only helps creating a movement, put this through nm_createWalk() to execute
+	return "
+	(LTrim Join`r`n
+	Send {" MoveKey1 " down}" (MoveKey2 ? "{" MoveKey2 " down}" : "") "
+	Walk(" tiles ")
+	Send {" MoveKey1 " up}" (MoveKey2 ? "{" MoveKey2 " up}" : "") "
+	)"
+}
+nm_createWalk(movement) ; ~ this function generates the 'walk' code and runs it for a given 'movement' (AHK code string), using movespeed correction if 'NewWalk' is enabled and legacy movement otherwise
+{
+	global newWalk, MoveSpeedNum, MoveSpeedFactor, WalkPID
+	
+	; F13 is used by 'natro_macro.ahk' to tell 'walk' to complete a cycle
+	; F14 is held down by 'walk' to indicate that the cycle is in progress, then released when the cycle is finished
+	
+	Prev_DetectHiddenWindows := A_DetectHiddenWindows
+	DetectHiddenWindows, On ; allow communication with walk script
+	
+	if NewWalk
+	{
+		; #Include Walk.ahk performs most of the initialisation, i.e. creating bitmaps and storing the necessary functions
+		; MoveSpeedNum must contain the exact in-game movespeed without buffs so the script can calculate the true base movespeed
+		
+		code := "
+		(LTrim Join`r`n
+		#NoEnv
+		#SingleInstance, force
+		SendMode Input
+		SetBatchLines -1
+		Process, Priority, , AboveNormal
+		#KeyHistory 0
+		ListLines, Off
+		
+		#Include " A_ScriptDir "\lib
+		#Include Gdip_All.ahk
+		#Include Gdip_ImageSearch.ahk
+		
+		#Include Walk.ahk
+		
+		movespeed := " MoveSpeedNum "
+		hasty_guard := (Mod(movespeed*10, 11) = 0) ? 1 : 0
+		base_movespeed := movespeed / (hasty_guard ? 1.1 : 1)
+		gifted_hasty := ((Mod(base_movespeed*10, 12) = 0) && base_movespeed != 18 && base_movespeed != 24 && base_movespeed != 30) ? 1 : 0
+		base_movespeed /= (gifted_hasty ? 1.2 : 1)
+		
+		Gosub, F13
+		return
+		
+		F13::
+		Send {F14 down}
+		" movement "
+		Send {F14 up}
+		return
+		)" ; this is just ahk code, it will be executed as a new script
+	}
+	else
+	{
+		code := "
+		(LTrim Join`r`n
+		#NoEnv
+		#SingleInstance, force
+		SendMode Input
+		SetBatchLines -1
+		Process, Priority, , AboveNormal
+		#KeyHistory 0
+		ListLines, Off
+		
+		Gosub, F13
+		return
+		
+		F13::
+		Send {F14 down}
+		" RegExReplace(movement, "m)^(Walk)(\(.*\))", "DllCall(""Sleep"",UInt,222*" MoveSpeedFactor "*$2)") "
+		Send {F14 up}
+		return
+		)"
+	}
+	
+	script := ExecScript(code, , "name=walk") ; run it
+	WalkPID := script.ProcessID
+	WinWait, % "ahk_class AutoHotkey ahk_pid " WalkPID, , 2
+	DetectHiddenWindows, %Prev_DetectHiddenWindows%
+	return !ErrorLevel ; return 1 if successful, 0 otherwise
+}
+nm_endWalk() ; ~ this function forcefully ends the walk script
+{
+	global WalkPID
+	Prev_DetectHiddenWindows := A_DetectHiddenWindows
+	DetectHiddenWindows On
+	WinClose % "ahk_class AutoHotkey ahk_pid " WalkPID
+	DetectHiddenWindows %Prev_DetectHiddenWindows%
+	WalkPID := 0
+	Send {%TCFBKey% up}{%AFCFBKey% up}{%TCLRKey% up}{%AFCLRKey% up}{F14 up}
 }
 nm_convert(hiveConfirm:=0)
 {
 	global KeyDelay, HiveVariation, RotRight, ZoomOut, AFBrollingDice, AFBuseGlitter, AFBuseBooster, CurrentField, HiveConfirmed, EnzymesKey,  LastEnzymes, ConvertStartTime, TotalConvertTime, SessionConvertTime, BackpackPercent, PFieldBoosted, GatherFieldBoosted, GameFrozenCounter, CurrentAction, PreviousAction, PFieldBoosted, GatherFieldBoosted, GatherFieldBoostedStart, LastGlitter, GlitterKey
 	GuiControlGet ConvertBalloon
 	GuiControlGet ConvertMins
-	IniRead, LastConvertBalloon, nm_config.ini, Settings, LastConvertBalloon
+	IniRead, LastConvertBalloon, settings\nm_config.ini, Settings, LastConvertBalloon
 	SetKeyDelay , (100+KeyDelay)
 	HiveConfirmed:=0
 	searchRet := nm_imgSearch("e_button.png",30,"high")
@@ -10553,7 +10478,7 @@ nm_convert(hiveConfirm:=0)
 					If (searchRet[1] = 0) {
 						nm_setStatus(0, "Balloon Refreshed")
 						LastConvertBalloon:=nowUnix()
-						IniWrite, %LastConvertBalloon%, nm_config.ini, Settings, LastConvertBalloon
+						IniWrite, %LastConvertBalloon%, settings\nm_config.ini, Settings, LastConvertBalloon
 						TotalConvertTime:=TotalConvertTime+(nowUnix()-ConvertStartTime)
 						SessionConvertTime:=SessionConvertTime+(nowUnix()-ConvertStartTime)
 						ConvertStartTime:=0
@@ -10577,7 +10502,7 @@ nm_convert(hiveConfirm:=0)
 							if(((EnzymesKey!="none" && !PFieldBoosted) || (EnzymesKey!="none" && PFieldBoosted && GatherFieldBoosted)) && (nowUnix()-LastEnzymes)>540 && nm_activeHoney()) {
 								send {%EnzymesKey%}
 								LastEnzymes:=nowUnix()
-								IniWrite, %LastEnzymes%, nm_config.ini, Boost, LastEnzymes
+								IniWrite, %LastEnzymes%, settings\nm_config.ini, Boost, LastEnzymes
 							}
 						}
 						nm_AutoFieldBoost(currentField)
@@ -10614,7 +10539,7 @@ nm_convert(hiveConfirm:=0)
 					if(ballooncomplete){
 						nm_setStatus(0, "Balloon Refreshed")
 						LastConvertBalloon:=nowUnix()
-						IniWrite, %LastConvertBalloon%, nm_config.ini, Settings, LastConvertBalloon
+						IniWrite, %LastConvertBalloon%, settings\nm_config.ini, Settings, LastConvertBalloon
 					}
 				}
 				;;;;;;;;;;;;;;;;;;;
@@ -10647,7 +10572,7 @@ nm_setSprinkler(quest:=0){
 	if(gotoPlanterField && EnablePlantersPlus){
 		loop, 3{
 			inverseIndex:=(4-A_Index)
-			IniRead, PlanterField%inverseIndex%, ba_config.ini, planters, PlanterField%inverseIndex%
+			IniRead, PlanterField%inverseIndex%, settings\ba_config.ini, planters, PlanterField%inverseIndex%
 			If(PlanterField%inverseIndex%="dandelion" || PlanterField%inverseIndex%="sunflower" || PlanterField%inverseIndex%="mushroom" || PlanterField%inverseIndex%="blue flower" || PlanterField%inverseIndex%="clover" || PlanterField%inverseIndex%="strawberry" || PlanterField%inverseIndex%="spider" || PlanterField%inverseIndex%="bamboo" || PlanterField%inverseIndex%="pineapple" || PlanterField%inverseIndex%="stump" || PlanterField%inverseIndex%="cactus" || PlanterField%inverseIndex%="pumpkin" || PlanterField%inverseIndex%="pine tree" || PlanterField%inverseIndex%="rose" || PlanterField%inverseIndex%="mountain top" || PlanterField%inverseIndex%="pepper" || PlanterField%inverseIndex%="coconut"){
 				FieldName%CurrentFieldNum%:=PlanterField%inverseIndex%
 				FieldSprinklerLoc%CurrentFieldNum%:="center"
@@ -10958,7 +10883,7 @@ DisconnectCheck(){
 		CurrentAction:="Reconnect"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;StartOnReload:=1
-;IniWrite, %StartOnReload%, nm_config.ini, Gui, StartOnReload
+;IniWrite, %StartOnReload%, settings\nm_config.ini, Gui, StartOnReload
 ;sleep, 1000
 ;Reload
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10966,8 +10891,8 @@ DisconnectCheck(){
 			TotalDisconnects:=TotalDisconnects+1
 			SessionDisconnects:=SessionDisconnects+1
 			Send_WM_COPYDATA("incrementstat Disconnects", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalDisconnects%, nm_config.ini, Status, TotalDisconnects
-			IniWrite, %SessionDisconnects%, nm_config.ini, Status, SessionDisconnects
+			IniWrite, %TotalDisconnects%, settings\nm_config.ini, Status, TotalDisconnects
+			IniWrite, %SessionDisconnects%, settings\nm_config.ini, Status, SessionDisconnects
 		}
 		browsers := ["msedge.exe","chrome.exe","ieplore.exe","firefox.exe","opera.exe","brave.exe"]
 		for i, value in browsers {
@@ -10976,7 +10901,7 @@ DisconnectCheck(){
 				;winwaitclose, ahk_exe %value%
 			}
 		}
-		if(not RegExMatch(PrivServer, "i)^((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\?privateServerLinkCode=\d{32}$")){
+		if(PrivServer && !RegExMatch(PrivServer, "i)^((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\/?([^\/]*)\?privateServerLinkCode=\d{32}(\&[^\/]*)*$")){ ; ~ updated ps link RegEx, only send "Invalid Link" if PrivServer actually contains an input
 			;null out the private server link for this disconnect
 			PrivServer:=
 			nm_setStatus("Error", "Private Server Link Invalid")
@@ -10988,8 +10913,8 @@ DisconnectCheck(){
 			sleep, 120000+staggerDelay
 			DailyReconnect:=0
 		}
-		StringLen, linklen, PrivServer
-		if (linklen > 0 && A_Index<10){
+		linklen := StrLen(PrivServer) ; ~ StrLen is recommended over StringLen
+		if (PrivServer && linklen > 0 && A_Index<10){ ; ~ added PrivServer as a condition since 0 has a StringLen of 1
 			;WinClose, Roblox
 			WinKill, Roblox
 			nm_setStatus("Attempting", "Private Server Link")
@@ -11033,15 +10958,22 @@ DisconnectCheck(){
 			sleep 50
 			send {LWin up}
 			send {Up up}
-			myOS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)
-			if((myOS*1)>=10) {
-				;IfWinNotExist, StatMonitor.ahk
-				;{
-					if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) {
-						Run, %A_ScriptDir%\StatMonitor.ahk
-					}
-				;}
+			Prev_DetectHiddenWindows := A_DetectHiddenWindows
+			Prev_TitleMatchMode := A_TitleMatchMode
+			DetectHiddenWindows On
+			SetTitleMatchMode 2
+			;myOS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)
+			;if((myOS*1)>=10) { ~ see previous commenting of this
+			IfWinNotExist, StatMonitor.ahk
+			{
+				if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) { ; ~ changed RegEx
+					Run, %A_ScriptDir%\StatMonitor.ahk
+				}
 			}
+			;}
+			DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+			SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
+			
 			break
 		} else {
 			nm_setStatus("Error", "No Roblox Found, Retry: " . A_Index)
@@ -11075,10 +11007,10 @@ DisconnectCheck(){
 		;set hiveslot
 		If (nm_imgSearch("e_button.png",30,"high")[1] = 0){
 			LastClock:=nowUnix()
-			IniWrite, %LastClock%, nm_config.ini, Collect, LastClock
+			IniWrite, %LastClock%, settings\nm_config.ini, Collect, LastClock
 			HiveSlot:=slotnum
 			GuiControl,,HiveSlot, %HiveSlot%
-			IniWrite, %HiveSlot%, nm_config.ini, Settings, HiveSlot
+			IniWrite, %HiveSlot%, settings\nm_config.ini, Settings, HiveSlot
 			nm_setStatus("Claimed", "Hive Slot " . HiveSlot)
 			;;;;; Natro so broke :weary:
 			if((nowUnix()-LastNatroSoBroke)>3600) { ;limit to once per hour
@@ -11230,7 +11162,7 @@ nm_dayOrNight(){
 		dayOrNight:="Night"
 		if((nowUnix()-NightLastDetected)>(5*60) || (nowUnix()-NightLastDetected)<0) { ;at least 5 minutes since last time it was night
 			NightLastDetected:=nowUnix()
-			IniWrite, %NightLastDetected%, nm_config.ini, Collect, NightLastDetected
+			IniWrite, %NightLastDetected%, settings\nm_config.ini, Collect, NightLastDetected
 			;send nightLastDetected time to background.ahk
 			Prev_DetectHiddenWindows := A_DetectHiddenWindows
 			Prev_TitleMatchMode := A_TitleMatchMode
@@ -11247,7 +11179,7 @@ nm_dayOrNight(){
 	}
 	GuiControl,Text, timeOfDay, %dayOrNight%
 	if(winexist("Timers"))
-		IniWrite, %dayOrNight%, nm_config.ini, gui, DayOrNight
+		IniWrite, %dayOrNight%, settings\nm_config.ini, gui, DayOrNight
 }
 */
 nm_ViciousCheck(){
@@ -11261,7 +11193,7 @@ nm_ViciousCheck(){
 		if(nm_imgSearch("VBfoundSymbol2.png", 50, "highright")[1]=0){
 			VBState:=2
 			VBLastKilled:=nowUnix()
-			IniWrite, %VBLastKilled%, nm_config.ini, Collect, VBLastKilled
+			IniWrite, %VBLastKilled%, settings\nm_config.ini, Collect, VBLastKilled
 			;nm_setStatus("VBState " . VBState, " <1>")
 			nm_setStatus("Attacking")
 			;send VBState to background.ahk
@@ -11282,7 +11214,7 @@ nm_ViciousCheck(){
 			;nm_setStatus("VBState " . VBState, " <2>")
 			nm_setStatus("Defeated")
 			VBLastKilled:=nowUnix()
-			IniWrite, %VBLastKilled%, nm_config.ini, Collect, VBLastKilled
+			IniWrite, %VBLastKilled%, settings\nm_config.ini, Collect, VBLastKilled
 			;send VBState to background.ahk
 			Prev_DetectHiddenWindows := A_DetectHiddenWindows
 			Prev_TitleMatchMode := A_TitleMatchMode
@@ -11305,7 +11237,7 @@ nm_ViciousCheck(){
 				;nm_setStatus("VBState " . VBState, " <3>")
 				nm_setStatus("Defeated")
 				VBLastKilled:=nowUnix()
-				IniWrite, %VBLastKilled%, nm_config.ini, Collect, VBLastKilled
+				IniWrite, %VBLastKilled%, settings\nm_config.ini, Collect, VBLastKilled
 				;send VBState to background.ahk
 				Prev_DetectHiddenWindows := A_DetectHiddenWindows
 				Prev_TitleMatchMode := A_TitleMatchMode
@@ -11320,8 +11252,8 @@ nm_ViciousCheck(){
 				TotalViciousKills:=TotalViciousKills+1
 				SessionViciousKills:=SessionViciousKills+1
 				Send_WM_COPYDATA("incrementstat Total Vic Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-				IniWrite, %TotalViciousKills%, nm_config.ini, Status, TotalViciousKills
-				IniWrite, %SessionViciousKills%, nm_config.ini, Status, SessionViciousKills
+				IniWrite, %TotalViciousKills%, settings\nm_config.ini, Status, TotalViciousKills
+				IniWrite, %SessionViciousKills%, settings\nm_config.ini, Status, SessionViciousKills
 			}
 		} else if((nowUnix()-VBLastKilled)>(300)) { ;it has been greater than 5 minutes since VB was found
 				VBState:=0
@@ -11405,7 +11337,7 @@ nm_locateVB(){
 				} else If (findImg[1]=1) {
 					;false positive, ABORT!
 					NightLastDetected:=nowUnix()-300-1 ;make NightLastDetected older than 5 minutes
-					IniWrite, %NightLastDetected%, nm_config.ini, Collect, NightLastDetected
+					IniWrite, %NightLastDetected%, settings\nm_config.ini, Collect, NightLastDetected
 					;msgbox false alarm!
 					nm_setStatus("Aborting", "VB - Not Night")
 					break
@@ -11957,7 +11889,7 @@ nm_hotbar(boost:=0){
 			HotkeyNum:=ActiveHotkeys[key][2]
 			send {%HotkeyNum%}
 			LastHotkeyN:=nowUnix()
-			Iniwrite, %LastHotkeyN%, nm_config.ini, Boost, LastHotkey%HotkeyNum%
+			Iniwrite, %LastHotkeyN%, settings\nm_config.ini, Boost, LastHotkey%HotkeyNum%
 			ActiveHotkeys[key][4]:=LastHotkeyN
 			break
 		}
@@ -11966,7 +11898,7 @@ nm_hotbar(boost:=0){
 			HotkeyNum:=ActiveHotkeys[key][2]
 			send {%HotkeyNum%}
 			LastHotkeyN:=nowUnix()
-			Iniwrite, %LastHotkeyN%, nm_config.ini, Boost, LastHotkey%HotkeyNum%
+			Iniwrite, %LastHotkeyN%, settings\nm_config.ini, Boost, LastHotkey%HotkeyNum%
 			ActiveHotkeys[key][4]:=LastHotkeyN
 			break
 		}
@@ -11975,7 +11907,7 @@ nm_hotbar(boost:=0){
 			HotkeyNum:=ActiveHotkeys[key][2]
 			send {%HotkeyNum%}
 			LastHotkeyN:=nowUnix()
-			Iniwrite, %LastHotkeyN%, nm_config.ini, Boost, LastHotkey%HotkeyNum%
+			Iniwrite, %LastHotkeyN%, settings\nm_config.ini, Boost, LastHotkey%HotkeyNum%
 			ActiveHotkeys[key][4]:=LastHotkeyN
 			break
 		}
@@ -11984,7 +11916,7 @@ nm_hotbar(boost:=0){
 			HotkeyNum:=ActiveHotkeys[key][2]
 			send {%HotkeyNum%}
 			LastHotkeyN:=nowUnix()
-			Iniwrite, %LastHotkeyN%, nm_config.ini, Boost, LastHotkey%HotkeyNum%
+			Iniwrite, %LastHotkeyN%, settings\nm_config.ini, Boost, LastHotkey%HotkeyNum%
 			if(ActiveHotkeys[key][3]<=10) {
 				ActiveHotkeys[key][4]:=LastHotkeyN+10
 			} else {
@@ -11998,7 +11930,7 @@ nm_hotbar(boost:=0){
 			HotkeyNum:=ActiveHotkeys[key][2]
 			send {%HotkeyNum%}
 			LastHotkeyN:=nowUnix()
-			Iniwrite, %LastHotkeyN%, nm_config.ini, Boost, LastHotkey%HotkeyNum%
+			Iniwrite, %LastHotkeyN%, settings\nm_config.ini, Boost, LastHotkey%HotkeyNum%
 			ActiveHotkeys[key][4]:=LastHotkeyN
 			break
 		}
@@ -12352,7 +12284,7 @@ nm_PolarQuestProg(){
 ;msgbox Bar1=%temp1%`nBar2=%temp2%`nBar3=%temp3%`nBar4=%temp4%`nBar5=%temp5%`nBar6=%temp6%
 		GuiControl,,PolarQuestProgress, %polarProgress%
 		polarProgressIni := StrReplace(polarProgress, "`n" , "|")
-		IniWrite, %polarProgressIni%, nm_config.ini, Quests, PolarQuestProgress
+		IniWrite, %polarProgressIni%, settings\nm_config.ini, Quests, PolarQuestProgress
 		if(QuestLadybugs=0 && QuestRhinoBeetles=0 && QuestSpider=0 && QuestMantis=0 && QuestScorpions=0 && QuestWerewolf=0 && QuestGatherField="None") {
 			PolarQuestComplete:=1
 		}
@@ -12397,8 +12329,8 @@ nm_PolarQuest(){
 			TotalQuestsComplete:=TotalQuestsComplete+1
 			SessionQuestsComplete:=SessionQuestsComplete+1
 			Send_WM_COPYDATA("incrementstat Quests Done", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
-			IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
+			IniWrite, %TotalQuestsComplete%, settings\nm_config.ini, Status, TotalQuestsComplete
+			IniWrite, %SessionQuestsComplete%, settings\nm_config.ini, Status, SessionQuestsComplete
 		}
 	}
 	;do quest stuff
@@ -12425,8 +12357,8 @@ nm_PolarQuest(){
 				TotalQuestsComplete:=TotalQuestsComplete+1
 				SessionQuestsComplete:=SessionQuestsComplete+1
 				Send_WM_COPYDATA("incrementstat Quests Done", "StatMonitor.ahk ahk_class AutoHotkey")
-				IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
-				IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
+				IniWrite, %TotalQuestsComplete%, settings\nm_config.ini, Status, TotalQuestsComplete
+				IniWrite, %SessionQuestsComplete%, settings\nm_config.ini, Status, SessionQuestsComplete
 			}
 		}
 	}
@@ -12790,7 +12722,7 @@ nm_RileyQuestProg(){
 ;msgbox Bar1=%temp1%`nBar2=%temp2%`nBar3=%temp3%`nBar4=%temp4%`nBar5=%temp5%`nBar6=%temp6%
 		GuiControl,,RileyQuestProgress, %rileyProgress%
 		rileyProgressIni := StrReplace(rileyProgress, "`n" , "|")
-		IniWrite, %rileyProgressIni%, nm_config.ini, Quests, RileyQuestProgress
+		IniWrite, %rileyProgressIni%, settings\nm_config.ini, Quests, RileyQuestProgress
 		if(RileyLadybugs=0 && RileyScorpions=0 && RileyAll=0 && QuestGatherField="None" && QuestAnt=0 && QuestRedBoost=0 && QuestFeed="None" && QuestRedAnyField=0) {
 				RileyQuestComplete:=1
 			} else { ;check if all doable things are done and everything else is on cooldown
@@ -12822,8 +12754,8 @@ nm_RileyQuest(){
 			TotalQuestsComplete:=TotalQuestsComplete+1
 			SessionQuestsComplete:=SessionQuestsComplete+1
 			Send_WM_COPYDATA("incrementstat Quests Done", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
-			IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
+			IniWrite, %TotalQuestsComplete%, settings\nm_config.ini, Status, TotalQuestsComplete
+			IniWrite, %SessionQuestsComplete%, settings\nm_config.ini, Status, SessionQuestsComplete
 		}
 	}
 	if(RileyQuestComplete!=1){
@@ -12850,8 +12782,8 @@ nm_RileyQuest(){
 				TotalQuestsComplete:=TotalQuestsComplete+1
 				SessionQuestsComplete:=SessionQuestsComplete+1
 				Send_WM_COPYDATA("incrementstat Quests Done", "StatMonitor.ahk ahk_class AutoHotkey")
-				IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
-				IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
+				IniWrite, %TotalQuestsComplete%, settings\nm_config.ini, Status, TotalQuestsComplete
+				IniWrite, %SessionQuestsComplete%, settings\nm_config.ini, Status, SessionQuestsComplete
 			}
 		}
 	}
@@ -13106,7 +13038,7 @@ nm_BuckoQuestProg(){
 ;msgbox Bar1=%temp1%`nBar2=%temp2%`nBar3=%temp3%`nBar4=%temp4%`nBar5=%temp5%`nBar6=%temp6%
 		GuiControl,,BuckoQuestProgress, %buckoProgress%
 		buckoProgressIni := StrReplace(buckoProgress, "`n" , "|")
-		IniWrite, %buckoProgressIni%, nm_config.ini, Quests, BuckoQuestProgress
+		IniWrite, %buckoProgressIni%, settings\nm_config.ini, Quests, BuckoQuestProgress
 		if(BuckoRhinoBeetles=0 && BuckoMantis=0 && QuestGatherField="None" && QuestAnt=0 && QuestBlueBoost=0 && QuestFeed="None" && QuestBlueAnyField=0) {
 				BuckoQuestComplete:=1
 			} else { ;check if all doable things are done and everything else is on cooldown
@@ -13139,8 +13071,8 @@ nm_BuckoQuest(){
 			TotalQuestsComplete:=TotalQuestsComplete+1
 			SessionQuestsComplete:=SessionQuestsComplete+1
 			Send_WM_COPYDATA("incrementstat Quests Done", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
-			IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
+			IniWrite, %TotalQuestsComplete%, settings\nm_config.ini, Status, TotalQuestsComplete
+			IniWrite, %SessionQuestsComplete%, settings\nm_config.ini, Status, SessionQuestsComplete
 		}
 	}
 	if(BuckoQuestComplete!=1){
@@ -13167,8 +13099,8 @@ nm_BuckoQuest(){
 				TotalQuestsComplete:=TotalQuestsComplete+1
 				SessionQuestsComplete:=SessionQuestsComplete+1
 				Send_WM_COPYDATA("incrementstat Quests Done", "StatMonitor.ahk ahk_class AutoHotkey")
-				IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
-				IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
+				IniWrite, %TotalQuestsComplete%, settings\nm_config.ini, Status, TotalQuestsComplete
+				IniWrite, %SessionQuestsComplete%, settings\nm_config.ini, Status, SessionQuestsComplete
 			}
 		}
 	}
@@ -13423,7 +13355,7 @@ nm_BlackQuestProg(){
 ;msgbox Bar1=%temp1%`nBar2=%temp2%`nBar3=%temp3%`nBar4=%temp4%`nBar5=%temp5%`nBar6=%temp6%
 		GuiControl,,BlackQuestProgress, %blackProgress%
 		blackProgressIni := StrReplace(blackProgress, "`n" , "|")
-		IniWrite, %blackProgressIni%, nm_config.ini, Quests, BlackQuestProgress
+		IniWrite, %blackProgressIni%, settings\nm_config.ini, Quests, BlackQuestProgress
 		if(QuestGatherField="None" && QuestBlackAnyField=0) {
 			BlackQuestComplete:=1
 		}
@@ -13453,11 +13385,11 @@ nm_BlackQuest(){
 			TotalQuestsComplete:=TotalQuestsComplete+1
 			SessionQuestsComplete:=SessionQuestsComplete+1
 			Send_WM_COPYDATA("incrementstat Quests Done", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalQuestsComplete%, nm_config.ini, Status, TotalQuestsComplete
-			IniWrite, %SessionQuestsComplete%, nm_config.ini, Status, SessionQuestsComplete
+			IniWrite, %TotalQuestsComplete%, settings\nm_config.ini, Status, TotalQuestsComplete
+			IniWrite, %SessionQuestsComplete%, settings\nm_config.ini, Status, SessionQuestsComplete
 		}
 		LastBlackQuest:=nowUnix()
-		IniWrite, %LastBlackQuest%, nm_config.ini, Quests, LastBlackQuest
+		IniWrite, %LastBlackQuest%, settings\nm_config.ini, Quests, LastBlackQuest
 	}
 }
 nm_questGather(quest){
@@ -13880,12 +13812,12 @@ nm_bugDeathCheck(){
 		If (searchRet[1] = 0) {
 			BugDeathCheckLockout:=nowUnix()
 			LastBugrunLadybugs:=nowUnix()
-			IniWrite, %LastBugrunLadybugs%, nm_config.ini, Collect, LastBugrunLadybugs
+			IniWrite, %LastBugrunLadybugs%, settings\nm_config.ini, Collect, LastBugrunLadybugs
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+			IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 		}
 	}
 	;rhino beetles
@@ -13894,7 +13826,7 @@ nm_bugDeathCheck(){
 		If (searchRet[1] = 0) {
 			BugDeathCheckLockout:=nowUnix()
 			LastBugrunRhinoBeetles:=nowUnix()
-			IniWrite, %LastBugrunRhinoBeetles%, nm_config.ini, Collect, LastBugrunRhinoBeetles
+			IniWrite, %LastBugrunRhinoBeetles%, settings\nm_config.ini, Collect, LastBugrunRhinoBeetles
 			if(InStr(objective,"bamboo")) {
 				TotalBugKills:=TotalBugKills+2
 				SessionBugKills:=SessionBugKills+2
@@ -13905,8 +13837,8 @@ nm_bugDeathCheck(){
 				SessionBugKills:=SessionBugKills+1
 				Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			}
-			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+			IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 		}
 	}
 	;spider
@@ -13915,12 +13847,12 @@ nm_bugDeathCheck(){
 		If (searchRet[1] = 0) {
 			BugDeathCheckLockout:=nowUnix()
 			LastBugrunSpider:=nowUnix()
-			IniWrite, %LastBugrunSpider%, nm_config.ini, Collect, LastBugrunSpider
+			IniWrite, %LastBugrunSpider%, settings\nm_config.ini, Collect, LastBugrunSpider
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+			IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 		}
 	}
 	;mantis/rhino beetle
@@ -13929,24 +13861,24 @@ nm_bugDeathCheck(){
 		If (searchRet[1] = 0) {
 			BugDeathCheckLockout:=nowUnix()
 			LastBugrunMantis:=nowUnix()
-			IniWrite, %LastBugrunMantis%, nm_config.ini, Collect, LastBugrunMantis
+			IniWrite, %LastBugrunMantis%, settings\nm_config.ini, Collect, LastBugrunMantis
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+			IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 		}
 		searchRet := nm_imgSearch("rhino.png",30,"lowright")
 		If (searchRet[1] = 0) {
 			if(!BugrunMantisCheck)
 				BugDeathCheckLockout:=nowUnix()
 			LastBugrunRhinoBeetles:=nowUnix()
-			IniWrite, %LastBugrunRhinoBeetles%, nm_config.ini, Collect, LastBugrunRhinoBeetles
+			IniWrite, %LastBugrunRhinoBeetles%, settings\nm_config.ini, Collect, LastBugrunRhinoBeetles
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+			IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 		}
 	}
 	;mantis/werewolf
@@ -13955,24 +13887,24 @@ nm_bugDeathCheck(){
 		If (searchRet[1] = 0) {
 			BugDeathCheckLockout:=nowUnix()
 			LastBugrunMantis:=nowUnix()
-			IniWrite, %LastBugrunMantis%, nm_config.ini, Collect, LastBugrunMantis
+			IniWrite, %LastBugrunMantis%, settings\nm_config.ini, Collect, LastBugrunMantis
 			TotalBugKills:=TotalBugKills+2
 			SessionBugKills:=SessionBugKills+2
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+			IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 		}
 		searchRet := nm_imgSearch("werewolf.png",30,"lowright")
 		If (searchRet[1] = 0) {
 			BugDeathCheckLockout:=nowUnix()
 			LastBugrunWerewolf:=nowUnix()
-			IniWrite, %LastBugrunWerewolf%, nm_config.ini, Collect, LastBugrunWerewolf
+			IniWrite, %LastBugrunWerewolf%, settings\nm_config.ini, Collect, LastBugrunWerewolf
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+			IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 		}
 	}
 	;werewolf
@@ -13981,12 +13913,12 @@ nm_bugDeathCheck(){
 		If (searchRet[1] = 0) {
 			BugDeathCheckLockout:=nowUnix()
 			LastBugrunWerewolf:=nowUnix()
-			IniWrite, %LastBugrunWerewolf%, nm_config.ini, Collect, LastBugrunWerewolf
+			IniWrite, %LastBugrunWerewolf%, settings\nm_config.ini, Collect, LastBugrunWerewolf
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+			IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 		}
 	}
 	;scorpions
@@ -13995,18 +13927,18 @@ nm_bugDeathCheck(){
 		If (searchRet[1] = 0) {
 			BugDeathCheckLockout:=nowUnix()
 			LastBugrunScorpions:=nowUnix()
-			IniWrite, %LastBugrunScorpions%, nm_config.ini, Collect, LastBugrunScorpions
+			IniWrite, %LastBugrunScorpions%, settings\nm_config.ini, Collect, LastBugrunScorpions
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
 			Send_WM_COPYDATA("incrementstat Total Bug Kills", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
-			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+			IniWrite, %TotalBugKills%, settings\nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, settings\nm_config.ini, Status, SessionBugKills
 		}
 	}
 }
 nm_resetConfig(){
-	if(fileexist("nm_config.ini")) {
-		FileDelete nm_config.ini
+	if(fileexist("settings\nm_config.ini")) {
+		FileDelete settings\nm_config.ini
 	}
 		FileAppend,
     (
@@ -14028,6 +13960,7 @@ ConvertMins=30
 LastConvertBalloon=1
 DisableToolUse=0
 AnnounceGuidingStar=0
+NewWalk=1
 HiveSlot=6
 HiveVariation=20
 HiveBees=25
@@ -14062,6 +13995,8 @@ TotalDisconnects=0
 SessionDisconnects=0
 Webhook=
 WebhookCheck=0
+discordUID=
+ssCheck=0
 ssCooldown=0
 
 [Keys]
@@ -14257,7 +14192,6 @@ AFBHoursLimit=.01
 FieldLastBoosted=1
 FieldLastBoostedBy=None
 FieldNextBoostedBy=None
-FieldBoostStacks=0
 AFBdiceUsed=0
 AFBglitterUsed=0
 LastMicroConverter=1
@@ -14343,7 +14277,7 @@ LastRefreshingField=None
 LastSatisfyingField=None
 LastMotivatingField=None
 LastInvigoratingField=None
-), nm_config.ini
+), settings\nm_config.ini
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; NATRO ENHANCEMENT FUNCTIONS
@@ -14353,11 +14287,11 @@ ba_enableSwitch(){
 	GuiControlGet, EnablePlantersPlus
 	GuiControlGet, MaxAllowedPlanters
 	/*
-	IniRead, resolution, config.ini, gui, resolution
+	IniRead, resolution, settings\config.ini, gui, resolution
 	if(EnablePlantersPlus && resolution!=720 && resolution!=1080) {
 		msgbox Graphics Resolution: %resolution% is not supported by Planters+`n`nSupported resolutions are:`n720`n1080
 		Guicontrol,, EnablePlantersPlus, 0
-		IniWrite, 0, ba_config.ini, gui, EnablePlantersPlus
+		IniWrite, 0, settings\ba_config.ini, gui, EnablePlantersPlus
 		return
 	}
 	*/
@@ -14382,7 +14316,7 @@ ba_maxAllowedPlantersSwitch(){
 	ba_saveConfig_()
 }
 ba_N1unswitch_(){
-    IniWrite, 1, ba_config.ini, other, n1Switch
+    IniWrite, 1, settings\ba_config.ini, other, n1Switch
 	guiControlGet, nPreset
     GuiControlGet, n1priority
 	GuiControlGet, n2priority
@@ -14414,7 +14348,7 @@ ba_N1unswitch_(){
     ba_saveConfig_()
 }
 ba_N2unswitch_(){
-    IniWrite, 1, ba_config.ini, other, n2Switch
+    IniWrite, 1, settings\ba_config.ini, other, n2Switch
     GuiControlGet, n2priority
 	GuiControl,chooseString,n3priority,None
 	GuiControl,chooseString,n4priority,None
@@ -14429,7 +14363,7 @@ ba_N2unswitch_(){
     ba_saveConfig_()
 }
 ba_N3unswitch_(){
-    IniWrite, 1, ba_config.ini, other, n3Switch
+    IniWrite, 1, settings\ba_config.ini, other, n3Switch
     GuiControlGet, n3priority
 	GuiControl,chooseString,n4priority,None
 	GuiControl,chooseString,n5priority,None
@@ -14442,7 +14376,7 @@ ba_N3unswitch_(){
     ba_saveConfig_()
 }
 ba_N4unswitch_(){
-    IniWrite, 1, ba_config.ini, other, n4Switch
+    IniWrite, 1, settings\ba_config.ini, other, n4Switch
     GuiControlGet, n4priority
 	GuiControl,chooseString,n5priority,None
 	GuiControl,chooseString,n5minPercent,10
@@ -14452,7 +14386,7 @@ ba_N4unswitch_(){
     ba_saveConfig_()
 }
 ba_N5unswitch_(){
-    IniWrite, 1, ba_config.ini, other, n5Switch
+    IniWrite, 1, settings\ba_config.ini, other, n5Switch
     GuiControlGet, n5priority
 	GuiControl,chooseString,nectarPreset,None
 	;nectarS_()
@@ -14733,64 +14667,64 @@ ba_saveConfig_(){
 	GuiControlGet, FDCMoveDurFB
 	GuiControlGet, FDCMoveDurLR
 	GuiControlGet, AltPineStart
-	IniWrite, %nPreset%, ba_config.ini, gui, nPreset
-    IniWrite, %n1priority%, ba_config.ini, gui, n1priority
-	IniWrite, %n2priority%, ba_config.ini, gui, n2priority
-	IniWrite, %n3priority%, ba_config.ini, gui, n3priority
-	IniWrite, %n4priority%, ba_config.ini, gui, n4priority
-	IniWrite, %n5priority%, ba_config.ini, gui, n5priority
-	IniWrite, %n1string%, ba_config.ini, gui, n1string
-	IniWrite, %n2string%, ba_config.ini, gui, n2string
-	IniWrite, %n3string%, ba_config.ini, gui, n3string
-	IniWrite, %n4string%, ba_config.ini, gui, n4string
-	IniWrite, %n5string%, ba_config.ini, gui, n5string
-	IniWrite, %n1minPercent%, ba_config.ini, gui, n1minPercent
-	IniWrite, %n2minPercent%, ba_config.ini, gui, n2minPercent
-	IniWrite, %n3minPercent%, ba_config.ini, gui, n3minPercent
-	IniWrite, %n4minPercent%, ba_config.ini, gui, n4minPercent
-	IniWrite, %n5minPercent%, ba_config.ini, gui, n5minPercent
-	IniWrite, %PlasticPlanterCheck%, ba_config.ini, gui, PlasticPlanterCheck
-	IniWrite, %CandyPlanterCheck%, ba_config.ini, gui, CandyPlanterCheck
-	IniWrite, %BlueClayPlanterCheck%, ba_config.ini, gui, BlueClayPlanterCheck
-	IniWrite, %RedClayPlanterCheck%, ba_config.ini, gui, RedClayPlanterCheck
-	IniWrite, %TackyPlanterCheck%, ba_config.ini, gui, TackyPlanterCheck
-	IniWrite, %PesticidePlanterCheck%, ba_config.ini, gui, PesticidePlanterCheck
-	IniWrite, %PetalPlanterCheck%, ba_config.ini, gui, PetalPlanterCheck
-	IniWrite, %PaperPlanterCheck%, ba_config.ini, gui, PaperPlanterCheck
-	IniWrite, %TicketPlanterCheck%, ba_config.ini, gui, TicketPlanterCheck
-	IniWrite, %PlanterOfPlentyCheck%, ba_config.ini, gui, PlanterOfPlentyCheck
-	IniWrite, %BambooFieldCheck%, ba_config.ini, gui, BambooFieldCheck
-	IniWrite, %BlueFlowerFieldCheck%, ba_config.ini, gui, BlueFlowerFieldCheck
-	IniWrite, %CactusFieldCheck%, ba_config.ini, gui, CactusFieldCheck
-	IniWrite, %CloverFieldCheck%, ba_config.ini, gui, CloverFieldCheck
-	IniWrite, %CoconutFieldCheck%, ba_config.ini, gui, CoconutFieldCheck
-	IniWrite, %DandelionFieldCheck%, ba_config.ini, gui, DandelionFieldCheck
-	IniWrite, %MountainTopFieldCheck%, ba_config.ini, gui, MountainTopFieldCheck
-	IniWrite, %MushroomFieldCheck%, ba_config.ini, gui, MushroomFieldCheck
-	IniWrite, %PepperFieldCheck%, ba_config.ini, gui, PepperFieldCheck
-	IniWrite, %PineTreeFieldCheck%, ba_config.ini, gui, PineTreeFieldCheck
-	IniWrite, %PineappleFieldCheck%, ba_config.ini, gui, PineappleFieldCheck
-	IniWrite, %PumpkinFieldCheck%, ba_config.ini, gui, PumpkinFieldCheck
-	IniWrite, %RoseFieldCheck%, ba_config.ini, gui, RoseFieldCheck
-	IniWrite, %SpiderFieldCheck%, ba_config.ini, gui, SpiderFieldCheck
-	IniWrite, %StrawberryFieldCheck%, ba_config.ini, gui, StrawberryFieldCheck
-	IniWrite, %StumpFieldCheck%, ba_config.ini, gui, StumpFieldCheck
-	IniWrite, %SunflowerFieldCheck%, ba_config.ini, gui, SunflowerFieldCheck
-	IniWrite, %EnablePlantersPlus%, ba_config.ini, gui, EnablePlantersPlus
-	IniWrite, %MaxAllowedPlanters%, ba_config.ini, gui, MaxAllowedPlanters
-	IniWrite, %HarvestIntervalNum%, ba_config.ini, gui, HarvestInterval
-	IniWrite, %AutomaticHarvestInterval%, ba_config.ini, gui, AutomaticHarvestInterval
-	IniWrite, %HarvestFullGrown%, ba_config.ini, gui, HarvestFullGrown
-	IniWrite, %GotoPlanterField%, ba_config.ini, gui, GotoPlanterField
-	IniWrite, %GatherFieldSipping%, ba_config.ini, gui, GatherFieldSipping
-	;IniWrite, %HiveDistance%, ba_config.ini, gui, HiveDistance
-	;IniWrite, %MoveSpeedFactor%, ba_config.ini, gui, MoveSpeedFactor
-	;IniWrite, %StingerCheck%, ba_config.ini, gui, StingerCheck
-	IniWrite, %FDCMoveDirFB%, ba_config.ini, gui, FDCMoveDirFB
-	IniWrite, %FDCMoveDirLR%, ba_config.ini, gui, FDCMoveDirLR
-	IniWrite, %FDCMoveDurFB%, ba_config.ini, gui, FDCMoveDurFB
-	IniWrite, %FDCMoveDurLR%, ba_config.ini, gui, FDCMoveDurLR
-	IniWrite, %AltPineStart%, ba_config.ini, gui, AltPineStart
+	IniWrite, %nPreset%, settings\ba_config.ini, gui, nPreset
+    IniWrite, %n1priority%, settings\ba_config.ini, gui, n1priority
+	IniWrite, %n2priority%, settings\ba_config.ini, gui, n2priority
+	IniWrite, %n3priority%, settings\ba_config.ini, gui, n3priority
+	IniWrite, %n4priority%, settings\ba_config.ini, gui, n4priority
+	IniWrite, %n5priority%, settings\ba_config.ini, gui, n5priority
+	IniWrite, %n1string%, settings\ba_config.ini, gui, n1string
+	IniWrite, %n2string%, settings\ba_config.ini, gui, n2string
+	IniWrite, %n3string%, settings\ba_config.ini, gui, n3string
+	IniWrite, %n4string%, settings\ba_config.ini, gui, n4string
+	IniWrite, %n5string%, settings\ba_config.ini, gui, n5string
+	IniWrite, %n1minPercent%, settings\ba_config.ini, gui, n1minPercent
+	IniWrite, %n2minPercent%, settings\ba_config.ini, gui, n2minPercent
+	IniWrite, %n3minPercent%, settings\ba_config.ini, gui, n3minPercent
+	IniWrite, %n4minPercent%, settings\ba_config.ini, gui, n4minPercent
+	IniWrite, %n5minPercent%, settings\ba_config.ini, gui, n5minPercent
+	IniWrite, %PlasticPlanterCheck%, settings\ba_config.ini, gui, PlasticPlanterCheck
+	IniWrite, %CandyPlanterCheck%, settings\ba_config.ini, gui, CandyPlanterCheck
+	IniWrite, %BlueClayPlanterCheck%, settings\ba_config.ini, gui, BlueClayPlanterCheck
+	IniWrite, %RedClayPlanterCheck%, settings\ba_config.ini, gui, RedClayPlanterCheck
+	IniWrite, %TackyPlanterCheck%, settings\ba_config.ini, gui, TackyPlanterCheck
+	IniWrite, %PesticidePlanterCheck%, settings\ba_config.ini, gui, PesticidePlanterCheck
+	IniWrite, %PetalPlanterCheck%, settings\ba_config.ini, gui, PetalPlanterCheck
+	IniWrite, %PaperPlanterCheck%, settings\ba_config.ini, gui, PaperPlanterCheck
+	IniWrite, %TicketPlanterCheck%, settings\ba_config.ini, gui, TicketPlanterCheck
+	IniWrite, %PlanterOfPlentyCheck%, settings\ba_config.ini, gui, PlanterOfPlentyCheck
+	IniWrite, %BambooFieldCheck%, settings\ba_config.ini, gui, BambooFieldCheck
+	IniWrite, %BlueFlowerFieldCheck%, settings\ba_config.ini, gui, BlueFlowerFieldCheck
+	IniWrite, %CactusFieldCheck%, settings\ba_config.ini, gui, CactusFieldCheck
+	IniWrite, %CloverFieldCheck%, settings\ba_config.ini, gui, CloverFieldCheck
+	IniWrite, %CoconutFieldCheck%, settings\ba_config.ini, gui, CoconutFieldCheck
+	IniWrite, %DandelionFieldCheck%, settings\ba_config.ini, gui, DandelionFieldCheck
+	IniWrite, %MountainTopFieldCheck%, settings\ba_config.ini, gui, MountainTopFieldCheck
+	IniWrite, %MushroomFieldCheck%, settings\ba_config.ini, gui, MushroomFieldCheck
+	IniWrite, %PepperFieldCheck%, settings\ba_config.ini, gui, PepperFieldCheck
+	IniWrite, %PineTreeFieldCheck%, settings\ba_config.ini, gui, PineTreeFieldCheck
+	IniWrite, %PineappleFieldCheck%, settings\ba_config.ini, gui, PineappleFieldCheck
+	IniWrite, %PumpkinFieldCheck%, settings\ba_config.ini, gui, PumpkinFieldCheck
+	IniWrite, %RoseFieldCheck%, settings\ba_config.ini, gui, RoseFieldCheck
+	IniWrite, %SpiderFieldCheck%, settings\ba_config.ini, gui, SpiderFieldCheck
+	IniWrite, %StrawberryFieldCheck%, settings\ba_config.ini, gui, StrawberryFieldCheck
+	IniWrite, %StumpFieldCheck%, settings\ba_config.ini, gui, StumpFieldCheck
+	IniWrite, %SunflowerFieldCheck%, settings\ba_config.ini, gui, SunflowerFieldCheck
+	IniWrite, %EnablePlantersPlus%, settings\ba_config.ini, gui, EnablePlantersPlus
+	IniWrite, %MaxAllowedPlanters%, settings\ba_config.ini, gui, MaxAllowedPlanters
+	IniWrite, %HarvestIntervalNum%, settings\ba_config.ini, gui, HarvestInterval
+	IniWrite, %AutomaticHarvestInterval%, settings\ba_config.ini, gui, AutomaticHarvestInterval
+	IniWrite, %HarvestFullGrown%, settings\ba_config.ini, gui, HarvestFullGrown
+	IniWrite, %GotoPlanterField%, settings\ba_config.ini, gui, GotoPlanterField
+	IniWrite, %GatherFieldSipping%, settings\ba_config.ini, gui, GatherFieldSipping
+	;IniWrite, %HiveDistance%, settings\ba_config.ini, gui, HiveDistance
+	;IniWrite, %MoveSpeedFactor%, settings\ba_config.ini, gui, MoveSpeedFactor
+	;IniWrite, %StingerCheck%, settings\ba_config.ini, gui, StingerCheck
+	IniWrite, %FDCMoveDirFB%, settings\ba_config.ini, gui, FDCMoveDirFB
+	IniWrite, %FDCMoveDirLR%, settings\ba_config.ini, gui, FDCMoveDirLR
+	IniWrite, %FDCMoveDurFB%, settings\ba_config.ini, gui, FDCMoveDurFB
+	IniWrite, %FDCMoveDurLR%, settings\ba_config.ini, gui, FDCMoveDurLR
+	IniWrite, %AltPineStart%, settings\ba_config.ini, gui, AltPineStart
 }
 ba_nectarstring(){
 	global n1string
@@ -14908,7 +14842,7 @@ ba_planter()
 	GuiControlGet, GatherFieldSipping
 	global LostPlanters
 	global Roblox, CurrentAction, PreviousAction, GatherFieldBoostedStart, LastGlitter
-	;IniRead, Roblox, ba_config.ini, gui, Roblox
+	;IniRead, Roblox, settings\ba_config.ini, gui, Roblox
 	GuiControlGet, EnablePlantersPlus
 	GuiControlGet, HarvestInterval
 	GuiControlGet, HarvestFullGrown
@@ -14950,11 +14884,11 @@ ba_planter()
 	GuiControlGet, StumpFieldCheck
 	GuiControlGet, SunflowerFieldCheck
 	loop, 3 {
-	IniRead, PlanterName%A_Index%, ba_config.ini, Planters, PlanterName%A_Index%
-	IniRead, PlanterField%A_Index%, ba_config.ini, Planters, PlanterField%A_Index%
-	IniRead, PlanterHarvestTime%A_Index%, ba_config.ini, Planters, PlanterHarvestTime%A_Index%
-	IniRead, PlanterNectar%A_Index%, ba_config.ini, Planters, PlanterNectar%A_Index%
-	IniRead, PlanterEstPercent%A_Index%, ba_config.ini, Planters, PlanterEstPercent%A_Index%
+	IniRead, PlanterName%A_Index%, settings\ba_config.ini, Planters, PlanterName%A_Index%
+	IniRead, PlanterField%A_Index%, settings\ba_config.ini, Planters, PlanterField%A_Index%
+	IniRead, PlanterHarvestTime%A_Index%, settings\ba_config.ini, Planters, PlanterHarvestTime%A_Index%
+	IniRead, PlanterNectar%A_Index%, settings\ba_config.ini, Planters, PlanterNectar%A_Index%
+	IniRead, PlanterEstPercent%A_Index%, settings\ba_config.ini, Planters, PlanterEstPercent%A_Index%
 	}
 	if (not EnablePlantersPlus){
 		return
@@ -15019,8 +14953,8 @@ ba_planter()
 							temp1:=PlanterField%A_Index%
 							PlanterHarvestTime%A_Index% := nowUnix()-1
 							PlanterHarvestTimeN:=PlanterHarvestTime%A_Index%
-							IniWrite, %PlanterHarvestTimeN%, ba_config.ini, Planters, PlanterHarvestTime%A_Index%
-							IniRead, PlanterHarvestTime%A_Index%, ba_config.ini, Planters, PlanterHarvestTime%A_Index%
+							IniWrite, %PlanterHarvestTimeN%, settings\ba_config.ini, Planters, PlanterHarvestTime%A_Index%
+							IniRead, PlanterHarvestTime%A_Index%, settings\ba_config.ini, Planters, PlanterHarvestTime%A_Index%
 						}
 					}
 				}
@@ -15031,8 +14965,8 @@ ba_planter()
 						if (PlanterNectar=currentNectar) {
 							PlanterHarvestTime%A_Index% := nowUnix()-1
 							PlanterHarvestTimeN:=PlanterHarvestTime%A_Index%
-							IniWrite, %PlanterHarvestTimeN%, ba_config.ini, Planters, PlanterHarvestTime%A_Index%
-							IniRead, PlanterHarvestTime%A_Index%, ba_config.ini, Planters, PlanterHarvestTime%A_Index%
+							IniWrite, %PlanterHarvestTimeN%, settings\ba_config.ini, Planters, PlanterHarvestTime%A_Index%
+							IniRead, PlanterHarvestTime%A_Index%, settings\ba_config.ini, Planters, PlanterHarvestTime%A_Index%
 						}
 					}
 				}
@@ -15103,7 +15037,7 @@ ba_planter()
 		;get nectarPlantersPlaced
 		nectarPlantersPlaced:=0
 		loop, 3{
-			IniRead, PlanterNectar%A_Index%, ba_config.ini, Planters, PlanterNectar%A_Index%
+			IniRead, PlanterNectar%A_Index%, settings\ba_config.ini, Planters, PlanterNectar%A_Index%
 			if(PlanterNectar%A_Index%=currentNectar)
 				nectarPlantersPlaced:=nectarPlantersPlaced+1
 		}
@@ -15270,7 +15204,7 @@ ba_planter()
 		;get nectarPlantersPlaced
 		nectarPlantersPlaced:=0
 		loop, 3{
-			IniRead, PlanterNectar%A_Index%, ba_config.ini, Planters, PlanterNectar%A_Index%
+			IniRead, PlanterNectar%A_Index%, settings\ba_config.ini, Planters, PlanterNectar%A_Index%
 			if(PlanterNectar%A_Index%=currentNectar)
 				nectarPlantersPlaced:=nectarPlantersPlaced+1
 		}
@@ -15418,7 +15352,7 @@ ba_planter()
 		;get nectarPlantersPlaced
 		nectarPlantersPlaced:=0
 		loop, 3{
-			IniRead, PlanterNectar%A_Index%, ba_config.ini, Planters, PlanterNectar%A_Index%
+			IniRead, PlanterNectar%A_Index%, settings\ba_config.ini, Planters, PlanterNectar%A_Index%
 			if(PlanterNectar%A_Index%=currentNectar)
 				nectarPlantersPlaced:=nectarPlantersPlaced+1
 		}
@@ -15677,13 +15611,13 @@ ba_getLastField(currentnectar){
 	guicontrolget, StumpFieldCheck
 	guicontrolget, SunflowerFieldCheck
 	loop, 3 {
-		IniRead, PlanterField%A_Index%, ba_config.ini, Planters, PlanterField%A_Index%
+		IniRead, PlanterField%A_Index%, settings\ba_config.ini, Planters, PlanterField%A_Index%
 	}
-	IniRead, LastComfortingField, ba_config.ini, Planters, LastComfortingField
-	IniRead, LastRefreshingField, ba_config.ini, Planters, LastRefreshingField
-	IniRead, LastSatisfyingField, ba_config.ini, Planters, LastSatisfyingField
-	IniRead, LastMotivatingField, ba_config.ini, Planters, LastMotivatingField
-	IniRead, LastInvigoratingField, ba_config.ini, Planters, LastInvigoratingField
+	IniRead, LastComfortingField, settings\ba_config.ini, Planters, LastComfortingField
+	IniRead, LastRefreshingField, settings\ba_config.ini, Planters, LastRefreshingField
+	IniRead, LastSatisfyingField, settings\ba_config.ini, Planters, LastSatisfyingField
+	IniRead, LastMotivatingField, settings\ba_config.ini, Planters, LastMotivatingField
+	IniRead, LastInvigoratingField, settings\ba_config.ini, Planters, LastInvigoratingField
 	
 	availablefields:=[]
 	;determine allowed fields
@@ -15744,7 +15678,7 @@ ba_getNextPlanter(nextfield){
 	GuiControlGet, TicketPlanterCheck
 	GuiControlGet, PlanterOfPlentyCheck
 	loop, 3 {
-		IniRead, PlanterName%A_Index%, ba_config.ini, Planters, PlanterName%A_Index%
+		IniRead, PlanterName%A_Index%, settings\ba_config.ini, Planters, PlanterName%A_Index%
 	}
 	global LostPlanters
 	;determine available planters
@@ -15755,7 +15689,7 @@ ba_getNextPlanter(nextfield){
 	nextPlanterBonus:=0
 	nextPlanterGrowTime:=0
 	loop, %arrayLen% {
-		tempPlanter:=%tempfieldname%Planters[A_Index][1]
+		tempPlanter:=Trim(%tempfieldname%Planters[A_Index][1])
 		tempPlanterCheck:=%tempPlanter%Check
 		if(tempPlanterCheck && tempPlanter!=PlanterName1 && tempPlanter!=PlanterName2 && tempPlanter!=PlanterName3)
 		{
@@ -15800,7 +15734,7 @@ ba_placePlanter(fieldName, planter, planterNum){
 	;nm_setObjective(planter[1] . "(" . fieldName . ")")
 	objective:=(planter[1] . "(" . fieldName . ")")
 	nm_gotoRamp()
-	nm_gotoCannon()
+	;nm_gotoCannon() ~ zaappiix planter paths rework
 	;nm_cannonTo(fieldName)
 	nm_cannonToPlanter(fieldName)
 	global MyField:=fieldName
@@ -16044,7 +15978,7 @@ ba_harvestPlanter(planterNum){
 	nm_Reset()
 	objective:=(PlanterName%planterNum% . " (" . PlanterField%planterNum% . ")")
 	nm_gotoRamp()
-	nm_gotoCannon()
+	;nm_gotoCannon() ~ zaappiix planter path rework
 	planterName:=PlanterName%planterNum%
 	fieldName:=PlanterField%planterNum%
 	nm_setStatus("Collecting", (planterName . " (" . fieldName . ")"))
@@ -16057,7 +15991,7 @@ ba_harvestPlanter(planterNum){
 	}
 	if (not findPlanter){
 		;check for phantom planter
-		IniRead, PlanterName%planterNum%, ba_config.ini, Planters, PlanterName%planterNum%
+		IniRead, PlanterName%planterNum%, settings\ba_config.ini, Planters, PlanterName%planterNum%
 		planterName:=PlanterName%planterNum%
 		planterImg:= (planterName . ".png")
 		nm_setStatus("Checking", "Phantom Planter: " . planterName)
@@ -16086,17 +16020,17 @@ ba_harvestPlanter(planterNum){
 				nm_setObjective(planterName . " found. Clearing Data.")
 				;statusUpdate("Phantom Planter: " . planterName . " found. Clearing Data.")
 				;clear phantom planter data
-				IniWrite, "None", ba_config.ini, Planters, PlanterName%planterNum%
-				IniWrite, "None", ba_config.ini, Planters, PlanterField%planterNum%
-				IniWrite, "None", ba_config.ini, Planters, PlanterNectar%planterNum%
-				IniWrite, 20211106000000, ba_config.ini, Planters, PlanterHarvestTime%planterNum%
-				IniWrite, 0, ba_config.ini, Planters, PlanterEstPercent%planterNum%
+				IniWrite, "None", settings\ba_config.ini, Planters, PlanterName%planterNum%
+				IniWrite, "None", settings\ba_config.ini, Planters, PlanterField%planterNum%
+				IniWrite, "None", settings\ba_config.ini, Planters, PlanterNectar%planterNum%
+				IniWrite, 20211106000000, settings\ba_config.ini, Planters, PlanterHarvestTime%planterNum%
+				IniWrite, 0, settings\ba_config.ini, Planters, PlanterEstPercent%planterNum%
 				;readback ini values
-				IniRead, PlanterName%planterNum%, ba_config.ini, Planters, PlanterName%planterNum%
-				IniRead, PlanterField%planterNum%, ba_config.ini, Planters, PlanterField%planterNum%
-				IniRead, PlanterNectar%planterNum%, ba_config.ini, Planters, PlanterNectar%planterNum%
-				IniRead, PlanterHarvestTime%planterNum%, ba_config.ini, Planters, PlanterHarvestTime%planterNum%
-				IniRead, PlanterEstPercent%planterNum%, ba_config.ini, Planters, PlanterEstPercent%planterNum%
+				IniRead, PlanterName%planterNum%, settings\ba_config.ini, Planters, PlanterName%planterNum%
+				IniRead, PlanterField%planterNum%, settings\ba_config.ini, Planters, PlanterField%planterNum%
+				IniRead, PlanterNectar%planterNum%, settings\ba_config.ini, Planters, PlanterNectar%planterNum%
+				IniRead, PlanterHarvestTime%planterNum%, settings\ba_config.ini, Planters, PlanterHarvestTime%planterNum%
+				IniRead, PlanterEstPercent%planterNum%, settings\ba_config.ini, Planters, PlanterEstPercent%planterNum%
 				break
 			}
 			loop, 2 {
@@ -16128,7 +16062,7 @@ ba_harvestPlanter(planterNum){
 			if(HarvestFullGrown) { ;press no and advance ready timer by 10 minutes
 				newtime:=nowUnix()+10*60
 				PlanterHarvestTime%planterNum%:=newtime
-				IniWrite, %newtime%, ba_config.ini, Planters, PlanterHarvestTime%planterNum%
+				IniWrite, %newtime%, settings\ba_config.ini, Planters, PlanterHarvestTime%planterNum%
 				imgPos := nm_imgSearch("no.png",30)
 				If (imgPos[1] = 0){
 					MouseMove, (imgPos[2]), (imgPos[3])
@@ -16162,22 +16096,22 @@ ba_harvestPlanter(planterNum){
 			PlanterHarvestTimeN:=PlanterHarvestTime%planterNum%
 			PlanterEstPercentN:=PlanterEstPercent%planterNum%
 			;save changes
-			IniWrite, %PlanterNameN%, ba_config.ini, Planters, PlanterName%planterNum%
-			IniWrite, %PlanterFieldN%, ba_config.ini, Planters, PlanterField%planterNum%
-			IniWrite, %PlanterNectarN%, ba_config.ini, Planters, PlanterNectar%planterNum%
-			IniWrite, %PlanterHarvestTimeN%, ba_config.ini, Planters, PlanterHarvestTime%planterNum%
-			IniWrite, %PlanterEstPercentN%, ba_config.ini, Planters, PlanterEstPercent%planterNum%
+			IniWrite, %PlanterNameN%, settings\ba_config.ini, Planters, PlanterName%planterNum%
+			IniWrite, %PlanterFieldN%, settings\ba_config.ini, Planters, PlanterField%planterNum%
+			IniWrite, %PlanterNectarN%, settings\ba_config.ini, Planters, PlanterNectar%planterNum%
+			IniWrite, %PlanterHarvestTimeN%, settings\ba_config.ini, Planters, PlanterHarvestTime%planterNum%
+			IniWrite, %PlanterEstPercentN%, settings\ba_config.ini, Planters, PlanterEstPercent%planterNum%
 			;readback ini values
-			IniRead, PlanterName%planterNum%, ba_config.ini, Planters, PlanterName%planterNum%
-			IniRead, PlanterField%planterNum%, ba_config.ini, Planters, PlanterField%planterNum%
-			IniRead, PlanterNectar%planterNum%, ba_config.ini, Planters, PlanterNectar%planterNum%
-			IniRead, PlanterHarvestTime%planterNum%, ba_config.ini, Planters, PlanterHarvestTime%planterNum%
-			IniRead, PlanterEstPercent%planterNum%, ba_config.ini, Planters, PlanterEstPercent%planterNum%
+			IniRead, PlanterName%planterNum%, settings\ba_config.ini, Planters, PlanterName%planterNum%
+			IniRead, PlanterField%planterNum%, settings\ba_config.ini, Planters, PlanterField%planterNum%
+			IniRead, PlanterNectar%planterNum%, settings\ba_config.ini, Planters, PlanterNectar%planterNum%
+			IniRead, PlanterHarvestTime%planterNum%, settings\ba_config.ini, Planters, PlanterHarvestTime%planterNum%
+			IniRead, PlanterEstPercent%planterNum%, settings\ba_config.ini, Planters, PlanterEstPercent%planterNum%
 			TotalPlantersCollected:=TotalPlantersCollected+1
 			SessionPlantersCollected:=SessionPlantersCollected+1
 			Send_WM_COPYDATA("incrementstat Total Planters", "StatMonitor.ahk ahk_class AutoHotkey")
-			IniWrite, %TotalPlantersCollected%, nm_config.ini, Status, TotalPlantersCollected
-			IniWrite, %SessionPlantersCollected%, nm_config.ini, Status, SessionPlantersCollected
+			IniWrite, %TotalPlantersCollected%, settings\nm_config.ini, Status, TotalPlantersCollected
+			IniWrite, %SessionPlantersCollected%, settings\nm_config.ini, Status, SessionPlantersCollected
 			;gather loot
 			nm_setStatus("Looting", planterName . " Loot")
 			sleep, 4000
@@ -16206,13 +16140,13 @@ ba_SavePlacedPlanter(fieldName, planter, planterNum, nectar){
 	GuiControlGet, HarvestIntervalNum
 	HarvestInterval:=HarvestIntervalNum
 	loop, 3{
-		IniRead, PlanterName%A_Index%, ba_config.ini, Planters, PlanterName%A_Index%
-		IniRead, PlanterField%A_Index%, ba_config.ini, Planters, PlanterField%A_Index%
-		IniRead, PlanterHarvestTime%A_Index%, ba_config.ini, Planters, PlanterHarvestTime%A_Index%
-		IniRead, PlanterNectar%A_Index%, ba_config.ini, Planters, PlanterNectar%A_Index%
-		IniRead, PlanterEstPercent%A_Index%, ba_config.ini, Planters, PlanterEstPercent%A_Index%
+		IniRead, PlanterName%A_Index%, settings\ba_config.ini, Planters, PlanterName%A_Index%
+		IniRead, PlanterField%A_Index%, settings\ba_config.ini, Planters, PlanterField%A_Index%
+		IniRead, PlanterHarvestTime%A_Index%, settings\ba_config.ini, Planters, PlanterHarvestTime%A_Index%
+		IniRead, PlanterNectar%A_Index%, settings\ba_config.ini, Planters, PlanterNectar%A_Index%
+		IniRead, PlanterEstPercent%A_Index%, settings\ba_config.ini, Planters, PlanterEstPercent%A_Index%
 	}
-	IniRead, HarvestInterval, ba_config.ini, gui, HarvestInterval
+	IniRead, HarvestInterval, settings\ba_config.ini, gui, HarvestInterval
 	GuiControlGet, PlasticPlanterCheck
 	GuiControlGet, CandyPlanterCheck
 	GuiControlGet, BlueClayPlanterCheck
@@ -16312,28 +16246,28 @@ ba_SavePlacedPlanter(fieldName, planter, planterNum, nectar){
 	PlanterEstPercent%planterNum%:=round((floor(planterHarvestInterval)*planter[2])/864, 1)
 	PlanterEstPercentN:=PlanterEstPercent%planterNum%
 	;save changes
-	IniWrite, %PlanterNameN%, ba_config.ini, Planters, PlanterName%planterNum%
-	IniWrite, %PlanterFieldN%, ba_config.ini, Planters, PlanterField%planterNum%
-	IniWrite, %PlanterNectarN%, ba_config.ini, Planters, PlanterNectar%planterNum%
+	IniWrite, %PlanterNameN%, settings\ba_config.ini, Planters, PlanterName%planterNum%
+	IniWrite, %PlanterFieldN%, settings\ba_config.ini, Planters, PlanterField%planterNum%
+	IniWrite, %PlanterNectarN%, settings\ba_config.ini, Planters, PlanterNectar%planterNum%
 
 	;make all harvest times equal
 	loop, 3 {
 		if(not HarvestFullGrown && PlanterHarvestTime%A_Index% > PlanterHarvestTimeN && PlanterHarvestTime%A_Index% < 20211106000000)
-			IniWrite, %PlanterHarvestTimeN%, ba_config.ini, Planters, PlanterHarvestTime%A_Index%
+			IniWrite, %PlanterHarvestTimeN%, settings\ba_config.ini, Planters, PlanterHarvestTime%A_Index%
 		else if(A_Index=planterNum)
-			IniWrite, %PlanterHarvestTimeN%, ba_config.ini, Planters, PlanterHarvestTime%planterNum%
+			IniWrite, %PlanterHarvestTimeN%, settings\ba_config.ini, Planters, PlanterHarvestTime%planterNum%
 	}
 
-	;IniWrite, %PlanterHarvestTimeN%, ba_config.ini, Planters, PlanterHarvestTime%planterNum%
-	IniWrite, %PlanterEstPercentN%, ba_config.ini, Planters, PlanterEstPercent%planterNum%
-	IniWrite, %fieldname%, ba_config.ini, Planters, Last%nectar%Field
+	;IniWrite, %PlanterHarvestTimeN%, settings\ba_config.ini, Planters, PlanterHarvestTime%planterNum%
+	IniWrite, %PlanterEstPercentN%, settings\ba_config.ini, Planters, PlanterEstPercent%planterNum%
+	IniWrite, %fieldname%, settings\ba_config.ini, Planters, Last%nectar%Field
 }
 ba_showPlanterTimers(){
 	run, %A_ScriptDir%\PlanterTimers.ahk
 }
 ba_resetConfig(){
-	if(fileexist("ba_config.ini")) {
-		FileDelete ba_config.ini
+	if(fileexist("settings\ba_config.ini")) {
+		FileDelete settings\ba_config.ini
 	}
 		FileAppend,
     (
@@ -16446,7 +16380,7 @@ StrawberryFieldCheck=1
 StumpFieldCheck=0
 SunflowerFieldCheck=1
 MaxPlanters=3
-TimerGuiTransparency=30
+TimerGuiTransparency=0
 TimerX=150
 TimerY=150
 TimerW=500
@@ -16492,7 +16426,7 @@ n2switch=1
 n3Switch=1
 n4Switch=1
 n5Switch=1
-), ba_config.ini
+), settings\ba_config.ini
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; LABELS
@@ -16500,13 +16434,13 @@ n5Switch=1
 getout:
 GuiClose:
 if(winexist("Timers") && not pass) {
-if(fileexist("ba_config.ini"))
-    IniWrite, 1, ba_config.ini, gui, TimersOpen
+if(fileexist("settings\ba_config.ini"))
+    IniWrite, 1, settings\ba_config.ini, gui, TimersOpen
     winclose, Timers
     pass:=1
 } else if (not winexist("Timers") && not pass){
-if(fileexist("ba_config.ini"))
-    IniWrite, 0, ba_config.ini, gui, TimersOpen
+if(fileexist("settings\ba_config.ini"))
+    IniWrite, 0, settings\ba_config.ini, gui, TimersOpen
     pass:=1
 }
 nm_SaveGui()
@@ -16516,6 +16450,7 @@ DetectHiddenWindows On
 SetTitleMatchMode 2
 WinClose guidingStarDetect.ahk
 WinClose background.ahk
+;WinClose test.ahk ; ~ close test script when done, can comment out if no need to test
 WinClose StatMonitor.ahk
 ;if((nowUnix()-LastHeartbeat)<12)
 ;	WinClose heartbeat.ahk
@@ -16586,7 +16521,7 @@ If(Roblox[3]>30)
 	WindowedScreen:=1
 else
 	WindowedScreen:=0
-IniWrite, %WindowedScreen%, nm_config.ini, Settings, WindowedScreen
+IniWrite, %WindowedScreen%, settings\nm_config.ini, Settings, WindowedScreen
 if(ShiftLockEnabled) {
 	ShiftLockEnabled:=0
 	send, {shift}
@@ -16638,7 +16573,7 @@ global ZoomOut
 global MoveMethod
 global HiveVariation
 global HiveSlot
-global DisableToolUse, AnnounceGuidingStar, ReconnectHour, ReconnectMin, DailyReconnect
+global DisableToolUse, AnnounceGuidingStar, NewWalk, ReconnectHour, ReconnectMin, DailyReconnect ; ~ new option
 global ClockCheck
 global MondoBuffCheck
 global MondoAction
@@ -16816,6 +16751,9 @@ global RileyAll:=0
 global MyField:=None
 global ReloadRobloxSecs
 global Webhook
+global WebhookCheck
+global discordUID
+global ssCheck
 global BoostChaserCheck
 global GatherFieldBoostedStart:=nowUnix()-3600
 global LastNatroSoBroke:=1
@@ -16830,12 +16768,13 @@ GuiControlGet, RotRight
 GuiControlGet, KeyDelay
 GuiControlGet, ZoomIn
 GuiControlGet, ZoomOut
-IniRead, MoveSpeedFactor, nm_config.ini, Settings, MoveSpeedFactor
+IniRead, MoveSpeedFactor, settings\nm_config.ini, Settings, MoveSpeedFactor
 ;GuiControlGet, HiveVariation
-IniRead, HiveVariation, nm_config.ini, Settings, HiveVariation
+IniRead, HiveVariation, settings\nm_config.ini, Settings, HiveVariation
 GuiControlGet, HiveSlot
 GuiControlGet, DisableToolUse
 GuiControlGet, AnnounceGuidingStar
+GuiControlGet, NewWalk ; ~ new option
 GuiControlGet, ReconnectHour
 GuiControlGet, ReconnectMin
 GuiControlGet, ClockCheck
@@ -16885,6 +16824,9 @@ GuiControlGet, BuckoQuestCheck
 GuiControlGet, RileyQuestCheck
 GuiControlGet, ReloadRobloxSecs
 GuiControlGet, Webhook
+GuiControlGet, WebhookCheck
+GuiControlGet, discordUID
+GuiControlGet, ssCheck
 GuiControlGet, BoostChaserCheck
 loop 3 {
 	GuiControlGet, FieldName%A_Index%
@@ -16903,64 +16845,64 @@ loop 3 {
 	GuiControlGet, FieldRotateTimes%A_Index%
 	GuiControlGet, FieldDriftCheck%A_Index%
 }
-IniRead, StartOnReload, nm_config.ini, Gui, StartOnReload
-IniRead, StingerPepperCheck, nm_config.ini, Collect, StingerPepperCheck
-IniRead, StingerMountainTopCheck, nm_config.ini, Collect, StingerMountainTopCheck
-IniRead, StingerRoseCheck, nm_config.ini, Collect, StingerRoseCheck
-IniRead, StingerCactusCheck, nm_config.ini, Collect, StingerCactusCheck
-IniRead, StingerSpiderCheck, nm_config.ini, Collect, StingerSpiderCheck
-IniRead, StingerCloverCheck, nm_config.ini, Collect, StingerCloverCheck
-IniRead, LastTunnelBear, nm_config.ini, Collect, LastTunnelBear
-IniRead, LastKingBeetle, nm_config.ini, Collect, LastKingBeetle
-IniRead, LastClock, nm_config.ini, Collect, LastClock
-IniRead, LastMondoBuff, nm_config.ini, Collect, LastMondoBuff
-IniRead, LastAntPass, nm_config.ini, Collect, LastAntPass
-IniRead, LastHoneyDis, nm_config.ini, Collect, LastHoneyDis
-IniRead, LastTreatDis, nm_config.ini, Collect, LastTreatDis
-IniRead, LastBlueberryDis, nm_config.ini, Collect, LastBlueberryDis
-IniRead, LastStrawberryDis, nm_config.ini, Collect, LastStrawberryDis
-IniRead, LastCoconutDis, nm_config.ini, Collect, LastCoconutDis
-IniRead, LastRoyalJellyDis, nm_config.ini, Collect, LastRoyalJellyDis
-IniRead, LastGlueDis, nm_config.ini, Collect, LastGlueDis
-IniRead, LastBlueBoost, nm_config.ini, Boost, LastBlueBoost
-IniRead, LastRedBoost, nm_config.ini, Boost, LastRedBoost
-IniRead, LastMountainBoost, nm_config.ini, Boost, LastMountainBoost
-IniRead, LastWindShrine, nm_config.ini, Boost, LastWindShrine
-IniRead, LastGuid, nm_config.ini, Boost, LastGuid
-IniRead, LastStockings, nm_config.ini, Collect, LastStockings
-IniRead, LastWreath, nm_config.ini, Collect, LastWreath
-IniRead, LastFeast, nm_config.ini, Collect, LastFeast
-IniRead, LastCandles, nm_config.ini, Collect, LastCandles
-IniRead, LastSamovar, nm_config.ini, Collect, LastSamovar
-IniRead, LastLidArt, nm_config.ini, Collect, LastLidArt
-IniRead, LastBugrunLadybugs, nm_config.ini, Collect, LastBugrunLadybugs
-IniRead, LastBugrunRhinoBeetles, nm_config.ini, Collect, LastBugrunRhinoBeetles
-IniRead, LastBugrunSpider, nm_config.ini, Collect, LastBugrunSpider
-IniRead, LastBugrunMantis, nm_config.ini, Collect, LastBugrunMantis
-IniRead, LastBugrunScorpions, nm_config.ini, Collect, LastBugrunScorpions
-IniRead, LastBugrunWerewolf, nm_config.ini, Collect, LastBugrunWerewolf
-IniRead, NightLastDetected, nm_config.ini, Collect, NightLastDetected
-IniRead, VBLastKilled, nm_config.ini, Collect, VBLastKilled
-IniRead, AutoFieldBoostActive, nm_config.ini, Boost, AutoFieldBoostActive
-IniRead, FieldLastBoosted, nm_config.ini, Boost, FieldLastBoosted
-IniRead, FieldLastBoostedBy, nm_config.ini, Boost, FieldLastBoostedBy
-IniRead, FieldNextBoostedBy, nm_config.ini, Boost, FieldNextBoostedBy
-IniRead, FieldBoostStacks, nm_config.ini, Boost, FieldBoostStacks
-IniRead, AutoFieldBoostRefresh, nm_config.ini, Boost, AutoFieldBoostRefresh
-IniRead, AFBHoursLimitEnable, nm_config.ini, Boost, AFBHoursLimitEnable
-IniRead, AFBHoursLimit, nm_config.ini, Boost, AFBHoursLimit
-IniRead, AFBFieldEnable, nm_config.ini, Boost, AFBFieldEnable
-IniRead, AFBDiceEnable, nm_config.ini, Boost, AFBDiceEnable
-IniRead, AFBGlitterEnable, nm_config.ini, Boost, AFBGlitterEnable
-IniRead, AFBdiceUsed, nm_config.ini, Boost, AFBdiceUsed
-IniRead, AFBglitterUsed, nm_config.ini, Boost, AFBglitterUsed
-IniRead, AFBDiceLimit, nm_config.ini, Boost, AFBDiceLimit
-IniRead, AFBDiceLimitEnable, nm_config.ini, Boost, AFBDiceLimitEnable
-IniRead, AFBdiceHotbar, nm_config.ini, Boost, AFBdiceHotbar
-IniRead, AFBglitterHotbar, nm_config.ini, Boost, AFBglitterHotbar
-IniRead, AFBGlitterLimit, nm_config.ini, Boost, AFBGlitterLimit
-IniRead, AFBGlitterLimitEnable, nm_config.ini, Boost, AFBGlitterLimitEnable
-IniRead, DailyReconnect, nm_config.ini, Settings, DailyReconnect
+IniRead, StartOnReload, settings\nm_config.ini, Gui, StartOnReload
+IniRead, StingerPepperCheck, settings\nm_config.ini, Collect, StingerPepperCheck
+IniRead, StingerMountainTopCheck, settings\nm_config.ini, Collect, StingerMountainTopCheck
+IniRead, StingerRoseCheck, settings\nm_config.ini, Collect, StingerRoseCheck
+IniRead, StingerCactusCheck, settings\nm_config.ini, Collect, StingerCactusCheck
+IniRead, StingerSpiderCheck, settings\nm_config.ini, Collect, StingerSpiderCheck
+IniRead, StingerCloverCheck, settings\nm_config.ini, Collect, StingerCloverCheck
+IniRead, LastTunnelBear, settings\nm_config.ini, Collect, LastTunnelBear
+IniRead, LastKingBeetle, settings\nm_config.ini, Collect, LastKingBeetle
+IniRead, LastClock, settings\nm_config.ini, Collect, LastClock
+IniRead, LastMondoBuff, settings\nm_config.ini, Collect, LastMondoBuff
+IniRead, LastAntPass, settings\nm_config.ini, Collect, LastAntPass
+IniRead, LastHoneyDis, settings\nm_config.ini, Collect, LastHoneyDis
+IniRead, LastTreatDis, settings\nm_config.ini, Collect, LastTreatDis
+IniRead, LastBlueberryDis, settings\nm_config.ini, Collect, LastBlueberryDis
+IniRead, LastStrawberryDis, settings\nm_config.ini, Collect, LastStrawberryDis
+IniRead, LastCoconutDis, settings\nm_config.ini, Collect, LastCoconutDis
+IniRead, LastRoyalJellyDis, settings\nm_config.ini, Collect, LastRoyalJellyDis
+IniRead, LastGlueDis, settings\nm_config.ini, Collect, LastGlueDis
+IniRead, LastBlueBoost, settings\nm_config.ini, Boost, LastBlueBoost
+IniRead, LastRedBoost, settings\nm_config.ini, Boost, LastRedBoost
+IniRead, LastMountainBoost, settings\nm_config.ini, Boost, LastMountainBoost
+IniRead, LastWindShrine, settings\nm_config.ini, Boost, LastWindShrine
+IniRead, LastGuid, settings\nm_config.ini, Boost, LastGuid
+IniRead, LastStockings, settings\nm_config.ini, Collect, LastStockings
+IniRead, LastWreath, settings\nm_config.ini, Collect, LastWreath
+IniRead, LastFeast, settings\nm_config.ini, Collect, LastFeast
+IniRead, LastCandles, settings\nm_config.ini, Collect, LastCandles
+IniRead, LastSamovar, settings\nm_config.ini, Collect, LastSamovar
+IniRead, LastLidArt, settings\nm_config.ini, Collect, LastLidArt
+IniRead, LastBugrunLadybugs, settings\nm_config.ini, Collect, LastBugrunLadybugs
+IniRead, LastBugrunRhinoBeetles, settings\nm_config.ini, Collect, LastBugrunRhinoBeetles
+IniRead, LastBugrunSpider, settings\nm_config.ini, Collect, LastBugrunSpider
+IniRead, LastBugrunMantis, settings\nm_config.ini, Collect, LastBugrunMantis
+IniRead, LastBugrunScorpions, settings\nm_config.ini, Collect, LastBugrunScorpions
+IniRead, LastBugrunWerewolf, settings\nm_config.ini, Collect, LastBugrunWerewolf
+IniRead, NightLastDetected, settings\nm_config.ini, Collect, NightLastDetected
+IniRead, VBLastKilled, settings\nm_config.ini, Collect, VBLastKilled
+IniRead, AutoFieldBoostActive, settings\nm_config.ini, Boost, AutoFieldBoostActive
+IniRead, FieldLastBoosted, settings\nm_config.ini, Boost, FieldLastBoosted
+IniRead, FieldLastBoostedBy, settings\nm_config.ini, Boost, FieldLastBoostedBy
+IniRead, FieldNextBoostedBy, settings\nm_config.ini, Boost, FieldNextBoostedBy
+IniRead, FieldBoostStacks, settings\nm_config.ini, Boost, FieldBoostStacks
+IniRead, AutoFieldBoostRefresh, settings\nm_config.ini, Boost, AutoFieldBoostRefresh
+IniRead, AFBHoursLimitEnable, settings\nm_config.ini, Boost, AFBHoursLimitEnable
+IniRead, AFBHoursLimit, settings\nm_config.ini, Boost, AFBHoursLimit
+IniRead, AFBFieldEnable, settings\nm_config.ini, Boost, AFBFieldEnable
+IniRead, AFBDiceEnable, settings\nm_config.ini, Boost, AFBDiceEnable
+IniRead, AFBGlitterEnable, settings\nm_config.ini, Boost, AFBGlitterEnable
+IniRead, AFBdiceUsed, settings\nm_config.ini, Boost, AFBdiceUsed
+IniRead, AFBglitterUsed, settings\nm_config.ini, Boost, AFBglitterUsed
+IniRead, AFBDiceLimit, settings\nm_config.ini, Boost, AFBDiceLimit
+IniRead, AFBDiceLimitEnable, settings\nm_config.ini, Boost, AFBDiceLimitEnable
+IniRead, AFBdiceHotbar, settings\nm_config.ini, Boost, AFBdiceHotbar
+IniRead, AFBglitterHotbar, settings\nm_config.ini, Boost, AFBglitterHotbar
+IniRead, AFBGlitterLimit, settings\nm_config.ini, Boost, AFBGlitterLimit
+IniRead, AFBGlitterLimitEnable, settings\nm_config.ini, Boost, AFBGlitterLimitEnable
+IniRead, DailyReconnect, settings\nm_config.ini, Settings, DailyReconnect
 ;set ActiveHotkeys[]
 global ActiveHotkeys
 ActiveHotkeys:=[]
@@ -16982,25 +16924,25 @@ GuiControlGet HotkeyWhile4
 GuiControlGet HotkeyWhile5
 GuiControlGet HotkeyWhile6
 GuiControlGet HotkeyWhile7
-IniRead, LastHotkey2, nm_config.ini, Boost, LastHotkey2
-IniRead, LastHotkey3, nm_config.ini, Boost, LastHotkey3
-IniRead, LastHotkey4, nm_config.ini, Boost, LastHotkey4
-IniRead, LastHotkey5, nm_config.ini, Boost, LastHotkey5
-IniRead, LastHotkey6, nm_config.ini, Boost, LastHotkey6
-IniRead, LastHotkey7, nm_config.ini, Boost, LastHotkey7
-IniRead, LastMicroConverter, nm_config.ini, Boost, LastMicroConverter
-IniRead, LastWhirligig, nm_config.ini, Boost, LastWhirligig
-IniRead, LastEnzymes, nm_config.ini, Boost, LastEnzymes
-IniRead, LastGlitter, nm_config.ini, Boost, LastGlitter
-IniRead, TotalGatherTime, nm_config.ini, Status, TotalGatherTime
-IniRead, TotalConvertTime, nm_config.ini, Status, TotalConvertTime
-IniRead, TotalViciousKills, nm_config.ini, Status, TotalViciousKills
-IniRead, TotalBossKills, nm_config.ini, Status, TotalBossKills
-IniRead, TotalBugKills, nm_config.ini, Status, TotalBugKills
-IniRead, TotalPlantersCollected, nm_config.ini, Status, TotalPlantersCollected
-IniRead, TotalQuestsComplete, nm_config.ini, Status, TotalQuestsComplete
-IniRead, TotalDisconnects, nm_config.ini, Status, TotalDisconnects
-IniRead, LastBlackQuest, nm_config.ini, Quests, LastBlackQuest
+IniRead, LastHotkey2, settings\nm_config.ini, Boost, LastHotkey2
+IniRead, LastHotkey3, settings\nm_config.ini, Boost, LastHotkey3
+IniRead, LastHotkey4, settings\nm_config.ini, Boost, LastHotkey4
+IniRead, LastHotkey5, settings\nm_config.ini, Boost, LastHotkey5
+IniRead, LastHotkey6, settings\nm_config.ini, Boost, LastHotkey6
+IniRead, LastHotkey7, settings\nm_config.ini, Boost, LastHotkey7
+IniRead, LastMicroConverter, settings\nm_config.ini, Boost, LastMicroConverter
+IniRead, LastWhirligig, settings\nm_config.ini, Boost, LastWhirligig
+IniRead, LastEnzymes, settings\nm_config.ini, Boost, LastEnzymes
+IniRead, LastGlitter, settings\nm_config.ini, Boost, LastGlitter
+IniRead, TotalGatherTime, settings\nm_config.ini, Status, TotalGatherTime
+IniRead, TotalConvertTime, settings\nm_config.ini, Status, TotalConvertTime
+IniRead, TotalViciousKills, settings\nm_config.ini, Status, TotalViciousKills
+IniRead, TotalBossKills, settings\nm_config.ini, Status, TotalBossKills
+IniRead, TotalBugKills, settings\nm_config.ini, Status, TotalBugKills
+IniRead, TotalPlantersCollected, settings\nm_config.ini, Status, TotalPlantersCollected
+IniRead, TotalQuestsComplete, settings\nm_config.ini, Status, TotalQuestsComplete
+IniRead, TotalDisconnects, settings\nm_config.ini, Status, TotalDisconnects
+IniRead, LastBlackQuest, settings\nm_config.ini, Quests, LastBlackQuest
 ;set hotbar values for actions handled by nm_hotbar()
 whileNames:=["Always", "Attacking", "Gathering", "At Hive", "GatherStart"]
 for key, val in whileNames {
@@ -17090,6 +17032,12 @@ if(AutoFieldBoostActive){
 if(AnnounceGuidingStar){
 	run guidingStarDetect.ahk, %A_ScriptDir%\submacros
 }
+;(re)start stat monitor ~ moved from previous position (around line 1464) to avoid duplicate startup reports
+;myOS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)
+;if((myOS*1)>=10) { ~ new StatMonitors do not require win10 or above
+if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) { ; ~ changed RegEx
+	Run, %A_ScriptDir%\StatMonitor.ahk
+}
 ;sendMessage commands
 if WinExist("background.ahk ahk_class AutoHotkey") {
 	SendMessage, 0x4200, 4, %StingerCheck%
@@ -17113,7 +17061,7 @@ if(MacroRunning) {
 	TotalConvertTime:=TotalConvertTime+(nowUnix()-ConvertStartTime)
 	SessionConvertTime:=SessionConvertTime+(nowUnix()-ConvertStartTime)
 }
-IniWrite, %TotalRuntime%, nm_config.ini, Status, TotalRuntime
+IniWrite, %TotalRuntime%, settings\nm_config.ini, Status, TotalRuntime
 MacroRunning:=0
 send {%FwdKey% up}
 send {%BackKey% up}
@@ -17122,13 +17070,17 @@ send {%RightKey% up}
 send {space up}
 click up
 ;nm_releaseKeys()
-IniWrite, %SessionRuntime%, nm_config.ini, Status, SessionRuntime
-IniWrite, %TotalGatherTime%, nm_config.ini, Status, TotalGatherTime
-IniWrite, %SessionGatherTime%, nm_config.ini, Status, SessionGatherTime
-IniWrite, %TotalConvertTime%, nm_config.ini, Status, TotalConvertTime
-IniWrite, %SessionConvertTime%, nm_config.ini, Status, SessionConvertTime
+IniWrite, %SessionRuntime%, settings\nm_config.ini, Status, SessionRuntime
+IniWrite, %TotalGatherTime%, settings\nm_config.ini, Status, TotalGatherTime
+IniWrite, %SessionGatherTime%, settings\nm_config.ini, Status, SessionGatherTime
+IniWrite, %TotalConvertTime%, settings\nm_config.ini, Status, TotalConvertTime
+IniWrite, %SessionConvertTime%, settings\nm_config.ini, Status, SessionConvertTime
 nm_setStatus("End", "Macro")
+Prev_DetectHiddenWindows := A_DetectHiddenWindows ; ~ need to detect hidden windows to close guidingStarDetect.ahk
+DetectHiddenWindows, On
 WinClose guidingStarDetect.ahk
+nm_endWalk()
+DetectHiddenWindows, %Prev_DetectHiddenWindows%
 Reload
 return
 ;PAUSE MACRO
@@ -17167,6 +17119,13 @@ if(A_IsPaused) {
 	send {%RightKey% up}
 	send {space up}
 	click up
+	
+	Prev_DetectHiddenWindows := A_DetectHiddenWindows 
+	DetectHiddenWindows, On
+	WinClose guidingStarDetect.ahk
+	nm_endWalk() ; ~ close walk script to stop gathering
+	DetectHiddenWindows, %Prev_DetectHiddenWindows%
+	
 	MacroRunning:=0
 	;manage runtimes
 	TotalRuntime:=TotalRuntime+(nowUnix()-MacroStartTime)
@@ -17176,7 +17135,7 @@ if(A_IsPaused) {
 		TotalGatherTime:=TotalGatherTime+(nowUnix()-GatherStartTime)
 		SessionGatherTime:=SessionGatherTime+(nowUnix()-GatherStartTime)
 	}
-	IniWrite, %TotalRuntime%, nm_config.ini, Status, TotalRuntime
+	IniWrite, %TotalRuntime%, settings\nm_config.ini, Status, TotalRuntime
 	;nm_sendHeartbeat(1)
 	nm_setStatus("Paused", "Press F2 to Continue")
 }
@@ -17227,10 +17186,10 @@ nm_WM_COPYDATA(wParam, lParam){
 		sleep 250
 		;set LastGuid
 		LastGuid:=nowUnix()
-		IniWrite, %LastGuid%, nm_config.ini, Boost, LastGuid
+		IniWrite, %LastGuid%, settings\nm_config.ini, Boost, LastGuid
 		if(PMondoGuid && MondoBuffCheck && MondoAction="Guid") {
 			nm_mondo()
-			return
+			return 0 ; ~ return integer for OnMessage
 		} else {
 			;unpause
 			if(FwdKeyState)
@@ -17245,9 +17204,11 @@ nm_WM_COPYDATA(wParam, lParam){
 				send {space down}
 		}
 	}
+	return 0 ; ~ return integer for OnMessage
 }
 nm_setLastHeartbeat(wParam, lParam){
 	global LastHeartbeat:=nowUnix()
+	return 0 ; ~ return integer for OnMessage
 }
 nm_backgroundEvent(wParam, lParam){
 	global youDied, NightLastDetected, VBState, BackpackPercent, BackpackPercentFiltered, LastFieldGuidDetected, FieldGuidDetected
@@ -17261,32 +17222,30 @@ nm_backgroundEvent(wParam, lParam){
 	;;;;;;;;;;;;;;;;;;;;;;;;;
 	; EVENTS
 	;;;;;;;;;;;;;;;;;;;;;;;;;
-	;You Died Indication
-	if(wParam=1){ ;You Died
+	switch wParam ; ~ switch-case instead of if-else could help?
+	{
+		case 1: ;You Died Indication
 		nm_setStatus("You Died")
 		youDied:=1
-	}
-	;Set NightLastDetected
-	else if(wParam=2){
+		
+		case 2: ;Set NightLastDetected
 		NightLastDetected:=lParam
 		nm_setStatus("Detected", "Night")
-	}
-	;Set VBState
-	else if(wParam=3){
+		
+		case 3: ;Set VBState
 		VBState:=lParam
 		;nm_setStatus("VBState " . VBState . " temp " . temp, " <8>")
-	}
-	;Set BackpackPercent
-	else if(wParam=6){
+		
+		case 6: ;Set BackpackPercent
 		BackpackPercent:=lParam
-	}
-	;Set BackpackPercentFiltered
-	else if(wParam=7){
+		
+		case 7: ;Set BackpackPercentFiltered
 		BackpackPercentFiltered:=lParam
-	}
-	;Set GuidingStar Detection
-	else if(wParam=8){
+		
+		case 8: ;Set GuidingStar Detection
 		LastFieldGuidDetected:=nowUnix()
 		FieldGuidDetected:=1
 	}
+	
+	return 0 ; ~ return integer for OnMessage
 }

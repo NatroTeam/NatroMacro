@@ -13,7 +13,7 @@ runWith(version){
 	ExitApp
 }
 ;OnMessages
-OnMessage(0x4299, "hb_resetTimeout")
+OnMessage(0x5556, "hb_resetTimeout")
 
 global HBTimeout:=nowUnix()
 global MacroRunning:=0
@@ -24,8 +24,8 @@ SetWorkingDir, ..
 while 1 {
 	if((nowUnix()-HBTimeout)>60 && paused=0){ ; natro_macro is frozen
 		resetting:=1
-		FileAppend `[%A_Hour%:%A_Min%:%A_Sec%`] Detected: Macro Freeze`, Re-starting`n, status_log.txt
-		FileAppend `[%A_MM%/%A_DD%`]`[%A_Hour%:%A_Min%:%A_Sec%`] Detected: Macro Freeze`, Re-starting`n, debug_log.txt
+		FileAppend `[%A_Hour%:%A_Min%:%A_Sec%`] Detected: Macro Freeze`, Re-starting`n, settings\status_log.txt
+		FileAppend `[%A_MM%/%A_DD%`]`[%A_Hour%:%A_Min%:%A_Sec%`] Detected: Macro Freeze`, Re-starting`n, settings\debug_log.txt
 		Prev_DetectHiddenWindows := A_DetectHiddenWindows
 		Prev_TitleMatchMode := A_TitleMatchMode
 		DetectHiddenWindows On
@@ -34,7 +34,7 @@ while 1 {
 		sleep, 10000
 		run, natro_macro.ahk
 		HBTimeout:=nowUnix()
-		SendMessage, 0x4299, 0, 0,, natro_macro
+		SendMessage, 0x5556, 0, 0,, natro_macro
 		DetectHiddenWindows %Prev_DetectHiddenWindows%
 		SetTitleMatchMode %Prev_TitleMatchMode%
 		if(MacroRunning) {
@@ -60,7 +60,7 @@ hb_resetTimeout(wParam, lParam){
     Prev_TitleMatchMode := A_TitleMatchMode
     DetectHiddenWindows On
     SetTitleMatchMode 2
-    SendMessage, 0x4299, 0, 0,, natro_macro
+    SendMessage, 0x5556, 0, 0,, natro_macro
     DetectHiddenWindows %Prev_DetectHiddenWindows%
     SetTitleMatchMode %Prev_TitleMatchMode%
 }
