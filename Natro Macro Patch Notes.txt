@@ -1,3 +1,40 @@
+0.8.5 Patch Notes
+
+Bugs
+-Added a limit to the indefinite loop if the character could not reach the planter field.
+-Rewrote nm_convert() to fix the convert ending glitch, add timers for backpack and balloon conversion, and speed up balloon convert detection.
+-Resolved the issue where planter searching for E did not take place.
+-Fixed mondo reset loop when interrupting gather.
+-Fixed an issue where quest gathering time limit option was not applying.
+-Fixed duplicate conversion after a successful walk back to hive.
+-Selected a default font for all GUIs, which fixes GUI appearance for users without English as their Windows base language.
+-Fixed an issue where default keys for 'azerty' keyboard layout were opening chat while turning camera.
+
+Other
+-Improved background.ahk to require sending and receiving fewer messages but function as normal.
+-Implemented a "heartbeat" functionality that will detect when the macro is down (crashed, unresponsive, etc.) and force a reload.
+-Updated GUI Movement Speed edit in Settings tab with improved number detection and variable altering.
+-Added measures to ensure the macro presses 'E', '/', '1', etc. successfully and is registered by the Roblox client.
+-Added 'Inactive Honey' check to Stump Snail and Coco Crab and disconnect check to Commando Chick.
+-Moved paths out of their individual folders to have one big 'paths' folder for simplicity and ease of use.
+-Updated some planter paths causing common issues, e.g. blue flower, clover.
+-Migrated 'toBooster' paths to the new system, adding them to 'paths' folder.
+-Moved StatMonitor.ahk and PlanterTimers.ahk inside 'submacros' to make it easier to start the macro.
+-Increased speed of hive orientation check, removing the delays between camera rotations.
+-Changed the default field_config.ini settings to select Walk as return method rather than Reset.
+-Disabled token link detection for planters, since some have slow spawning tokens.
+-Added warning for incorrect scale when starting the macro.
+-Introduced StatusHandler.ahk to handle all status updates and drastically improve performance and stability in the main script.
+-Rewrote writing to status logs in both GUI and log files to greatly increase speed.
+-Added a click every 30 seconds while converting to prevent idle disconnect.
+-Added an extra delay after killing Rhino Beetles in Clover to separate kill detection from Blue Flower.
+-Changed default percentages of nectar presets to 80% instead of 90%
+-Edited bitmap for red cannon to be a slightly less sensitive detection.
+-Changed Coco Crab cooldown on fail to 30 minutes instead of 2 hours.
+-Disabled interruption of OnMessages in main script to remove duplicate message handling, resulting in improved speed and reliability.
+-Added status updates for "Pop Star Active" and "Guiding Star Active" detection.
+
+
 0.8.4 Patch Notes
 
 This version has many bug fixes and stability changes. HUGE thanks to the Dev Team and our first testers: Nick 9#9476 (Nick), FHL09#4061 (FHL), valibreaz#8493 (ERB), and Heat/Sky#9350 (Heat) for extensively testing all of the new features and making this update possible!

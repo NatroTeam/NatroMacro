@@ -1,7 +1,8 @@
 #NoEnv
 #SingleInstance force
-;SetBatchLines -1
+SetBatchLines -1
 #MaxThreads 255
+SetWorkingDir %A_ScriptDir%
 
 RunWith(32)
 runWith(version){	
@@ -16,17 +17,16 @@ runWith(version){
 	ExitApp
 }
 
-global windowX, windowY, windowWidth, windowHeight
-global resetTime:=nowUnix()
-global NightLastDetected
-global VBState:=0
-global confirm:=0
-global PackFilterArray:=[]
+;initialization
 global imgfolder:="..\nm_image_assets"
+resetTime:=LastHeartbeat:=nowUnix()
+DailyReconnect:=0
 IniRead, NightLastDetected, ..\settings\nm_config.ini, Collect, NightLastDetected
 IniRead, VBLastKilled, ..\settings\nm_config.ini, Collect, VBLastKilled
 IniRead, StingerCheck, ..\settings\nm_config.ini, Collect, StingerCheck
 IniRead, AnnounceGuidingStar, ..\settings\nm_config.ini, Settings, AnnounceGuidingStar
+IniRead, ReconnectHour, ..\settings\nm_config.ini, Settings, ReconnectHour
+IniRead, ReconnectMin, ..\settings\nm_config.ini, Settings, ReconnectMin
 
 CoordMode, Pixel, Client
 DetectHiddenWindows On
@@ -36,82 +36,118 @@ SetTitleMatchMode 2
 OnMessage(0x5554, "nm_setGlobalNum", 255)
 
 loop {
-	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox")
+	Critical, On
+	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
 	nm_deathCheck()
-	nm_dayOrNight()
-	nm_backpackPercentFilter()
 	nm_guidCheck()
 	nm_popStarCheck()
+	nm_dayOrNight()
+	nm_backpackPercentFilter()
 	nm_guidingStarDetect()
+	nm_dailyReconnect()
+	(Mod(A_Index, 10) = 0) ? nm_sendHeartbeat()
+	Critical, Off
 	sleep, 1000
 }
 
 nm_setGlobalNum(wParam, lParam){
 	global
-	static arr := ["resetTime", "NightLastDetected", "VBState", "StingerCheck", "VBLastKilled"]
+	local var
+	static arr:=["resetTime", "NightLastDetected", "VBState", "StingerCheck", "VBLastKilled", "DailyReconnect", "LastHeartbeat", "state"]
 	
 	var := arr[wParam], %var% := lParam
-	
 	return 0
 }
 
 nm_deathCheck(){
-	global windowX, windowY, windowWidth, windowHeight
-	static lastDetected:=0
-	if (((nowUnix()-resetTime)>20) && ((nowUnix()-lastDetected)>10)) {
-		ImageSearch, FoundX, FoundY, windowWidth/2, windowHeight/2, windowWidth, windowHeight, *50 %imgfolder%\died.png	
+	global windowX, windowY, windowWidth, windowHeight, resetTime
+	static LastDeathDetected:=0
+	if (((nowUnix()-resetTime)>20) && ((nowUnix()-LastDeathDetected)>10)) {
+		ImageSearch, , , windowWidth/2, windowHeight/2, windowWidth, windowHeight, *50 %imgfolder%\died.png	
 		if(ErrorLevel=0){
 			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
 				PostMessage, 0x5555, 1, 1
+				Send_WM_COPYDATA("You Died", "natro_macro.ahk ahk_class AutoHotkey")
 			}
-			lastDetected := nowUnix()
+			LastDeathDetected := nowUnix()
 		}
 	}
 }
 
 nm_guidCheck(){
-	global windowX, windowY, windowWidth, windowHeight, LastFieldGuidDetected
-	ImageSearch, FoundX, FoundY, 0, 0, windowWidth, 100, *50 %imgfolder%\boostguidingstar.png	
+	global windowX, windowY, windowWidth, windowHeight, state
+	static LastFieldGuidDetected:=1, FieldGuidDetected:=0, confirm:=0
+	ImageSearch, , , 0, 30, windowWidth, 90, *50 %imgfolder%\boostguidingstar.png
 	if(ErrorLevel=0){ ;Guid Detected
-		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-			PostMessage, 0x5555, 8, 1
+		confirm:=0
+		if ((FieldGuidDetected = 0) && (state = 1)) {
+			FieldGuidDetected := 1
+			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+				PostMessage, 0x5555, 6, 1
+				Send_WM_COPYDATA("Detected: Guiding Star Active", "natro_macro.ahk ahk_class AutoHotkey")
+			}
+			LastFieldGuidDetected := nowUnix()
+		}
+	}
+	else if ((nowUnix() - LastFieldGuidDetected > 5) && FieldGuidDetected){
+		confirm++
+		if (comfirm >= 5) {
+			confirm:=0
+			FieldGuidDetected := 0
+			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+				PostMessage, 0x5555, 6, 0
+			}
 		}
 	}
 }
+
 nm_popStarCheck(){
-	global windowX, windowY, windowWidth, windowHeight, HasPopStar, PopStarActive
-	ImageSearch, FoundX, FoundY, windowWidth/4, (windowHeight/4)*3, (windowWidth/4)*3, windowHeight, *30 %imgfolder%\popstar_counter.png
-	if(ErrorLevel=0){
-		HasPopStar:=1
-		PopStarActive:=0
-	} else if(ErrorLevel=1 && HasPopStar){
-		PopStarActive:=1
+	global windowX, windowY, windowWidth, windowHeight, state
+	static HasPopStar:=0, PopStarActive:=0
+	ImageSearch, , , windowWidth//2 - 275, 3*windowHeight//4, windowWidth//2 + 275, windowHeight, *30 %imgfolder%\popstar_counter.png
+	if(ErrorLevel=0){ ;Has Pop
+		if (HasPopStar = 0){
+			HasPopStar := 1
+			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+				PostMessage, 0x5555, 7, 1
+			}
+		}
+		if (HasPopStar && (PopStarActive = 1)){
+			PopStarActive := 0
+			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+				PostMessage, 0x5555, 8, 0
+			}
+		}
+	}
+	else if(ErrorLevel=1){
+		if (HasPopStar && (PopStarActive = 0) && (state = 1)){
+			PopStarActive := 1
+			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+				PostMessage, 0x5555, 8, 1
+				Send_WM_COPYDATA("Detected: Pop Star Active", "natro_macro.ahk ahk_class AutoHotkey")
+			}
+		}
 	}
 }
+
 nm_dayOrNight(){
 	disableDayorNight:=0
-	;0=no VB, 1=searching for VB, 2=VB found
-	global windowX, windowY, windowWidth, windowHeight
-	global VBState, NightLastDetected, StingerCheck, VBLastKilled, confirm
+	;VBState 0=no VB, 1=searching for VB, 2=VB found
+	global windowX, windowY, windowWidth, windowHeight, NightLastDetected, StingerCheck, VBLastKilled
+	static VBState:=0, confirm:=0
 	if (disableDayorNight || StingerCheck=0)
 		return
-	if(((VBState=1) && ((nowUnix()-NightLastDetected)>(400) || (nowUnix()-NightLastDetected)<0)) || ((VBState=2) && ((nowUnix()-VBLastKilled)>(400) || (nowUnix()-VBLastKilled)<0))) {
-;temp:=nowUnix()-NightLastDetected
-;temp2:=nowUnix()-VBLastKilled
-;temp3:=nowUnix()
-;temp4:=VBLastKilled
-;send {F2}
-;msgbox reset VBState=%VBState% (nowUnix()-NightLastDetected)=%temp% (nowUnix()-VBLastKilled)=%temp2%`nnow=%temp3% VBLastKilled=%VBLastKilled%
+	if(((VBState=1) && ((nowUnix()-NightLastDetected)>400 || (nowUnix()-NightLastDetected)<0)) || ((VBState=2) && ((nowUnix()-VBLastKilled)>(400) || (nowUnix()-VBLastKilled)<0))) {
 		VBState:=0
 		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-			PostMessage, 0x5555, 3, %VBState%
+			PostMessage, 0x5555, 3, 0
 		}
 	}
-	ImageSearch, FoundX, FoundY, 0, windowHeight/2, windowWidth, windowHeight, *5 %imgfolder%\grassD.png
+	ImageSearch, , , 0, windowHeight/2, windowWidth, windowHeight, *5 %imgfolder%\grassD.png
 	if(ErrorLevel=0){
 		dayOrNight:="Day"
 	} else {
-		ImageSearch, FoundX, FoundY, 0, windowHeight/2, windowWidth, windowHeight, *5 %imgfolder%\grassN.png	
+		ImageSearch, , , 0, windowHeight/2, windowWidth, windowHeight, *5 %imgfolder%\grassN.png	
 		if(ErrorLevel=0){
 			dayOrNight:="Dusk"
 		} else {
@@ -125,34 +161,30 @@ nm_dayOrNight(){
 	}
 	if(confirm>=5) {
 		dayOrNight:="Night"
-		if((nowUnix()-NightLastDetected)>(300) || (nowUnix()-NightLastDetected)<0) {
+		if((nowUnix()-NightLastDetected)>300 || (nowUnix()-NightLastDetected)<0) {
 			NightLastDetected:=nowUnix()
 			IniWrite, %NightLastDetected%, ..\settings\nm_config.ini, Collect, NightLastDetected
-;temp:=nowUnix()-NightLastDetected
-;temp2:=nowUnix()-VBLastKilled
-;temp3:=nowUnix()
-;temp4:=NightLastDetected
-;send {F2}
-;msgbox reset VBState=%VBState% (nowUnix()-NightLastDetected)=%temp%`nnow=%temp3% NightLastDetected=%NightLastDetected%
 			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
 				PostMessage, 0x5555, 2, %NightLastDetected%
+				Send_WM_COPYDATA("Detected: Night", "natro_macro.ahk ahk_class AutoHotkey")
 			}
-			sleep, 250
 			if(StingerCheck && VBState=0) {
 				VBState:=1 ;0=no VB, 1=searching for VB, 2=VB found
 				if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-					PostMessage, 0x5555, 3, %VBState%
+					PostMessage, 0x5555, 3, 1
 				}
 			}
 		}
 	}
 	;GuiControl,Text, timeOfDay, %dayOrNight%
 	if(winexist("PlanterTimers.ahk ahk_class AutoHotkey")) {
-		IniWrite, %dayOrNight%, ..\settings\nm_config.ini, gui, DayOrNight
+		IniWrite, %dayOrNight%, ..\settings\nm_config.ini, gui, DayOrNight ;make this a PostMessage too, fewer disk reads/writes is better!
 	}
 }
 
 nm_backpackPercent(){
+	global windowX, windowY, windowWidth, windowHeight
+	static LastBackpackPercent:=""
 	;WinGetPos , windowX, windowY, windowWidth, windowHeight, Roblox
 	;UpperLeft X1 = windowWidth/2+59
 	;UpperLeft Y1 = 3
@@ -265,15 +297,14 @@ nm_backpackPercent(){
 			}
 		}
 	}
-	if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-		PostMessage, 0x5555, 6, %BackpackPercent%
+	if ((BackpackPercent != LastBackpackPercent) && WinExist("natro_macro.ahk ahk_class AutoHotkey")) {
+		PostMessage, 0x5555, 4, %BackpackPercent%
+		LastBackpackPercent := BackpackPercent
 	}
 	Return BackpackPercent
 }
 nm_backpackPercentFilter(){
-	global PackFilterArray
-	global BackpackPercentFiltered
-	samplesize:=6 ;6 seconds (6 samples @ 1 sec intervals)
+	static PackFilterArray:=[], LastBackpackPercentFiltered:="", samplesize:=6 ;6 seconds (6 samples @ 1 sec intervals)
 	
 	;make room for new sample
 	if(PackFilterArray.Length()=samplesize){
@@ -284,49 +315,41 @@ nm_backpackPercentFilter(){
 	;calculate rolling average
 	sum:=0
 	for key, val in PackFilterArray {
-		sum:=sum+PackFilterArray[key]
+		sum+=val
 	}
 	BackpackPercentFiltered:=sum/PackFilterArray.length()
-	if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-		PostMessage, 0x5555, 7, %BackpackPercentFiltered%
+	if ((BackpackPercentFiltered != LastBackpackPercentFiltered) && WinExist("natro_macro.ahk ahk_class AutoHotkey")) {
+		PostMessage, 0x5555, 5, %BackpackPercentFiltered%
+		LastBackpackPercentFiltered := BackpackPercentFiltered
 	}
-	return BackpackPercentFiltered
 }
+
 nm_guidingStarDetect(){
 	global AnnounceGuidingStar, windowX, windowY, windowWidth, windowHeight
-	static lastDetected:=0, fieldnames := ["PineTree", "Stump", "Bamboo", "BlueFlower", "MountainTop", "Cactus", "Coconut", "Pineapple", "Spider", "Pumpkin", "Dandelion", "Sunflower", "Clover", "Pepper", "Rose", "Strawberry", "Mushroom"]
+	static LastGuidDetected:=0, fieldnames := ["PineTree", "Stump", "Bamboo", "BlueFlower", "MountainTop", "Cactus", "Coconut", "Pineapple", "Spider", "Pumpkin", "Dandelion", "Sunflower", "Clover", "Pepper", "Rose", "Strawberry", "Mushroom"]
 	
-	if (!AnnounceGuidingStar || (nowUnix()-lastDetected<10))
+	if (!AnnounceGuidingStar || (nowUnix()-LastGuidDetected<10))
 		return
 	
 	xi:=windowWidth/2
 	yi:=windowHeight/2
 	
 	GSfound:=0
-	ImageSearch, FoundX, FoundY, %xi%, %yi%, %windowWidth%, %windowHeight%, *50 %imgfolder%\guiding_star_icon1.png
-	if(ErrorLevel=0){
-		GSfound:=1
-	} else {
-		ImageSearch, FoundX, FoundY, %xi%, %yi%, %windowWidth%, %windowHeight%, *50 %imgfolder%\guiding_star_icon2.png
-		if(ErrorLevel=0){
+	Loop, 2 {
+		ImageSearch, , , xi, yi, windowWidth, windowHeight, *50 %imgfolder%\guiding_star_icon%A_Index%.png
+		if(ErrorLevel=0) {
 			GSfound:=1
+			break
 		}
 	}
+	
 	if(GSfound){
 		for key, value in fieldnames {
-			ImageSearch, FoundX, FoundY, %xi%, %yi%, %windowWidth%, %windowHeight%, *50 %imgfolder%\guiding_star_%value%.png
+			ImageSearch, , , xi, yi, windowWidth, windowHeight, *50 %imgfolder%\guiding_star_%value%.png
 			if(ErrorLevel=0){
 				if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-					StringToSend:=value
-					;set up string send
-					VarSetCapacity(CopyDataStruct, 3*A_PtrSize, 0)  ; Set up the structure's memory area.
-					SizeInBytes := (StrLen(StringToSend) + 1) * (A_IsUnicode ? 2 : 1)
-					NumPut(SizeInBytes, CopyDataStruct, A_PtrSize)  ; OS requires that this be done.
-					NumPut(&StringToSend, CopyDataStruct, 2*A_PtrSize)  ; Set lpData to point to the string itself.
-					;send the address to the string
-					;SendMessage, 0x4242, 1, &CopyDataStruct
-					SendMessage, 0x004A, 1, &CopyDataStruct
-					lastDetected := nowUnix()
+					Send_WM_COPYDATA(value, "natro_macro.ahk ahk_class AutoHotkey", 1)
+					LastGuidDetected := nowUnix()
 					break
 				}
 			}
@@ -334,7 +357,61 @@ nm_guidingStarDetect(){
 	}
 }
 
+nm_dailyReconnect(){
+	global ReconnectHour, ReconnectMin, DailyReconnect
+	FormatTime, RChourUTC, %A_NowUTC%, HH
+	FormatTime, RCminUTC, %A_Now%, mm
+	if((ReconnectMin=RCminUTC) && (ReconnectHour=RChourUTC) && (DailyReconnect=0)) {
+		DailyReconnect:=1
+		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+			PostMessage, 0x5555, 9, 1
+			Send_WM_COPYDATA("Closing: Roblox, Daily Reconnect", "natro_macro.ahk ahk_class AutoHotkey")
+		}
+		while(winexist("Roblox ahk_exe RobloxPlayerBeta.exe")){
+			WinKill, Roblox ahk_exe RobloxPlayerBeta.exe
+			sleep, 1000
+		}
+	}
+}
 
+nm_sendHeartbeat(){
+	global LastHeartbeat
+	static LastRobloxWindow:=2**31
+	time := nowUnix()
+	if WinExist("Roblox ahk_exe RobloxPlayerBeta.exe")
+		LastRobloxWindow:=time
+	if ((time - LastHeartbeat > 60) || (time - LastRobloxWindow > 600)) {
+		Loop, 10 {
+			WinGet, natroPID, PID, natro_macro.ahk ahk_class AutoHotkey
+			Process, Close, natroPID
+			while (WinExist("Roblox ahk_exe RobloxPlayerBeta.exe")) {
+				WinKill, Roblox ahk_exe RobloxPlayerBeta.exe
+				sleep, 1000
+			}
+			
+			Run, %A_ScriptDir%\..\natro_macro.ahk, %A_ScriptDir%\..
+			WinWait, natro_macro.ahk ahk_class AutoHotkeyGUI, , 30
+			if (success := !ErrorLevel) {
+				Sleep, 2000
+				Send {F1}
+				break
+			}
+		}
+	}
+	if WinExist("natro_macro.ahk ahk_class AutoHotkey")
+		PostMessage, 0x5556
+}
+
+
+Send_WM_COPYDATA(ByRef StringToSend, ByRef TargetScriptTitle, wParam:=0)
+{
+    VarSetCapacity(CopyDataStruct, 3*A_PtrSize, 0)
+    SizeInBytes := (StrLen(StringToSend) + 1) * (A_IsUnicode ? 2 : 1)
+    NumPut(SizeInBytes, CopyDataStruct, A_PtrSize)
+    NumPut(&StringToSend, CopyDataStruct, 2*A_PtrSize)
+    SendMessage, 0x004A, wParam, &CopyDataStruct,, %TargetScriptTitle%
+    return ErrorLevel
+}
 nowUnix(){
     Time := A_NowUTC
     EnvSub, Time, 19700101000000, Seconds
