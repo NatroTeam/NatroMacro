@@ -23,7 +23,7 @@ IniRead, ThemeSelect, settings\nm_config.ini, Settings, GuiTheme
 SkinForm(Apply, A_ScriptDir . "\Styles\USkin.dll", A_ScriptDir . "\styles\" . ThemeSelect . ".msstyles")
 OnExit("ba_timersExit")
 
-gui ptimers:+AlwaysOnTop +border +minsize50x30
+gui ptimers:+AlwaysOnTop +border +minsize50x30 +E0x08040000 +hwndhGUI
 gui ptimers:font, s8 w1000
 gui ptimers:+lastfound
 gui ptimers:add, picture,x5 y35 h40 w40 vvplanterfield1 +BackgroundTrans,
@@ -82,8 +82,8 @@ gui ptimers:font, s8 w800
 gui ptimers:add, text,x407 y84 w40  +left +BackgroundTrans,Opacity:
 gui ptimers:font, s8 w1000
 Gui ptimers:Add, edit, x454 y83 w40 h16 Limit2 Number ReadOnly -border
-if(fileexist("settings\ba_config.ini"))
-	IniRead, TimerGuiTransparency, settings\ba_config.ini, gui, TimerGuiTransparency
+if(fileexist("settings\nm_config.ini"))
+	IniRead, TimerGuiTransparency, settings\nm_config.ini, gui, TimerGuiTransparency
 Gui ptimers:Add, updown, Range0-50 vtimerGuiTransparency gsetTimerGuiTransparency, %TimerGuiTransparency%
 setTimerGuiTransparency()
 Gui, ptimers:Add, Button, x2 y84 w43 h15 gba_resetPlanterTimer1, Ready
@@ -110,14 +110,14 @@ gui, ptimers:add, text,x391 y2 w110 h60 vstatus +center +BackgroundTrans,Status:
 gui, ptimers:add, text,x395 y13 w84 h55 vpstatus +left +BackgroundTrans,unknown
 gui ptimers:font, s7 w400
 
-if(fileexist("settings\ba_config.ini")){
-	IniRead, TimerX, settings\ba_config.ini, gui, TimerX
-	IniRead, TimerY, settings\ba_config.ini, gui, TimerY
-	IniRead, TimerW, settings\ba_config.ini, gui, TimerW
-	IniRead, TimerH, settings\ba_config.ini, gui, TimerH
+if(fileexist("settings\nm_config.ini")){
+	IniRead, TimerX, settings\nm_config.ini, gui, TimerX
+	IniRead, TimerY, settings\nm_config.ini, gui, TimerY
+	IniRead, TimerW, settings\nm_config.ini, gui, TimerW
+	IniRead, TimerH, settings\nm_config.ini, gui, TimerH
 }
 ;msgbox x=%TimerX% y=%TimerY%
-gui ptimers:show, x%TimerX% y%TimerY% w%TimerW% h%TimerH%,Timers Revision 2.0
+gui ptimers:show, x%TimerX% y%TimerY% w%TimerW% h%TimerH% NoActivate,Timers Revision 2.0
 
 Gui, -Resize
 
@@ -127,7 +127,7 @@ Loop {
 		i := A_Index
 		
 		for k,v in ["name","field","nectar","harvesttime","estpercent"]
-			IniRead, Planter%v%%i%, settings\ba_config.ini, Planters, Planter%v%%i%
+			IniRead, Planter%v%%i%, settings\nm_config.ini, Planters, Planter%v%%i%
 		
 		for k,v in ["field","name","nectar"]
 		{
@@ -204,87 +204,85 @@ setTimerGuiTransparency(){
 	global TimerGuiTransparency
 	setVal:=255-floor(timerGuiTransparency*2.55)
 	winset, transparent, %setVal%
-	if(fileexist("settings\ba_config.ini"))
-		IniWrite, %TimerGuiTransparency%, settings\nm_config.ini, Settings, TimerGuiTransparency
+	if(fileexist("settings\nm_config.ini"))
+		IniWrite, %TimerGuiTransparency%, settings\nm_config.ini, Gui, TimerGuiTransparency
 }
 ba_resetPlanterTimer1(){
 	PlanterHarvestTime1 := toUnix_()-1
 	PlanterHarvestTimeN:=PlanterHarvestTime1
-	IniWrite, %PlanterHarvestTimeN%, settings\ba_config.ini, Planters, PlanterHarvestTime1
-	IniRead, PlanterHarvestTime1, settings\ba_config.ini, Planters, PlanterHarvestTime1
+	IniWrite, %PlanterHarvestTimeN%, settings\nm_config.ini, Planters, PlanterHarvestTime1
+	IniRead, PlanterHarvestTime1, settings\nm_config.ini, Planters, PlanterHarvestTime1
 }
 ba_resetPlanterTimer2(){
 	PlanterHarvestTime2 := toUnix_()-1
 	PlanterHarvestTimeN:=PlanterHarvestTime2
-	IniWrite, %PlanterHarvestTimeN%, settings\ba_config.ini, Planters, PlanterHarvestTime2
-	IniRead, PlanterHarvestTime2, settings\ba_config.ini, Planters, PlanterHarvestTime2
+	IniWrite, %PlanterHarvestTimeN%, settings\nm_config.ini, Planters, PlanterHarvestTime2
+	IniRead, PlanterHarvestTime2, settings\nm_config.ini, Planters, PlanterHarvestTime2
 }
 ba_resetPlanterTimer3(){
 	PlanterHarvestTime3 := toUnix_()-1
 	PlanterHarvestTimeN:=PlanterHarvestTime3
-	IniWrite, %PlanterHarvestTimeN%, settings\ba_config.ini, Planters, PlanterHarvestTime3
-	IniRead, PlanterHarvestTime3, settings\ba_config.ini, Planters, PlanterHarvestTime3
+	IniWrite, %PlanterHarvestTimeN%, settings\nm_config.ini, Planters, PlanterHarvestTime3
+	IniRead, PlanterHarvestTime3, settings\nm_config.ini, Planters, PlanterHarvestTime3
 }
 ba_resetPlanterData1(){
 	;save changes
-	IniWrite, None, settings\ba_config.ini, Planters, PlanterName1
-	IniWrite, None, settings\ba_config.ini, Planters, PlanterField1
-	IniWrite, None, settings\ba_config.ini, Planters, PlanterNectar1
-	IniWrite, 20211106000000, settings\ba_config.ini, Planters, PlanterHarvestTime1
-	IniWrite, 0, settings\ba_config.ini, Planters, PlanterEstPercent1
+	IniWrite, None, settings\nm_config.ini, Planters, PlanterName1
+	IniWrite, None, settings\nm_config.ini, Planters, PlanterField1
+	IniWrite, None, settings\nm_config.ini, Planters, PlanterNectar1
+	IniWrite, 20211106000000, settings\nm_config.ini, Planters, PlanterHarvestTime1
+	IniWrite, 0, settings\nm_config.ini, Planters, PlanterEstPercent1
 	;readback ini values
-	IniRead, PlanterName1, settings\ba_config.ini, Planters, PlanterName1
-	IniRead, PlanterField1, settings\ba_config.ini, Planters, PlanterField1
-	IniRead, PlanterNectar1, settings\ba_config.ini, Planters, PlanterNectar1
-	IniRead, PlanterHarvestTime1, settings\ba_config.ini, Planters, PlanterHarvestTime1
-	IniRead, PlanterEstPercent1, settings\ba_config.ini, Planters, PlanterEstPercent1
+	IniRead, PlanterName1, settings\nm_config.ini, Planters, PlanterName1
+	IniRead, PlanterField1, settings\nm_config.ini, Planters, PlanterField1
+	IniRead, PlanterNectar1, settings\nm_config.ini, Planters, PlanterNectar1
+	IniRead, PlanterHarvestTime1, settings\nm_config.ini, Planters, PlanterHarvestTime1
+	IniRead, PlanterEstPercent1, settings\nm_config.ini, Planters, PlanterEstPercent1
 }
 ba_resetPlanterData2(){
 	;save changes
-	IniWrite, None, settings\ba_config.ini, Planters, PlanterName2
-	IniWrite, None, settings\ba_config.ini, Planters, PlanterField2
-	IniWrite, None, settings\ba_config.ini, Planters, PlanterNectar2
-	IniWrite, 20211106000000, settings\ba_config.ini, Planters, PlanterHarvestTime2
-	IniWrite, 0, settings\ba_config.ini, Planters, PlanterEstPercent2
+	IniWrite, None, settings\nm_config.ini, Planters, PlanterName2
+	IniWrite, None, settings\nm_config.ini, Planters, PlanterField2
+	IniWrite, None, settings\nm_config.ini, Planters, PlanterNectar2
+	IniWrite, 20211106000000, settings\nm_config.ini, Planters, PlanterHarvestTime2
+	IniWrite, 0, settings\nm_config.ini, Planters, PlanterEstPercent2
 	;readback ini values
-	IniRead, PlanterName2, settings\ba_config.ini, Planters, PlanterName2
-	IniRead, PlanterField2, settings\ba_config.ini, Planters, PlanterField2
-	IniRead, PlanterNectar2, settings\ba_config.ini, Planters, PlanterNectar2
-	IniRead, PlanterHarvestTime2, settings\ba_config.ini, Planters, PlanterHarvestTime2
-	IniRead, PlanterEstPercent2, settings\ba_config.ini, Planters, PlanterEstPercent2
+	IniRead, PlanterName2, settings\nm_config.ini, Planters, PlanterName2
+	IniRead, PlanterField2, settings\nm_config.ini, Planters, PlanterField2
+	IniRead, PlanterNectar2, settings\nm_config.ini, Planters, PlanterNectar2
+	IniRead, PlanterHarvestTime2, settings\nm_config.ini, Planters, PlanterHarvestTime2
+	IniRead, PlanterEstPercent2, settings\nm_config.ini, Planters, PlanterEstPercent2
 }
 ba_resetPlanterData3(){
 	;save changes
-	IniWrite, None, settings\ba_config.ini, Planters, PlanterName3
-	IniWrite, None, settings\ba_config.ini, Planters, PlanterField3
-	IniWrite, None, settings\ba_config.ini, Planters, PlanterNectar3
-	IniWrite, 20211106000000, settings\ba_config.ini, Planters, PlanterHarvestTime3
-	IniWrite, 0, settings\ba_config.ini, Planters, PlanterEstPercent3
+	IniWrite, None, settings\nm_config.ini, Planters, PlanterName3
+	IniWrite, None, settings\nm_config.ini, Planters, PlanterField3
+	IniWrite, None, settings\nm_config.ini, Planters, PlanterNectar3
+	IniWrite, 20211106000000, settings\nm_config.ini, Planters, PlanterHarvestTime3
+	IniWrite, 0, settings\nm_config.ini, Planters, PlanterEstPercent3
 	;readback ini values
-	IniRead, PlanterName3, settings\ba_config.ini, Planters, PlanterName3
-	IniRead, PlanterField3, settings\ba_config.ini, Planters, PlanterField3
-	IniRead, PlanterNectar3, settings\ba_config.ini, Planters, PlanterNectar3
-	IniRead, PlanterHarvestTime3, settings\ba_config.ini, Planters, PlanterHarvestTime3
-	IniRead, PlanterEstPercent3, settings\ba_config.ini, Planters, PlanterEstPercent3
+	IniRead, PlanterName3, settings\nm_config.ini, Planters, PlanterName3
+	IniRead, PlanterField3, settings\nm_config.ini, Planters, PlanterField3
+	IniRead, PlanterNectar3, settings\nm_config.ini, Planters, PlanterNectar3
+	IniRead, PlanterHarvestTime3, settings\nm_config.ini, Planters, PlanterHarvestTime3
+	IniRead, PlanterEstPercent3, settings\nm_config.ini, Planters, PlanterEstPercent3
 }
 ba_saveTimerGui(){
-	global TimerX
-	global TimerY
-	global TimerW
-	global TimerH
-	global TimerGuiTransparency
-	WinGetPos, windowX, windowY, windowWidth, windowHeight, Timers
+	global hGUI, TimerGuiTransparency
+	VarSetCapacity(wp, 44), NumPut(44, wp)
+    DllCall("GetWindowPlacement", "uint", hGUI, "uint", &wp)
+	x := NumGet(wp, 28, "int"), y := NumGet(wp, 32, "int")
 	;msgbox X=%TimerX% y=%TimerY% W=%TimerW% H=%TimerH%`nX=%windowX% y=%windowY% W=%windowWidth% H=%windowHeight%
-	if(fileexist("settings\ba_config.ini")){
-		if (windowX > 0)
-			IniWrite, %windowX%, settings\ba_config.ini, gui, TimerX
-		if (windowY > 0)
-			IniWrite, %windowY%, settings\ba_config.ini, gui, TimerY
+	if(fileexist("settings\nm_config.ini")){
+		if (x > 0)
+			IniWrite, %x%, settings\nm_config.ini, gui, TimerX
+		if (y > 0)
+			IniWrite, %y%, settings\nm_config.ini, gui, TimerY
 		;if (windowWidth > 0)
-		;    IniWrite, %windowWidth%, settings\ba_config.ini, gui, TimerW
+		;    IniWrite, %windowWidth%, settings\nm_config.ini, gui, TimerW
 		;if (windowHeight > 0)
-		;    IniWrite, %windowHeight%, settings\ba_config.ini, gui, TimerH
-		IniWrite, %TimerGuiTransparency%, settings\ba_config.ini, gui, TimerGuiTransparency
+		;    IniWrite, %windowHeight%, settings\nm_config.ini, gui, TimerH
+		IniWrite, %TimerGuiTransparency%, settings\nm_config.ini, gui, TimerGuiTransparency
 	}
 }
 ba_timersExit(){

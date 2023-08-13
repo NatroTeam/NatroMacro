@@ -1,3 +1,49 @@
+0.8.4 Patch Notes
+
+This version has many bug fixes and stability changes. HUGE thanks to the Dev Team and our first testers: Nick 9#9476 (Nick), FHL09#4061 (FHL), valibreaz#8493 (ERB), and Heat/Sky#9350 (Heat) for extensively testing all of the new features and making this update possible!
+
+New Features
+-Added ability to kill Coco Crab, Stump Snail, and Commando Chick in the macro! Special thanks to El Gato for developing these functions and integrating them into Natro Macro!
+-Field Default settings are now stored externally! There will be options in the future to easily edit default field gather options from the macro.
+-New customisable cannon and walk paths to fields, dispensers, planters, and questgivers! Thanks to Zaappiix and SuperDadof6 for creating and optimising these paths!
+
+Bugs
+-Fixed an issue where Vicious Bee was not detected as found/dead since chat was not being opened properly.
+-Fixed 'Shift' being sent with '/' for European keyboard layouts, which caused unintentional shift-lock activation.
+-Fixed Spider kill detection being falsely activated by other messages from Spider Field.
+-Fixed default walk back path from Pine Tree not checking hive slots 1 and 2.
+-Fixed an issue where the macro did not return when night was detected (Vicious Bee) while doing a Polar Quest.
+-Reduced the possibility of failed planter placement error detection by looping the error check search.
+-Fixed Honey Bee questing issues! The macro should be able to complete and hand in Honey Bee quests as normal now.
+-Fixed unpausing of 'walk' script after Guiding Star was announced.
+-Fixed infinite loop if there is a planter already in the field that a new planter will be placed.
+-Added some measures to stabilise reconnecting, including elimination of some infinite waiting and failed activation of Roblox.
+-Fixed issue where the macro would stop if a disk read error made an image inaccessible (__.png was not found in...) by sending a status update instead.
+-Fixed GUI showing 'Collect None' for certain quests.
+
+Other
+-Changed default Bag Full Percent from 100% to 95%.
+-Initial loading has been sped up by approximately 30%! The config files are now read at once, allowing much faster startup times.
+-Added some measures which allow 'settings' folder to be safely transferrable between versions. This means you don't have to set all your settings again after an update!
+-Added a Webhook Easter Egg! Set all three of your fields to be the same colour to discover it!
+-Improved GUI performance by reducing the total number of controls. This should improve dragging on lower end systems.
+-Disabled F1 hotkey during startup. This was the cause of some variable initialisation issues in the macro.
+-Webhook messages have a new colour system! They have been given more appropriate colours based on the nature of the status update.
+-Added status update which informs you which field was boosted after using a free booster.
+-Removed all windowed screen detection dependencies. The macro now acts on the client window, allowing it to function identically for all windowed modes.
+-Added a design change to microconverter usage. Now, microconverters are used at your Bag Full setting if it's 90% or above, and 100% otherwise.
+-Updated Roblox VIP Server link validation to accept both numbers and letters in 'privateServerLinkCode'.
+-Optimised looting function (bugs, bosses, planters) to use the new movement system and stop when token link is detected in relevant cases.
+-Optimised nm_gotoCannon(), nm_searchForE(), and nm_findHiveSlot() to use Gdip_ImageSearch instead of regular ImageSearch. This drastically increases speed and performance, allowing the macro to execute those actions much faster.
+-Introduced HyperSleep() function for sensitive delays such as cannon duration. This should make landing location after cannon much more consistent.
+-Implemented extra check for when Vicious Bee is stepped on at the beginning of the Vicious Cycle.
+-Added 'Error' as a criterion for a critical event. Examples of such status updates are 'image not found', 'maximum planters reduced', and 'quest not found'.
+-Added a mouse move as a failsafe if the mouse position reached the top of the screen and caused the Roblox grey bar to show.
+-Updated Gather Interrupt logic so it is separate for each quest giver (i.e. Bucko Gather Interrupt will only interrupt to complete Bucko Quests, and not Polar)
+-Adjusted PlanterTimers GUI options so that it no longer activates and steals focus from the Roblox window.
+-Changed from WinGetPos to 'GetWindowPlacement' to allow GUI position saving even when GUI windows are minimised.
+
+
 0.8.3 Patch Notes
 
 New Features

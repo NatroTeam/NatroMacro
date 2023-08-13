@@ -58,7 +58,7 @@ loop " reps " {
 	send {" TCLRKey " up}
 	send {" AFCFBKey " up}
 	;pause here
-	DllCall(""Sleep"",UInt,50)
+	HyperSleep(50)
 	;reverse infinity
 	send {" AFCFBKey " down}
 	Walk(AurynDelay*9/2000*" size "*A_Index*1.1)

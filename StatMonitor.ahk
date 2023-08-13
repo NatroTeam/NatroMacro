@@ -377,9 +377,9 @@ if FileExist("natro_macro.ahk")
 		consumables .= (HotkeyWhile%i% != "Never") ? (((StrLen(consumables) = 0) ? "" : ", " ) . "#" . i) : ""
 	}
 	
-	; read information from settings\ba_config.ini
-	IniRead, EnablePlantersPlus, settings\ba_config.ini, gui, EnablePlantersPlus, 0
-	IniRead, MaxAllowedPlanters, settings\ba_config.ini, gui, MaxAllowedPlanters, 0
+	; read information from settings\nm_config.ini
+	IniRead, EnablePlantersPlus, settings\nm_config.ini, gui, EnablePlantersPlus, 0
+	IniRead, MaxAllowedPlanters, settings\nm_config.ini, gui, MaxAllowedPlanters, 0
 }
 
 ; time until next report
@@ -1348,10 +1348,10 @@ SendHourlyReport()
 	
 	Loop, 3
 	{
-		IniRead, name, %A_ScriptDir%\settings\ba_config.ini, Planters, PlanterName%A_Index%
-		IniRead, field, %A_ScriptDir%\settings\ba_config.ini, Planters, PlanterField%A_Index%
-		IniRead, unix_harvest, %A_ScriptDir%\settings\ba_config.ini, Planters, PlanterHarvestTime%A_Index%, 0
-		IniRead, nectar_type, %A_ScriptDir%\settings\ba_config.ini, Planters, PlanterNectar%A_Index%
+		IniRead, name, %A_ScriptDir%\settings\nm_config.ini, Planters, PlanterName%A_Index%
+		IniRead, field, %A_ScriptDir%\settings\nm_config.ini, Planters, PlanterField%A_Index%
+		IniRead, unix_harvest, %A_ScriptDir%\settings\nm_config.ini, Planters, PlanterHarvestTime%A_Index%, 0
+		IniRead, nectar_type, %A_ScriptDir%\settings\nm_config.ini, Planters, PlanterNectar%A_Index%
 		
 		pBMImage := Gdip_BitmapFromBase64(bitmaps["pBM" ((name = "None") ? "Unknown" : name)]), Gdip_DrawImage(G, pBMImage, regions["stats"][1]+250+(A_Index-1)*(regions["stats"][3]-500-220)/2, y, 220, 220), Gdip_DisposeImage(pBMImage)
 		

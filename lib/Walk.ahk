@@ -31,8 +31,10 @@ bitmaps["pBMBearGummy"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAA4AAA
 bitmaps["pBMBearScience"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAA4AAAABBAMAAAAcMII3AAAAFVBMVEUwLi1TTD+zjUy0jky8l1W5oXHevny+g95vAAAAE0lEQVR4AQEIAPf/ACNGUQAVZDIFbwFmjB55HwAAAABJRU5ErkJggg==")
 bitmaps["pBMBearMother"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAABAAAAABBAMAAAAlVzNsAAAAJFBMVEVBNRlDNxtTRid8b0avoG69r22+sG7Qw4PRw4Te0Jbk153m2Z5VNHxxAAAAFElEQVR4AQEJAPb/AFVouTECSnZVDPsCv+2QpmwAAAAASUVORK5CYII=")
 
-Walk(n)
+Walk(n, hasteCap:=0)
 {
+	;hasteCap values > 0 will cause all haste values lower than it to be treated as no haste but haste values above it will be treated as the cap value.
+	;In otherwords, no haste compensation up to the cap and then 100% compensation after that.
 	static freq, init := DllCall("QueryPerformanceFrequency", "Int64*", freq) ; obtain frequency on first execution
 	
 	distance := 0, length := n * freq * 4 ; 4 studs in a tile
@@ -40,13 +42,13 @@ Walk(n)
 	while (distance < length)
 	{
 		DllCall("QueryPerformanceCounter", "Int64*", start)
-		movespeed := DetectMovespeed()
+		movespeed := DetectMovespeed(hasteCap)
 		DllCall("QueryPerformanceCounter", "Int64*", finish)
 		distance += movespeed * (finish - start)
 	}
 }
 
-DetectMovespeed()
+DetectMovespeed(hasteCap:=0)
 {
 	global hasty_guard, gifted_hasty, base_movespeed, buff_characters, bitmaps
 	
@@ -117,5 +119,5 @@ DetectMovespeed()
 	Gdip_DisposeImage(pBMArea)
 	
 	; use movespeed formula on obtained values
-	return ((base_movespeed + (coconut_haste ? 10 : 0) + (bear ? 6 : 0)) * (hasty_guard ? 1.1 : 1) * (gifted_hasty ? 1.2 : 1) * (1 + haste*0.1) * (haste_plus ? 2 : 1) * (oil ? 1.2 : 1) * (smoothie ? 1.25 : 1))
+	return ((base_movespeed + (coconut_haste ? 10 : 0) + (bear ? 6 : 0)) * (hasty_guard ? 1.1 : 1) * (gifted_hasty ? 1.2 : 1) * (1 + max(0, haste-hasteCap)*0.1) * (haste_plus ? 2 : 1) * (oil ? 1.2 : 1) * (smoothie ? 1.25 : 1))
 }

@@ -16,71 +16,55 @@ runWith(version){
 	ExitApp
 }
 
+global windowX, windowY, windowWidth, windowHeight
 global resetTime:=nowUnix()
-global windowX, windowY, windowWidth, windowHeight, NightLastDetected, VBState:=0
+global NightLastDetected
+global VBState:=0
 global confirm:=0
 global PackFilterArray:=[]
 global imgfolder:="..\nm_image_assets"
 IniRead, NightLastDetected, ..\settings\nm_config.ini, Collect, NightLastDetected
 IniRead, VBLastKilled, ..\settings\nm_config.ini, Collect, VBLastKilled
 IniRead, StingerCheck, ..\settings\nm_config.ini, Collect, StingerCheck
-IniRead, WindowedScreen, ..\settings\nm_config.ini, Settings, WindowedScreen
+IniRead, AnnounceGuidingStar, ..\settings\nm_config.ini, Settings, AnnounceGuidingStar
 
-CoordMode, Pixel, Relative
+CoordMode, Pixel, Client
 DetectHiddenWindows On
 SetTitleMatchMode 2
 
 ;OnMessages
 OnMessage(0x5554, "nm_setGlobalNum", 255)
 
-while 1 {
-	WinGetPos, windowX, windowY, windowWidth, windowHeight, Roblox
+loop {
+	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox")
 	nm_deathCheck()
 	nm_dayOrNight()
 	nm_backpackPercentFilter()
 	nm_guidCheck()
 	nm_popStarCheck()
-	;tooltip % "VBState: " vbstate "`nNightLastDetected: " nightlastdetected "`nVBLastKilled: " vblastkilled ; ~~
+	nm_guidingStarDetect()
 	sleep, 1000
 }
 
 nm_setGlobalNum(wParam, lParam){
-	global resetTime, NightLastDetected, VBState, StingerCheck, VBLastKilled
+	global
 	static arr := ["resetTime", "NightLastDetected", "VBState", "StingerCheck", "VBLastKilled"]
 	
 	var := arr[wParam], %var% := lParam
 	
-	/*
-	switch wParam
-	{
-		case 1:
-		resetTime:=lParam
-		
-		case 2:
-		NightLastDetected:=lParam
-		
-		case 3:
-		VBState:=lParam
-		
-		case 4:
-		StingerCheck:=lParam
-		
-		case 5:
-		VBLastKilled:=lParam
-	}
-	*/
-		
 	return 0
 }
 
 nm_deathCheck(){
 	global windowX, windowY, windowWidth, windowHeight
-	if ((nowUnix()-ResetTime)>20) {
+	static lastDetected:=0
+	if (((nowUnix()-resetTime)>20) && ((nowUnix()-lastDetected)>10)) {
 		ImageSearch, FoundX, FoundY, windowWidth/2, windowHeight/2, windowWidth, windowHeight, *50 %imgfolder%\died.png	
 		if(ErrorLevel=0){
 			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-				PostMessage, 0x5555, 1, 0
+				PostMessage, 0x5555, 1, 1
 			}
+			lastDetected := nowUnix()
 		}
 	}
 }
@@ -90,7 +74,7 @@ nm_guidCheck(){
 	ImageSearch, FoundX, FoundY, 0, 0, windowWidth, 100, *50 %imgfolder%\boostguidingstar.png	
 	if(ErrorLevel=0){ ;Guid Detected
 		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-			PostMessage, 0x5555, 8, 0
+			PostMessage, 0x5555, 8, 1
 		}
 	}
 }
@@ -169,15 +153,14 @@ nm_dayOrNight(){
 }
 
 nm_backpackPercent(){
-	global WindowedScreen
 	;WinGetPos , windowX, windowY, windowWidth, windowHeight, Roblox
 	;UpperLeft X1 = windowWidth/2+59
-	;UpperLeft Y1 = 3+WindowedScreen*31
+	;UpperLeft Y1 = 3
 	;LowerRight X2 = windowWidth/2+59+220
-	;LowerRight Y2 = 3+WindowedScreen*31+5
+	;LowerRight Y2 = 3+5
 	;Bar = 220 pixels wide = 11 pixels per 5%
-	X1:=round((windowWidth/2+59+3), 0)
-	Y1:=round((3+WindowedScreen*31+3), 0)
+	X1:=windowWidth//2+59+3
+	Y1:=6
 	PixelGetColor, backpackColor, %X1%, %Y1%, RGB fast
 	BackpackPercent:=0
 
@@ -309,10 +292,61 @@ nm_backpackPercentFilter(){
 	}
 	return BackpackPercentFiltered
 }
+nm_guidingStarDetect(){
+	global AnnounceGuidingStar, windowX, windowY, windowWidth, windowHeight
+	static lastDetected:=0, fieldnames := ["PineTree", "Stump", "Bamboo", "BlueFlower", "MountainTop", "Cactus", "Coconut", "Pineapple", "Spider", "Pumpkin", "Dandelion", "Sunflower", "Clover", "Pepper", "Rose", "Strawberry", "Mushroom"]
+	
+	if (!AnnounceGuidingStar || (nowUnix()-lastDetected<10))
+		return
+	
+	xi:=windowWidth/2
+	yi:=windowHeight/2
+	
+	GSfound:=0
+	ImageSearch, FoundX, FoundY, %xi%, %yi%, %windowWidth%, %windowHeight%, *50 %imgfolder%\guiding_star_icon1.png
+	if(ErrorLevel=0){
+		GSfound:=1
+	} else {
+		ImageSearch, FoundX, FoundY, %xi%, %yi%, %windowWidth%, %windowHeight%, *50 %imgfolder%\guiding_star_icon2.png
+		if(ErrorLevel=0){
+			GSfound:=1
+		}
+	}
+	if(GSfound){
+		for key, value in fieldnames {
+			ImageSearch, FoundX, FoundY, %xi%, %yi%, %windowWidth%, %windowHeight%, *50 %imgfolder%\guiding_star_%value%.png
+			if(ErrorLevel=0){
+				if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+					StringToSend:=value
+					;set up string send
+					VarSetCapacity(CopyDataStruct, 3*A_PtrSize, 0)  ; Set up the structure's memory area.
+					SizeInBytes := (StrLen(StringToSend) + 1) * (A_IsUnicode ? 2 : 1)
+					NumPut(SizeInBytes, CopyDataStruct, A_PtrSize)  ; OS requires that this be done.
+					NumPut(&StringToSend, CopyDataStruct, 2*A_PtrSize)  ; Set lpData to point to the string itself.
+					;send the address to the string
+					;SendMessage, 0x4242, 1, &CopyDataStruct
+					SendMessage, 0x004A, 1, &CopyDataStruct
+					lastDetected := nowUnix()
+					break
+				}
+			}
+		}
+	}
+}
 
 
 nowUnix(){
     Time := A_NowUTC
     EnvSub, Time, 19700101000000, Seconds
     return Time
+}
+WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", WinTitle:="", WinText:="", ExcludeTitle:="", ExcludeText:="")
+{
+    local hWnd, RECT
+    hWnd := WinExist(WinTitle, WinText, ExcludeTitle, ExcludeText)
+    VarSetCapacity(RECT, 16, 0)
+    DllCall("user32\GetClientRect", Ptr,hWnd, Ptr,&RECT)
+    DllCall("user32\ClientToScreen", Ptr,hWnd, Ptr,&RECT)
+    X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
+    Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
 }
