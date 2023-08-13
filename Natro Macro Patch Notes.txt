@@ -1,3 +1,30 @@
+0.7.4 Patch Notes
+
+Natro Macro now has its own discord server!! The invite link is contained in the macro itself.
+
+New Features
+-Added new and improved StatMonitor graphs!!  Special thank you again to SP#0305 for his amazing work in creating these charts!  This feature is very well loved and appreciated.
+-Added a new "GatherStart" option to the Boost Tab->Hotbar Slots.  This option will only use the item one time upon the start of gathering only.  The time value entered serves as the minimum interval of time before the next use of the item.  This option can work well for specific items such as extracts to ensure there is no wasted buff time.
+
+Other
+-Double resets will now only occur before going to gather in your gathering field.  No reset at all will occur if you are confirmed to be at your hive slot already.
+-Blue Booster pathing will now corner align to be more reliable.
+-Default mouse position has been lowered to prevent the cases where the cursor will sometimes hover over the buff bar.
+-Tweaked inventory searching to locate planters faster.
+-Hotbar selection of "Gather" will no longer be used while questing.
+-If your field is was boosted or glittered within the last 15 mins then planters, mondo, item collections, and bugruns will be skipped.  This will help prevent wasted field boosts.
+-Added more logic to help detect a frozen Roblox session faster.
+-Added some more FPS freeze checks to better detect when this occurs.
+-"Natro so broke :weary:" message will now only occur once per hour.  There have been a few Roblox warnings due to this message spamming public servers.
+-Added message to Black Bear Quest checkbox to clarify it only works for the repeatable quests.
+
+Bugs
+-Adjusted Mondo pathing so it no longer leaves you in the field.
+-Fixed booster quest step for Bucko and Riley quests
+-Riley quests will now work if both Bucko and Riley quests are enabled.
+-Fixed an issue that would sometimes cause the saved Hiveslot data to be cleared.  This would result in being unable to locate your hive after a reconnect and cause an infinite reset/reconnect loop.
+
+
 0.7.3 Patch Notes
 
 Bugs

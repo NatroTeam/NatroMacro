@@ -38,6 +38,8 @@ while 1 {
 	nm_deathCheck()
 	nm_dayOrNight()
 	nm_backpackPercentFilter()
+	nm_guidCheck()
+	nm_popStarCheck()
 	sleep, 1000
 }
 
@@ -68,7 +70,7 @@ nm_setGlobalNum(wParam, lParam){
 
 nm_deathCheck(){
 	global windowX, windowY, windowWidth, windowHeight
-	if ((nowUnix()-ResetTime)>10) {
+	if ((nowUnix()-ResetTime)>20) {
 		ImageSearch, FoundX, FoundY, windowWidth/2, windowHeight/2, windowWidth, windowHeight, *50 %imgfolder%\died.png	
 		if(ErrorLevel=0){
 			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
@@ -78,6 +80,25 @@ nm_deathCheck(){
 	}
 }
 
+nm_guidCheck(){
+	global windowX, windowY, windowWidth, windowHeight, LastFieldGuidDetected, GuidStrike
+	ImageSearch, FoundX, FoundY, 0, 0, windowWidth, 100, *50 %imgfolder%\boostguidingstar.png	
+	if(ErrorLevel=0){ ;Guid Detected
+		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+			SendMessage, 0x4201, 8, 0
+		}
+	}
+}
+nm_popStarCheck(){
+	global windowX, windowY, windowWidth, windowHeight, HasPopStar, PopStarActive
+	ImageSearch, FoundX, FoundY, windowWidth/4, (windowHeight/4)*3, (windowWidth/4)*3, windowHeight, *30 %imgfolder%\popstar_counter.png
+	if(ErrorLevel=0){
+		HasPopStar:=1
+		PopStarActive:=0
+	} else if(ErrorLevel=1 && HasPopStar){
+		PopStarActive:=1
+	}
+}
 nm_dayOrNight(){
 	disableDayorNight:=0
 	;0=no VB, 1=searching for VB, 2=VB found
