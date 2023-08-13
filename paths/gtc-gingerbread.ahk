@@ -13,5 +13,5 @@ send {" RotRight " 2}
 " nm_Walk(3, FwdKey, RightKey) "
 " nm_Walk(15, FwdKey) "
 " nm_Walk(2, FwdKey, RightKey) "
-" nm_Walk(13.4, FwdKey) "
+" nm_Walk(12.5, FwdKey) "
 )"

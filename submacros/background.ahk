@@ -390,7 +390,7 @@ nm_sendHeartbeat(){
 	time := nowUnix()
 	if WinExist("Roblox ahk_exe RobloxPlayerBeta.exe")
 		LastRobloxWindow:=time
-	if (((time - LastHeartbeat > 60) && (reason := 1)) || ((time - LastRobloxWindow > 600) && (reason := 2))) {
+	if (((time - LastHeartbeat > 120) && (reason := 1)) || ((time - LastRobloxWindow > 600) && (reason := 2))) {
 		Loop, 10 {
 			while WinExist("natro_macro.ahk ahk_class AutoHotkey") {
 				WinGet, natroPID, PID
@@ -405,7 +405,7 @@ nm_sendHeartbeat(){
 			WinWait, natro_macro.ahk ahk_class AutoHotkeyGUI, , 30
 			if (success := !ErrorLevel) {
 				Sleep, 5000
-				Send_WM_COPYDATA("Error: " ((reason = 1) ? "No Heartbeat in 60s!" : "No Roblox window in 10m!") "`nSuccessfully restarted macro!", "natro_macro.ahk ahk_class AutoHotkey")
+				Send_WM_COPYDATA("Error: " ((reason = 1) ? "No Heartbeat in 120s!" : "No Roblox window in 10m!") "`nSuccessfully restarted macro!", "natro_macro.ahk ahk_class AutoHotkey")
 				Sleep, 1000
 				Send {F1}
 				ExitApp

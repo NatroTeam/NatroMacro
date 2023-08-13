@@ -1,3 +1,24 @@
+0.8.8 Patch Notes
+
+Bugs
+- Added a delay for Beesmas Feast animation to end and fixed camera rotation before looting.
+- Fixed issue where Honey Wreath would not be collected.
+- Fixed Stockings path running into Bee Bear if "Walk" Move Method was selected.
+- Added detection of Beesmas-coloured tunnel to Tunnel Bear.
+- Fixed planter paths for Pumpkin and Cactus fields being affected by non-collide pumpkin.
+- Fixed 'Gather with Shift Lock' breaking macro after reconnect.
+
+Other
+- Increased left movement of Stockings loot pattern to ensure collection of leftmost token.
+- Added 5 mins to Gingerbread House timer if disconnected and successfully reconnected.
+- Added RotLeft, RotRight, ZoomIn, ZoomOut support in patterns.
+- Increased heartbeat timeout to 120 seconds in order to reduce some false activations.
+- Edited non-ASCII warning to make it easier to understand.
+- Added Robo Pass inventory full detection for Robo Pass Dispenser.
+- Modified Honey Wreath loot path to more reliably collect all tokens.
+- Added delay after conversion based on Number of Bees in Settings tab.
+
+
 0.8.7 Patch Notes
 
 Bugs

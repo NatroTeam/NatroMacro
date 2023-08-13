@@ -21,6 +21,7 @@
 	HyperSleep(100)
 	Send {space up}
 	" nm_Walk(5, FwdKey) "
+	Sleep, 1000
 	)"
 }
 else
@@ -47,6 +48,7 @@ else
 	Send {space down}
 	HyperSleep(100)
 	Send {space up}
-	" nm_Walk(5, FwdKey) "	
+	" nm_Walk(5, FwdKey) "
+	Sleep, 1000	
 	)"
 }
