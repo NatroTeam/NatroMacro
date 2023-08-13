@@ -1,3 +1,22 @@
+0.7.0 Patch Notes
+
+New Features
+-Added "Gather Field Nectar Sipping" option to Planters+.  Enabling this will force planters to be placed into your current gathering field if you need that nectar type (ignores allowed field selections). This will result in much higher nectar gains for that nectar type.  This option was always on in previous verions and it now allows you to disable this feature if you want to.
+-Added a Daily Reconnect option.  This will close Roblox at the specified time and result in the normal reconnect logic.  If all players on the server do this at the same time, this option will also serve as a saily server reset.  To enable this option, simply add the time of day you want this to happen.  If either hour or minutes field is blank, this option will not cause a reconnect.
+
+Bugs
+-Planters will no longer be harvested early if the nectar exceeds 100% full if using a fixed harvest time.  This was causing infinite plant/harvest loops in certain cases.
+-Fixed an issue where a full nectar was not reading percent properly.  This would result in a planter being placed for an already full nectar when there were other nectars that are not full.
+-Fixed an issue preventing the Ant Challenge if you already have 10 ant passes in your inventory.
+
+Other
+-Removed Hive Image Variance from the GUI. This setting is largely unecessary and can still be set in the ini file it is necessary.  I needed some GUI space to add the new daily reconnect feature.
+-Added checks for frozen Roblox game based on active honey checks.  After 5 consecutive strikes of inactive honey Roblox will be restarted.  This was a condition not previously identified and potentially a cause for the loss of balloon blessings.
+-Tweaked cannon travel to coconut/pepper fields to make the crevasse jump more reliable.
+-Tweaked cannon travel to blue booster to compensate better for slightly laggy or low FPS cases to make it more reliable.
+-Updated Planter placement locations for better reliability.  This should help locate and place planters more consistently even with variances due to lag.  This may require additional tweaking.  This will require you to pick up any currently placed planters since the locations in the fields are now different.
+
+
 0.6.9 Patch Notes
 
 New Features

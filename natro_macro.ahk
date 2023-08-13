@@ -25,7 +25,7 @@ OnMessage(0x4299, "nm_setLastHeartbeat")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.6.9"
+VersionID:="0.7.0"
 #include *i personal.ahk
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; DISABLE ROBLOX BETA APP
@@ -92,6 +92,7 @@ global AutoText:="[Auto]"
 global FullText:="[Full]"
 global HarvestFullGrown:=0
 global GotoPlanterField:=0
+global GatherFieldSipping:=0
 global HarvestIntervalNum:=1
 global PlasticPlanterCheck:=0
 global CandyPlanterCheck:=0
@@ -222,6 +223,7 @@ IniRead, HarvestInterval, ba_config.ini, gui, HarvestInterval
 IniRead, AutomaticHarvestInterval, ba_config.ini, gui, AutomaticHarvestInterval
 IniRead, HarvestFullGrown, ba_config.ini, gui, HarvestFullGrown
 IniRead, GotoPlanterField, ba_config.ini, gui, GotoPlanterField
+IniRead, GatherFieldSipping, ba_config.ini, gui, GatherFieldSipping
 IniRead, HiveDistance, ba_config.ini, gui, HiveDistance
 ;IniRead, MoveSpeedFactorNum, ba_config.ini, gui, MoveSpeedFactor
 ;IniRead, MoveSpeedFactor, ba_config.ini, gui, MoveSpeedFactor
@@ -259,6 +261,7 @@ global FieldDefault:={"Sunflower":{pattern:["Snake","M", 2],camera:["None",1],sp
 ;msgbox bambooplanters.length()=%temp%
 global resetTime:=nowUnix()
 global youDied:=0
+global GameFrozenCounter:=0
 global state
 global objective
 global WindowedScreen:=0
@@ -288,6 +291,7 @@ if(fileexist("nm_personal.ini")) {
 	IniRead, PWindShrineDonate, nm_personal.ini, Personal, PWindShrineDonate
 	IniRead, PWindShrineDonateNum, nm_personal.ini, Personal, PWindShrineDonateNum
 	IniRead, PMondoGuid, nm_personal.ini, Personal, PMondoGuid
+	IniRead, PFieldDriftSteps, nm_personal.ini, Personal, PFieldDriftSteps
 }
 ;ensure Gui will be visible
 SysGet, MonNum, MonitorCount
@@ -331,6 +335,8 @@ IniRead, ConvertBalloon, nm_config.ini, Settings, ConvertBalloon
 IniRead, ConvertMins, nm_config.ini, Settings, ConvertMins
 IniRead, PrivServer, nm_config.ini, Settings, PrivServer
 IniRead, ReloadRobloxSecs, nm_config.ini, Settings, ReloadRobloxSecs
+IniRead, ReconnectHour, nm_config.ini, Settings, ReconnectHour
+IniRead, ReconnectMin, nm_config.ini, Settings, ReconnectMin
 ;set initial windowed mode
 global Roblox:=[]
 WinActivate, Roblox
@@ -717,20 +723,30 @@ Gui, Add, Text, x10 y115 w60 +left +BackgroundTrans,Hive Slot:
 Gui, Add, Text, x103 y115 w10 +left +BackgroundTrans,:
 Gui, Add, DropDownList, x110 y110 w30 vHiveSlot gnm_saveConfig, %HiveSlot%||1|2|3|4|5|6
 GuiControl, disable, HiveSlot
-Gui, Add, Text, x10 y135 w120 +left +BackgroundTrans,Hive Image Variation:
-Gui, Add, Edit, x110 y130 w30 h20 limit3 number vHiveVariation gnm_HiveVariation,%HiveVariation%
-GuiControl, disable, HiveVariation
-Gui, Add, Text, x10 y155 w110 +left +BackgroundTrans,My Hive Has:
-Gui, Add, Edit, x75 y150 w20 h15 r1 number +BackgroundTrans vHiveBees gnm_saveConfig, %HiveBees%
+;Gui, Add, Text, x10 y135 w120 +left +BackgroundTrans,Hive Image Variation:
+;Gui, Add, Edit, x110 y130 w30 h20 limit3 number vHiveVariation gnm_HiveVariation,%HiveVariation%
+;GuiControl, disable, HiveVariation
+Gui, Add, Text, x10 y135 w110 +left +BackgroundTrans,My Hive Has:
+Gui, Add, Edit, x75 y130 w20 h15 r1 number +BackgroundTrans vHiveBees gnm_saveConfig, %HiveBees%
 GuiControl, disable, HiveBees
-Gui, Add, Text, x100 y155 w110 +left +BackgroundTrans,Bees
-Gui, Add, Text, x5 y180 w160 +left +BackgroundTrans,Private Server Link (full address):
-Gui, Add, Edit, x5 y195 w160 r1 +BackgroundTrans vPrivServer gnm_ServerLink, %PrivServer%
+Gui, Add, Text, x100 y135 w110 +left +BackgroundTrans,Bees
+Gui, Add, Text, x5 y160 w160 +left +BackgroundTrans,Private Server Link (full address):
+Gui, Add, Edit, x5 y175 w160 r1 +BackgroundTrans vPrivServer gnm_ServerLink, %PrivServer%
 GuiControl, disable, PrivServer
-Gui, Add, Text, x5 y218 w160 +left +BackgroundTrans,Wait
-Gui, Add, Edit, x28 y215 w20 h15 r1 number +BackgroundTrans vReloadRobloxSecs gnm_saveConfig, %ReloadRobloxSecs%
+Gui, Add, Text, x5 y198 w160 +left +BackgroundTrans,Wait
+Gui, Add, Edit, x28 y195 w20 h15 r1 number +BackgroundTrans vReloadRobloxSecs gnm_saveConfig, %ReloadRobloxSecs%
 GuiControl, disable, ReloadRobloxSecs
-Gui, Add, Text, x51 y218 w160 +left +BackgroundTrans,seconds to load Roblox.
+Gui, Add, Text, x51 y198 w160 +left +BackgroundTrans,seconds to load Roblox.
+Gui, Add, Text, x5 y218 +BackgroundTrans, Reconnect daily at:
+Gui, Add, Edit, x95 y215 w20 h15 Number Limit2 r1 vReconnectHour gnm_setReconnectHour, %ReconnectHour%
+Gui, font, w1000 s12
+Gui, Add, Text, x115 y215 +BackgroundTrans, :
+Gui, font
+Gui, Add, Edit, x120 y215 w20 h15 Number Limit2 r1 vReconnectMin gnm_setReconnectMin, %ReconnectMin%
+Gui, font, s6 w700
+Gui, Add, Text, x140 y222 +BackgroundTrans, UTC
+Gui, font
+Gui, Add, Button, x160 y218 w10 h15 gnm_ReconnectTimeHelp, ?
 nm_convertBalloon()
 
 
@@ -1213,7 +1229,8 @@ Gui, Add, Text, x5 y178 w70 h20 +right +BackgroundTrans, Harvest Every
 gui, font, s7
 Gui, Add, Checkbox, x103 y194 +BackgroundTrans vAutomaticHarvestInterval gba_AutoHarvestSwitch_ Checked%AutomaticHarvestInterval%, Auto
 Gui, Add, Checkbox, x28 y194 +BackgroundTrans vHarvestFullGrown gba_HarvestFullGrownSwitch_ Checked%HarvestFullGrown%, Full Grown
-Gui, Add, Checkbox, x2 y222 +BackgroundTrans vgotoPlanterField gba_gotoPlanterFieldSwitch_ Checked%gotoPlanterField%, Only Gather in Planter Field
+Gui, Add, Checkbox, x2 y211 +BackgroundTrans vgotoPlanterField gba_gotoPlanterFieldSwitch_ Checked%gotoPlanterField%, Only Gather in Planter Field
+Gui, Add, Checkbox, x2 y224 +BackgroundTrans vgatherFieldSipping gba_gatherFieldSippingSwitch_ Checked%gatherFieldSipping%, Gather Field Nectar Sipping
 gui, font
 Gui, Add, Text, x80 y178 w32 h20 cRed +left vAutoText +BackgroundTrans, [Auto]
 Gui, Add, Text, x80 y178 w32 h20 cRed +left vFullText +BackgroundTrans, [Full]
@@ -4118,7 +4135,7 @@ nm_fieldBoostCheck(fieldName, variant:=0){
 		else if (fieldName="Sunflower"){
 			imgName:="boostsunflower3.png"
 		}
-		imgFound:=nm_imgSearch(imgName,30,"buff")
+		imgFound:=nm_imgSearch(imgName,50,"buff")
 	}
 	if(imgFound[1]=0){
 		return 1
@@ -4536,6 +4553,58 @@ nm_ServerLink(){
 	;remove "/Bee-Swarm-Simulator" from link if it exists
 	PrivServer := StrReplace(PrivServer, "/Bee-Swarm-Simulator")
 	IniWrite, %PrivServer%, nm_config.ini, Settings, PrivServer
+}
+nm_setReconnectHour(){
+	global ReconnectHour
+	GuiControlGet, ReconnectHour
+	if ((ReconnectHour<0 || ReconnectHour>23) && ReconnectHour) {
+		GuiControl,,ReconnectHour,
+		ReconnectHour:= ;deliberately set to NULL
+		msgbox Hours can only be between 00 and 23
+	}
+	IniWrite, %ReconnectHour%, nm_config.ini, Settings, ReconnectHour
+}
+nm_setReconnectMin(){
+	global ReconnectMin
+	GuiControlGet, ReconnectMin
+	if ((ReconnectMin<0 || ReconnectMin>59) && ReconnectMin) {
+		GuiControl,,ReconnectMin,
+		ReconnectMin:= ;deliberately set to NULL
+		msgbox Mins can only be between 00 and 59
+	}
+	IniWrite, %ReconnectMin%, nm_config.ini, Settings, ReconnectMin
+}
+nm_ReconnectTimeHelp(){
+	global ReconnectHour, ReconnectMin
+	FormatTime, hourUTC, %A_NowUTC%, hh
+	FormatTime, hourLOC, %A_Now%, hh
+	FormatTime, timeUTC, %A_NowUTC%, hh:mm
+	FormatTime, timeLOC, %A_Now%, hh:mm
+	timeDiff:=hourLOC-hourUTC
+	convertedLocalHour:=ReconnectHour-timeDiff
+	if (convertedLocalHour>24)
+		convertedLocalHour:=convertedLocalHour-24
+	if(convertedLocalHour<10)
+		PaddedConvertedLocalHour:=("0" . convertedLocalHour)
+	else
+		PaddedConvertedLocalHour:=convertedLocalHour
+	
+	if(ReconnectHour && ReconnectHour<10)
+		PaddedReconnectHour:=("0" . ReconnectHour)
+	else
+		PaddedReconnectHour:=ReconnectHour
+	if(ReconnectMin && ReconnectMin<10)
+		PaddedReconnectMin:=("0" . ReconnectMin)
+	else
+		PaddedReconnectMin:=ReconnectMin
+	
+	if((!ReconnectHour && ReconnectHour!=0) || (!ReconnectMin && ReconnectMin!=0)) {
+		ReconnectTimeString:="<Invalid Time>"
+	} else {
+		ReconnectTimeString:=(PaddedReconnectHour . ":" . PaddedReconnectMin . " UTC = Local Time: " . PaddedConvertedLocalHour . ":" . PaddedReconnectMin)
+	}
+
+		msgbox, 0, Coordinated Universal Time (UTC),DEFINITION:`nUTC is the time standard commonly used across the world. The world's timing centers have agreed to keep their time scales closely synchronized - or coordinated - therefore the name Coordinated Universal Time.`n`nWhy use UTC?`nThis allows all players on the same server to enter the same time value into the GUI regardless of the local timezone.`n`nTIME NOW:`nLocal Time: %timeLOC% (UTC %timeDiff% hours) = UTC Time: %timeUTC%`n`nRECONNECT TIME:`n%ReconnectTimeString%
 }
 nm_stingerFields(){
 	gui, stingerFields:destroy
@@ -5019,7 +5088,9 @@ nm_testButton(){
 	IniRead, MoveSpeedFactor, nm_config.ini, Settings, MoveSpeedFactor
 	GuiControlGet MoveMethod
 	
-	
+	;FormatTime, temp, %A_NowUTC%, hh
+	;msgbox local=%A_Hour%`nutc=%temp%`ntimeUTC=%A_nowUTC%`ntimeLOC=%A_now%
+	nm_cannonToPlanter("coconut")
 	;settimer, heartbeat, off
 	/*
 	;count hiveslot locations
@@ -5157,10 +5228,20 @@ nm_Reset(checkAll:=1, wait:=2000){
 	global AFBuseBooster
 	global currentField
 	global MyField:="None"
-	global HiveConfirmed, WebhookCheck, ShiftLockEnabled
+	global HiveConfirmed, WebhookCheck, ShiftLockEnabled, GameFrozenCounter
 	if (ShiftLockEnabled) {
 		ShiftLockEnabled:=0
 		send, {shift}
+	}
+	;check for game frozen conditions
+	if (GameFrozenCounter>=5) { ;5 strikes
+		nm_setStatus("Detected", "Roblox Game Frozen, Restarting")
+		While(winexist("Roblox")){
+			WinKill, Roblox
+			WinWaitClose, Roblox
+			;WinClose StatMonitor.ahk
+			sleep, 8000
+		}
 	}
 	SetKeyDelay , (170+KeyDelay)
 	DisconnectCheck()
@@ -5205,7 +5286,7 @@ nm_Reset(checkAll:=1, wait:=2000){
 				;WinClose, Roblox
 				WinKill, Roblox
 				WinWaitClose, Roblox
-				WinClose StatMonitor.ahk
+				;WinClose StatMonitor.ahk
 				sleep, 8000
 			}
 			DisconnectCheck()
@@ -5281,7 +5362,7 @@ nm_Reset(checkAll:=1, wait:=2000){
 				send r
 				sleep, 100
 				send {enter}
-				sleep,7000
+				sleep,7000 ;7000
 			}
 			;reset
 			send {esc}
@@ -5289,7 +5370,7 @@ nm_Reset(checkAll:=1, wait:=2000){
 			send r
 			sleep, 100
 			send {enter}
-			sleep,7000
+			sleep,7000 ;7000
 			SetKeyDelay , (100+KeyDelay)
 			loop 4{
 				send {PgUp}
@@ -5516,10 +5597,12 @@ nm_gotoCannon(){
 }
 nm_findHiveslot(slotnum:=0){
 	global RightKey, LeftKey, BackKey, RotRight, ZoomOut, MoveSpeedFactor, HiveSlot, KeyDelay
+	global AtHive:=0
 	;check if already at hiveslot
 	sleep, 500
 	searchRet := nm_imgSearch("e_button.png",30,"high")
 	If (searchRet[1] = 0) {
+		AtHive:=1
 		return
 	}
 	;find hiveslot
@@ -5540,7 +5623,7 @@ nm_findHiveslot(slotnum:=0){
 		count:=0
 		previous:=1
 		current:=1
-		loop 100 {
+		loop 60 {
 			previous:=current
 			current:=nm_imgSearch("hive4.png",HiveVariation,"actionbar")[1]
 			if(current=0 && (previous!=current)){
@@ -5947,7 +6030,7 @@ nm_toBooster(location){
 				send, {e}
 				DllCall("Sleep",UInt,50)
 				send {%LeftKey% down}
-				DllCall("Sleep",UInt,700)
+				DllCall("Sleep",UInt,720)
 				send {space}
 				send {space}
 				DllCall("Sleep",UInt,4450)
@@ -6442,6 +6525,10 @@ nm_walkToCollect(){
 					sleep, 350
 				}
 			}
+			;close inventory
+			MouseMove, 30, (Roblox[3]+120)
+			Click
+			MouseMove, 350, (Roblox[3]+70)
 			sleep,1500
 			;inside gummy lair
 			nm_Move(2000*MoveSpeedFactor, FwdKey)
@@ -7692,6 +7779,10 @@ nm_Mondo(){
 				send {%BackKey% up}
 				send {space}
 				DllCall("Sleep",UInt,1500)
+				;Zaappiix4
+				nm_Move(1800*MoveSpeedFactor, LeftKey)	
+				nm_Move(1800*MoveSpeedFactor, RightKey)
+				nm_Move(600*MoveSpeedFactor, LeftKey)	
 			}
 			global MyField:="Mountain Top"
 			nm_setStatus("Attacking")
@@ -7706,7 +7797,12 @@ nm_Mondo(){
 			}
 			else if(MondoAction="Tag"){
 				repeat:=0
-				loop 30 { ;30 sec
+				;zaappiix5
+				nm_Move(2000*MoveSpeedFactor, LeftKey)	
+				nm_Move(2000*MoveSpeedFactor, BackKey)	
+				nm_Move(1000*MoveSpeedFactor, LeftKey)	
+				nm_Move(3500*MoveSpeedFactor, FwdKey)	
+				loop 25 { ;25 sec
 					if(youDied)
 						break
 					sleep, 1000
@@ -7815,7 +7911,7 @@ nm_cannonToCollect(){
 	}
 	;ant pass
 	global AntPassCheck, AntPassAction, QuestAnt, LastAntPass, LastAntPassInventory
-	if(QuestAnt) {
+	if(QuestAnt || AntPassAction="challenge") {
 		;check for ant pass in inventory
 		doAntChallenge:=0
 		if((QuestAnt || AntPassAction="challenge") && (nowUnix()-LastAntPassInventory)>300){
@@ -7845,9 +7941,9 @@ nm_cannonToCollect(){
 						If (imgPos[1]=0){
 							doAntChallenge:=1
 							;close inventory
-							MouseMove, 30, (Roblox[3]+120)
-							Click
-							MouseMove, 350, (Roblox[3]+70)
+							;MouseMove, 30, (Roblox[3]+120)
+							;Click
+							;MouseMove, 350, (Roblox[3]+70)
 							break
 						} 
 					}
@@ -7858,11 +7954,15 @@ nm_cannonToCollect(){
 					sleep, 350
 				}
 			}
+			;close inventory
+			MouseMove, 30, (Roblox[3]+120)
+			Click
+			MouseMove, 350, (Roblox[3]+70)
 			LastAntPassInventory:=nowUnix()
 			sleep,1500
 		}
 	}
-	if(((AntPassCheck || QuestAnt) && (nowUnix()-LastAntPass)>7230) || (QuestAnt && doAntChallenge)){ ;2 hours OR ant quest
+	if(((AntPassCheck || QuestAnt) && (((nowUnix()-LastAntPass)>7230) || doAntChallenge)) || (QuestAnt && doAntChallenge)){ ;2 hours OR ant quest
 		loop, 2 {
 			AntStart:
 			nm_Reset()
@@ -7894,6 +7994,8 @@ nm_cannonToCollect(){
 				newAntPass:=1
 				send {e}
 				DllCall("Sleep",UInt,1000)
+				break
+			} else if (doAntChallenge) {
 				break
 			}
 		}
@@ -8180,6 +8282,10 @@ nm_cannonToCollect(){
 					sleep, 350
 				}
 			}
+			;close inventory
+			MouseMove, 30, (Roblox[3]+120)
+			Click
+			MouseMove, 350, (Roblox[3]+70)
 			sleep,1500
 			;inside gummy lair
 			nm_Move(2000*MoveSpeedFactor, FwdKey)
@@ -8465,7 +8571,7 @@ nm_cannonTo(location){
 		send {%RightKey% up}
 		DllCall("Sleep",UInt,2000)
 		send {%RightKey% down}
-		DllCall("Sleep",UInt,1000)
+		DllCall("Sleep",UInt,2000)
 		send {%RightKey% up}
 		send {space down}
 		DllCall("Sleep",UInt,50)
@@ -8479,26 +8585,21 @@ nm_cannonTo(location){
 		DllCall("Sleep",UInt,50)
 		send {space up}
 		DllCall("Sleep",UInt,3000*MovespeedFactor)
-		;sleep 3000*MovespeedFactor
 		send {%RightKey% down}
 		send {space down}
 		DllCall("Sleep",UInt,50)
 		send {space up}
 		DllCall("Sleep",UInt,5000*MovespeedFactor)
-		;sleep 5000*MovespeedFactor
 		send {space down}
 		DllCall("Sleep",UInt,100)
 		send {space up}
 		DllCall("Sleep",UInt,1500*MovespeedFactor)
-		;sleep 1500*MovespeedFactor
 		send {%FwdKey% up}
 		DllCall("Sleep",UInt,2000*MovespeedFactor)
-		;sleep 2000*MovespeedFactor
 		send {space down}
 		DllCall("Sleep",UInt,100)
 		send {space up}
 		DllCall("Sleep",UInt,1000*MovespeedFactor)
-		;sleep 1000*MovespeedFactor
 		send {%RightKey% up}
 		send {%FwdKey% up}
 		loop 2 {
@@ -8518,7 +8619,7 @@ nm_cannonTo(location){
 		send {%RightKey% up}
 		DllCall("Sleep",UInt,2000)
 		send {%RightKey% down}
-		DllCall("Sleep",UInt,1000)
+		DllCall("Sleep",UInt,2000)
 		send {%RightKey% up}
 		send {space down}
 		DllCall("Sleep",UInt,50)
@@ -8532,12 +8633,384 @@ nm_cannonTo(location){
 		DllCall("Sleep",UInt,50)
 		send {space up}
 		DllCall("Sleep",UInt,3000*MovespeedFactor)
-		;sleep 3000*MovespeedFactor
 		send {%FwdKey% up}
 		send {%LeftKey% down}
 		DllCall("Sleep",UInt,3000*MovespeedFactor)
-		;sleep 3000*MovespeedFactor
 		send {%LeftKey% up}
+	}
+	SetKeyDelay, 5
+}
+nm_cannonToPlanter(location){
+	global FwdKey, LeftKey, BackKey, RightKey, RotLeft, RotRight, KeyDelay, MoveSpeedFactor, ShiftLockEnabled
+	if (ShiftLockEnabled) {
+		ShiftLockEnabled:=0
+		send, {shift}
+	}
+	SetKeyDelay, 10
+	if(location="sunflower"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%RightKey% down}
+		DllCall("Sleep",UInt,325) ;425
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,900)
+		send {%RightKey% up}
+		send {space}
+		DllCall("Sleep",UInt,1000)
+		loop 2 {
+			send, {%RotRight%}
+		}
+		nm_Move(3000*MoveSpeedFactor, FwdKey)
+		nm_Move(6000*MoveSpeedFactor, LeftKey)
+		nm_Move(2000*MoveSpeedFactor, RightKey, BackKey)
+	}
+	else if(location="dandelion"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%LeftKey% down}
+		DllCall("Sleep",UInt,325) ;275
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,1000)
+		send {%FwdKey% down}
+		DllCall("Sleep",UInt,500)
+		send {%FwdKey% up}
+		DllCall("Sleep",UInt,1250) ;1750
+		send {%LeftKey% up}
+		send {space}
+		loop 2 {
+			send, {%RotLeft%}
+		}
+		DllCall("Sleep",UInt,1500)
+		nm_Move(1500*MoveSpeedFactor, FwdKey, RightKey)
+		nm_Move(2000*MoveSpeedFactor, FwdKey)
+		nm_Move(1500*MoveSpeedFactor, FwdKey, RightKey)
+		nm_Move(1500*MoveSpeedFactor, BackKey, LeftKey)
+		nm_Move(1000*MoveSpeedFactor, BackKey)
+	}
+	else if(location="mushroom"){
+		send, {e}
+		DllCall("Sleep",UInt,50)	
+		send {%FwdKey% down}
+		DllCall("Sleep",UInt,775) ;725
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,150)
+		send {%FwdKey% up}
+		send {space}
+		DllCall("Sleep",UInt,2000)
+		loop 4 {
+			send, {%RotLeft%}
+		}
+		nm_Move(3000*MoveSpeedFactor, FwdKey, RightKey)
+		nm_Move(3000*MoveSpeedFactor, RightKey)
+		nm_Move(1000*MoveSpeedFactor, BackKey, LeftKey)
+	}
+	else if(location="blue flower"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%LeftKey% down}
+		DllCall("Sleep",UInt,675)
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,3250)
+		send {%LeftKey% up}
+		send {space}
+		DllCall("Sleep",UInt,1000)
+		loop 2 {
+			send, {%RotLeft%}
+		}
+		nm_Move(3000*MoveSpeedFactor, LeftKey)
+		nm_Move(4500*MoveSpeedFactor, RightKey)
+		nm_Move(3000*MoveSpeedFactor, BackKey)
+		nm_Move(1000*MoveSpeedFactor, LeftKey)
+	}
+	else if(location="clover"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%LeftKey% down}
+		send {%FwdKey% down}
+		DllCall("Sleep",UInt,475) ;575
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,1500) ;1200
+		send {%FwdKey% up}
+		DllCall("Sleep",UInt,3500) ;4000
+		send {%LeftKey% up}
+		send {space}
+		DllCall("Sleep",UInt,1000)
+		nm_Move(1000*MoveSpeedFactor, FwdKey, LeftKey)
+		nm_Move(3000*MoveSpeedFactor, LeftKey)
+		nm_Move(2000*MoveSpeedFactor, FwdKey)
+		nm_Move(1000*MoveSpeedFactor, BackKey, RightKey)
+		nm_Move(2500*MoveSpeedFactor, RightKey)
+		
+		
+	}
+	else if(location="spider"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%BackKey% down}
+		DllCall("Sleep",UInt,850) ;1050
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,750) ;150
+		send {space}
+		send {%BackKey% up}
+		loop 4 {
+			send, {%RotRight%}
+		}
+		DllCall("Sleep",UInt,3000)
+		nm_Move(4000*MoveSpeedFactor, FwdKey)
+		nm_Move(2000*MoveSpeedFactor, FwdKey, LeftKey)
+		nm_Move(2000*MoveSpeedFactor, LeftKey)
+		nm_Move(1000*MoveSpeedFactor, BackKey, RightKey)
+	}
+	else if(location="strawberry"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%RightKey% down}
+		send {%BackKey% down}
+		DllCall("Sleep",UInt,750)
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,1800)
+		send {%RightKey% up}
+		send {%BackKey% up}
+		send {space}
+		DllCall("Sleep",UInt,500)
+		loop 4 {
+			send, {%RotRight%}
+		}
+		nm_Move(5000*MoveSpeedFactor, FwdKey, LeftKey)
+		nm_Move(2000*MoveSpeedFactor, LeftKey)
+		nm_Move(1500*MoveSpeedFactor, BackKey, RightKey)
+	}
+	else if(location="bamboo"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%LeftKey% down}
+		DllCall("Sleep",UInt,1200)
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,2500)
+		send {%LeftKey% up}
+		send {space}
+		loop 4 {
+			send, {%RotLeft%}
+		}
+		DllCall("Sleep",UInt,1500)
+		nm_Move(3500*MoveSpeedFactor, FwdKey)
+		nm_Move(1000*MoveSpeedFactor, BackKey)
+		nm_Move(4000*MoveSpeedFactor, RightKey)
+		nm_Move(1000*MoveSpeedFactor, LeftKey)
+	}
+	else if(location="pineapple"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%LeftKey% down}
+		DllCall("Sleep",UInt,1950) ;1850
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,2000) ;2750
+		send {%LeftKey% up}
+		send {%BackKey% down}
+		DllCall("Sleep",UInt,1000) ;1150
+		send {%BackKey% up}
+		send {space}
+		loop 4 {
+			send, {%RotLeft%}
+		}
+		DllCall("Sleep",UInt,1000)
+		nm_Move(4000*MoveSpeedFactor, FwdKey, LeftKey)
+		nm_Move(1000*MoveSpeedFactor, BackKey, RightKey)
+	}
+	else if(location="stump"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%LeftKey% down}
+		DllCall("Sleep",UInt,1850)
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,2750)
+		send {%LeftKey% up}
+		loop 2 {
+			send, {%RotLeft%}
+		}
+		send {%FwdKey% down}
+		send {%LeftKey% down}
+		DllCall("Sleep",UInt,900)
+		send {%LeftKey% up}
+		DllCall("Sleep",UInt,1500)
+		send {%FwdKey% up}
+		send {space}
+		DllCall("Sleep",UInt,1000)
+	}
+	else if(location="cactus"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%RightKey% down}
+		send {%BackKey% down}
+		DllCall("Sleep",UInt,940)
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,2000)
+		send {%RightKey% up}
+		DllCall("Sleep",UInt,1500)
+		send {%BackKey% up}
+		send {space}
+		DllCall("Sleep",UInt,1500)
+		nm_Move(4000*MoveSpeedFactor, LeftKey)
+		nm_Move(5000*MoveSpeedFactor, FwdKey)
+		nm_Move(2000*MoveSpeedFactor, RightKey)
+
+	}
+	else if(location="pumpkin"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%RightKey% down}
+		send {%BackKey% down}
+		DllCall("Sleep",UInt,940)
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,2300)
+		send {%RightKey% up}
+		DllCall("Sleep",UInt,1100)
+		send {%BackKey% up}
+		send {space}
+		loop 4 {
+			send, {%RotLeft%}
+		}
+		DllCall("Sleep",UInt,1100)
+		nm_Move(4000*MoveSpeedFactor, FwdKey)
+		nm_Move(900*MoveSpeedFactor, BackKey)
+		nm_Move(4000*MoveSpeedFactor, RightKey)
+		nm_Move(2000*MoveSpeedFactor, LeftKey)
+		
+	}
+	else if(location="pine tree"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%RightKey% down}
+		send {%BackKey% down}
+		DllCall("Sleep",UInt,1100) ;1000
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,4000)
+		send {%BackKey% up}
+		DllCall("Sleep",UInt,1500)
+		send {%RightKey% up}
+		send {space}
+		loop 2 {
+			send, {%RotRight%}
+		}
+		DllCall("Sleep",UInt,1000)
+		nm_Move(6000*MoveSpeedFactor, RightKey)
+		nm_Move(4000*MoveSpeedFactor, FwdKey)
+		nm_Move(3000*MoveSpeedFactor, LeftKey)
+		
+		
+	}
+	else if(location="rose"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%RightKey% down}
+		DllCall("Sleep",UInt,600)
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,2500)
+		send {%RightKey% up}
+		send {space}
+		loop 4 {
+			send, {%RotLeft%}
+		}
+		DllCall("Sleep",UInt,1000)
+		nm_Move(4000*MoveSpeedFactor, FwdKey)
+		nm_Move(4000*MoveSpeedFactor, RightKey)
+		nm_Move(1000*MoveSpeedFactor, BackKey, LeftKey)
+	}
+	else if(location="mountain top"){
+		send, {e}
+		DllCall("Sleep",UInt,4000)
+	}
+	else if(location="pepper"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%FwdKey% down}
+		DllCall("Sleep",UInt,500)
+		send {space}
+		send {space}
+		send {%RightKey% down}
+		DllCall("Sleep",UInt,3900)
+		send {%RightKey% up}
+		DllCall("Sleep",UInt,2000)
+		send {%RightKey% down}
+		DllCall("Sleep",UInt,2000)
+		send {%RightKey% up}
+		send {space down}
+		DllCall("Sleep",UInt,50)
+		send {space up}
+		DllCall("Sleep",UInt,750)
+		send {space down}
+		DllCall("Sleep",UInt,50)
+		send {space up}
+		DllCall("Sleep",UInt,750)
+		send {space down}
+		DllCall("Sleep",UInt,50)
+		send {space up}
+		DllCall("Sleep",UInt,3000*MovespeedFactor)
+		send {%RightKey% down}
+		send {space down}
+		DllCall("Sleep",UInt,50)
+		send {space up}
+		DllCall("Sleep",UInt,5000*MovespeedFactor)
+		send {space down}
+		DllCall("Sleep",UInt,100)
+		send {space up}
+		DllCall("Sleep",UInt,1500*MovespeedFactor)
+		send {%FwdKey% up}
+		DllCall("Sleep",UInt,2000*MovespeedFactor)
+		send {space down}
+		DllCall("Sleep",UInt,100)
+		send {space up}
+		DllCall("Sleep",UInt,1000*MovespeedFactor)
+		send {%RightKey% up}
+		send {%FwdKey% up}
+		loop 2 {
+			send {%RotRight%}
+		}
+		nm_Move(6000*MoveSpeedFactor, FwdKey)
+		nm_Move(1500*MoveSpeedFactor, BackKey)
+	}
+	else if(location="coconut"){
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%FwdKey% down}
+		DllCall("Sleep",UInt,500)
+		send {space}
+		send {space}
+		send {%RightKey% down}
+		DllCall("Sleep",UInt,3900)
+		send {%RightKey% up}
+		DllCall("Sleep",UInt,2000)
+		send {%RightKey% down}
+		DllCall("Sleep",UInt,2000)
+		send {%RightKey% up}
+		send {space down}
+		DllCall("Sleep",UInt,50)
+		send {space up}
+		DllCall("Sleep",UInt,750)
+		send {space down}
+		DllCall("Sleep",UInt,50)
+		send {space up}
+		DllCall("Sleep",UInt,750)
+		send {space down}
+		DllCall("Sleep",UInt,50)
+		send {space up}
+		DllCall("Sleep",UInt,3000*MovespeedFactor)
+		send {%FwdKey% up}
+		nm_Move(2000*MoveSpeedFactor, LeftKey)
 	}
 	SetKeyDelay, 5
 }
@@ -8930,7 +9403,7 @@ nm_GoGather(){
 	global QuestMantis
 	global QuestScorpions
 	global QuestWerewolf
-	global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, BugrunInterruptCheck, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BlackQuestCheck, BlackQuestComplete, QuestGatherField, BuckoQuestCheck, RileyQuestCheck, RotateQuest, QuestGatherMins, QuestGatherReturnBy, BuckoRhinoBeetles, BuckoMantis, RileyLadybugs, RileyScorpions, RileyAll, ShiftLockEnabled
+	global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, BugrunInterruptCheck, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BlackQuestCheck, BlackQuestComplete, QuestGatherField, BuckoQuestCheck, RileyQuestCheck, RotateQuest, QuestGatherMins, QuestGatherReturnBy, BuckoRhinoBeetles, BuckoMantis, RileyLadybugs, RileyScorpions, RileyAll, ShiftLockEnabled, GameFrozenCounter, HiveSlot, AtHive
 	global GatherStartTime, TotalGatherTime, SessionGatherTime, ConvertStartTime, TotalConvertTime, SessionConvertTime
 	;BUGS GatherInterruptCheck
 	if((PolarQuestGatherInterruptCheck || BuckoQuestGatherInterruptCheck || RileyQuestGatherInterruptCheck || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck || RileyLadybugs || RileyAll) && (nowUnix()-LastBugrunLadybugs)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck || BuckoRhinoBeetles || RileyAll) && (nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck || RileyAll) && (nowUnix()-LastBugrunSpider)>floor(1830*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck || BuckoMantis || RileyAll) && (nowUnix()-LastBugrunMantis)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck || RileyScorpions || RileyAll) && (nowUnix()-LastBugrunScorpions)>floor(1230*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck || RileyAll) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
@@ -9182,6 +9655,11 @@ nm_GoGather(){
 			send {%RotRight%}
 		}
 	}
+	;determine if facing corner
+	FacingFieldCorner:=0
+	if((FieldName%CurrentFieldNum%="pine tree" && (FieldSprinklerLoc%CurrentFieldNum%="upper" && FieldRotateDirection%CurrentFieldNum%="left" && FieldRotateTimes%CurrentFieldNum%=1)) || ((FieldName%CurrentFieldNum%="pineapple" && (FieldSprinklerLoc%CurrentFieldNum%="upper left" && FieldRotateDirection%CurrentFieldNum%="left" && FieldRotateTimes%CurrentFieldNum%=1)))) {
+		FacingFieldCorner:=1
+	}
 	;set direction keys
 	;foward/back
 	if(FieldPatternInvertFB%CurrentFieldNum%){
@@ -9208,7 +9686,7 @@ nm_GoGather(){
 		send, {shift}
 	}
 	while(((nowUnix()-gatherStart)<(FieldUntilMins%CurrentFieldNum%*60))){
-		nm_gather(FieldPattern%CurrentFieldNum%, FieldPatternSize%CurrentFieldNum%, FieldPatternReps%CurrentFieldNum%)
+		nm_gather(FieldPattern%CurrentFieldNum%, FieldPatternSize%CurrentFieldNum%, FieldPatternReps%CurrentFieldNum%, FacingFieldCorner)
 		nm_autoFieldBoost(FieldName%CurrentFieldNum%)
 		nm_fieldDriftCompensation()
 		nm_fieldBoostGlitter()
@@ -9257,6 +9735,7 @@ nm_GoGather(){
 		;active honey
 		if(not nm_activeHoney() && (BackpackPercentFiltered<FieldUntilPack%CurrentFieldNum%)){
 			nm_setStatus("Interupted", "Inactive Honey")
+			GameFrozenCounter:=GameFrozenCounter+1
 			break
 		}
 		;Black Bear quest
@@ -9407,7 +9886,11 @@ nm_GoGather(){
 				nm_findHiveslot()
 			}
 			;convert
-			nm_convert(1)
+			if(FieldName%CurrentFieldNum%="pine tree" && FieldReturnType%CurrentFieldNum%="walk" && HiveSlot=3 && AtHive) {
+				nm_convert(0)
+			} else {
+				nm_convert(1)
+			}
 		} else if(FieldReturnType%CurrentFieldNum%="rejoin") { ;exit and rejoin game
 			;reset
 			send {esc}
@@ -9544,14 +10027,8 @@ nm_loot(length, reps, direction){
 		}
 	}
 }
-nm_gather(pattern, patternsize:="M", reps:=1){
-	global TCFBKey
-	global AFCFBKey
-	global TCLRKey
-	global AFCLRKey
-	global KeyDelay
-	global MoveSpeedFactor
-	global DisableToolUse
+nm_gather(pattern, patternsize:="M", reps:=1, facingcorner:=0){
+	global TCFBKey, AFCFBKey, TCLRKey, AFCLRKey, KeyDelay, MoveSpeedFactor, DisableToolUse, FwdKey
 	;set size
 	if(patternsize="XS")
 		size:=0.25
@@ -9571,38 +10048,30 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 		loop %reps% {
 			send {%TCFBKey% down}
 			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			;sleep, 2000*MoveSpeedFactor*size
 			send {%TCLRKey% down}
 			send {%TCFBKey% up}
 			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			;sleep, 200*MoveSpeedFactor
 			send {%AFCFBKey% down}
 			send {%TCLRKey% up}
 			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			;sleep, 2000*MoveSpeedFactor*size
 			send {%TCLRKey% down}
 			send {%AFCFBKey% up}
 			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			;sleep, 200*MoveSpeedFactor
 			send {%TCLRKey% up}
 		}
 		;away from center
 		loop %reps% {
 			send {%TCFBKey% down}
 			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			;sleep, 2000*MoveSpeedFactor*size
 			send {%AFCLRKey% down}
 			send {%TCFBKey% up}
 			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			;sleep, 200*MoveSpeedFactor
 			send {%AFCFBKey% down}
 			send {%AFCLRKey% up}
 			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			;sleep, 2000*MoveSpeedFactor*size
 			send {%AFCLRKey% down}
 			send {%AFCFBKey% up}
 			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			;sleep, 200*MoveSpeedFactor
 			send {%AFCLRKey% up}
 		}
 	} else if(pattern="snake"){
@@ -9610,38 +10079,30 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 		loop %reps% {
 			send {%TCLRKey% down}
 			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			;sleep, 2000*MoveSpeedFactor*size
 			send {%TCFBKey% down}
 			send {%TCLRKey% up}
 			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			;sleep, 200*MoveSpeedFactor
 			send {%AFCLRKey% down}
 			send {%TCFBKey% up}
 			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			;sleep, 2000*MoveSpeedFactor*size
 			send {%TCFBKey% down}
 			send {%AFCLRKey% up}
 			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			;sleep, 200*MoveSpeedFactor
 			send {%TCFBKey% up}
 		}
 		;away from center
 		loop %reps% {
 			send {%TCLRKey% down}
 			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			;sleep, 2000*MoveSpeedFactor*size
 			send {%AFCFBKey% down}
 			send {%TCLRKey% up}
 			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			;sleep, 200*MoveSpeedFactor
 			send {%AFCLRKey% down}
 			send {%AFCFBKey% up}
 			DllCall("Sleep",UInt,2200*MoveSpeedFactor*size)
-			;sleep, 2000*MoveSpeedFactor*size
 			send {%AFCFBKey% down}
 			send {%AFCLRKey% up}
 			DllCall("Sleep",UInt,200*MoveSpeedFactor)
-			;sleep, 200*MoveSpeedFactor
 			send {%AFCFBKey% up}
 		}
 	} else if(pattern="diamonds"){
@@ -9649,19 +10110,15 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 			send {%TCFBKey% down}
 			send {%TCLRKey% down}
 			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%TCLRKey% up}
 			send {%AFCLRKey% down}
 			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%TCFBKey% up}
 			send {%AFCFBKey% down}
 			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%AFCLRKey% up}
 			send {%TCLRKey% down}
 			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%TCLRKey% up}
 			send {%AFCFBKey% up}
 		}
@@ -9669,19 +10126,15 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 		loop %reps% {
 			send {%TCFBKey% down}
 			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%TCLRKey% down}
 			send {%TCFBKey% up}
 			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%AFCFBKey% down}
 			send {%TCLRKey% up}
 			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%AFCLRKey% down}
 			send {%AFCFBKey% up}
 			DllCall("Sleep",UInt,500*MoveSpeedFactor*size+A_Index*200)
-			;sleep, 500*MoveSpeedFactor*size+A_Index*200
 			send {%AFCLRKey% up}
 		}
 	} else if(pattern="typewriter"){
@@ -9705,7 +10158,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 			DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor)
 			send {%AFCLRKey% up}
 			send {%AFCFBKey% down}
-			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
+			DllCall("Sleep",UInt,(1094+150*facingcorner)*MoveSpeedFactor*size)
 			send {%AFCFBKey% up}
 		}
 		send {%TCLRKey% down}
@@ -9719,7 +10172,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 			DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor)
 			send {%AFCFBKey% down}
 			send {%AFCLRKey% up}
-			DllCall("Sleep",UInt,1094*MoveSpeedFactor*size)
+			DllCall("Sleep",UInt,(1094+150*facingcorner)*MoveSpeedFactor*size)
 			send {%AFCLRKey% down}
 			send {%AFCFBKey% up}
 			DllCall("Sleep",UInt,spacingDelay*MoveSpeedFactor)
@@ -9853,7 +10306,7 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 }
 nm_convert(hiveConfirm:=0)
 {
-	global KeyDelay, HiveVariation, RotRight, ZoomOut, AFBrollingDice, AFBuseGlitter, AFBuseBooster, CurrentField, HiveConfirmed, EnzymesKey,  LastEnzymes, ConvertStartTime, TotalConvertTime, SessionConvertTime, BackpackPercent, PFieldBoosted, GatherFieldBoosted
+	global KeyDelay, HiveVariation, RotRight, ZoomOut, AFBrollingDice, AFBuseGlitter, AFBuseBooster, CurrentField, HiveConfirmed, EnzymesKey,  LastEnzymes, ConvertStartTime, TotalConvertTime, SessionConvertTime, BackpackPercent, PFieldBoosted, GatherFieldBoosted, GameFrozenCounter
 	GuiControlGet ConvertBalloon
 	GuiControlGet ConvertMins
 	IniRead, LastConvertBalloon, nm_config.ini, Settings, LastConvertBalloon
@@ -9964,6 +10417,7 @@ nm_convert(hiveConfirm:=0)
 							inactiveHoney:=inactiveHoney+1
 							if(inactiveHoney>15) { ;15 consecutive seconds of inactive honey
 								nm_setStatus("Interupted", "Inactive Honey")
+								GameFrozenCounter:=GameFrozenCounter+1
 								break
 							}
 						} else {
@@ -10224,10 +10678,13 @@ nm_fieldDriftCompensation(){
 	global FieldSprinklerLoc1
 	global FieldSprinklerLoc2
 	global FieldSprinklerLoc3
-	global DisableToolUse
+	global DisableToolUse, PFieldDriftSteps
 	FieldDriftComp:=FieldDriftCheck%CurrentFieldNum%
 	GuiControlGet, SprinklerType
 	If (FieldDriftComp){
+		if (!PFieldDriftSteps) {
+			PFieldDriftSteps:=10
+		}
 		WinGetPos , windowX, windowY, windowWidth, windowHeight, Roblox
         winUp := windowHeight / 2.14
         winDown := windowHeight / 1.88
@@ -10240,7 +10697,7 @@ nm_fieldDriftCompensation(){
 		}
 		saturatorFinder := nm_imgSearch(imgName,50)
 		If (saturatorFinder[1] = 0){
-			while (saturatorFinder[1] = 0 && A_Index<=10) {
+			while (saturatorFinder[1] = 0 && A_Index<=PFieldDriftSteps) {
 				if(saturatorFinder[2] >= winleft && saturatorFinder[2] <= winRight && saturatorFinder[3] >= winUp && saturatorFinder[3] <= winDown) {
 					click up
 					break
@@ -10312,7 +10769,7 @@ DisconnectCheck(){
 	global Roblox, StartOnReload
 	GuiControlGet, PrivServer
 	global ReloadRobloxSecs
-	global TotalDisconnects, SessionDisconnects
+	global TotalDisconnects, SessionDisconnects, DailyReconnect
 	PublicServer:="https://www.roblox.com/games/4189852503?privateServerLinkCode=94175309348158422142147035472390"
 	while(1){
 		If (nm_imgSearch("disconnected.png",25, "center")[1] = 1 && WinExist("Roblox")){
@@ -10346,19 +10803,26 @@ DisconnectCheck(){
 			PrivServer:=
 			nm_setStatus("Error", "Private Server Link Invalid")
 		}
+		;Daily Reconnect
+		if(DailyReconnect) {
+			staggerDelay:=30000*HiveSlot
+			nm_setStatus("Waiting", round(2+(staggerDelay/60000), 1) " minutes before Reconnect")
+			sleep, 120000+staggerDelay
+			DailyReconnect:=0
+		}
 		StringLen, linklen, PrivServer
 		if (linklen > 0 && A_Index<10){
 			;WinClose, Roblox
 			WinKill, Roblox
 			nm_setStatus("Attempting", "Private Server Link")
 			run, %PrivServer%
-			WinClose StatMonitor.ahk
+			;WinClose StatMonitor.ahk
 		} else {
 			;WinClose, Roblox
 			WinKill, Roblox
 			nm_setStatus("Attempting", "Public Server Link")
 			run, %PublicServer%
-			WinClose StatMonitor.ahk
+			;WinClose StatMonitor.ahk
 			sleep, ReloadRobloxSecs * 1000
 		}
 		sleep, ReloadRobloxSecs * 1000
@@ -10393,12 +10857,12 @@ DisconnectCheck(){
 			send {Up up}
 			myOS:=SubStr(A_OSVersion, 1 , InStr(A_OSVersion, ".")-1)
 			if((myOS*1)>=10) {
-				IfWinNotExist, StatMonitor.ahk
-				{
+				;IfWinNotExist, StatMonitor.ahk
+				;{
 					if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) {
 						Run, StatMonitor.ahk
 					}
-				}
+				;}
 			}
 			break
 		} else {
@@ -10469,22 +10933,20 @@ nm_deathCheck(){
 	}
 }
 nm_activeHoney(){
-	global HiveBees
+	global HiveBees, GameFrozenCounter
 	WinGetPos, windowX, windowY, windowWidth, windowHeight, Roblox
     x1 := (windowWidth/2)-65
     x2 := (windowWidth/2)
     PixelSearch, bx2, by2, x1, 0, x2, 65, 0x80E3FF, 10, Fast
-	;PixelSearch, bx2, by2, x1, 0, x2, 65, 0xF3DB7E, 20, RGB Fast
     if not ErrorLevel
 	{
+		GameFrozenCounter:=0
         return 1
 	} else {
 		if(HiveBees<25){
 			x1 := (windowWidth/2)+235
 			x2 := (windowWidth/2)+275
 			PixelSearch, bx2, by2, x1, 0, x2, 65, 0xFFFFFF, 10, Fast
-			;PixelSearch, bx2, by2, x1, 0, x2, 65, 0xFFFFFF, 10, RGB Fast
-			
 			if not ErrorLevel
 			{
 				return 1
@@ -10493,6 +10955,7 @@ nm_activeHoney(){
 			}
 		}else{
 		; return 0
+			return 0
 		}
     }
 }
@@ -11861,6 +12324,10 @@ nm_Feed(food){
 			sleep, 350
 		}
 	}
+	;close inventory
+	MouseMove, 30, (Roblox[3]+120)
+	Click
+	MouseMove, 350, (Roblox[3]+70)
 }
 nm_RileyQuestProg(){
 	global RileyQuestCheck, RileyBee, RileyQuest, RileyStart, HiveBees, FieldName1, LastAntPass, LastRedBoost, RileyLadybugs, RileyScorpions, RileyAll
@@ -12760,7 +13227,7 @@ nm_questGather(quest){
 	global AFCFBKey
 	global TCLRKey
 	global AFCLRKey
-	global YouDied
+	global YouDied, GameFrozenCounter
 	thisfield:=QuestGatherField
 	if(QuestGatherField="none")
 		return
@@ -12833,6 +13300,7 @@ nm_questGather(quest){
 		;active honey
 		if(not nm_activeHoney()){
 			nm_setStatus("Interupted", "Inactive Honey")
+			GameFrozenCounter:=GameFrozenCounter+1
 			break
 		}
 		
@@ -13322,6 +13790,9 @@ HiveVariation=20
 HiveBees=25
 PrivServer=0
 ReloadRobloxSecs=60
+ReconnectHour=
+ReconnectMin=
+DailyReconnect=0
 GuiX=0
 GuiY=0
 GuiMode=0
@@ -13824,6 +14295,23 @@ ba_gotoPlanterFieldSwitch_(){
 	}
 	ba_saveConfig_()
 }
+
+ba_gatherFieldSippingSwitch_(){
+	GuiControlGet, GatherFieldSipping
+	if(GatherFieldSipping){
+		Guicontrol,,GatherFieldSipping,0
+		msgbox, 1, INFORMATION,You have selected to "Gather Field Nectar Sipping".`n`nThis option will force planters to always be placed in your current gathering field if you need the nectar type that field provides.  This is done regardless of the allowed field selections.  This will allow your bees to sip from the planter and greatly increase the amount of nectar gained.
+		IfMsgBox Ok
+		{
+			Guicontrol,,GatherFieldSipping,1
+		} else {
+			Guicontrol,,GatherFieldSipping,0
+		}
+	}
+	ba_saveConfig_()
+}
+
+
 ba_nPresetSwitch_(){
 	guiControlGet, nPreset
 	if (nPreset="Blue"){
@@ -13964,6 +14452,7 @@ ba_saveConfig_(){
 	GuiControlGet, AutomaticHarvestInterval
 	GuiControlGet, HarvestFullGrown
 	GuiControlGet, GotoPlanterField
+	GuiControlGet, GatherFieldSipping
 	;GuiControlGet, HiveDistance
 	;GuiControlGet, MoveSpeedFactor
 	GuiControlGet, PlasticPlanterCheck
@@ -14050,6 +14539,7 @@ ba_saveConfig_(){
 	IniWrite, %AutomaticHarvestInterval%, ba_config.ini, gui, AutomaticHarvestInterval
 	IniWrite, %HarvestFullGrown%, ba_config.ini, gui, HarvestFullGrown
 	IniWrite, %GotoPlanterField%, ba_config.ini, gui, GotoPlanterField
+	IniWrite, %GatherFieldSipping%, ba_config.ini, gui, GatherFieldSipping
 	;IniWrite, %HiveDistance%, ba_config.ini, gui, HiveDistance
 	;IniWrite, %MoveSpeedFactor%, ba_config.ini, gui, MoveSpeedFactor
 	;IniWrite, %StingerCheck%, ba_config.ini, gui, StingerCheck
@@ -14172,6 +14662,7 @@ ba_planter()
 	global PlanterEstPercent3
 	GuiControlGet, MaxAllowedPlanters
 	GuiControlGet, GotoPlanterField
+	GuiControlGet, GatherFieldSipping
 	global LostPlanters
 	global Roblox
 	;IniRead, Roblox, ba_config.ini, gui, Roblox
@@ -14277,7 +14768,7 @@ ba_planter()
 				}
 				nectarPercent:=ba_GetNectarPercent(currentnectar)
 				;recover planters that are collecting same nectar as currentField AND are not placed in currentField
-				if(currentNectar=currentFieldNectar && not HarvestFullGrown) {
+				if(currentNectar=currentFieldNectar && not HarvestFullGrown && GatherFieldSipping) {
 					loop, 3 { ;3 max positions
 						if(currentField!=PlanterField%A_Index% && currentFieldNectar=PlanterNectar%A_Index%) {
 							temp1:=PlanterField%A_Index%
@@ -14289,7 +14780,7 @@ ba_planter()
 					}
 				}
 				;recover planters that will overfill nectars
-				if (not HarvestFullGrown && ((nectarPercent>99)||(nectarPercent>90 && (nectarPercent+estimatedNectarPercent)>110)||(nectarPercent+estimatedNectarPercent)>120)){
+				if (AutomaticHarvestInterval && ((nectarPercent>99)||(nectarPercent>90 && (nectarPercent+estimatedNectarPercent)>110)||(nectarPercent+estimatedNectarPercent)>120)){
 					loop, 3 { ;3 max positions
 						planterNectar:=PlanterNectar%A_Index%
 						if (PlanterNectar=currentNectar) {
@@ -14391,7 +14882,7 @@ ba_planter()
 				maxplanters := min(MaxAllowedPlanters, maxplanters)
 				;msgbox maxplanters=%maxplanters%
 				;determine last and next fields
-				if(currentNectar=currentFieldNectar && not GotoPlanterField){ ;always place planter in field you are collecting from
+				if(currentNectar=currentFieldNectar && not GotoPlanterField && GatherFieldSipping){ ;always place planter in field you are collecting from
 					lastnextfield:=ba_getlastfield(currentNectar)
 					lastField:=lastNextField[1]
 					nextField:=CurrentField
@@ -14547,7 +15038,7 @@ ba_planter()
 			}
 			maxplanters := min(MaxAllowedPlanters, maxplanters)
 			;determine last and next fields
-			if(currentNectar=currentFieldNectar && not GotoPlanterField){
+			if(currentNectar=currentFieldNectar && not GotoPlanterField && GatherFieldSipping){
 				lastnextfield:=ba_getlastfield(currentNectar)
 				lastField:=lastNextField[1]
 				nextField:=CurrentField
@@ -14697,7 +15188,7 @@ ba_planter()
 				}
 				maxplanters := min(MaxAllowedPlanters, maxplanters)
 				;determine last and next fields
-				if(currentNectar=currentFieldNectar && not GotoPlanterField){
+				if(currentNectar=currentFieldNectar && not GotoPlanterField && GatherFieldSipping){
 					lastnextfield:=ba_getlastfield(currentNectar)
 					lastField:=lastNextField[1]
 					nextField:=CurrentField
@@ -14888,6 +15379,8 @@ ba_GetNectarPercent(var){
 			*/
 		}
 	}
+	if (nectarpercent=100)
+		nectarpercent:=99.99
 	;msgbox %var%: %nectarpercent%
 	if (var="comforting"){
 		totalCom := nectarpercent
@@ -15059,7 +15552,8 @@ ba_placePlanter(fieldName, planter, planterNum){
 	objective:=(planter[1] . "(" . fieldName . ")")
 	nm_gotoRamp()
 	nm_gotoCannon()
-	nm_cannonTo(fieldName)
+	;nm_cannonTo(fieldName)
+	nm_cannonToPlanter(fieldName)
 	global MyField:=fieldName
 	sleep, 1000
 	;place next sprinkler
@@ -15289,8 +15783,8 @@ ba_harvestPlanter(planterNum){
 	planterName:=PlanterName%planterNum%
 	fieldName:=PlanterField%planterNum%
 	nm_setStatus("Collecting", (planterName . " (" . fieldName . ")"))
-	nm_cannonTo(fieldName)
-
+	;nm_cannonTo(fieldName)
+	nm_cannonToPlanter(fieldName)
 	sleep, 1000
 	findPlanter := nm_imgSearch("e_button.png",10)
     if (findPlanter[1] = 1){
@@ -15595,7 +16089,7 @@ LastInvigoratingField=Cactus
 ;planters array: [1] planter name, [2] nectar bonus, [3] speed bonus, [4] hours to complete growth (no field degradation is assumed)
 BambooPlanters=PetalPlanter, 1.5, 1.16, 12.12; PesticidePlanter, 1, 1.6, 6.25; PlanterOfPlenty, 1.5, 1, 16; BlueClayPlanter, 1.2, 1.17, 5.12; TackyPlanter, 1.25, 1, 8; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; RedClayPlanter, 1, 1, 6; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 BlueFlowerPlanters=TackyPlanter, 1, 1.5, 5.33; PlanterOfPlenty, 1.5, 1, 16; BlueClayPlanter, 1.2, 1.17, 5.12; PetalPlanter, 1, 1.16, 12.12; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; RedClayPlanter, 1, 1, 6; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
-CactusPlanters=PlanterOfPlenty, 1.5, 1, 16; BlueClayPlanter, 1, 1.13, 5.33; RedClayPlanter, 1.2, 1.11, 5.42; PetalPlanter, 1, 1.04, 13.53; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; TackyPlanter, 1, 1, 8; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
+CactusPlanters=PlanterOfPlenty, 1.5, 1, 16; RedClayPlanter, 1.2, 1.11, 5.42; BlueClayPlanter, 1, 1.13, 5.33; PetalPlanter, 1, 1.04, 13.53; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; TackyPlanter, 1, 1, 8; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 CloverPlanters=TackyPlanter, 1, 1.5, 5.33; PlanterOfPlenty, 1.5, 1, 16; RedClayPlanter, 1.2, 1.09, 5.53; PetalPlanter, 1, 1.16, 12.07; BlueClayPlanter, 1, 1.09, 5.53; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 CoconutPlanters=CandyPlanter, 1, 1.5, 2.67; PlanterOfPlenty, 1.5, 1.5, 10.67; PetalPlanter, 1, 1.45, 9.68; BlueClayPlanter, 1.2, 1.01, 5.93; RedClayPlanter, 1, 1.02, 5.91; PlasticPlanter, 1, 1, 2; TackyPlanter, 1, 1, 8; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
 DandelionPlanters=TackyPlanter, 1.25, 1.5, 5.33; PetalPlanter, 1.5, 1.43, 9.82; PlanterOfPlenty, 1.5, 1, 16; BlueClayPlanter, 1.2, 1.03, 5.85; RedClayPlanter, 1, 1.01, 5.93; PlasticPlanter, 1, 1, 2; CandyPlanter, 1, 1, 4; PesticidePlanter, 1, 1, 10; PaperPlanter, .75, 1, 1; TicketPlanter, 2, 1, 2
@@ -15657,6 +16151,7 @@ HarvestInterval=2
 AutomaticHarvestInterval=0
 HarvestFullGrown=0
 GotoPlanterField=0
+GatherFieldSipping=0
 PlasticPlanterCheck=1
 CandyPlanterCheck=1
 BlueClayPlanterCheck=1
@@ -15773,9 +16268,21 @@ if(bg)
 	bg:=0
 else
 	msgbox bakground task took too long
-global disableDayorNight, AFBrollingDice, BackpackPercentFiltered
+global disableDayorNight, AFBrollingDice, BackpackPercentFiltered, ReconnectHour, ReconnectMin, DailyReconnect
+;daily reconnect
+FormatTime, RChourUTC, %A_NowUTC%, hh
+FormatTime, RCminUTC, %A_Now%, mm
+if(!DailyReconnect && ReconnectHour && ReconnectMin && ReconnectHour=RChourUTC && ReconnectMin=RCminUTC) {
+	DailyReconnect:=1
+	nm_setStatus("Closing", "Roblox, Daily Reconnect")
+	While(winexist("Roblox")){
+		WinKill, Roblox
+		sleep, 1000
+	}
+}
+
 ;auto field boost
-if (AFBrollingDice && not disableDayorNight&& state!="Disconnected")
+if (AFBrollingDice && not disableDayorNight && state!="Disconnected")
     nm_fieldBoostDice()
 ;death check
 ;-->moved to background.ahk
@@ -15877,7 +16384,7 @@ global ZoomOut
 global MoveMethod
 global HiveVariation
 global HiveSlot
-global DisableToolUse, AnnounceGuidingStar
+global DisableToolUse, AnnounceGuidingStar, ReconnectHour, ReconnectMin, DailyReconnect
 global ClockCheck
 global MondoBuffCheck
 global MondoAction
@@ -16069,10 +16576,13 @@ GuiControlGet, KeyDelay
 GuiControlGet, ZoomIn
 GuiControlGet, ZoomOut
 IniRead, MoveSpeedFactor, nm_config.ini, Settings, MoveSpeedFactor
-GuiControlGet, HiveVariation
+;GuiControlGet, HiveVariation
+IniRead, HiveVariation, nm_config.ini, Settings, HiveVariation
 GuiControlGet, HiveSlot
 GuiControlGet, DisableToolUse
 GuiControlGet, AnnounceGuidingStar
+GuiControlGet, ReconnectHour
+GuiControlGet, ReconnectMin
 GuiControlGet, ClockCheck
 GuiControlGet, MondoBuffCheck
 GuiControlGet, MondoAction
@@ -16195,6 +16705,7 @@ IniRead, AFBdiceHotbar, nm_config.ini, Boost, AFBdiceHotbar
 IniRead, AFBglitterHotbar, nm_config.ini, Boost, AFBglitterHotbar
 IniRead, AFBGlitterLimit, nm_config.ini, Boost, AFBGlitterLimit
 IniRead, AFBGlitterLimitEnable, nm_config.ini, Boost, AFBGlitterLimitEnable
+IniRead, DailyReconnect, nm_config.ini, Settings, DailyReconnect
 ;set ActiveHotkeys[]
 global ActiveHotkeys
 ActiveHotkeys:=[]
@@ -16453,7 +16964,7 @@ nm_WM_COPYDATA(wParam, lParam){
 		}
 		send, /
 		sleep 200
-		Send {Blind}{Text} <<Guiding Star>> in %StringText% until __:%GSMins%
+		Send {Text} <<Guiding Star>> in %StringText% until __:%GSMins% ;{blind}
 		sleep 200
 		send, {Enter}
 		sleep 250
