@@ -21,7 +21,7 @@ runWith(version){
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.6.1"
+VersionID:="0.6.2"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; NATRO ENHANCEMENT STUFF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -7073,7 +7073,7 @@ nm_Bugrun(){
 				}
 				if(!found) { ;No King Beetle here...try again in 2 hours
 					if(A_Index=2){
-						LastKingBeetle:=nowUnix()-79200
+						LastKingBeetle:=nowUnix()-floor(79200*(1-GiftedViciousCheck*.15))+7200
 						IniWrite %LastKingBeetle%, nm_config.ini, Collect, LastKingBeetle
 					}
 					continue 	
@@ -9019,7 +9019,6 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 			sleep, 1000*MoveSpeedFactor*size
 			send {%TCFBKey% up}
 		}
-		msgbox stop here
 	} else if(pattern="auryn"){
 		;Auryn Gathering Path
 		AurynDelay:=175
@@ -9191,7 +9190,7 @@ nm_convert(hiveConfirm:=0)
 				If (nm_backpackPercent() = 0) {
 					break
 				}
-				If (disconnectcheck()=0) {
+				If (disconnectcheck()) {
 					return
 				}
 			}
@@ -9229,7 +9228,7 @@ nm_convert(hiveConfirm:=0)
 						ConvertStartTime:=0
 						return
 					}
-					If (disconnectcheck()=0) {
+					If (disconnectcheck()) {
 						return
 					}
 					sleep, 1000
@@ -9259,7 +9258,7 @@ nm_convert(hiveConfirm:=0)
 							ballooncomplete:=1
 							break
 						}
-						If (disconnectcheck()=0) {
+						If (disconnectcheck()) {
 							return
 						}
 						sleep, 1000

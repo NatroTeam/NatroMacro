@@ -1,7 +1,14 @@
+0.6.2 Patch Notes
+
+Bugs
+-Fixed issue causing pollen to not convert at all!
+-Fixed issue with King Beetle re-try timer not working properly.
+
+
 0.6.1 Patch Notes
 
 New Features
--Added new "Auryn" gathering pattern.  Shaped like my discord pfp.
+-Added new "Auryn" gathering pattern.  Shaped like my discord pfp.  This was added for fun so I have no idea if it is even an effective pattern!
 
 Other
 -The Ant Challenge objective for quests will bypass the normal 2 hour timeout as long as you have ant passes and the quest objective is not yet complete.  If not, it will do them every 2 hours whenever you get a free ant pass.
