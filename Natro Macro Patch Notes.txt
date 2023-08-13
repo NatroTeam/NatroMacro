@@ -1,3 +1,14 @@
+0.8.2 Patch Notes
+
+Bugs
+-Fixed an issue where the script would not pause properly while an external 'walk' script was running. This also indirectly fixes the issue where 'Guiding Star' announcement is interrupted by keystrokes from 'walk'.
+-Fixed an issue that would cause the macro to gather in a different pattern than the one chosen.
+-Patterns are now initialised at first launch, fixing the issue where the macro would stand still when it should be doing a gather pattern.
+
+Other
+-User will now be informed whether their private server link is deemed invalid when inputting in the GUI.
+
+
 0.8.1 Patch Notes
 
 Bugs

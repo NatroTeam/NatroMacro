@@ -36,12 +36,13 @@ If !FileExist("settings") ; ~ make sure the settings folder exists for stability
 }
 if(not fileexist("settings\nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.8.1"
+VersionID:="0.8.2"
 #include *i personal.ahk
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; UPDATE PATTERNS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; ~ at every start of macro, ensure all patterns are loaded into 'patterns.ahk'
+init := FileExist(A_ScriptDir "\settings\patterns.ahk") ? 0 : 1
 tempfile := FileOpen(A_ScriptDir "\settings\patterns.ahk", 0), checkString := tempFile.Read(), tempFile.Close()
 patternString := ""
 Loop, Files, %A_ScriptDir%\patterns\*.ahk
@@ -50,6 +51,8 @@ if (patternString != checkString)
 {
 	FileDelete, % A_ScriptDir "\settings\patterns.ahk"
 	FileAppend, % patternString, % A_ScriptDir "\settings\patterns.ahk"
+	if init
+		Reload
 	if checkString
 	{
 		msgbox, 0x34, , Change in patterns detected! Reload to update patterns?
@@ -84,7 +87,7 @@ global MoveSpeedFactor:=1
 global MoveSpeedFactorNum:=1
 global MoveSpeed
 global MoveSpeedNum
-global WalkPID:=0 ; ~ must be accessed by nm_gather() and nm_endWalk
+global currentWalk:={"pid":"", "name":""} ; ~ stores "pid" (script process ID) and "name" (pattern/movement name)
 global DayOrNight:=Day
 ;global disableDayorNight:=0
 ;global StingerCheck:=0
@@ -630,8 +633,7 @@ Gui, Add, GroupBox, x3 y23 w160 h215, Development
 Gui, Add, GroupBox, x163 y23 w335 h215, Contributors
 Gui, Font
 Gui, Add, Text, x5 y38 w155 +wrap +backgroundtrans, Special Thanks for your contributions in the development and testing of this project.  Your feedback and ideas have been invaluable in the design process!`n`nzez#8710`nFHL09#4061`nLittleChurch#1631 (N00b)`nZaappiix#2372`nSP#0305`nZiz | Jake#9154`nBlackBeard6#2691`nbaguetto#8775
-Gui, Add, Text, x170 y38 w330 +wrap +backgroundtrans, Thank you for your donations to this project!`n`nFHL09#4061`nNick 9#9476`nwilalwil2#4175`nAshtonishing#4420`nTheRealXoli#1017`nK_Money#0001`nHeat#9350`nSasuel#5393`nDisco#9130
-
+Gui, Add, Text, x170 y38 w330 +wrap +backgroundtrans, Thank you for your donations to this project!`n`nFHL09#4061`nNick 9#9476`nwilalwil2#4175`nAshtonishing#4420`nTheRealXoli#1017`nK_Money#0001`nHeat#9350`nSasuel#5393`nDisco#9130`nEthereal_Sparks#7693`nInzainiac#9806
 
 
 ;STATUS TAB
@@ -4416,19 +4418,15 @@ SkinForm(Param1 = "Apply", DLL = "", SkinName = ""){
 		DllCall(DLL . "\USkinExit")
 	}
 }
-nm_ServerLink(){
-	GuiControlGet, PrivServer
-	;https://www.roblox.com/games/
-	if (InStr(PrivServer, "https://www.roblox.com/games/") || InStr(PrivServer, "https://web.roblox.com/games/")) {
-	} else {
-		msgbox It appears you have not entered a full address.  Please ensure the entire private server address is included in this field.
-	}
-	if (InStr(PrivServer, "<") || InStr(PrivServer, ">")) {
-		msgbox It appears you have an improperly formatted server address.  Please remove "<" and or ">" from the full address.
-	}
-	;remove "/Bee-Swarm-Simulator" from link if it exists
-	PrivServer := StrReplace(PrivServer, "/Bee-Swarm-Simulator")
-	IniWrite, %PrivServer%, settings\nm_config.ini, Settings, PrivServer
+nm_ServerLink(){ ; ~ new private server link validation
+    GuiControlGet, PrivServer
+    
+    PrivServer := Trim(PrivServer)
+    
+    if ((StrLen(PrivServer) > 20) && !RegExMatch(PrivServer, "i)^((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\/?([^\/]*)\?privateServerLinkCode=\d{32}(\&[^\/]*)*$"))
+        msgbox It appears you have not entered a valid address.  Please ensure the entire private server address is included in this field.
+
+    IniWrite, %PrivServer%, settings\nm_config.ini, Settings, PrivServer
 }
 nm_setReconnectHour(){
 	global ReconnectHour
@@ -10185,7 +10183,7 @@ nm_loot(length, reps, direction){
 	}
 }
 nm_gather(pattern, patternsize:="M", reps:=1, facingcorner:=0){
-	global TCFBKey, AFCFBKey, TCLRKey, AFCLRKey, KeyDelay, MoveSpeedFactor, DisableToolUse, FwdKey, MoveSpeedNum, WalkPID, NewWalk ; ~ new walk requires movespeednum, WalkPID variable needed to check if external gather script is running
+	global TCFBKey, AFCFBKey, TCLRKey, AFCLRKey, KeyDelay, MoveSpeedFactor, DisableToolUse, FwdKey, MoveSpeedNum, currentWalk, NewWalk ; ~ new walk requires movespeednum and currentWalk variables
 	static patterns := {}
 	
 	if(pattern="stationary"){
@@ -10220,8 +10218,8 @@ nm_gather(pattern, patternsize:="M", reps:=1, facingcorner:=0){
 	
 	Prev_DetectHiddenWindows := A_DetectHiddenWindows
 	DetectHiddenWindows, On	
-	if !WinExist("ahk_class AutoHotkey ahk_pid " WalkPID)
-		nm_createWalk(patterns[pattern]) ; create cycled walk script for this gather session
+	if ((currentWalk["name"] != pattern) || !WinExist("ahk_class AutoHotkey ahk_pid " currentWalk["pid"]))
+		nm_createWalk(patterns[pattern], pattern) ; create / replace cycled walk script for this gather session
 	else
 		Send {F13} ; start new cycle
 	DetectHiddenWindows, %Prev_DetectHiddenWindows%
@@ -10243,12 +10241,13 @@ nm_Walk(tiles, MoveKey1, MoveKey2:=0){ ; ~ this function returns a string of AHK
 	Send {" MoveKey1 " up}" (MoveKey2 ? "{" MoveKey2 " up}" : "") "
 	)"
 }
-nm_createWalk(movement) ; ~ this function generates the 'walk' code and runs it for a given 'movement' (AHK code string), using movespeed correction if 'NewWalk' is enabled and legacy movement otherwise
+nm_createWalk(movement, name:="") ; ~ this function generates the 'walk' code and runs it for a given 'movement' (AHK code string), using movespeed correction if 'NewWalk' is enabled and legacy movement otherwise
 {
-	global newWalk, MoveSpeedNum, MoveSpeedFactor, WalkPID
+	global newWalk, MoveSpeedNum, MoveSpeedFactor, currentWalk, LeftKey, RightKey, FwdKey, BackKey
 	
 	; F13 is used by 'natro_macro.ahk' to tell 'walk' to complete a cycle
 	; F14 is held down by 'walk' to indicate that the cycle is in progress, then released when the cycle is finished
+	; F15 can be used by any script to pause / unpause the walk script, when unpaused it will resume from where it left off
 	
 	Prev_DetectHiddenWindows := A_DetectHiddenWindows
 	DetectHiddenWindows, On ; allow communication with walk script
@@ -10288,6 +10287,24 @@ nm_createWalk(movement) ; ~ this function generates the 'walk' code and runs it 
 		" movement "
 		Send {F14 up}
 		return
+		
+		F15::
+		if A_IsPaused
+		{
+			for k,v in [""" LeftKey """, """ RightKey """, """ FwdKey """, """ BackKey """, ""Space"", ""LButton"", ""RButton""]
+				if %v%state
+					Send % ""{"" v "" down}""
+		}
+		else
+		{
+			for k,v in [""" LeftKey """, """ RightKey """, """ FwdKey """, """ BackKey """, ""Space"", ""LButton"", ""RButton""]
+			{
+				%v%state := GetKeyState(v)
+				Send % ""{"" v "" up}""
+			}
+		}
+		Pause, Toggle, 1
+		return
 		)" ; this is just ahk code, it will be executed as a new script
 	}
 	else
@@ -10310,24 +10327,44 @@ nm_createWalk(movement) ; ~ this function generates the 'walk' code and runs it 
 		" RegExReplace(movement, "m)^(Walk)(\(.*\))", "DllCall(""Sleep"",UInt,222*" MoveSpeedFactor "*$2)") "
 		Send {F14 up}
 		return
+		
+		F15::
+		if A_IsPaused
+		{
+			for k,v in [""" LeftKey """, """ RightKey """, """ FwdKey """, """ BackKey """, ""Space"", ""Click""]
+				if %v%state
+					Send % ""{"" v "" down}""
+		}
+		else
+		{
+			for k,v in [""" LeftKey """, """ RightKey """, """ FwdKey """, """ BackKey """, ""Space"", ""Click""]
+			{
+				%v%state := GetKeyState(v)
+				Send % ""{"" v "" up}""
+			}
+		}
+		Pause, Toggle, 1
+		return
 		)"
 	}
 	
+	clipboard := code
+	
 	script := ExecScript(code, , "name=walk") ; run it
-	WalkPID := script.ProcessID
-	WinWait, % "ahk_class AutoHotkey ahk_pid " WalkPID, , 2
+	WinWait, % "ahk_class AutoHotkey ahk_pid " script.ProcessID, , 2
+	currentWalk["pid"] := script.ProcessID, currentWalk["name"] := name
 	DetectHiddenWindows, %Prev_DetectHiddenWindows%
 	return !ErrorLevel ; return 1 if successful, 0 otherwise
 }
 nm_endWalk() ; ~ this function forcefully ends the walk script
 {
-	global WalkPID
+	global currentWalk
 	Prev_DetectHiddenWindows := A_DetectHiddenWindows
 	DetectHiddenWindows On
-	WinClose % "ahk_class AutoHotkey ahk_pid " WalkPID
+	WinClose % "ahk_class AutoHotkey ahk_pid " currentWalk["pid"]
 	DetectHiddenWindows %Prev_DetectHiddenWindows%
-	WalkPID := 0
-	Send {%TCFBKey% up}{%AFCFBKey% up}{%TCLRKey% up}{%AFCLRKey% up}{F14 up}
+	currentWalk["pid"] := ""
+	Send {%TCFBKey% up}{%AFCFBKey% up}{%TCLRKey% up}{%AFCLRKey% up}{Space up}{Click up}{F14 up}
 }
 nm_convert(hiveConfirm:=0)
 {
@@ -10839,7 +10876,7 @@ DisconnectCheck(){
 			IniWrite, %TotalDisconnects%, settings\nm_config.ini, Status, TotalDisconnects
 			IniWrite, %SessionDisconnects%, settings\nm_config.ini, Status, SessionDisconnects
 		}
-		browsers := ["msedge.exe","chrome.exe","ieplore.exe","firefox.exe","opera.exe","brave.exe"]
+		browsers := ["msedge.exe","chrome.exe","iexplore.exe","firefox.exe","opera.exe","brave.exe"] ; ~ fixed internet explorer typo
 		for i, value in browsers {
 			if (WinExist("ahk_exe " . value)){
 				WinKill, ahk_exe %value%
@@ -13394,6 +13431,7 @@ nm_questGather(quest){
 	qreps:=FieldDefault[QuestGatherField]["pattern"][3]
 	while((BackpackPercentFiltered<100) && ((nowUnix()-gatherStart)<(300))){
 		nm_gather(qpattern, qsize, qreps)
+		nm_endWalk() ; ~ this is needed whenever a 'walk' script is created!
 		nm_fieldDriftCompensation()
 		if(quest="polar") {
 			nm_PolarQuestProg()
@@ -17017,6 +17055,7 @@ if(MacroRunning) {
 }
 IniWrite, %TotalRuntime%, settings\nm_config.ini, Status, TotalRuntime
 MacroRunning:=0
+nm_endWalk() ; ~ end walk script
 send {%FwdKey% up}
 send {%BackKey% up}
 send {%LeftKey% up}
@@ -17033,7 +17072,6 @@ nm_setStatus("End", "Macro")
 Prev_DetectHiddenWindows := A_DetectHiddenWindows ; ~ need to detect hidden windows to close guidingStarDetect.ahk
 DetectHiddenWindows, On
 WinClose guidingStarDetect.ahk
-nm_endWalk()
 DetectHiddenWindows, %Prev_DetectHiddenWindows%
 Reload
 return
@@ -17042,17 +17080,24 @@ f2::
 global state
 if(state="startup")
 	return
+Prev_DetectHiddenWindows := A_DetectHiddenWindows
+DetectHiddenWindows, On
 if(A_IsPaused) {
-	if(FwdKeyState)
-		send {%FwdKey% down}
-	if(BackKeyState)
-		send {%BackKey% down}
-	if(LeftKeyState)
-		send {%LeftKey% down}
-	if(RightKeyState)
-		send {%RightKey% down}
-	if(SpaceKeyState)
-		send {space down}
+	if WinExist("ahk_class AutoHotkey ahk_pid " currentWalk["pid"])
+		Send {F15} ; ~ unpause walk script
+	else
+	{
+		if(FwdKeyState)
+			send {%FwdKey% down}
+		if(BackKeyState)
+			send {%BackKey% down}
+		if(LeftKeyState)
+			send {%LeftKey% down}
+		if(RightKeyState)
+			send {%RightKey% down}
+		if(SpaceKeyState)
+			send {space down}
+	}
 	nm_setStatus(PauseState, PauseObjective)
 	MacroRunning:=1
 	;nm_sendHeartbeat(0)
@@ -17060,25 +17105,26 @@ if(A_IsPaused) {
 	MacroStartTime:=nowUnix()
 	GatherStartTime:=nowUnix()
 } else {
-	FwdKeyState:=GetKeyState(FwdKey)
-	BackKeyState:=GetKeyState(BackKey)
-	LeftKeyState:=GetKeyState(LeftKey)
-	RightKeyState:=GetKeyState(RightKey)
-	SpaceKeyState:=GetKeyState(Space)
-	PauseState:=state
-	PauseObjective:=objective
-	send {%FwdKey% up}
-	send {%BackKey% up}
-	send {%LeftKey% up}
-	send {%RightKey% up}
-	send {space up}
-	click up
+	if WinExist("ahk_class AutoHotkey ahk_pid " currentWalk["pid"])
+		Send {F15} ; ~ pause walk script
+	else
+	{
+		FwdKeyState:=GetKeyState(FwdKey)
+		BackKeyState:=GetKeyState(BackKey)
+		LeftKeyState:=GetKeyState(LeftKey)
+		RightKeyState:=GetKeyState(RightKey)
+		SpaceKeyState:=GetKeyState(Space)
+		PauseState:=state
+		PauseObjective:=objective
+		send {%FwdKey% up}
+		send {%BackKey% up}
+		send {%LeftKey% up}
+		send {%RightKey% up}
+		send {space up}
+		click up
+	}
 	
-	Prev_DetectHiddenWindows := A_DetectHiddenWindows 
-	DetectHiddenWindows, On
 	WinClose guidingStarDetect.ahk
-	nm_endWalk() ; ~ close walk script to stop gathering
-	DetectHiddenWindows, %Prev_DetectHiddenWindows%
 	
 	MacroRunning:=0
 	;manage runtimes
@@ -17093,6 +17139,7 @@ if(A_IsPaused) {
 	;nm_sendHeartbeat(1)
 	nm_setStatus("Paused", "Press F2 to Continue")
 }
+DetectHiddenWindows, %Prev_DetectHiddenWindows%
 Pause, Toggle, 1
 return
 f4::
@@ -17103,24 +17150,31 @@ loop, 1000 {
 return
 
 nm_WM_COPYDATA(wParam, lParam){
-	global youDied, LastGuid, PMondoGuid, MondoAction, MondoBuffCheck
+	global youDied, LastGuid, PMondoGuid, MondoAction, MondoBuffCheck, currentWalk ; ~ allow pausing of walk script
 	StringSize := NumGet(lParam + A_PtrSize)  ; Retrieves the CopyDataStruct's lpData member.
 	StringAddress := NumGet(lParam + 2*A_PtrSize)  ; Retrieves the CopyDataStruct's lpData member.
     StringText := StrGet(StringAddress)  ; Copy the string out of the structure.
 	if(wParam=1){ ;guiding star detected
 		nm_setStatus("Detected", "Guiding Star in " . StringText)
 		;pause
-		FwdKeyState:=GetKeyState(FwdKey)
-		BackKeyState:=GetKeyState(BackKey)
-		LeftKeyState:=GetKeyState(LeftKey)
-		RightKeyState:=GetKeyState(RightKey)
-		SpaceKeyState:=GetKeyState(Space)
-		send {%FwdKey% up}
-		send {%BackKey% up}
-		send {%LeftKey% up}
-		send {%RightKey% up}
-		send {space up}
-		click up
+		if WinExist("ahk_class AutoHotkey ahk_pid " currentWalk["pid"])
+			Send {F15} ; ~ pause walk script
+		else
+		{
+			FwdKeyState:=GetKeyState(FwdKey)
+			BackKeyState:=GetKeyState(BackKey)
+			LeftKeyState:=GetKeyState(LeftKey)
+			RightKeyState:=GetKeyState(RightKey)
+			SpaceKeyState:=GetKeyState(Space)
+			PauseState:=state
+			PauseObjective:=objective
+			send {%FwdKey% up}
+			send {%BackKey% up}
+			send {%LeftKey% up}
+			send {%RightKey% up}
+			send {space up}
+			click up
+		}
 		;Announce Guiding Star
 		;calculate mins
 		if(A_Min>=50) {
@@ -17145,17 +17199,21 @@ nm_WM_COPYDATA(wParam, lParam){
 			nm_mondo()
 			return 0 ; ~ return integer for OnMessage
 		} else {
-			;unpause
-			if(FwdKeyState)
-			send {%FwdKey% down}
-			if(BackKeyState)
-				send {%BackKey% down}
-			if(LeftKeyState)
-				send {%LeftKey% down}
-			if(RightKeyState)
-				send {%RightKey% down}
-			if(SpaceKeyState)
-				send {space down}
+			if WinExist("ahk_class AutoHotkey ahk_pid " currentWalk["pid"])
+				Send {F15} ; ~ unpause walk script
+			else
+			{
+				if(FwdKeyState)
+					send {%FwdKey% down}
+				if(BackKeyState)
+					send {%BackKey% down}
+				if(LeftKeyState)
+					send {%LeftKey% down}
+				if(RightKeyState)
+					send {%RightKey% down}
+				if(SpaceKeyState)
+					send {space down}
+			}
 		}
 	}
 	return 0 ; ~ return integer for OnMessage
