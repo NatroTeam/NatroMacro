@@ -1,6 +1,8 @@
 #NoEnv
+#NoTrayIcon
 #SingleInstance force
 SetBatchLines -1
+#InputLevel 1
 #MaxThreads 255
 SetWorkingDir %A_ScriptDir%
 
@@ -19,7 +21,8 @@ runWith(version){
 
 ;initialization
 global imgfolder:="..\nm_image_assets"
-resetTime:=LastHeartbeat:=nowUnix()
+resetTime:=LastRobloxWindow:=LastState:=LastHeartbeat:=nowUnix()
+state:=0
 DailyReconnect:=0
 IniRead, NightLastDetected, ..\settings\nm_config.ini, Collect, NightLastDetected
 IniRead, VBLastKilled, ..\settings\nm_config.ini, Collect, VBLastKilled
@@ -33,7 +36,9 @@ DetectHiddenWindows On
 SetTitleMatchMode 2
 
 ;OnMessages
+OnExit("ExitFunc")
 OnMessage(0x5554, "nm_setGlobalNum", 255)
+OnMessage(0x5555, "nm_setState", 255)
 
 loop {
 	Critical, On
@@ -53,9 +58,15 @@ loop {
 nm_setGlobalNum(wParam, lParam){
 	global
 	local var
-	static arr:=["resetTime", "NightLastDetected", "VBState", "StingerCheck", "VBLastKilled", "DailyReconnect", "LastHeartbeat", "state"]
+	static arr:=["resetTime", "NightLastDetected", "VBState", "StingerCheck", "VBLastKilled", "DailyReconnect", "LastHeartbeat"]
 	
 	var := arr[wParam], %var% := lParam
+	return 0
+}
+
+nm_setState(wParam, lParam){
+	global
+	state := wParam, LastState := lParam
 	return 0
 }
 
@@ -368,33 +379,36 @@ nm_dailyReconnect(){
 			Send_WM_COPYDATA("Closing: Roblox, Daily Reconnect", "natro_macro.ahk ahk_class AutoHotkey")
 		}
 		while(winexist("Roblox ahk_exe RobloxPlayerBeta.exe")){
-			WinKill, Roblox ahk_exe RobloxPlayerBeta.exe
+			WinKill
 			sleep, 1000
 		}
 	}
 }
 
 nm_sendHeartbeat(){
-	global LastHeartbeat
-	static LastRobloxWindow:=2**31
+	global LastHeartbeat, LastState, LastRobloxWindow
 	time := nowUnix()
 	if WinExist("Roblox ahk_exe RobloxPlayerBeta.exe")
 		LastRobloxWindow:=time
-	if ((time - LastHeartbeat > 60) || (time - LastRobloxWindow > 600)) {
+	if (((time - LastHeartbeat > 60) && (reason := 1)) || ((time - LastRobloxWindow > 600) && (reason := 2))) {
 		Loop, 10 {
-			WinGet, natroPID, PID, natro_macro.ahk ahk_class AutoHotkey
-			Process, Close, natroPID
-			while (WinExist("Roblox ahk_exe RobloxPlayerBeta.exe")) {
-				WinKill, Roblox ahk_exe RobloxPlayerBeta.exe
+			while WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+				WinGet, natroPID, PID
+				Process, Close, % natroPID
+			}
+			while WinExist("Roblox ahk_exe RobloxPlayerBeta.exe") {
+				WinKill
 				sleep, 1000
 			}
 			
-			Run, %A_ScriptDir%\..\natro_macro.ahk, %A_ScriptDir%\..
+			Run, ..\natro_macro.ahk
 			WinWait, natro_macro.ahk ahk_class AutoHotkeyGUI, , 30
 			if (success := !ErrorLevel) {
-				Sleep, 2000
+				Sleep, 5000
+				Send_WM_COPYDATA("Error: " ((reason = 1) ? "No Heartbeat in 60s!" : "No Roblox window in 10m!") "`nSuccessfully restarted macro!", "natro_macro.ahk ahk_class AutoHotkey")
+				Sleep, 1000
 				Send {F1}
-				break
+				ExitApp
 			}
 		}
 	}
@@ -426,4 +440,9 @@ WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", Win
     DllCall("user32\ClientToScreen", Ptr,hWnd, Ptr,&RECT)
     X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
     Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
+}
+
+ExitFunc()
+{
+	Process, Close, % DllCall("GetCurrentProcessId")
 }

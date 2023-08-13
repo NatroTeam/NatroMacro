@@ -1,5 +1,6 @@
 ;Enhancement Version 0.2.0
 #SingleInstance force
+#NoTrayIcon
 ;Menu, Tray, Icon, nm_image_assets\ptimers\bonk.ico
 global TimerGuiTransparency:=0
 global TimerX:=150
@@ -175,22 +176,25 @@ setTimerGuiTransparency(){
 		IniWrite, %TimerGuiTransparency%, settings\nm_config.ini, Gui, TimerGuiTransparency
 }
 ba_resetPlanterTimer1(){
-	PlanterHarvestTime1 := toUnix_()-1
-	PlanterHarvestTimeN:=PlanterHarvestTime1
-	IniWrite, %PlanterHarvestTimeN%, settings\nm_config.ini, Planters, PlanterHarvestTime1
-	IniRead, PlanterHarvestTime1, settings\nm_config.ini, Planters, PlanterHarvestTime1
+	IniRead, PlanterName1, settings\nm_config.ini, Planters, PlanterName3
+	if (PlanterName1 != "None") {
+		PlanterHarvestTime1 := toUnix_()-1
+		IniWrite, %PlanterHarvestTime1%, settings\nm_config.ini, Planters, PlanterHarvestTime1
+	}
 }
 ba_resetPlanterTimer2(){
-	PlanterHarvestTime2 := toUnix_()-1
-	PlanterHarvestTimeN:=PlanterHarvestTime2
-	IniWrite, %PlanterHarvestTimeN%, settings\nm_config.ini, Planters, PlanterHarvestTime2
-	IniRead, PlanterHarvestTime2, settings\nm_config.ini, Planters, PlanterHarvestTime2
+	IniRead, PlanterName2, settings\nm_config.ini, Planters, PlanterName3
+	if (PlanterName2 != "None") {
+		PlanterHarvestTime2 := toUnix_()-1
+		IniWrite, %PlanterHarvestTime2%, settings\nm_config.ini, Planters, PlanterHarvestTime2
+	}
 }
 ba_resetPlanterTimer3(){
-	PlanterHarvestTime3 := toUnix_()-1
-	PlanterHarvestTimeN:=PlanterHarvestTime3
-	IniWrite, %PlanterHarvestTimeN%, settings\nm_config.ini, Planters, PlanterHarvestTime3
-	IniRead, PlanterHarvestTime3, settings\nm_config.ini, Planters, PlanterHarvestTime3
+	IniRead, PlanterName3, settings\nm_config.ini, Planters, PlanterName3
+	if (PlanterName3 != "None") {
+		PlanterHarvestTime3 := toUnix_()-1
+		IniWrite, %PlanterHarvestTime3%, settings\nm_config.ini, Planters, PlanterHarvestTime3
+	}
 }
 ba_resetPlanterData1(){
 	;save changes
@@ -199,12 +203,6 @@ ba_resetPlanterData1(){
 	IniWrite, None, settings\nm_config.ini, Planters, PlanterNectar1
 	IniWrite, 20211106000000, settings\nm_config.ini, Planters, PlanterHarvestTime1
 	IniWrite, 0, settings\nm_config.ini, Planters, PlanterEstPercent1
-	;readback ini values
-	IniRead, PlanterName1, settings\nm_config.ini, Planters, PlanterName1
-	IniRead, PlanterField1, settings\nm_config.ini, Planters, PlanterField1
-	IniRead, PlanterNectar1, settings\nm_config.ini, Planters, PlanterNectar1
-	IniRead, PlanterHarvestTime1, settings\nm_config.ini, Planters, PlanterHarvestTime1
-	IniRead, PlanterEstPercent1, settings\nm_config.ini, Planters, PlanterEstPercent1
 }
 ba_resetPlanterData2(){
 	;save changes
@@ -213,12 +211,6 @@ ba_resetPlanterData2(){
 	IniWrite, None, settings\nm_config.ini, Planters, PlanterNectar2
 	IniWrite, 20211106000000, settings\nm_config.ini, Planters, PlanterHarvestTime2
 	IniWrite, 0, settings\nm_config.ini, Planters, PlanterEstPercent2
-	;readback ini values
-	IniRead, PlanterName2, settings\nm_config.ini, Planters, PlanterName2
-	IniRead, PlanterField2, settings\nm_config.ini, Planters, PlanterField2
-	IniRead, PlanterNectar2, settings\nm_config.ini, Planters, PlanterNectar2
-	IniRead, PlanterHarvestTime2, settings\nm_config.ini, Planters, PlanterHarvestTime2
-	IniRead, PlanterEstPercent2, settings\nm_config.ini, Planters, PlanterEstPercent2
 }
 ba_resetPlanterData3(){
 	;save changes
@@ -227,12 +219,6 @@ ba_resetPlanterData3(){
 	IniWrite, None, settings\nm_config.ini, Planters, PlanterNectar3
 	IniWrite, 20211106000000, settings\nm_config.ini, Planters, PlanterHarvestTime3
 	IniWrite, 0, settings\nm_config.ini, Planters, PlanterEstPercent3
-	;readback ini values
-	IniRead, PlanterName3, settings\nm_config.ini, Planters, PlanterName3
-	IniRead, PlanterField3, settings\nm_config.ini, Planters, PlanterField3
-	IniRead, PlanterNectar3, settings\nm_config.ini, Planters, PlanterNectar3
-	IniRead, PlanterHarvestTime3, settings\nm_config.ini, Planters, PlanterHarvestTime3
-	IniRead, PlanterEstPercent3, settings\nm_config.ini, Planters, PlanterEstPercent3
 }
 ba_saveTimerGui(){
 	global hGUI, TimerGuiTransparency

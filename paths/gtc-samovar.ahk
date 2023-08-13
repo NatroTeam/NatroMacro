@@ -19,28 +19,24 @@
 	" nm_Walk(63, FwdKey) "
 	send {" RotRight " 2}
 	" nm_Walk(45, FwdKey) "
-	" nm_Walk(9, RightKey) "
-	send {" RotLeft " 2}{" FwdKey " down}
-	Walk(45)
+	send {" RotLeft " 2}
+	" nm_Walk(27, FwdKey) "
 	send {space down}
-	HyperSleep(150)
+	HyperSleep(100)
 	send {space up}
-	Walk(3)
-	send {" RightKey " down}
-	Walk(14)
-	send {" RightKey " up}{" LeftKey " down}
-	Walk(8)
+	" nm_Walk(3, FwdKey) "
+	" nm_Walk(10, FwdKey, RightKey) "
+	" nm_Walk(8, FwdKey, LeftKey) "
 	send {space down}
-	HyperSleep(150)
+	HyperSleep(100)
 	send {space up}
-	Walk(2)
-	send {" LeftKey " up}{" RotRight " 1}
-	HyperSleep(1200)
+	" nm_Walk(3.5, FwdKey, LeftKey) "
+	send {" RotRight " 1}
+	" nm_Walk(3, FwdKey) "
 	send {space down}
-	HyperSleep(150)
+	HyperSleep(100)
 	send {space up}
-	Walk(7)
-	send {" FwdKey " up}
+	" nm_Walk(6, FwdKey) "
 	)"
 }
 else
@@ -49,41 +45,37 @@ else
 	(LTrim Join`r`n
 	;gotoramp
 	;gotocannon
-	HyperSleep(300)
-	send {" RotLeft " 2}
-	HyperSleep(300)
-	send {e down}
+	send {" RotLeft " 2}{e down}
 	HyperSleep(100)
 	send {e up}{" FwdKey " down}
 	HyperSleep(2000)
 	send {space 2}
 	HyperSleep(2800)
-	send {" FwdKey " down}{" LeftKey " down}
+	send {" LeftKey " down}
 	HyperSleep(900)
 	send {" LeftKey " up}
-	HyperSleep(1650)
-	send {" FwdKey " up}{space}
 	HyperSleep(1000)
-	send {" RotLeft " 2}{" FwdKey " down}
-	Walk(45)
-	send {space down}
-	HyperSleep(150)
-	send {space up}
-	Walk(3)
-	send {" RightKey " down}
-	Walk(14)
-	send {" RightKey " up}{" LeftKey " down}
-	Walk(8)
-	send {space down}
-	HyperSleep(150)
-	send {space up}
-	Walk(2)
-	send {" LeftKey " up}{" RotRight " 1}
-	HyperSleep(1200)
-	send {space down}
-	HyperSleep(150)
-	send {space up}
-	Walk(7)
 	send {" FwdKey " up}
+	HyperSleep(650)
+	send {space}
+	HyperSleep(1000)
+	send {" RotLeft " 2}
+	" nm_Walk(36, FwdKey) "
+	send {space down}
+	HyperSleep(100)
+	send {space up}
+	" nm_Walk(3, FwdKey) "
+	" nm_Walk(10, FwdKey, RightKey) "
+	" nm_Walk(8, FwdKey, LeftKey) "
+	send {space down}
+	HyperSleep(100)
+	send {space up}
+	" nm_Walk(3.5, FwdKey, LeftKey) "
+	send {" RotRight " 1}
+	" nm_Walk(3, FwdKey) "
+	send {space down}
+	HyperSleep(100)
+	send {space up}
+	" nm_Walk(6, FwdKey) "
 	)"
 }

@@ -1,3 +1,50 @@
+0.8.6 Patch Notes
+
+New Features
+-Added paths and implementation of all Beesmas machines to the macro! Many thanks to the Dev Team for creating the paths swiftly and our testers for testing them!
+-Added new Multiple Reset option in Settings tab. This can be used to reset additional times to counter in-game glitches.
+-Added GUI options and implementation of Heat-Treated and Hydroponic Planters.
+
+Bugs
+-Fixed missing objectives for some status updates, which resulted in "Traveling: Character 1" or duplicate bug run messages.
+-Fixed GUI display issue where Key Delay edit control was not wide enough.
+-Fixed errors with looting after spider finishing too early.
+-Fixed instances of the macro waiting too long to start the next task, or starting the next task prematurely (e.g. mondo reset loop).
+-Fixed status log in Status tab clearing after every restart of macro.
+-Movement scripts are now executed through StdIn instead of the named pipe, improving compatibility with various antiviruses (no more \\.\pipe\walk error).
+-Edited the loading of variables in StatusUpdater to reduce antivirus false positives and fix the issue where webhook updates are sometimes not sent.
+-Edited hive conversion to run completely from memory. This will solve some "Image not found" errors.
+-Fixed some "Error" status updates not being sent as the macro was subsequently closed.
+-Fixed reconnect after 10 failed attempts to reach Red Cannon.
+-Fixed an issue where StatusUpdater remained uninterruptible so the previous instance could not be closed.
+-Fixed an issue where Bucko Quest gathering did not stop when the quest objective was completed.
+-Eliminated attempts to harvest a "None" planter.
+-Fixed the issue where wrong hive slot was selected after reconnect by rewriting the function to claim hive slot.
+-Fixed an issue in StatMonitor and movement scripts where the client window was not properly detected due to a misinterpretation of the window handle.
+-Fixed a bug where pausing and unpausing resetted gather timer.
+-Fixed an issue where heartbeat function did not restart the macro.
+-Fixed the issue where AFB did not use glitter due to a variable not being declared as global.
+
+Other
+-Removed duplicate options in GUI drop-down lists to cause less confusion and improve GUI performance.
+-Altered default paths to Wealth Clock, Bucko Bee, Blueberry Dispenser, Ant Pass Dispenser, Blue Field Booster, and Pine Tree Planter to improve reliability.
+-Improved inventory search for planters using transparent background image searching. This also fixes some cases where the macro got stuck on Yes/No prompt.
+-Added detection of Ant Pass and various hive conversion messages to enhance intelligence when carrying out these actions. This also allows the macro to use Ant Passes more frequently than every 2 hours for quests (if they exist in inventory).
+-Reduced the sensitivity of cannon and hive bitmaps further.
+-Changed F15 hotkey to F16 to reduce interference from other programs.
+-Changed Inactive Honey check while gathering to require missing active honey after 3 successive gather cycles (previously 1).
+-Implemented new loot paths for Bug Run! Thanks to ERB for analysing the ideal paths for each mob.
+-Added 3 new default patterns: CornerXSnake, XSnake, Slimline. Thanks to Zaappiix for creating all of these!
+-Added a direct import of default patterns in the code to fix the issue of character standing still when gathering.
+-Slightly reduced length of hive image search to work better on smaller resolutions and window sizes.
+-Removed the small unnecessary delay in the middle of Red Cannon travel.
+-Increased safety of nm_searchForE(), nm_gotoCannon(), nm_findHiveSlot() to further verify their respective targets.
+-Improved quest log searching to allow larger logs and detect end of log reached, increasing speed and reliability of quest detection.
+-Improved harvesting of planters to detect failure and attempt multiple times (up to a limit of 10).
+-Changed mouse position for conversion clicking to prevent clicking on hive on small window sizes or resolutions.
+-Implemented more reliable enzyme usage during conversion.
+
+
 0.8.5 Patch Notes
 
 Bugs

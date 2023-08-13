@@ -1,31 +1,30 @@
 ﻿#NoEnv
+#NoTrayIcon
 #SingleInstance force
+SetBatchLines -1
 #MaxThreads 255
+SetWorkingDir %A_ScriptDir%
 #Include %A_ScriptDir%\..\lib\Gdip_All.ahk
-OnMessage(0x5554, "nm_setStatus", 255)
 
 ;initialization
-Critical, On
-SetWorkingDir %A_ScriptDir%
-IniRead, Webhook, ..\settings\nm_config.ini, Status, Webhook
-IniRead, WebhookCheck, ..\settings\nm_config.ini, Status, WebhookCheck
-IniRead, ssCheck, ..\settings\nm_config.ini, Status, ssCheck
-IniRead, discordUID, ..\settings\nm_config.ini, Status, discordUID
-IniRead, ssDebugging, ..\settings\nm_config.ini, Status, ssDebugging
-IniRead, WebhookEasterEgg, ..\settings\nm_config.ini, Status, WebhookEasterEgg
-FileRead, log, ..\settings\status_log.txt
-statuslog := StrSplit(log, "`r`n")
 pToken := Gdip_Startup()
-Critical, Off
-SetBatchLines -1
+OnExit("ExitFunc")
+OnMessage(0x5554, "nm_setStatus", 255)
 
 nm_status(stateString)
 {
-	global statuslog
+	static statuslog:=[]
+	
+	if (statuslog.Length() = 0)
+	{
+		FileRead, log, ..\settings\status_log.txt
+		statuslog := StrSplit(log, "`r`n")
+	}
+	
 	state := SubStr(stateString, 1, InStr(stateString, ": ")-1), objective := SubStr(stateString, InStr(stateString, ": ")+2)
 	
 	;manage status_log
-	statuslog.Push("[" A_Hour ":" A_Min ":" A_Sec "] " stateString)
+	statuslog.Push("[" A_Hour ":" A_Min ":" A_Sec "] " (InStr(stateString, "`n") ? SubStr(stateString, 1, InStr(stateString, "`n")-1) : stateString))
 	statuslog.RemoveAt(1,(statuslog.MaxIndex()>20) ? statuslog.MaxIndex()-20 : 0)
 	statuslogtext:=""
 	for k,v in statuslog
@@ -38,8 +37,14 @@ nm_status(stateString)
 	;;;;;;;;
 	;webhook
 	;;;;;;;;
-	global webhook, webhookCheck, ssCheck, discordUID, ssDebugging, WebhookEasterEgg
-	static lastCritical:=0, colorIndex:= 0
+	static webhook:=0, discordUID:=0, webhookCheck:="", ssCheck:="", ssDebugging:="", WebhookEasterEgg:="", lastCritical:=0, colorIndex:=0
+	for k,v in ["webhook","discordUID"]
+		if (%v% = 0)
+			IniRead, %v%, ..\settings\nm_config.ini, Status, %v%, 0
+	
+	for k,v in ["webhookCheck","ssCheck","ssDebugging","WebhookEasterEgg"]
+		if (%v% = "")
+			IniRead, %v%, ..\settings\nm_config.ini, Status, %v%, %A_Space%
 	
 	if (WebhookCheck && RegExMatch(webhook, "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) {
 		; set colour based on state string
@@ -56,25 +61,25 @@ nm_status(stateString)
 		}
 		else
 		{
-			color := ((state = "Disconnected") || (state = "You Died") || (state = "Failed") || (state = "Error") || (state = "Aborting") || (state = "Missing") || InStr(objective, "Phantom")) ? 15085139 ; red - error
+			color := ((state = "Disconnected") || (state = "You Died") || (state = "Failed") || (state = "Error") || (state = "Aborting") || (state = "Missing") || (state = "Canceling") || InStr(objective, "Phantom")) ? 15085139 ; red - error
 			: (InStr(objective, "Tunnel Bear") || InStr(objective, "King Beetle") || InStr(objective, "Vicious Bee") || InStr(objective, "Snail") || InStr(objective, "Crab") || InStr(objective, "Mondo") || InStr(objective, "Commando")) ? 7036559 ; purple - boss / attacking
 			: (InStr(objective, "Planter") || (state = "Placing") || (state = "Collecting")) ? 48355 ; blue - planters
 			: ((state = "Interupted")) ? 14408468 ; yellow - alert
 			: ((state = "Gathering")) ? 9755247 ; light green - gathering
 			: ((state = "Converting")) ? 8871681 ; yellow-brown - converting
-			: ((state = "Boosted") || (state = "Looting") || (state = "Claimed") || (state = "Completed") || (state = "Collected") || InStr(stateString,"confirmed") || InStr(stateString,"found")) ? 48128 ; green - success
+			: ((state = "Boosted") || (state = "Looting") || (state = "Keeping") || (state = "Claimed") || (state = "Completed") || (state = "Collected") || InStr(stateString,"confirmed") || InStr(stateString,"found")) ? 48128 ; green - success
 			: ((state = "Starting")) ? 16366336 ; orange - quests
 			: ((state = "Startup") || (state = "GUI") || (state = "Detected") || (state = "Closing") || (state = "Begin") || (state = "End")) ? 15658739 ; white - startup / utility
 			: 3223350
 		}
 
 		; check if event needs screenshot
-		critical_event := ((state = "Error") || ((nowUnix() - lastCritical > 300) && ((state = "Disconnected") || (InStr(stateString, "Resetting: Character") && (SubStr(objective, InStr(objective, " ")+1) > 2)) || InStr(stateString, "Phantom")))) ? 1 : 0
+		critical_event := ((state = "Error") || ((nowUnix() - lastCritical > 300) && ((state = "Disconnected") || (InStr(stateString, "Resetting: Character") && (SubStr(objective, InStr(objective, " ")+1) > 4)) || InStr(stateString, "Phantom")))) ? 1 : 0
 		if critical_event
 			lastCritical := nowUnix()
 		content := (discordUID && critical_event) ? "<@" discordUID ">" : ""
-		debug_event := (ssDebugging && ((state = "Placing") || (state = "Collecting") || (state = "Failed"))) ? 1 : 0
-		ss_event := InStr(stateString, "Amulet") ? 1 : 0
+		debug_event := (ssDebugging && ((state = "Placing") || (state = "Collecting") || (state = "Failed") || InStr(stateString, "Next Quest Step"))) ? 1 : 0
+		ss_event := (InStr(stateString, "Amulet") && (state != "You Died")) ? 1 : 0
 		
 		; create postdata and send to discord
 		message := "[" A_Hour ":" A_Min ":" A_Sec "] " StrReplace(StrReplace(StrReplace(StrReplace(stateString, "\", "\\"), "`n", "\n"), Chr(9), "  "), "`r", "")
@@ -143,6 +148,7 @@ nm_status(stateString)
 
 nm_setStatus() {
 	Critical
+	VarSetCapacity(stateString, 1024)
     ControlGetText, stateString, static4, Natro Macro
 	stateString ? nm_status(stateString)
 	return 0
@@ -237,4 +243,9 @@ Class CreateFormData {
 		     : "application/octet-stream"
 	}
 
+}
+
+ExitFunc()
+{
+	Process, Close, % DllCall("GetCurrentProcessId")
 }

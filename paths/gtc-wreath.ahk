@@ -1,14 +1,8 @@
-﻿if (MoveMethod = "walk")
-{
-	paths["wreath"] := "
-	(LTrim Join`r`n
-	
-	)"
-}
-else
-{
-	paths["wreath"] := "
-	(LTrim Join`r`n
-	
-	)"
-}
+﻿paths["wreath"] := "
+(LTrim Join`r`n
+;gotoramp
+Send {space down}
+HyperSleep(100)
+Send {space up}
+" nm_Walk(22.5, RightKey) "
+)"

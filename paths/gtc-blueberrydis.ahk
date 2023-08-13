@@ -3,12 +3,15 @@
 	paths["blueberrydis"] := "
 	(LTrim Join`r`n
 	;gotoramp
-	send {e}
 	" nm_Walk(88.875, BackKey, LeftKey) "
 	" nm_Walk(27, LeftKey) "
 	send {" RotLeft " 2}
-	" nm_Walk(27, FwdKey) "
-	" nm_Walk(13, FwdKey, RightKey) "
+	" nm_Walk(14, LeftKey) "
+	" nm_Walk(26, FwdKey) "
+	" nm_Walk(5, BackKey) "	
+	" nm_Walk(7.5, RightKey) "
+	" nm_Walk(9, FwdKey) "
+	" nm_Walk(14, FwdKey, RightKey) "
 	)"
 }
 else
@@ -26,12 +29,11 @@ else
 	send {" LeftKey " up}{space}
 	HyperSleep(1000)
 	send {" RotLeft " 2}
-	" nm_Walk(4.5, RightKey) "
-	" nm_Walk(6.75, FwdKey, RightKey) "
-	" nm_Walk(4.5, RightKey) "
-	" nm_Walk(2.25, BackKey, LeftKey) "
-	" nm_Walk(6, LeftKey) "
+	" nm_Walk(19, LeftKey) "
+	" nm_Walk(17, FwdKey) "
+	" nm_Walk(5, BackKey) "	
+	" nm_Walk(7.5, RightKey) "
 	" nm_Walk(9, FwdKey) "
-	" nm_Walk(12.5, FwdKey, RightKey) "
+	" nm_Walk(14, FwdKey, RightKey) "
 	)"
 }

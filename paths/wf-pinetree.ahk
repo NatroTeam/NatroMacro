@@ -6,7 +6,7 @@
 send {" RotLeft " 4}
 HyperSleep(100)
 send {space down}
-HyperSleep(50)
+HyperSleep(100)
 send {space up}
 HyperSleep(350)
 send {space}

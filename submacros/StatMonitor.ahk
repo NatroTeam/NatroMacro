@@ -9,7 +9,7 @@ SetWorkingDir %A_ScriptDir%\..
 #Include Gdip_ImageSearch.ahk
 
 ; set version number
-version := "2.2"
+version := "2.3α"
 
 ; obtain webhook for sending reports
 IniRead, webhook1, settings\nm_config.ini, Status, Webhook, 0
@@ -284,7 +284,8 @@ status_changes := {}
 stats := {1:["Total Boss Kills",0],2:["Total Vic Kills",0],3:["Total Bug Kills",0],4:["Total Planters",0],5:["Quests Done",0],6:["Disconnects",0]}
 
 ; enable receiving of messages
-OnMessage(0x004A, "Receive_WM_COPYDATA")
+OnMessage(0x5554, "SetStatus", 255)
+OnMessage(0x5555, "IncrementStat", 255)
 
 
 ; IMAGE ASSETS
@@ -521,15 +522,9 @@ DetectBuffs()
 	global buff_values, buff_characters, buff_bitmaps
 	
 	; check roblox window exists
-	if !(rblxid := WinExist("Roblox")) ; ahk_class ThunderRT6Form
-		return
-	
-	; get client window coordinates
-	VarSetCapacity(RECT, 16, 0)
-	DllCall("user32\GetClientRect", Ptr,rblxid, Ptr,&RECT)
-	DllCall("user32\ClientToScreen", Ptr,rblxid, Ptr,&RECT)
-	_x := NumGet(&RECT, 0, "Int"), _y := NumGet(&RECT, 4, "Int")
-	_w := NumGet(&RECT, 8, "Int"), _h := NumGet(&RECT, 12, "Int")
+	WinGetClientPos(_x, _y, _w, _h, "Roblox ahk_exe RobloxPlayerBeta.exe")
+	if (_w = 0)
+		return 0
 	
 	; create bitmap for buffs
 	pBMHWND := Gdip_BitmapFromScreen(_x "|" _y "|" _w "|" _h)
@@ -746,15 +741,9 @@ DetectHoney()
 	global honey_values, start_honey, start_time
 	
 	; check roblox window exists
-	if !(rblxid := WinExist("Roblox"))
+	WinGetClientPos(_x, _y, _w, _h, "Roblox ahk_exe RobloxPlayerBeta.exe")
+	if (_w = 0)
 		return 0
-		
-	; get client window coordinates
-	VarSetCapacity(RECT, 16, 0)
-	DllCall("user32\GetClientRect", Ptr,rblxid, Ptr,&RECT)
-	DllCall("user32\ClientToScreen", Ptr,rblxid, Ptr,&RECT)
-	_x := NumGet(&RECT, 0, "Int"), _y := NumGet(&RECT, 4, "Int")
-	_w := NumGet(&RECT, 8, "Int"), _h := NumGet(&RECT, 12, "Int")
 	
 	; initialise array to store detected values and get bitmap and effect ready
 	detectedValues := {}
@@ -1514,40 +1503,26 @@ FormatNumber(n)
 
 
 /*
-Receive_WM_COPYDATA()
-this function is responsible for receiving messages from other scripts
-its main function in this script is to receive information from the main macro script
-Example #4, https://www.autohotkey.com/docs/commands/OnMessage.htm
+SetStatus()
+this function is responsible for receiving messages from the main macro script to set current status
+wParam is the status number, lParam is the second of the hour in which this status came into effect
 */
+SetStatus(wParam, lParam){
+	global status_changes
+	if (lParam > status_changes.MaxIndex())
+		status_changes[lParam] := wParam
+	return 0
+}
 
-Receive_WM_COPYDATA(wParam, lParam)
-{
-	global stats, status_changes
-	
-    StringAddress := NumGet(lParam + 2*A_PtrSize)
-    str := StrGet(StringAddress)
-    
-	; string received is "status %status_number%"
-	; status_number: 0 = other, 1 = gathering, 2 = converting
-	if (SubStr(str,1,6) = "status")
-	{
-		status_number := SubStr(str,8)
-		if (A_Min*60+A_Sec > status_changes.MaxIndex())
-			status_changes[A_Min*60+A_Sec] := status_number
-		return 1
-	}
-	
-	; string received is "incrementstat %stat_name%"
-	if (SubStr(str,1,13) = "incrementstat")
-	{
-		stat_name := SubStr(str,15)
-		for k,v in stats
-			if (stat_name = v[1])
-				v[2]++
-		return 1
-	}
-	
-	; invalid command
+
+/*
+IncrementStat()
+this function is responsible for receiving messages from the main macro script to increment stats
+wParam is the stat to be incrememted, lParam is the amount
+*/
+IncrementStat(wParam, lParam){
+	global stats
+	stats[wParam][2] += lParam
 	return 0
 }
 
@@ -1892,4 +1867,15 @@ WaitForAsync(ByRef Object)
    DllCall(NumGet(NumGet(Object+0)+8*A_PtrSize), "ptr", Object, "ptr*", ObjectResult)   ; GetResults
    ObjRelease(Object)
    Object := ObjectResult
+}
+
+WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", WinTitle:="", WinText:="", ExcludeTitle:="", ExcludeText:="")
+{
+    local hWnd, RECT
+    hWnd := WinExist(WinTitle, WinText, ExcludeTitle, ExcludeText)
+    VarSetCapacity(RECT, 16, 0)
+    DllCall("user32\GetClientRect", Ptr,hWnd, Ptr,&RECT)
+    DllCall("user32\ClientToScreen", Ptr,hWnd, Ptr,&RECT)
+    X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
+    Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
 }

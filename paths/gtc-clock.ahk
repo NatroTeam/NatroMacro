@@ -14,6 +14,7 @@
 	" nm_Walk(4, FwdKey) "
 	" nm_Walk(5.625, LeftKey) "
 	" nm_Walk(10.125, FwdKey) "
+	send {" RotRight " 2}
 	)"
 }
 else
@@ -24,18 +25,14 @@ else
 	;gotocannon
 	Send {e down}
 	HyperSleep(100)
-	Send {e up}{" LeftKey " down}{" FwdKey " down}
-	HyperSleep(850)
+	Send {e up}{" FwdKey " down}{" LeftKey " down}
+	HyperSleep(1500)
 	send {space 2}
-	HyperSleep(2475)
-	send {" FwdKey " up}
-	HyperSleep(500)
-	send {" LeftKey " up}
-	HyperSleep(3500)
-	send {space}
-	HyperSleep(1000)
-	send {" LeftKey " down}
-	HyperSleep(1000)
-	send {" LeftKey " up}
+	Sleep 8000
+	Send {" FwdKey " up}{" LeftKey " up}
+	" nm_Walk(15, BackKey) "
+	" nm_Walk(3.5, RightKey) "
+	" nm_Walk(2, RightKey, BackKey) "
+	" nm_Walk(1, BackKey) "
 	)"
 }

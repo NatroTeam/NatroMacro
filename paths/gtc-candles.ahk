@@ -1,72 +1,28 @@
-﻿if (MoveMethod = "walk")
-{
-	paths["candles"] := "
-	(LTrim Join`r`n
-	;gotoramp
-	;gotocannon
-	HyperSleep(900)
-	Send {" RightKey " down}
-	Walk(17)
-	Send {" RightKey " up}
-	HyperSleep(800)
-	send {space down}{" RightKey " down}
-	HyperSleep(200)
-	send {space up}
-	Walk(6)
-	Send {" RightKey " up}{" RotRight " 2}
-	HyperSleep(1100)
-	send {space down}{" FwdKey " down}
-	HyperSleep(200)
-	send {space up}
-	Walk(3)
-	Send {" FwdKey " up}
-	HyperSleep(1000)
-	send {space down}{" RightKey " down}
-	HyperSleep(300)
-	send {space up}
-	HyperSleep(300)
-	send {space down}
-	HyperSleep(500)
-	send {space up}
-	HyperSleep(500)
-	send {" RightKey " up}
-	" nm_Walk(1, RightKey) "
-	" nm_Walk(14, FwdKey) "
-	)"
-}
-else
-{
-	paths["candles"] := "
-	(LTrim Join`r`n
-	;gotoramp
-	;gotocannon
-	HyperSleep(900)
-	Send {" RightKey " down}
-	Walk(17)
-	Send {" RightKey " up}
-	HyperSleep(800)
-	send {space down}{" RightKey " down}
-	HyperSleep(200)
-	send {space up}
-	Walk(6)
-	Send {" RightKey " up}{" RotRight " 2}
-	HyperSleep(1100)
-	send {space down}{" FwdKey " down}
-	HyperSleep(200)
-	send {space up}
-	Walk(3)
-	Send {" FwdKey " up}
-	HyperSleep(1000)
-	send {space down}{" RightKey " down}
-	HyperSleep(300)
-	send {space up}
-	HyperSleep(300)
-	send {space down}
-	HyperSleep(500)
-	send {space up}
-	HyperSleep(500)
-	send {" RightKey " up}
-	" nm_Walk(1, RightKey) "
-	" nm_Walk(14, FwdKey) "
-	)"
-}
+﻿paths["candles"] := "
+(LTrim Join`r`n
+;gotoramp
+Send {space down}
+HyperSleep(100)
+Send {space up}
+" nm_Walk(28, RightKey) "
+send {space down}
+HyperSleep(100)
+send {space up}
+" nm_Walk(6, RightKey) "
+Sleep 500
+send {" RotRight " 2}
+send {space down}
+HyperSleep(100)
+send {space up}
+" nm_Walk(3, FwdKey) "
+Sleep 1000
+send {space down}{" RightKey " down}
+HyperSleep(100)
+send {space up}
+HyperSleep(300)
+send {space}{" RightKey " up}
+HyperSleep(1000)
+" nm_Walk(4, RightKey) "
+" nm_Walk(14, FwdKey) "
+Sleep 500
+)"

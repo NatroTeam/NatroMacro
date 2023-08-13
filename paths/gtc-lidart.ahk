@@ -15,53 +15,22 @@
 	" nm_Walk(54, RightKey) "
 	" nm_Walk(54, BackKey) "
 	" nm_Walk(58.5, RightKey) "
+	" nm_Walk(3, LeftKey) "
 	" nm_Walk(57, FwdKey) "
-	" nm_Walk(2, BackKey) "
-	" nm_Walk(20, LeftKey) "
-	" nm_Walk(4, LeftKey, FwdKey) "
-	" nm_Walk(4, RightKey) "
-	send {" FwdKey " down}{space down}
-	HyperSleep(300)
-	send {space up}
-	HyperSleep(300)
+	" nm_Walk(16, LeftKey) "
+	" nm_Walk(3, FwdKey) "
+	" nm_Walk(8, LeftKey) "
+	" nm_Walk(3.6, RightKey) "
+	" nm_Walk(40, FwdKey) "
 	send {space down}
-	HyperSleep(300)
+	HyperSleep(100)
 	send {space up}
-	Walk(10)
+	" nm_Walk(21.5, FwdKey) "
 	send {space down}
-	HyperSleep(300)
+	HyperSleep(100)
 	send {space up}
-	HyperSleep(300)
-	send {space down}
-	HyperSleep(300)
-	send {space up}
-	Walk(10)
-	send {space down}
-	HyperSleep(300)
-	send {space up}
-	HyperSleep(300)
-	send {space down}
-	HyperSleep(300)
-	send {space up}
-	Walk(10)
-	send {space down}
-	HyperSleep(300)
-	send {space up}
-	HyperSleep(300)
-	send {space down}
-	HyperSleep(300)
-	send {space up}
-	Walk(10)
-	send {space down}
-	HyperSleep(300)
-	send {space up}
-	HyperSleep(300)
-	send {space down}
-	HyperSleep(300)
-	send {space up}
-	Walk(15)
-	send {" FwdKey " up}
-	" nm_Walk(10, BackKey) "
+	" nm_Walk(3.5, FwdKey) "
+	Sleep 1000
 	)"
 }
 else
@@ -70,64 +39,31 @@ else
 	(LTrim Join`r`n
 	;gotoramp
 	;gotocannon
-	HyperSleep(100)
 	send {e down}
 	HyperSleep(100)
 	send {e up}{" LeftKey " down}{" BackKey " down}
-	HyperSleep(1575)
+	HyperSleep(1400)
 	send {space 2}
 	HyperSleep(1100)
 	send {" LeftKey " up}
 	HyperSleep(650)
 	send {" BackKey " up}{space}{" RotRight " 4}
-	HyperSleep(1500)
+	Sleep 1500
 	" nm_Walk(4, RightKey, FwdKey) "
-	" nm_Walk(25, FwdKey) "
-	" nm_Walk(2, BackKey) "
-	" nm_Walk(20, LeftKey) "
-	" nm_Walk(4, LeftKey, FwdKey) "
-	" nm_Walk(4, RightKey) "
-	send {" FwdKey " down}{space down}
-	HyperSleep(300)
-	send {space up}
-	HyperSleep(300)
+	" nm_Walk(23, FwdKey) "
+	" nm_Walk(9, LeftKey) "
+	" nm_Walk(3, FwdKey) "
+	" nm_Walk(8, LeftKey) "
+	" nm_Walk(3.6, RightKey) "
+	" nm_Walk(40, FwdKey) "
 	send {space down}
-	HyperSleep(300)
+	HyperSleep(100)
 	send {space up}
-	Walk(10)
+	" nm_Walk(21.5, FwdKey) "
 	send {space down}
-	HyperSleep(300)
+	HyperSleep(100)
 	send {space up}
-	HyperSleep(300)
-	send {space down}
-	HyperSleep(300)
-	send {space up}
-	Walk(10)
-	send {space down}
-	HyperSleep(300)
-	send {space up}
-	HyperSleep(300)
-	send {space down}
-	HyperSleep(300)
-	send {space up}
-	Walk(10)
-	send {space down}
-	HyperSleep(300)
-	send {space up}
-	HyperSleep(300)
-	send {space down}
-	HyperSleep(300)
-	send {space up}
-	Walk(10)
-	send {space down}
-	HyperSleep(300)
-	send {space up}
-	HyperSleep(300)
-	send {space down}
-	HyperSleep(300)
-	send {space up}
-	Walk(15)
-	send {" FwdKey " up}
-	" nm_Walk(10, BackKey) "
+	" nm_Walk(3.5, FwdKey) "
+	Sleep 1000
 	)"
 }

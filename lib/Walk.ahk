@@ -53,16 +53,9 @@ DetectMovespeed(hasteCap:=0)
 	global hasty_guard, gifted_hasty, base_movespeed, buff_characters, bitmaps
 	
 	; check roblox window exists
-	rblxid := WinExist("Roblox") ; ahk_class ThunderRT6Form
-	if !rblxid
+	WinGetClientPos(_x, _y, _w, _h, "Roblox ahk_exe RobloxPlayerBeta.exe")
+	if (_w = 0)
 		return 10000000 ; large number to break walk loop
-	
-	; get client window coordinates
-	VarSetCapacity(RECT, 16, 0)
-	DllCall("user32\GetClientRect", Ptr,rblxid, Ptr,&RECT)
-	DllCall("user32\ClientToScreen", Ptr,rblxid, Ptr,&RECT)
-	_x := NumGet(&RECT, 0, "Int"), _y := NumGet(&RECT, 4, "Int")
-	_w := NumGet(&RECT, 8, "Int"), _h := NumGet(&RECT, 12, "Int")
 	
 	; get screen bitmap of buff area from client window
 	pBMArea := Gdip_BitmapFromScreen(_x "|" _y+30 "|" _w "|50")
@@ -120,4 +113,15 @@ DetectMovespeed(hasteCap:=0)
 	
 	; use movespeed formula on obtained values
 	return ((base_movespeed + (coconut_haste ? 10 : 0) + (bear ? 6 : 0)) * (hasty_guard ? 1.1 : 1) * (gifted_hasty ? 1.2 : 1) * (1 + max(0, haste-hasteCap)*0.1) * (haste_plus ? 2 : 1) * (oil ? 1.2 : 1) * (smoothie ? 1.25 : 1))
+}
+
+WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", WinTitle:="", WinText:="", ExcludeTitle:="", ExcludeText:="")
+{
+    local hWnd, RECT
+    hWnd := WinExist(WinTitle, WinText, ExcludeTitle, ExcludeText)
+    VarSetCapacity(RECT, 16, 0)
+    DllCall("user32\GetClientRect", Ptr,hWnd, Ptr,&RECT)
+    DllCall("user32\ClientToScreen", Ptr,hWnd, Ptr,&RECT)
+    X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
+    Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
 }
