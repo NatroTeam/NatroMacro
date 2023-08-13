@@ -20,7 +20,7 @@ runWith(version){
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if(not fileexist("nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.5.0"
+VersionID:="0.5.1"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; NATRO ENHANCEMENT STUFF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -442,11 +442,11 @@ Gui, Add, DropDownList, x18 y115 w90 vFieldName2 gnm_FieldSelect2, %FieldName2%|
 GuiControl, disable, FieldName2
 Gui, Add, DropDownList, x18 y175 w90 vFieldName3 gnm_FieldSelect3, %FieldName3%||None|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower
 GuiControl, disable, FieldName3
-Gui, Add, DropDownList, x118 y57 w60 vFieldPattern1 gnm_SaveGather, %FieldPattern1%||Lines|Snake|Diamonds|Squares|Typewriter
+Gui, Add, DropDownList, x118 y57 w60 vFieldPattern1 gnm_SaveGather, %FieldPattern1%||Lines|Snake|Diamonds|Squares|Typewriter|Stationary
 GuiControl, disable, FieldPattern1
-Gui, Add, DropDownList, x118 y115 w60 vFieldPattern2 gnm_SaveGather, %FieldPattern2%||Lines|Snake|Diamonds|Squares|Typewriter
+Gui, Add, DropDownList, x118 y115 w60 vFieldPattern2 gnm_SaveGather, %FieldPattern2%||Lines|Snake|Diamonds|Squares|Typewriter|Stationary
 GuiControl, disable, FieldPattern2
-Gui, Add, DropDownList, x118 y175 w60 vFieldPattern3 gnm_SaveGather, %FieldPattern3%||Lines|Snake|Diamonds|Squares|Typewriter
+Gui, Add, DropDownList, x118 y175 w60 vFieldPattern3 gnm_SaveGather, %FieldPattern3%||Lines|Snake|Diamonds|Squares|Typewriter|Stationary
 GuiControl, disable, FieldPattern3
 Gui, Add, DropDownList, x180 y57 w40 vFieldPatternSize1 gnm_SaveGather, %FieldPatternSize1%||XS|S|M|L|XL
 GuiControl, disable, FieldPatternSize1
@@ -804,6 +804,7 @@ global BugrunScorpionsLoot
 global BugrunWerewolfLoot
 global StingerCheck
 IniRead, GiftedViciousCheck, nm_config.ini, Collect, GiftedViciousCheck
+IniRead, BugrunInterruptCheck, nm_config.ini, Collect, BugrunInterruptCheck
 IniRead, BugrunLadybugsCheck, nm_config.ini, Collect, BugrunLadybugsCheck
 IniRead, BugrunRhinoBeetlesCheck, nm_config.ini, Collect, BugrunRhinoBeetlesCheck
 IniRead, BugrunSpiderCheck, nm_config.ini, Collect, BugrunSpiderCheck
@@ -821,40 +822,41 @@ IniRead, TunnelBearCheck, nm_config.ini, Collect, TunnelBearCheck
 IniRead, TunnelBearBabyCheck, nm_config.ini, Collect, TunnelBearBabyCheck
 IniRead, KingBeetleCheck, nm_config.ini, Collect, KingBeetleCheck
 IniRead, KingBeetleBabyCheck, nm_config.ini, Collect, KingBeetleBabyCheck
-Gui, Add, Checkbox, x260 y45 w110 +border vGiftedViciousCheck gnm_saveCollect Checked%GiftedViciousCheck%, Apply Hive Bonus:`nGifted Vicious Bee
-Gui, Add, text, x260 y75 +BackgroundTrans, Loot
-Gui, Add, text, x295 y75 +BackgroundTrans, Kill
-Gui, Add, text, x260 y77 +BackgroundTrans, _ _ _ _ _ _ _ _ _ _ _ _
-Gui, Add, text, x285 y75 +BackgroundTrans, !
-Gui, Add, text, x285 y85 +BackgroundTrans, !
-Gui, Add, text, x285 y105 +BackgroundTrans, !
-Gui, Add, text, x285 y125 +BackgroundTrans, !
-Gui, Add, text, x285 y145 +BackgroundTrans, !
-Gui, Add, text, x285 y165 +BackgroundTrans, !
-Gui, Add, text, x285 y185 +BackgroundTrans, !
-Gui, Add, Checkbox, x266 y95 +BackgroundTrans vBugrunLadybugsLoot  gnm_saveCollect Checked%BugrunLadybugsLoot%, %A_Space%!
+Gui, Add, Checkbox, x260 y43 w110 +border vGiftedViciousCheck gnm_saveCollect Checked%GiftedViciousCheck%, Apply Hive Bonus:`nGifted Vicious Bee
+Gui, Add, Checkbox, x257 y70 w120 h15 +BackgroundTrans vBugrunInterruptCheck gnm_saveCollect Checked%BugrunInterruptCheck%, Allow Gather Interrupt
+Gui, Add, text, x260 y90 +BackgroundTrans, Loot
+Gui, Add, text, x295 y90 +BackgroundTrans, Kill
+Gui, Add, text, x260 y92 +BackgroundTrans, _ _ _ _ _ _ _ _ _ _ _ _
+Gui, Add, text, x285 y90 +BackgroundTrans, !
+Gui, Add, text, x285 y100 +BackgroundTrans, !
+Gui, Add, text, x285 y120 +BackgroundTrans, !
+Gui, Add, text, x285 y140 +BackgroundTrans, !
+Gui, Add, text, x285 y160 +BackgroundTrans, !
+Gui, Add, text, x285 y180 +BackgroundTrans, !
+Gui, Add, text, x285 y200 +BackgroundTrans, !
+Gui, Add, Checkbox, x266 y110 +BackgroundTrans vBugrunLadybugsLoot  gnm_saveCollect Checked%BugrunLadybugsLoot%, %A_Space%!
 GuiControl, disable, BugrunLadybugsLoot
-Gui, Add, Checkbox, x266 y115 +BackgroundTrans vBugrunRhinoBeetlesLoot gnm_saveCollect Checked%BugrunRhinoBeetlesLoot%, %A_Space%!
+Gui, Add, Checkbox, x266 y130 +BackgroundTrans vBugrunRhinoBeetlesLoot gnm_saveCollect Checked%BugrunRhinoBeetlesLoot%, %A_Space%!
 GuiControl, disable, BugrunRhinoBeetlesLoot
-Gui, Add, Checkbox, x266 y135 +BackgroundTrans vBugrunSpiderLoot gnm_saveCollect Checked%BugrunSpiderLoot%, %A_Space%!
+Gui, Add, Checkbox, x266 y150 +BackgroundTrans vBugrunSpiderLoot gnm_saveCollect Checked%BugrunSpiderLoot%, %A_Space%!
 GuiControl, disable, BugrunSpiderLoot
-Gui, Add, Checkbox, x266 y155 +BackgroundTrans vBugrunMantisLoot gnm_saveCollect Checked%BugrunMantisLoot%, %A_Space%!
+Gui, Add, Checkbox, x266 y170 +BackgroundTrans vBugrunMantisLoot gnm_saveCollect Checked%BugrunMantisLoot%, %A_Space%!
 GuiControl, disable, BugrunMantisLoot
-Gui, Add, Checkbox, x266 y175 +BackgroundTrans vBugrunScorpionsLoot gnm_saveCollect Checked%BugrunScorpionsLoot%, %A_Space%!
+Gui, Add, Checkbox, x266 y190 +BackgroundTrans vBugrunScorpionsLoot gnm_saveCollect Checked%BugrunScorpionsLoot%, %A_Space%!
 GuiControl, disable, BugrunScorpionLoot
-Gui, Add, Checkbox, x266 y195 +BackgroundTrans vBugrunWerewolfLoot gnm_saveCollect Checked%BugrunWerewolfLoot%, %A_Space%!
+Gui, Add, Checkbox, x266 y210 +BackgroundTrans vBugrunWerewolfLoot gnm_saveCollect Checked%BugrunWerewolfLoot%, %A_Space%!
 GuiControl, disable, BugrunWerewolfLoot
-Gui, Add, Checkbox, x294 y95 +BackgroundTrans vBugrunLadybugsCheck gnm_saveCollect Checked%BugrunLadybugsCheck%, Ladybugs
+Gui, Add, Checkbox, x294 y110 +BackgroundTrans vBugrunLadybugsCheck gnm_saveCollect Checked%BugrunLadybugsCheck%, Ladybugs
 GuiControl, disable, BugrunLadybugsCheck
-Gui, Add, Checkbox, x294 y115 +BackgroundTrans vBugrunRhinoBeetlesCheck gnm_saveCollect Checked%BugrunRhinoBeetlesCheck%, Rhino Beetles
+Gui, Add, Checkbox, x294 y130 +BackgroundTrans vBugrunRhinoBeetlesCheck gnm_saveCollect Checked%BugrunRhinoBeetlesCheck%, Rhino Beetles
 GuiControl, disable, BugrunRhinoBeetlesCheck
-Gui, Add, Checkbox, x294 y135 +BackgroundTrans vBugrunSpiderCheck gnm_saveCollect Checked%BugrunSpiderCheck%, Spider
+Gui, Add, Checkbox, x294 y150 +BackgroundTrans vBugrunSpiderCheck gnm_saveCollect Checked%BugrunSpiderCheck%, Spider
 GuiControl, disable, BugrunSpiderCheck
-Gui, Add, Checkbox, x294 y155 +BackgroundTrans vBugrunMantisCheck gnm_saveCollect Checked%BugrunMantisCheck%, Mantis
+Gui, Add, Checkbox, x294 y170 +BackgroundTrans vBugrunMantisCheck gnm_saveCollect Checked%BugrunMantisCheck%, Mantis
 GuiControl, disable, BugrunManticCheck
-Gui, Add, Checkbox, x294 y175 +BackgroundTrans vBugrunScorpionsCheck gnm_saveCollect Checked%BugrunScorpionsCheck%, Scorpions
+Gui, Add, Checkbox, x294 y190 +BackgroundTrans vBugrunScorpionsCheck gnm_saveCollect Checked%BugrunScorpionsCheck%, Scorpions
 GuiControl, disable, BugrunScorpionsCheck
-Gui, Add, Checkbox, x294 y195 +BackgroundTrans vBugrunWerewolfCheck gnm_saveCollect Checked%BugrunWerewolfCheck%, Werewolf
+Gui, Add, Checkbox, x294 y210 +BackgroundTrans vBugrunWerewolfCheck gnm_saveCollect Checked%BugrunWerewolfCheck%, Werewolf
 GuiControl, disable, BugrunWerewolfCheck
 Gui, Add, Checkbox, x390 y45 +BackgroundTrans vStingerCheck gnm_saveCollect Checked%StingerCheck%, Stingers
 GuiControl, disable, StingerCheck
@@ -870,12 +872,12 @@ Gui, Add, text, x412 y105 +BackgroundTrans, !
 Gui, Add, text, x412 y115 +BackgroundTrans, !
 Gui, Add, Checkbox, x393 y95 +BackgroundTrans vTunnelBearBabyCheck gnm_saveCollect Checked%TunnelBearBabyCheck%, %A_Space%!
 GuiControl, disable, TunnelBearBabyCheck
-;Gui, Add, Checkbox, x393 y115 +BackgroundTrans vKingBeetleBabyCheck , %A_Space%!
-;GuiControl, disable, KingBeetleBabyCheck
+Gui, Add, Checkbox, x393 y115 +BackgroundTrans vKingBeetleBabyCheck gnm_saveCollect Checked%KingBeetleBabyCheck%, %A_Space%!
+GuiControl, disable, KingBeetleBabyCheck
 Gui, Add, Checkbox, x421 y95 +BackgroundTrans vTunnelBearCheck gnm_saveCollect Checked%TunnelBearCheck%, Tunnel Bear
 GuiControl, disable, TunnelBearCheck
-;Gui, Add, Checkbox, x421 y115 +BackgroundTrans vKingBeetleCheck gnm_saveCollect Checked%KingBeetleCheck%, King Beetle
-;GuiControl, disable, KingBeetleCheck
+Gui, Add, Checkbox, x421 y115 +BackgroundTrans vKingBeetleCheck gnm_saveCollect Checked%KingBeetleCheck%, King Beetle
+GuiControl, disable, KingBeetleCheck
 
 ;Other
 ;Gui, Add, Checkbox, x202 y64 , Ants
@@ -1034,13 +1036,19 @@ Gui, Add, Button, x20 y170 w90 h30 vAutoFieldBoostButton gnm_autoFieldBoostButto
 Gui, Tab, Quest
 GuiControl,focus, Tab
 IniRead, PolarQuestCheck, nm_config.ini, Quests, PolarQuestCheck
+IniRead, PolarQuestGatherInterruptCheck, nm_config.ini, Quests, PolarQuestGatherInterruptCheck
 IniRead, PolarQuestProgress, nm_config.ini, Quests, PolarQuestProgress
+IniRead, HoneyQuestCheck, nm_config.ini, Quests, HoneyQuestCheck
 PolarQuestProgress := StrReplace(PolarQuestProgress, "|", "`n")
 Gui, Font, w700
 Gui, Add, GroupBox, x5 y25 w150 h135, Polar Bear
+Gui, Add, GroupBox, x5 y160 w150 h40, Honey Bee
 Gui, Font
 Gui, Add, Checkbox, x80 y25 vPolarQuestCheck gnm_savequest Checked%PolarQuestCheck%, Enable
-Gui, Add, Text, x10 y40 w150 h120 vPolarQuestProgress +border, %PolarQuestProgress%
+Gui, Add, Checkbox, x15 y40 vPolarQuestGatherInterruptCheck gnm_savequest Checked%PolarQuestGatherInterruptCheck%, Allow Gather Interrupt
+Gui, Add, Text, x8 y55 w145 h103 vPolarQuestProgress +border, %PolarQuestProgress%
+Gui, Add, Checkbox, x80 y160 vHoneyQuestCheck gnm_savequest Checked%HoneyQuestCheck%, Enable
+Gui, Add, Text, x8 y175 w145 h20 vHoneyQuestProgress +border, Startup
 
 
 ;PLANTERS+ TAB
@@ -1324,6 +1332,7 @@ nm_Start(){
 		nm_Mondo()
 		;quests
 		nm_PolarQuest()
+		nm_HoneyQuest()
 		;booster
 		nm_ToAnyBooster()
 		;gather
@@ -1563,7 +1572,7 @@ nm_setStatus(newState:=0, newObjective:=0){
 		}
 		; check if it is time for hourly update
 		timeBetween := nowUnix() - lastHourlyUpdate
-		if ((timeBetween >= 300) && !InStr(stateString, "Startup"))
+		if ((timeBetween >= 3600) && !InStr(stateString, "Startup"))
 		{
 			; initialise variables
 			rblxid := WinExist("Roblox")
@@ -2336,6 +2345,7 @@ nm_saveCollect(){
 	global SamovarCheck
 	global LidArtCheck
 	global GiftedViciousCheck
+	global BugrunInterruptCheck
 	global BugrunLadybugsCheck
 	global BugrunRhinoBeetlesCheck
 	global BugrunSpiderCheck
@@ -2371,6 +2381,7 @@ nm_saveCollect(){
 	GuiControlGet SamovarCheck
 	GuiControlGet LidArtCheck
 	GuiControlGet GiftedViciousCheck
+	GuiControlGet BugrunInterruptCheck
 	GuiControlGet BugrunLadybugsCheck
 	GuiControlGet BugrunRhinoBeetlesCheck
 	GuiControlGet BugrunSpiderCheck
@@ -2406,6 +2417,7 @@ nm_saveCollect(){
 	IniWrite, %SamovarCheck%, nm_config.ini, Collect, SamovarCheck
 	IniWrite, %LidArtCheck%, nm_config.ini, Collect, LidArtCheck
 	IniWrite, %GiftedViciousCheck%, nm_config.ini, Collect, GiftedViciousCheck
+	IniWrite, %BugrunInterruptCheck%, nm_config.ini, Collect, BugrunInterruptCheck
 	IniWrite, %BugrunLadybugsCheck%, nm_config.ini, Collect, BugrunLadybugsCheck
 	IniWrite, %BugrunRhinoBeetlesCheck%, nm_config.ini, Collect, BugrunRhinoBeetlesCheck
 	IniWrite, %BugrunSpiderCheck%, nm_config.ini, Collect, BugrunSpiderCheck
@@ -2769,7 +2781,11 @@ nm_HotkeyWhile7(){
 }
 nm_savequest(){
 	GuiControlGet, PolarQuestCheck
+	GuiControlGet, PolarQuestGatherInterruptCheck
+	GuiControlGet, HoneyQuestCheck
 	IniWrite, %PolarQuestCheck%, nm_config.ini, Quests, PolarQuestCheck
+	IniWrite, %PolarQuestGatherInterruptCheck%, nm_config.ini, Quests, PolarQuestGatherInterruptCheck
+	IniWrite, %HoneyQuestCheck%, nm_config.ini, Quests, HoneyQuestCheck
 }
 nm_ResetTotalStats(){
 	global TotalRuntime:=0
@@ -4062,257 +4078,7 @@ nm_testButton(){
 	WinActivate, Roblox
 	WinWaitActive, Roblox
 	
-	CoordMode, Pixel, Relative
-	TopOfBuffY:=35
-	startMeasuring:=A_TickCount
-	;Bloat
-	WinGetPos, windowX, windowY, windowWidth, windowHeight, Roblox
-	bloatColor:=0xCC8048
-	PixelSearch, bx2, by2, 0, 0, %windowWidth%, 150, %bloatColor%,0, Fast
-	If (ErrorLevel=0) {
-		nexty:=by2+1
-		pixels:=1
-		loop 38 {
-			PixelGetColor, OutputVar, %bx2%, %nexty%, fast
-			If (OutputVar=bloatColor) {
-				nexty:=nexty+1
-				pixels:=pixels+1
-			} else {
-				blo:=round(pixels/38*100, 0)
-				break
-			}
-		}
-	} else {
-		blo:=0
-	}
-	blonum:=round((blo/100)*6, 2)
-	msgbox Bloat=%blo% -> %blonum%
-	;Comforting
-	;nectarColor:=0x7E9EB3
-	nectarColor:=0xB39E7E
-	;: (var="motivating") ? nectarColor:=0xB37D93
-	;: (var="satisfying") ? nectarColor:=0xA798B3
-	;: (var="refreshing") ? nectarColor:=0x75B378
-	;: (var="invigorating") ? nectarColor:=0x5159B3
-	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%,0, Fast
-	If (ErrorLevel=0) {
-		nexty:=by2+1
-		pixels:=1
-		loop 38 {
-			;PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
-			PixelGetColor, OutputVar, %bx2%, %nexty%, fast
-			;PixelSearch, bx3, by3, %bx2%-1, %nexty%, %bx2%+38, 150, %nectarColor%,0, Fast
-			If (OutputVar=nectarColor) {
-			;If (ErrorLevel=0) {
-				nexty:=nexty+1
-				pixels:=pixels+1
-			} else {
-				com:=round(pixels/38*100, 0)
-				break
-			}
-		}
-	} else {
-		com:=0
-	}
-	/*
-	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
-	if(TopOfBuffY)
-		com:=round((38-(bx2-TopOfBuffY))/38*100, 0)
-	If (ErrorLevel=0) {
-		nexty:=by2+1
-		pixels:=1
-		loop 37 {
-			PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
-			If (OutputVar=nectarColor) {
-				nexty:=nexty+1
-				pixels:=pixels+1
-			} else {
-				com:=round(pixels/38*100, 0)
-				break
-			}
-		}
-	} else {
-		com:=0
-	}
-	*/
-	;Refreshing
-	nectarColor:=0x75B378
-	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%,0, Fast
-	If (ErrorLevel=0) {
-		nexty:=by2+1
-		pixels:=1
-		loop 38 {
-			;PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
-			PixelGetColor, OutputVar, %bx2%, %nexty%, fast
-			;PixelSearch, bx3, by3, %bx2%-1, %nexty%, %bx2%+38, 150, %nectarColor%,0, Fast
-			If (OutputVar=nectarColor) {
-			;If (ErrorLevel=0) {
-				nexty:=nexty+1
-				pixels:=pixels+1
-			} else {
-				ref:=round(pixels/38*100, 0)
-				break
-			}
-		}
-	} else {
-		ref:=0
-	}
-	/*
-	nectarColor:=0x78B375
-	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
-	if(TopOfBuffY)
-		ref:=round((38-(bx2-TopOfBuffY))/38*100, 0)
-	If (ErrorLevel=0) {
-		nexty:=by2+1
-		pixels:=1
-		loop 37 {
-			PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
-			If (OutputVar=nectarColor) {
-				nexty:=nexty+1
-				pixels:=pixels+1
-			} else {
-				ref:=round(pixels/38*100, 0)
-				break
-			}
-		}
-	} else {
-		ref:=0
-	}
-	*/
-	;Satisfying
-	nectarColor:=0xA798B3
-	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%,0, Fast
-	If (ErrorLevel=0) {
-		nexty:=by2+1
-		pixels:=1
-		loop 38 {
-			;PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
-			PixelGetColor, OutputVar, %bx2%, %nexty%, fast
-			;PixelSearch, bx3, by3, %bx2%-1, %nexty%, %bx2%+38, 150, %nectarColor%,0, Fast
-			If (OutputVar=nectarColor) {
-			;If (ErrorLevel=0) {
-				nexty:=nexty+1
-				pixels:=pixels+1
-			} else {
-				sat:=round(pixels/38*100, 0)
-				break
-			}
-		}
-	} else {
-		sat:=0
-	}
-	/*
-	nectarColor:=0xB398A7
-	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
-	if(TopOfBuffY)
-		sat:=round((38-(bx2-TopOfBuffY))/38*100, 0)
-	If (ErrorLevel=0) {
-		nexty:=by2+1
-		pixels:=1
-		loop 37 {
-			PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
-			If (OutputVar=nectarColor) {
-				nexty:=nexty+1
-				pixels:=pixels+1
-			} else {
-				sat:=round(pixels/38*100, 0)
-				break
-			}
-		}
-	} else {
-		sat:=0
-	}
-	*/
-	;Motivating
-	nectarColor:=0xB37D93
-	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%,0, Fast
-	If (ErrorLevel=0) {
-		nexty:=by2+1
-		pixels:=1
-		loop 38 {
-			;PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
-			PixelGetColor, OutputVar, %bx2%, %nexty%, fast
-			;PixelSearch, bx3, by3, %bx2%-1, %nexty%, %bx2%+38, 150, %nectarColor%,0, Fast
-			If (OutputVar=nectarColor) {
-			;If (ErrorLevel=0) {
-				nexty:=nexty+1
-				pixels:=pixels+1
-			} else {
-				mot:=round(pixels/38*100, 0)
-				break
-			}
-		}
-	} else {
-		mot:=0
-	}
-	/*
-	nectarColor:=0x937DB3
-	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
-	if(TopOfBuffY)
-		mot:=round((38-(bx2-TopOfBuffY))/38*100, 0)
-	If (ErrorLevel=0) {
-		nexty:=by2+1
-		pixels:=1
-		loop 37 {
-			PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
-			If (OutputVar=nectarColor) {
-				nexty:=nexty+1
-				pixels:=pixels+1
-			} else {
-				mot:=round(pixels/38*100, 0)
-				break
-			}
-		}
-	} else {
-		mot:=0
-	}
-	*/
-	;Invigorating
-	nectarColor:=0x5159B3
-	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%,0, Fast
-	If (ErrorLevel=0) {
-		nexty:=by2+1
-		pixels:=1
-		loop 38 {
-			;PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
-			PixelGetColor, OutputVar, %bx2%, %nexty%, fast
-			;PixelSearch, bx3, by3, %bx2%-1, %nexty%, %bx2%+38, 150, %nectarColor%,0, Fast
-			If (OutputVar=nectarColor) {
-			;If (ErrorLevel=0) {
-				nexty:=nexty+1
-				pixels:=pixels+1
-			} else {
-				inv:=round(pixels/38*100, 0)
-				break
-			}
-		}
-	} else {
-		inv:=0
-	}
-	/*
-	nectarColor:=0xB35951
-	PixelSearch, bx2, by2, 0, 30, 860, 150, %nectarColor%, 0, RGB Fast
-	if(TopOfBuffY)
-		inv:=round((38-(bx2-TopOfBuffY))/38*100, 0)
-	If (ErrorLevel=0) {
-		nexty:=by2+1
-		pixels:=1
-		loop 37 {
-			PixelGetColor, OutputVar, %bx2%, %nexty%, RGB fast
-			If (OutputVar=nectarColor) {
-				nexty:=nexty+1
-				pixels:=pixels+1
-			} else {
-				inv:=round(pixels/38*100, 0)
-				break
-			}
-		}
-	} else {
-		inv:=0
-	}
-	*/
-	speed:=A_TickCount-startMeasuring
-	msgbox Com=%com% Ref=%ref% Sat=%sat% Mot=%mot% Inv=%inv% nextY:=%nextY%`nspeed=%speed%
+	nm_gotoQuestGiver("honey")
 
 
 	/*
@@ -4541,8 +4307,10 @@ nm_Reset(checkAll:=1, wait:=2000){
 	temp:=(nowUnix()-resetTime)
 	if((nowUnix()-resetTime)<wait) {
 		remaining:=floor((wait-(nowUnix()-resetTime))/1000) ;seconds
-		waitStr:=(remaining . " Seconds")
-		nm_setStatus("Waiting", waitStr)
+		if(remaining>5){
+			waitStr:=(remaining . " Seconds")
+			nm_setStatus("Waiting", waitStr)
+		}
 		sleep, (remaining*1000) ;miliseconds
 	}
 }
@@ -5583,12 +5351,7 @@ nm_Bugrun(){
 	global BugrunLadybugsLoot
 	global LastBugrunLadybugs
 	global GiftedViciousCheck
-	global TunnelBearCheck
-	global TunnelBearBabyCheck
-	global KingBeetleCheck
-	global KingBeetleBabyCheck
-	global LastTunnelBear
-	global LastKingBeetle
+	global TunnelBearCheck, TunnelBearBabyCheck, KingBeetleCheck, KingBeetleBabyCheck, LastTunnelBear, LastKingBeetle
 	global TotalBossKills, SessionBossKills, TotalBugKills, SessionBugKills
 	bypass:=0
 	if(((BugrunSpiderCheck || QuestSpider) && (nowUnix()-LastBugrunSpider)>floor(1800*(1-GiftedViciousCheck*.15))) && HiveBees>=5){ ;30 minutes
@@ -5615,9 +5378,14 @@ nm_Bugrun(){
 				send, 1
 				if(!DisableToolUse)
 					click, down
-				loop 20 { ;wait to kill
-					if(A_Index=20)
+				loop 30 { ;wait to kill
+					if(A_Index=30)
 						success:=1
+					searchRet := nm_imgSearch("spider.png",30,"lowright")
+					If (searchRet[1] = 0) {
+						success:=1
+						break
+					}
 					if(youDied)
 						break
 					if(!DisableToolUse)
@@ -5689,6 +5457,11 @@ nm_Bugrun(){
 					loop 10 { ;wait to kill
 						if(A_Index=10)
 							success:=1
+						searchRet := nm_imgSearch("ladybug.png",30,"lowright")
+						If (searchRet[1] = 0) {
+							success:=1
+							break
+						}
 						if(youDied)
 							break
 						if(!DisableToolUse)
@@ -5747,6 +5520,11 @@ nm_Bugrun(){
 				loop 10 { ;wait to kill
 					if(A_Index=10)
 						success:=1
+					searchRet := nm_imgSearch("ladybug.png",30,"lowright")
+					If (searchRet[1] = 0) {
+						success:=1
+						break
+					}
 					if(youDied)
 						break
 					if(!DisableToolUse)
@@ -5815,6 +5593,20 @@ nm_Bugrun(){
 				loop 10 { ;wait to kill
 					if(A_Index=10)
 						success:=1
+					if((BugrunLadybugsCheck || QuestLadybugs)){
+						searchRet := nm_imgSearch("ladybug.png",30,"lowright")
+						If (searchRet[1] = 0) {
+							success:=1
+							break
+						}
+					}
+					if((BugrunRhinoBeetlesCheck || QuestRhinoBeetles)){
+						searchRet := nm_imgSearch("rhino.png",30,"lowright")
+						If (searchRet[1] = 0) {
+							success:=1
+							break
+						}
+					}
 					if(youDied)
 						break
 					if(!DisableToolUse)
@@ -5847,6 +5639,7 @@ nm_Bugrun(){
 			;blue flower
 			success:=0
 			bypass:=1
+			sleep, 5000
 			BugRunField:="blue flower"
 			nm_setStatus("Traveling")
 			nm_Move(5000*MoveSpeedFactor, BackKey)
@@ -5875,6 +5668,11 @@ nm_Bugrun(){
 				loop 12 { ;wait to kill
 					if(A_Index=12)
 						success:=1
+					searchRet := nm_imgSearch("rhino.png",30,"lowright")
+					If (searchRet[1] = 0) {
+						success:=1
+						break
+					}
 					if(youDied)
 						break
 					if(!DisableToolUse)
@@ -5930,6 +5728,12 @@ nm_Bugrun(){
 					loop 15 { ;wait to kill
 						if(A_Index=15)
 							success:=1
+						searchRet := nm_imgSearch("rhino.png",30,"lowright")
+						If (searchRet[1] = 0) {
+							success:=1
+							sleep 3000
+							break
+						}
 						if(youDied)
 							break
 						if(!DisableToolUse)
@@ -6035,6 +5839,19 @@ nm_Bugrun(){
 				loop 20 { ;wait to kill
 					if(A_Index=20)
 						success:=1
+					if(not (BugrunMantisCheck || QuestMantis) && (BugrunRhinoBeetlesCheck || QuestRhinoBeetles)){
+						searchRet := nm_imgSearch("rhino.png",30,"lowright")
+						If (searchRet[1] = 0) {
+							success:=1
+							break
+						}
+					} else if((BugrunMantisCheck || QuestMantis)){
+						searchRet := nm_imgSearch("mantis.png",30,"lowright")
+						If (searchRet[1] = 0) {
+							success:=1
+							break
+						}
+					}
 					if(youDied)
 						break
 					if(!DisableToolUse)
@@ -6100,12 +5917,32 @@ nm_Bugrun(){
 					loop 25 { ;wait to kill
 						if(mod(A_Index,4)=1){
 							nm_Move(1500*MoveSpeedFactor, FwdKey)
+							searchRet := nm_imgSearch("werewolf.png",30,"lowright")
+							If (searchRet[1] = 0) {
+								success:=1
+								break
+							}
 						} else if(mod(A_Index,4)=2){
 							nm_Move(1500*MoveSpeedFactor, LeftKey)
+							searchRet := nm_imgSearch("werewolf.png",30,"lowright")
+							If (searchRet[1] = 0) {
+								success:=1
+								break
+							}
 						} else if(mod(A_Index,4)=3){
 							nm_Move(1500*MoveSpeedFactor, BackKey)
+							searchRet := nm_imgSearch("werewolf.png",30,"lowright")
+							If (searchRet[1] = 0) {
+								success:=1
+								break
+							}
 						} else if(mod(A_Index,4)=0){
 							nm_Move(1500*MoveSpeedFactor, RightKey)
+							searchRet := nm_imgSearch("werewolf.png",30,"lowright")
+							If (searchRet[1] = 0) {
+								success:=1
+								break
+							}
 						}
 						if(A_Index=25)
 							success:=1
@@ -6173,6 +6010,12 @@ nm_Bugrun(){
 					loop 20 { ;wait to kill
 						if(A_Index=20)
 							success:=1
+						searchRet := nm_imgSearch("mantis.png",30,"lowright")
+						If (searchRet[1] = 0) {
+							success:=1
+							sleep, 4000
+							break
+						}
 						if(youDied)
 							break
 						if(!DisableToolUse)
@@ -6249,12 +6092,32 @@ nm_Bugrun(){
 					loop 17 { ;wait to kill
 						if(mod(A_Index,4)=1){
 							nm_Move(1500*MoveSpeedFactor, FwdKey)
+							searchRet := nm_imgSearch("scorpion.png",30,"lowright")
+							If (searchRet[1] = 0) {
+								success:=1
+								break
+							}
 						} else if(mod(A_Index,4)=2){
 							nm_Move(1500*MoveSpeedFactor, LeftKey)
+							searchRet := nm_imgSearch("scorpion.png",30,"lowright")
+							If (searchRet[1] = 0) {
+								success:=1
+								break
+							}
 						} else if(mod(A_Index,4)=3){
 							nm_Move(1500*MoveSpeedFactor, BackKey)
+							searchRet := nm_imgSearch("scorpion.png",30,"lowright")
+							If (searchRet[1] = 0) {
+								success:=1
+								break
+							}
 						} else if(mod(A_Index,4)=0){
 							nm_Move(1500*MoveSpeedFactor, RightKey)
+							searchRet := nm_imgSearch("scorpion.png",30,"lowright")
+							If (searchRet[1] = 0) {
+								success:=1
+								break
+							}
 						}
 						if(A_Index=17)
 							success:=1
@@ -6281,6 +6144,8 @@ nm_Bugrun(){
 					nm_Move(1500*MoveSpeedFactor, BackKey, RightKey)
 					nm_loot(3000, 5, "left")
 					click, up
+				} else {
+					sleep 4000
 				}
 			}
 		}
@@ -6293,7 +6158,6 @@ nm_Bugrun(){
 				nm_gotoRamp()
 				If (MoveMethod="walk") {
 					break
-					;nm_walkTo(BugRunField)
 				} else {
 					nm_gotoCannon()
 					send, {e}
@@ -6337,7 +6201,7 @@ nm_Bugrun(){
 					found:=0
 					loop 3 {
 						sleep 1000
-						if(nm_imgSearch("planterConfirm3.png",25,"high")[1] = 0){
+						if(nm_imgSearch("planterConfirm3.png",10,"high")[1] = 0){
 							found:=1
 							break
 						} else {
@@ -6345,17 +6209,10 @@ nm_Bugrun(){
 							sleep 150
 							loop 3{
 								sleep 1000
-								if(nm_imgSearch("planterConfirm3.png",25,"high")[1] = 0){
+								if(nm_imgSearch("planterConfirm3.png",10,"high")[1] = 0){
 									found:=1
 									break
 								}
-							}
-							if(found) {
-								break
-							} else { ;No TunnelBear here...try again in 2 hours
-								LastTunnelBear:=nowUnix()-165600
-								IniWrite %LastTunnelBear%, nm_config.ini, Collect, LastTunnelBear
-								continue
 							}
 						}
 					}
@@ -6381,6 +6238,12 @@ nm_Bugrun(){
 								break
 							sleep, 1000
 						}
+					} else { ;No TunnelBear here...try again in 2 hours
+						if(A_Index=2){
+							LastTunnelBear:=nowUnix()-165600
+							IniWrite %LastTunnelBear%, nm_config.ini, Collect, LastTunnelBear
+							return
+						}
 					}
 					;loot
 					if(TBdead) {
@@ -6393,8 +6256,173 @@ nm_Bugrun(){
 						nm_Move(18000*MoveSpeedFactor, BackKey)
 						LastTunnelBear:=nowUnix()
 						IniWrite %LastTunnelBear%, nm_config.ini, Collect, LastTunnelBear
-						return
 					}
+				}
+				if(TBdead)
+					break
+			}
+		}
+		;king beetle
+		if((KingBeetleCheck) && (nowUnix()-LastKingBeetle)>floor(86400*(1-GiftedViciousCheck*.15))){ ;24 hours
+			loop 2 {
+				wait:=min(20000, (50-HiveBees)*1000)
+				nm_Reset(1, wait)
+				objective:="King Beetle"
+				nm_gotoRamp()
+				If (MoveMethod="walk") {
+					nm_walkTo("blue flower")
+					nm_Move(5000*MoveSpeedFactor, RightKey, FwdKey)
+					nm_Move(4000*MoveSpeedFactor, FwdKey)
+					loop 2 {
+						send {%RotRight%}
+					}
+					nm_Move(1500*MoveSpeedFactor, RightKey, BackKey)
+					nm_Move(1700*MoveSpeedFactor, RightKey, FwdKey)
+				} else {
+					nm_gotoCannon()
+					send, {e}
+					sleep, 50
+					send {%LeftKey% down}
+					sleep, 675
+					send {space}
+					send {space}
+					sleep, 4600
+					send {%LeftKey% up}
+					send {space}
+					sleep, 1000
+					nm_Move(3000*MoveSpeedFactor, LeftKey, FwdKey)
+					nm_Move(1500*MoveSpeedFactor, RightKey, BackKey)
+					nm_Move(1700*MoveSpeedFactor, RightKey, FwdKey)
+				}
+				;wait for baby love
+				sleep, 1000
+				if (KingBeetleBabyCheck){
+					nm_setStatus("Waiting", "BabyLove Buff")
+					sleep 1500
+					loop 30{
+						if (nm_imgSearch("blove.png",25,"buff")[1] = 0){
+							break
+						}
+						sleep 1000
+					}
+				}
+				lairConfirmed:=0
+				;Go inside
+				nm_Move(1000*MoveSpeedFactor, FwdKey)
+				loop 2 {
+					send {%RotLeft%}
+				}
+				loop 5 {
+					if (nm_imgSearch("kingfloor.png",35,"low")[1] = 0){
+						lairConfirmed:=1
+						break
+					}
+					sleep 200
+				}
+				if(!lairConfirmed)
+					continue
+				;search for king beetle
+				nm_setStatus("Searching", "King Beetle")
+				found:=0
+				loop 10 {
+					sleep 200
+					if(nm_imgSearch("planterConfirm3.png",10,"right")[1] = 0){
+						found:=1
+						break
+					}
+				}
+				if(!found) { ;No King Beetle here...try again in 2 hours
+					if(A_Index=2){
+						LastKingBeetle:=nowUnix()-79200
+						IniWrite %LastKingBeetle%, nm_config.ini, Collect, LastKingBeetle
+					}
+					continue 	
+				}
+				nm_setStatus("Attacking", "King Beetle")
+				kingdead:=0
+				sleep, 2000
+
+				loop 1 {
+					if(nm_imgSearch("king.png",25,"lowright")[1] = 0){
+						kingdead:=1
+						nm_Move(1000*MoveSpeedFactor, BackKey, RightKey)
+						nm_Move(3500*MoveSpeedFactor, BackKey)
+						nm_Move(200*MoveSpeedFactor, RightKey)
+						break
+					}
+					nm_Move(2000*MoveSpeedFactor, BackKey)
+					sleep, 1000
+					if(nm_imgSearch("king.png",25,"lowright")[1] = 0){
+						kingdead:=1
+						nm_Move(1000*MoveSpeedFactor, BackKey, RightKey)
+						nm_Move(1500*MoveSpeedFactor, BackKey)
+						nm_Move(200*MoveSpeedFactor, RightKey)
+						break
+					}
+					nm_Move(2000*MoveSpeedFactor, RightKey)
+					sleep, 1000
+					if(nm_imgSearch("king.png",25,"lowright")[1] = 0){
+						kingdead:=1
+						nm_Move(2500*MoveSpeedFactor, BackKey)
+						nm_Move(1500*MoveSpeedFactor, LeftKey)
+						break
+					}
+					nm_Move(2000*MoveSpeedFactor, BackKey)
+					sleep, 1000
+					if(nm_imgSearch("king.png",25,"lowright")[1] = 0){
+						kingdead:=1
+						nm_Move(1500*MoveSpeedFactor, LeftKey)
+						break
+					}
+					nm_Move(2000*MoveSpeedFactor, RightKey)
+					sleep, 1000
+					if(nm_imgSearch("king.png",25,"lowright")[1] = 0){
+						kingdead:=1
+						nm_Move(3500*MoveSpeedFactor, LeftKey)
+						break
+					}
+					loop 2 {
+						nm_Move(2000*MoveSpeedFactor, BackKey, RightKey)
+						if(nm_imgSearch("king.png",25,"lowright")[1] = 0){
+							kingdead:=1
+							nm_Move(2000*MoveSpeedFactor, FwdKey, LeftKey)
+							nm_Move(3500*MoveSpeedFactor, LeftKey)
+							break
+						}
+					}
+					if(kingdead)
+						break
+					sleep, 500
+					send {%RotLeft%}
+					loop 300 {
+						if(nm_imgSearch("king.png",25,"lowright")[1] = 0){
+							kingdead:=1
+							send {%RotRight%}
+							nm_Move(2500*MoveSpeedFactor, FwdKey, LeftKey)
+							nm_Move(3500*MoveSpeedFactor, LeftKey)
+							break
+						}
+						sleep 1000
+					}
+				}
+				if(kingdead) {
+					;check for amulet
+					imgPos := nm_imgSearch("keep.png",25,"full")
+					If (imgPos[1] = 0){
+						nm_setStatus("Looting", "King Beetle Amulet")
+						MouseMove, (imgPos[2] + 10), (imgPos[3] + 10)
+						Click
+						sleep, 1000
+					} else { ;loot
+						nm_setStatus("Looting", "King Beetle")
+						nm_loot(3500, 7, "right")
+					}
+					TotalBossKills:=TotalBossKills+1
+					SessionBossKills:=SessionBossKills+1
+					IniWrite, %TotalBossKills%, nm_config.ini, Status, TotalBossKills
+					IniWrite, %SessionBossKills%, nm_config.ini, Status, SessionBossKills
+					LastKingBeetle:=nowUnix()
+					IniWrite %LastKingBeetle%, nm_config.ini, Collect, LastKingBeetle
 				}
 			}
 		}
@@ -7521,14 +7549,13 @@ nm_GoGather(){
 	global QuestMantis
 	global QuestScorpions
 	global QuestWerewolf
-	global LastBugrunLadybugs
-	global LastBugrunRhinoBeetles
-	global LastBugrunSpider
-	global LastBugrunMantis
-	global LastBugrunScorpions
-	global LastBugrunWerewolf
+	global PolarQuestGatherInterruptCheck, BugrunInterruptCheck, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf
 	global GatherStartTime, TotalGatherTime, SessionGatherTime, ConvertStartTime, TotalConvertTime, SessionConvertTime
 	nm_backpackPercentFilter()
+	;GatherInterruptCheck
+	if((PolarQuestGatherInterruptCheck || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck) && (nowUnix()-LastBugrunLadybugs)>floor(300*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck) && (nowUnix()-LastBugrunRhinoBeetles)>floor(300*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck) && (nowUnix()-LastBugrunSpider)>floor(1800*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck) && (nowUnix()-LastBugrunMantis)>floor(1200*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck) && (nowUnix()-LastBugrunScorpions)>floor(1200*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
+		return
+	}
 	;reset
 	nm_Reset()
 	if(CurrentField="mountain top" && (A_Min>=0 && A_Min<15)) ;mondo dangerzone! skip over this field if possible
@@ -7577,6 +7604,7 @@ nm_GoGather(){
 	nm_autoFieldBoost(FieldName%CurrentFieldNum%)
 	nm_fieldBoostGlitter()
 	;set sprinkler
+	nm_setStatus("Gathering")
 	nm_setSprinkler()
 	;rotate
 	num:=FieldRotateTimes%CurrentFieldNum%
@@ -7607,7 +7635,6 @@ nm_GoGather(){
 	}
 	;gather loop
 	bypass:=0
-	nm_setStatus("Gathering")
 	gatherStart:=nowUnix() ; used to control how long to gather in this cycle
 	GatherStartTime:=nowUnix() ; used to track total and session gathering time metrics
 	if(FieldPatternShift%CurrentFieldNum%)
@@ -7618,16 +7645,7 @@ nm_GoGather(){
 		nm_autoFieldBoost(FieldName%CurrentFieldNum%)
 		nm_fieldBoostGlitter()
 		nm_fieldDriftCompensation()
-		;special hotkeys
-		if(BackpackPercentFiltered>=95 && MicroConverterKey!="none") {
-			send {%MicroConverterKey%}
-			PackFilterArray:=[]
-			sleep, 500
-		}
 		;interrupt if...
-		if(not nm_activeHoney() && (BackpackPercentFiltered<FieldUntilPack%CurrentFieldNum%)){
-			break
-		}
 		if(DisconnectCheck() || youDied || VBState=1) {
 			bypass:=1
 			break
@@ -7635,7 +7653,18 @@ nm_GoGather(){
 		if(MondoBuffCheck && A_Min>=0 && A_Min<14 && (nowUnix()-LastMondoBuff)>960){
 			break
 		}
-		if((QuestLadybugs && (nowUnix()-LastBugrunLadybugs)>floor(300*(1-GiftedViciousCheck*.15))) || (QuestRhinoBeetlesbugs && (nowUnix()-LastBugrunRhinoBeetles)>floor(300*(1-GiftedViciousCheck*.15))) || (QuestSpider && (nowUnix()-LastBugrunSpider)>floor(1800*(1-GiftedViciousCheck*.15))) || (QuestMantis && (nowUnix()-LastBugrunMantis)>floor(1200*(1-GiftedViciousCheck*.15))) || (QuestScorpions && (nowUnix()-LastBugrunScorpions)>floor(1200*(1-GiftedViciousCheck*.15))) || (QuestWerewolf && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15)))){
+		;GatherInterruptCheck
+		if((PolarQuestGatherInterruptCheck || BugrunInterruptCheck) && (((QuestLadybugs || BugrunLadybugsCheck) && (nowUnix()-LastBugrunLadybugs)>floor(300*(1-GiftedViciousCheck*.15))) || ((QuestRhinoBeetlesbugs || BugrunRhinoBeetlesCheck) && (nowUnix()-LastBugrunRhinoBeetles)>floor(300*(1-GiftedViciousCheck*.15))) || ((QuestSpider || BugrunSpiderCheck) && (nowUnix()-LastBugrunSpider)>floor(1800*(1-GiftedViciousCheck*.15))) || ((QuestMantis || BugrunMantisCheck) && (nowUnix()-LastBugrunMantis)>floor(1200*(1-GiftedViciousCheck*.15))) || ((QuestScorpions || BugrunScorpionsCheck) && (nowUnix()-LastBugrunScorpions)>floor(1200*(1-GiftedViciousCheck*.15))) || ((QuestWerewolf || BugrunWerewolfCheck) && (nowUnix()-LastWerewolf)>floor(3600*(1-GiftedViciousCheck*.15))))){
+			break
+		}
+		;special hotkeys
+		if(BackpackPercentFiltered>=95 && MicroConverterKey!="none") {
+			send {%MicroConverterKey%}
+			PackFilterArray:=[]
+			sleep, 500
+			continue
+		}
+		if(not nm_activeHoney() && (BackpackPercentFiltered<FieldUntilPack%CurrentFieldNum%)){
 			break
 		}
 	}
@@ -8007,6 +8036,11 @@ nm_gather(pattern, patternsize:="M", reps:=1){
 			sleep, 1000*MoveSpeedFactor*size
 			send {%TCFBKey% up}
 		}
+	} else if(pattern="stationary"){
+		loop 10 {
+			click
+			sleep 1000
+		}
 	}
 	click, up
 }
@@ -8048,7 +8082,7 @@ nm_convert(hiveConfirm:=0)
 			send e
 			ConvertStartTime:=nowUnix()
 			;empty pack
-			loop 180 {
+			loop 300 {
 				If (nm_backpackPercent()>0 && A_Index=1)
 					nm_setStatus("Converting", "Backpack")
 				sleep, 1000
@@ -9360,6 +9394,130 @@ nm_hotbar(){
 		}
 	}
 }
+nm_HoneyQuest(){
+	global HoneyStart:=[]
+	global HoneyQuestCheck
+	global HoneyQuestComplete:=0
+	global QuestBarSize
+	global QuestBarGapSize
+	global QuestBarInset
+	global Roblox
+	global state
+	if(!HoneyQuestCheck)
+		return
+	imgPos := nm_imgSearch("questlog.png",10, "left")
+	If (imgPos[1] != 0){
+		MouseMove, 140, (Roblox[3]+120)
+		Click
+		MouseMove, 85, (Roblox[3]+120)
+		Click
+		MouseMove, 350, (Roblox[3]+70)
+	}
+	;search for Honey Bee Quest
+	imgPos := nm_imgSearch("honeyhunt.png",10, "highleft")
+	If (imgPos[1]=0){ ;honey bee quest found
+		Qfound:=imgPos
+	} else { ;honey bee quest not found
+		;scroll through log to find quest
+		MouseMove, 30, (Roblox[3]+225), 5
+		Loop, 30 {
+			send, {WheelUp 1}
+			Sleep, 50
+		}
+		Loop, 25 {
+			;search for Honey Bee Quest
+			imgPos := nm_imgSearch("honeyhunt.png",10, "highleft")
+			If (imgPos[1]=0) { ;honey bee quest found
+				Qfound:=imgPos
+				break
+			}
+			loop, 2 {
+				send, {WheelDown 1}
+				Sleep, 50
+			}
+			sleep, 350
+		}
+	}
+	if(Qfound[1]=0){
+		MouseMove, 350, (Roblox[3]+70)
+		;locate exact bottom of quest title bar coordinates
+		;titlebar = 30 pixels high
+		;quest objective bar spacing = 10 pixels
+		;quest objective bar height = 40 pixels
+		WinGetPos, windowX, windowY, windowWidth, windowHeight, Roblox
+		xi := 0
+		yi := Qfound[3]
+		ww := windowWidth / 2
+		wh := windowHeight
+		fileName:="questlog.png"
+		IfExist, %A_ScriptDir%\nm_image_assets\
+		{	
+			ImageSearch, FoundX, FoundY, %xi%, %yi%, %ww%, %wh%, *10 nm_image_assets\%fileName%
+			if (ErrorLevel = 2){
+				MsgBox Image file %filename% was not found in:`nnm_image_assets\
+				pause
+			}
+		} else {
+			MsgBox Folder location cannot be found:`n%A_ScriptDir%\nm_image_assets\
+		}
+		HoneyStart:=[ErrorLevel, FoundX, FoundY+3]
+		;determine quest bar sizes and spacing
+		if(QuestBarGapSize=0 || QuestBarSize=0 || QuestBarInset=0) {
+			xi := 0
+			yi := HoneyStart[3]+15
+			ww := windowWidth / 2
+			wh := HoneyStart[3]+100
+			ImageSearch, FoundX, FoundY, %xi%, %yi%, %ww%, %wh%, *10 nm_image_assets\questbargap.png
+			if(ErrorLevel=0) {
+				QuestBarSize:=FoundY-HoneyStart[3]
+				QuestBarGapSize:=3
+				QuestBarInset:=3
+				NextY:=FoundY+1
+				NextX:=FoundX+1
+				loop 20 {
+					ImageSearch, FoundX, FoundY, %FoundX%, %NextY%, %ww%, %wh%, *10 nm_image_assets\questbargap.png
+					if(ErrorLevel=0) {
+						NextY:=FoundY+1
+						QuestBarGapSize:=QuestBarGapSize+1
+					} else {
+						break
+					}
+				}
+				wh := HoneyStart[3]+200
+				loop 20 {
+					ImageSearch, FoundX, FoundY, %NextX%, %yi%, %ww%, %wh%, *10 nm_image_assets\questbarinset.png
+					if(ErrorLevel=0) {
+						NextX:=FoundX+1
+						QuestBarInset:=QuestBarInset+1
+					} else {
+						break
+					}
+				}
+				;msgbox QuestBarSize=%QuestBarSize%`nQuestBarGapSize=%QuestBarGapSize%`nQuestBarInset=%QuestBarInset%
+			}
+		}	
+		;Update Honey quest progress in GUI
+		honeyProgress:=""
+		;also set next steps
+		PixelGetColor, questbarColor, QuestBarInset+10, HoneyStart[3]+QuestBarGapSize+1, RGB fast
+		;temp%A_Index%:=questbarColor
+		if((questbarColor=Format("{:d}",0xF46C55)) || (questbarColor=Format("{:d}",0x6EFF60))) {
+			HoneyQuestComplete:=0
+			completeness:="Incomplete"
+		}
+		;border color, white (titlebar), black (text)
+		else if((questbarColor!=Format("{:d}",0x96C3DE)) && (questbarColor!=Format("{:d}",0xE5F0F7)) && (questbarColor!=Format("{:d}",0x1B2A35))) {
+			HoneyQuestComplete:=1
+			completeness:="Complete"
+		} else {
+			completeness:="Unknown"
+		}
+		honeyProgress:=("Honey Tokens: " . completeness)
+		GuiControl,,HoneyQuestProgress, %honeyProgress%
+	}
+	if(HoneyQuestComplete)
+		nm_gotoQuestgiver("honey")
+}
 nm_PolarQuestProg(){
 	global PolarQuestCheck
 	global PolarBear
@@ -9647,7 +9805,7 @@ nm_questGather(){
 	nm_setStatus("Gathering")
 	gatherStart:=nowUnix() ; used to track gathering time for this cycle
 	;GatherStartTime:=nowUnix() ;used to track total and session time metrics
-	while((BackpackPercentFiltered<100) && ((nowUnix()-gatherStart)<(1800))){
+	while((BackpackPercentFiltered<100) && ((nowUnix()-gatherStart)<(300))){
 		nm_gather("squares",, 3)
 		nm_fieldDriftCompensation()
 		nm_PolarQuestProg()
@@ -9719,6 +9877,96 @@ nm_gotoQuestgiver(giver){
 			} else {
 				msgbox GotoQuestGiver: MoveMethod undefined!
 			}
+		} else if(giver="honey"){
+			;goto honey bee
+			if(MoveMethod="Walk"){
+				nm_Move(15000*MoveSpeedFactor, BackKey, LeftKey)
+				loop 4 {
+					send, {%RotRight%}
+				}
+				nm_Move(7000*MoveSpeedFactor, FwdKey)
+				nm_Move(2000*MoveSpeedFactor, LeftKey)
+				nm_Move(2000*MoveSpeedFactor, BackKey)
+				nm_Move(13000*MoveSpeedFactor, LeftKey)
+				nm_Move(11000*MoveSpeedFactor, FwdKey)
+				nm_Move(500*MoveSpeedFactor, BackKey, LeftKey)
+				nm_Move(8000*MoveSpeedFactor, LeftKey)
+				send, {%LeftKey% down}
+				sleep, 200
+				send, {space down}
+				sleep, 200
+				send, {space up}
+				sleep, 800
+				send, {%FwdKey% down}
+				sleep, 200
+				send, {space down}
+				sleep, 200
+				send, {space up}
+				sleep, 5000*MoveSpeedFactor
+				send, {%LeftKey% up}
+				sleep, 200
+				send, {space down}
+				sleep, 200
+				send, {space up}
+				sleep, 800
+				send, {%FwdKey% up}
+				nm_Move(5000*MoveSpeedFactor, FwdKey)
+				nm_Move(500*MoveSpeedFactor, BackKey)
+				repeat:=1
+				loop 10 {
+					searchRet := nm_imgSearch("e_button.png",30,"high")
+					If (searchRet[1] = 0) {
+						sleep, 100
+						searchRet := nm_imgSearch("e_button.png",30,"high")
+						If (searchRet[1] = 0) {
+							repeat:=0
+							break
+						}
+					}
+					nm_Move(400*MoveSpeedFactor, BackKey, RightKey)
+				}
+			} else if (MoveMethod="Cannon"){
+				nm_gotoCannon()
+				send {e}
+				sleep, 50
+				send {%RightKey% down}
+				send {%BackKey% down}
+				sleep, 1200 
+				send {space}
+				send {space}
+				sleep, 4000
+				send {%BackKey% up}
+				sleep 4000
+				send {%RightKey% up}
+				send {space}
+				loop 2 {
+					send, {%RotRight%}
+				}
+				sleep, 2000
+				;walk to honey bee platform
+				send, {%FwdKey% down}
+				sleep, 200
+				send, {space down}
+				sleep, 200
+				send, {space up}
+				sleep, 200
+				send, {%FwdKey% up}
+				repeat:=1
+				loop 10 {
+					searchRet := nm_imgSearch("e_button.png",30,"high")
+					If (searchRet[1] = 0) {
+						sleep, 100
+						searchRet := nm_imgSearch("e_button.png",30,"high")
+						If (searchRet[1] = 0) {
+							repeat:=0
+							break
+						}
+					}
+					nm_Move(400*MoveSpeedFactor, FwdKey)
+				}
+			} else {
+				msgbox GotoQuestGiver: MoveMethod undefined!
+			}
 		}
 		;turn-in / get next quest
 		loop 2 {
@@ -9753,7 +10001,130 @@ nm_gotoQuestgiver(giver){
 			return
 	}
 }
-
+nm_bugDeathCheck(){
+	global objective, TotalBugKills, SessionBugKills, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BugDeathCheckLockout, BugrunLadybugsCheck, BugrunRhinoBeetlesCheck, BugrunMantisCheck, BugrunWerewolfCheck
+	if(BugDeathCheckLockout && (nowUnix() - BugDeathCheckLockout)>20)
+		BugDeathCheckLockout:=0
+	if(BugDeathCheckLockout)
+		return
+	;ladybugs
+	if(InStr(objective,"strawberry") || InStr(objective,"mushroom") || InStr(objective,"clover")) {
+		searchRet := nm_imgSearch("ladybug.png",30,"lowright")
+		If (searchRet[1] = 0) {
+			BugDeathCheckLockout:=nowUnix()
+			LastBugrunLadybugs:=nowUnix()
+			IniWrite, %LastBugrunLadybugs%, nm_config.ini, Collect, LastBugrunLadybugs
+			TotalBugKills:=TotalBugKills+1
+			SessionBugKills:=SessionBugKills+1
+			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+		}
+	}
+	;rhino beetles
+	else if(InStr(objective,"blue flower") || InStr(objective,"bamboo")) {
+		searchRet := nm_imgSearch("rhino.png",30,"lowright")
+		If (searchRet[1] = 0) {
+			BugDeathCheckLockout:=nowUnix()
+			LastBugrunRhinoBeetles:=nowUnix()
+			IniWrite, %LastBugrunRhinoBeetles%, nm_config.ini, Collect, LastBugrunRhinoBeetles
+			if(InStr(objective,"bamboo")) {
+				TotalBugKills:=TotalBugKills+2
+				SessionBugKills:=SessionBugKills+2
+			} else {
+				TotalBugKills:=TotalBugKills+1
+				SessionBugKills:=SessionBugKills+1
+			}
+			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+		}
+	}
+	;spider
+	else if(InStr(objective,"spider")) {
+		searchRet := nm_imgSearch("spider.png",30,"lowright")
+		If (searchRet[1] = 0) {
+			BugDeathCheckLockout:=nowUnix()
+			LastBugrunSpider:=nowUnix()
+			IniWrite, %LastBugrunSpider%, nm_config.ini, Collect, LastBugrunSpider
+			TotalBugKills:=TotalBugKills+1
+			SessionBugKills:=SessionBugKills+1
+			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+		}
+	}
+	;mantis/rhino beetle
+	else if(InStr(objective,"pineapple")) {
+		searchRet := nm_imgSearch("mantis.png",30,"lowright")
+		If (searchRet[1] = 0) {
+			BugDeathCheckLockout:=nowUnix()
+			LastBugrunMantis:=nowUnix()
+			IniWrite, %LastBugrunMantis%, nm_config.ini, Collect, LastBugrunMantis
+			TotalBugKills:=TotalBugKills+1
+			SessionBugKills:=SessionBugKills+1
+			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+		}
+		searchRet := nm_imgSearch("rhino.png",30,"lowright")
+		If (searchRet[1] = 0) {
+			if(!BugrunMantisCheck)
+				BugDeathCheckLockout:=nowUnix()
+			LastBugrunRhinoBeetles:=nowUnix()
+			IniWrite, %LastBugrunRhinoBeetles%, nm_config.ini, Collect, LastBugrunRhinoBeetles
+			TotalBugKills:=TotalBugKills+1
+			SessionBugKills:=SessionBugKills+1
+			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+		}
+	}
+	;mantis/werewolf
+	else if(InStr(objective,"pine tree")) {
+		searchRet := nm_imgSearch("mantis.png",30,"lowright")
+		If (searchRet[1] = 0) {
+			BugDeathCheckLockout:=nowUnix()
+			LastBugrunMantis:=nowUnix()
+			IniWrite, %LastBugrunMantis%, nm_config.ini, Collect, LastBugrunMantis
+			TotalBugKills:=TotalBugKills+2
+			SessionBugKills:=SessionBugKills+2
+			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+		}
+		searchRet := nm_imgSearch("werewolf.png",30,"lowright")
+		If (searchRet[1] = 0) {
+			BugDeathCheckLockout:=nowUnix()
+			LastBugrunWerewolf:=nowUnix()
+			IniWrite, %LastBugrunWerewolf%, nm_config.ini, Collect, LastBugrunWerewolf
+			TotalBugKills:=TotalBugKills+1
+			SessionBugKills:=SessionBugKills+1
+			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+		}
+	}
+	;werewolf
+	else if(InStr(objective,"pumpkin") || InStr(objective,"cactus")) {
+		searchRet := nm_imgSearch("werewolf.png",30,"lowright")
+		If (searchRet[1] = 0) {
+			BugDeathCheckLockout:=nowUnix()
+			LastBugrunWerewolf:=nowUnix()
+			IniWrite, %LastBugrunWerewolf%, nm_config.ini, Collect, LastBugrunWerewolf
+			TotalBugKills:=TotalBugKills+1
+			SessionBugKills:=SessionBugKills+1
+			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+		}
+	}
+	;scorpions
+	else if(InStr(objective,"rose")) {
+		searchRet := nm_imgSearch("scorpion.png",30,"lowright")
+		If (searchRet[1] = 0) {
+			BugDeathCheckLockout:=nowUnix()
+			LastBugrunScorpions:=nowUnix()
+			IniWrite, %LastBugrunScorpions%, nm_config.ini, Collect, LastBugrunScorpions
+			TotalBugKills:=TotalBugKills+1
+			SessionBugKills:=SessionBugKills+1
+			IniWrite, %TotalBugKills%, nm_config.ini, Status, TotalBugKills
+			IniWrite, %SessionBugKills%, nm_config.ini, Status, SessionBugKills
+		}
+	}
+}
 nm_resetConfig(){
 	if(fileexist("nm_config.ini")) {
 		FileDelete nm_config.ini
@@ -9904,6 +10275,7 @@ LastSamovar=1
 LidArtCheck=0
 LastLidArt=1
 GiftedViciousCheck=0
+BugrunInterruptCheck=0
 BugrunLadybugsCheck=0
 BugrunLadybugsLoot=0
 LastBugrunLadybugs=1
@@ -9995,6 +10367,7 @@ AFBglitterUsed=0
 
 [Quests]
 PolarQuestCheck=0
+PolarQuestGatherInterruptCheck=1
 PolarQuestName=None
 PolarQuestProgress=Unknown
 
@@ -12177,6 +12550,9 @@ if(state="Gathering" || state="Converting") {
 } 
 ;use/check hotbar boosts
 nm_hotbar()
+;bug death check
+if(state="Gathering" || state="Searching" || (VBState=2 && state="Attacking"))
+	nm_bugDeathCheck()
 ;stats
 nm_setStats()
 bg:=1
@@ -12267,6 +12643,8 @@ global FieldBooster2
 global FieldBooster3
 global FieldBoosterMins
 global GiftedViciousCheck
+global BugrunInterruptCheck
+global BugDeathCheckLockout:=0
 global BugrunLadybugsCheck
 global BugrunRhinoBeetlesCheck
 global BugrunSpiderCheck
@@ -12401,6 +12779,7 @@ global AFBglitterHotbar
 global AFBGlitterLimit
 global AFBGlitterLimitEnable
 global PolarQuestCheck
+global PolarQuestGatherInterruptCheck
 global QuestLadybugs:=0
 global QuestRhinoBeetles:=0
 global QuestSpider:=0
@@ -12410,6 +12789,7 @@ global QuestWerewolf:=0
 global QuestBarSize:=0
 global QuestBarGapSize:=0
 global QuestBarInset:=0
+global HoneyQuestCheck
 global MyField:=None
 global ReloadRobloxSecs
 global Webhook
@@ -12444,6 +12824,7 @@ GuiControlGet, FieldBooster2
 GuiControlGet, FieldBooster3
 GuiControlGet, FieldBoosterMins
 GuiControlGet, GiftedViciousCheck
+GuiControlGet, BugrunInterruptCheck
 GuiControlGet, BugrunLadybugsCheck
 GuiControlGet, BugrunRhinoBeetlesCheck
 GuiControlGet, BugrunSpiderCheck
@@ -12462,6 +12843,8 @@ GuiControlGet, TunnelBearBabyCheck
 GuiControlGet, KingBeetleCheck
 GuiControlGet, KingBeetleBabyCheck
 GuiControlGet, PolarQuestCheck
+GuiControlGet, PolarQuestGatherInterruptCheck
+GuiControlGet, HoneyQuestCheck
 GuiControlGet, ReloadRobloxSecs
 GuiControlGet, Webhook
 loop 3 {
@@ -12486,6 +12869,7 @@ IniRead, StingerCactusCheck, nm_config.ini, Collect, StingerCactusCheck
 IniRead, StingerSpiderCheck, nm_config.ini, Collect, StingerSpiderCheck
 IniRead, StingerCloverCheck, nm_config.ini, Collect, StingerCloverCheck
 IniRead, LastTunnelBear, nm_config.ini, Collect, LastTunnelBear
+IniRead, LastKingBeetle, nm_config.ini, Collect, LastKingBeetle
 IniRead, LastClock, nm_config.ini, Collect, LastClock
 IniRead, LastMondoBuff, nm_config.ini, Collect, LastMondoBuff
 IniRead, LastAntPass, nm_config.ini, Collect, LastAntPass
