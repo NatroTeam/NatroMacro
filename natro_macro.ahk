@@ -36,7 +36,7 @@ If !FileExist("settings") ; ~ make sure the settings folder exists for stability
 }
 if(not fileexist("settings\nm_config.ini"))
 	nm_resetConfig()
-VersionID:="0.8.0"
+VersionID:="0.8.1"
 #include *i personal.ahk
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; UPDATE PATTERNS
@@ -8762,7 +8762,7 @@ nm_cannonTo(location){
 	}
 	SetKeyDelay, 5
 }
-nm_cannonToPlanter(location){ ; ~ zaappiix planter path rework
+nm_cannonToPlanter(location){ ; ~ zaappiix planter path rework, posted in server 02/11/22 (dd/mm/yy)
 	global FwdKey, LeftKey, BackKey, RightKey, RotLeft, RotRight, KeyDelay, MoveSpeedFactor, ShiftLockEnabled
 	if (ShiftLockEnabled) {
 		ShiftLockEnabled:=0
@@ -8770,212 +8770,176 @@ nm_cannonToPlanter(location){ ; ~ zaappiix planter path rework
 	}
 	SetKeyDelay, 10
 	if(location="sunflower"){
-	movement := "
-	(LTrim Join`r`n
-		" nm_Walk(14, BackKey) "
-		loop 1 {
-			send, {" RotRight "}
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%RightKey% down}
+		DllCall("Sleep",UInt,325) ;425
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,900)
+		send {%RightKey% up}
+		send {space}
+		DllCall("Sleep",UInt,1000)
+		loop 2 {
+			send, {%RotRight%}
 		}
-		" nm_Walk(24, RightKey) "
-		" nm_Walk(15, FwdKey) "
-		" nm_Walk(7, BackKey) "
-    )"
-    nm_createWalk(movement)
-    KeyWait, F14, D T5 L ; wait for pattern start
-    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
-    nm_endWalk()
+		nm_Move(3000*MoveSpeedFactor, FwdKey)
+		nm_Move(6000*MoveSpeedFactor, LeftKey)
+		nm_Move(2000*MoveSpeedFactor, RightKey, BackKey)
 	}
 	else if(location="dandelion"){
-	movement := "
-	(LTrim Join`r`n
-		loop 1 {
-			send, {" RotRight "}
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%LeftKey% down}
+		DllCall("Sleep",UInt,325) ;275
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,1000)
+		send {%FwdKey% down}
+		DllCall("Sleep",UInt,500)
+		send {%FwdKey% up}
+		DllCall("Sleep",UInt,1250) ;1750
+		send {%LeftKey% up}
+		send {space}
+		loop 2 {
+			send, {%RotLeft%}
 		}
-		" nm_Walk(45, BackKey) "
-    )"
-    nm_createWalk(movement)
-    KeyWait, F14, D T5 L ; wait for pattern start
-    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
-    nm_endWalk()
+		DllCall("Sleep",UInt,1500)
+		nm_Move(1500*MoveSpeedFactor, FwdKey, RightKey)
+		nm_Move(2000*MoveSpeedFactor, FwdKey)
+		nm_Move(1500*MoveSpeedFactor, FwdKey, RightKey)
+		nm_Move(1500*MoveSpeedFactor, BackKey, LeftKey)
+		nm_Move(1000*MoveSpeedFactor, BackKey)
 	}
 	else if(location="mushroom"){
-	movement := "
-	(LTrim Join`r`n
-		loop 1 {
-			send, {" RotRight "}
+		send, {e}
+		DllCall("Sleep",UInt,50)	
+		send {%FwdKey% down}
+		DllCall("Sleep",UInt,775) ;725
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,150)
+		send {%FwdKey% up}
+		send {space}
+		DllCall("Sleep",UInt,2000)
+		loop 4 {
+			send, {%RotLeft%}
 		}
-		" nm_Walk(41, BackKey) "
-		loop 3 {
-			send, {" RotRight "}
-		}
-		" nm_Walk(35, FwdKey) "
-    )"
-    nm_createWalk(movement)
-    KeyWait, F14, D T5 L ; wait for pattern start
-    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
-    nm_endWalk()
+		nm_Move(3000*MoveSpeedFactor, FwdKey, RightKey)
+		nm_Move(3000*MoveSpeedFactor, RightKey)
+		nm_Move(1000*MoveSpeedFactor, BackKey, LeftKey)
 	}
 	else if(location="blue flower"){
-	movement := "
-	(LTrim Join`r`n
-		" nm_Walk(90, BackKey, LeftKey) "
-		" nm_Walk(28, LeftKey) "		
-		" nm_Walk(12, FwdKey) "		
-		" nm_Walk(17, RightKey) "		
-		" nm_Walk(7, BackKey, LeftKey) "		
-    )"
-    nm_createWalk(movement)
-    KeyWait, F14, D T5 L ; wait for pattern start
-    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
-    nm_endWalk()
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%LeftKey% down}
+		DllCall("Sleep",UInt,675)
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,3250)
+		send {%LeftKey% up}
+		send {space}
+		DllCall("Sleep",UInt,1000)
+		loop 2 {
+			send, {%RotLeft%}
+		}
+		nm_Move(3000*MoveSpeedFactor, LeftKey)
+		nm_Move(4500*MoveSpeedFactor, RightKey)
+		nm_Move(3000*MoveSpeedFactor, BackKey)
+		nm_Move(1000*MoveSpeedFactor, LeftKey)
 	}
 	else if(location="clover"){
-	movement := "
-	(LTrim Join`r`n
-		" nm_Walk(43, LeftKey, BackKey) "
-		" nm_Walk(43, LeftKey) "
-        Send {" LeftKey " down}
-		Walk(2)
-		send {space down}
-		Walk(2)
-		send {space up}
-		Walk(2)
-		" nm_Walk(3, BackKey) "
-		Walk(5)
-		send {space down}
-		Walk(2)
-		send {space up}
-		Walk(2)
-		send {" LeftKey " up}
-		" nm_Walk(15, LeftKey) "
-		" nm_Walk(15, FwdKey) "		
-		" nm_Walk(15, FwdKey, RightKey) "
-		" nm_Walk(8, BackKey) "
-    )"
-    nm_createWalk(movement)
-    KeyWait, F14, D T5 L ; wait for pattern start
-    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
-    nm_endWalk()
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%LeftKey% down}
+		send {%FwdKey% down}
+		DllCall("Sleep",UInt,475) ;575
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,1500) ;1200
+		send {%FwdKey% up}
+		DllCall("Sleep",UInt,3500) ;4000
+		send {%LeftKey% up}
+		send {space}
+		DllCall("Sleep",UInt,1000)
+		nm_Move(1000*MoveSpeedFactor, FwdKey, LeftKey)
+		nm_Move(3000*MoveSpeedFactor, LeftKey)
+		nm_Move(2000*MoveSpeedFactor, FwdKey)
+		nm_Move(1000*MoveSpeedFactor, BackKey, RightKey)
+		nm_Move(2500*MoveSpeedFactor, RightKey)
+		
+		
 	}
 	else if(location="spider"){
-	movement := "
-	(LTrim Join`r`n
-		loop 1 {
-			send, {" RotRight "}
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%BackKey% down}
+		DllCall("Sleep",UInt,850) ;1050
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,750) ;150
+		send {space}
+		send {%BackKey% up}
+		loop 4 {
+			send, {%RotRight%}
 		}
-		" nm_Walk(41, BackKey) "
-		loop 3 {
-			send, {" RotRight "}
-		}
-		Send {" FwdKey " down}
-		Walk(45)
-		send {space down}
-		Walk(3)
-		send {space up}
-		Walk(5)
-		Send {" RightKey " down}
-		Walk(10)
-		Send {" RightKey " up}
-		Walk(10)
-		Send {" LeftKey " down}
-		Walk(18)
-		send {" LeftKey " up}{" FwdKey " up}
-		" nm_Walk(8, BackKey, RightKey) "
-    )"
-    nm_createWalk(movement)
-    KeyWait, F14, D T5 L ; wait for pattern start
-    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
-    nm_endWalk()
+		DllCall("Sleep",UInt,3000)
+		nm_Move(4000*MoveSpeedFactor, FwdKey)
+		nm_Move(2000*MoveSpeedFactor, FwdKey, LeftKey)
+		nm_Move(2000*MoveSpeedFactor, LeftKey)
+		nm_Move(1000*MoveSpeedFactor, BackKey, RightKey)
 	}
 	else if(location="strawberry"){
-	movement := "
-	(LTrim Join`r`n
-		loop 1 {
-			send, {" RotRight "}
+		send, {e}
+		DllCall("Sleep",UInt,50)
+		send {%RightKey% down}
+		send {%BackKey% down}
+		DllCall("Sleep",UInt,750)
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,1800)
+		send {%RightKey% up}
+		send {%BackKey% up}
+		send {space}
+		DllCall("Sleep",UInt,500)
+		loop 4 {
+			send, {%RotRight%}
 		}
-		" nm_Walk(41, BackKey) "
-		loop 3 {
-			send, {" RotRight "}
-		}
-		Send {" FwdKey " down}
-		Walk(45)
-		send {space down}
-		Walk(3)
-		send {space up}
-		Walk(4)
-		loop 2 {
-			send, {" RotLeft "}
-		}
-		Walk(17)
-		Send {" RightKey " down}
-		Walk(10)
-		Send {" RightKey " up}
-		Walk(17)
-		Send {" FwdKey " up}{" LeftKey " down}
-		Walk(10)
-		send {" LeftKey " up}
-		" nm_Walk(10, BackKey, RightKey) "
-    )"
-    nm_createWalk(movement)
-    KeyWait, F14, D T5 L ; wait for pattern start
-    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
-    nm_endWalk()
+		nm_Move(5000*MoveSpeedFactor, FwdKey, LeftKey)
+		nm_Move(2000*MoveSpeedFactor, LeftKey)
+		nm_Move(1500*MoveSpeedFactor, BackKey, RightKey)
 	}
 	else if(location="bamboo"){
-	movement := "
-	(LTrim Join`r`n
-		loop 1 {
-			send, {" RotRight "}
-		}
-		" nm_Walk(41, BackKey) "
-		loop 3 {
-			send, {" RotRight "}
-		}
-		Send {" FwdKey " down}
-		Walk(45)
-		send {space down}
-		Walk(3)
-		send {space up}
-		Walk(4)
-		loop 2 {
-			send, {" RotRight "}
-		}
-		Send {" LeftKey " down}
-		Walk(23)
-		Send {" LeftKey " up}
-		Walk(28)
-		Send {" FwdKey " up}
-    )"
-    nm_createWalk(movement)
-    KeyWait, F14, D T5 L ; wait for pattern start
-    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
-    nm_endWalk()
-	}
-	else if(location="pineapple"){
-		nm_gotoCannon()
-		DllCall("Sleep",UInt,500)
 		send, {e}
-        DllCall("Sleep",UInt,2500)
-	movement := "
-	(LTrim Join`r`n
-		loop 3 {
-			send, {" RotRight "}
+		DllCall("Sleep",UInt,50)
+		send {%LeftKey% down}
+		DllCall("Sleep",UInt,1200)
+		send {space}
+		send {space}
+		DllCall("Sleep",UInt,2500)
+		send {%LeftKey% up}
+		send {space}
+		loop 4 {
+			send, {%RotLeft%}
 		}
-		" nm_Walk(8, BackKey) "
-		" nm_Walk(10, BackKey, RightKey) "
-		" nm_Walk(24, RightKey) "
-		" nm_Walk(10, FwdKey) "
-		" nm_Walk(5, FwdKey, RightKey) "
-		" nm_Walk(8, BackKey) "
-    )"
-    nm_createWalk(movement)
-    KeyWait, F14, D T5 L ; wait for pattern start
-    KeyWait, F14, T60 L ; wait for pattern finish (decrease timeout for shorter movements)
-    nm_endWalk()
+		DllCall("Sleep",UInt,1500)
+		nm_Move(3500*MoveSpeedFactor, FwdKey)
+		nm_Move(1000*MoveSpeedFactor, BackKey)
+		nm_Move(4000*MoveSpeedFactor, RightKey)
+		nm_Move(1000*MoveSpeedFactor, LeftKey)
+	}
+	else if(location="pineapple"){ ; ~ planter finding improvement, thanks zaap
+        send, {e}
+        DllCall("Sleep",UInt,2500)
+        loop 4 {
+        send, {%RotLeft%}
+        }
+        nm_Move(8000*MoveSpeedFactor, RightKey)
+        nm_Move(5000*MoveSpeedFactor, LeftKey)
+        nm_Move(5500*MoveSpeedFactor, FwdKey)
+        nm_Move(1500*MoveSpeedFactor, RightKey, BackKey)
 	}
 	else if(location="stump"){
-		nm_gotoCannon()
-		DllCall("Sleep",UInt,500)
 		send, {e}
 		DllCall("Sleep",UInt,50)
 		send {%LeftKey% down}
@@ -8997,8 +8961,6 @@ nm_cannonToPlanter(location){ ; ~ zaappiix planter path rework
 		DllCall("Sleep",UInt,1000)
 	}
 	else if(location="cactus"){
-		nm_gotoCannon()
-		DllCall("Sleep",UInt,500)
 		send, {e}
 		DllCall("Sleep",UInt,50)
 		send {%RightKey% down}
@@ -9018,8 +8980,6 @@ nm_cannonToPlanter(location){ ; ~ zaappiix planter path rework
 
 	}
 	else if(location="pumpkin"){
-		nm_gotoCannon()
-		DllCall("Sleep",UInt,500)
 		send, {e}
 		DllCall("Sleep",UInt,50)
 		send {%RightKey% down}
@@ -9040,10 +9000,9 @@ nm_cannonToPlanter(location){ ; ~ zaappiix planter path rework
 		nm_Move(900*MoveSpeedFactor, BackKey)
 		nm_Move(4000*MoveSpeedFactor, RightKey)
 		nm_Move(2000*MoveSpeedFactor, LeftKey)
+		
 	}
 	else if(location="pine tree"){
-		nm_gotoCannon()
-		DllCall("Sleep",UInt,500)
 		send, {e}
 		DllCall("Sleep",UInt,50)
 		send {%RightKey% down}
@@ -9056,18 +9015,17 @@ nm_cannonToPlanter(location){ ; ~ zaappiix planter path rework
 		DllCall("Sleep",UInt,1500)
 		send {%RightKey% up}
 		send {space}
-		loop 3 {
+		loop 2 {
 			send, {%RotRight%}
 		}
 		DllCall("Sleep",UInt,1000)
-		nm_Move(6000*MoveSpeedFactor, FwdKey, RightKey)
-		nm_Move(4000*MoveSpeedFactor, FwdKey, LeftKey)
-		nm_Move(2000*MoveSpeedFactor, FwdKey)
-		nm_Move(2000*MoveSpeedFactor, BackKey)
+		nm_Move(6000*MoveSpeedFactor, RightKey)
+		nm_Move(4000*MoveSpeedFactor, FwdKey)
+		nm_Move(3000*MoveSpeedFactor, LeftKey)
+		
+		
 	}
 	else if(location="rose"){
-		nm_gotoCannon()
-		DllCall("Sleep",UInt,500)
 		send, {e}
 		DllCall("Sleep",UInt,50)
 		send {%RightKey% down}
@@ -9086,72 +9044,59 @@ nm_cannonToPlanter(location){ ; ~ zaappiix planter path rework
 		nm_Move(1000*MoveSpeedFactor, BackKey, LeftKey)
 	}
 	else if(location="mountain top"){
-		nm_gotoCannon()
-		DllCall("Sleep",UInt,500)
 		send, {e}
 		DllCall("Sleep",UInt,4000)
 	}
 	else if(location="pepper"){
-		nm_gotoCannon()
-		DllCall("Sleep",UInt,150)
-		send {%RightKey% down}
-		sleep, 5000*MovespeedFactor
-		send {space down}
-		DllCall("Sleep",UInt,100)
-		send {space up}
-		DllCall("Sleep",UInt,1500*MovespeedFactor)
+		send, {e}
+		DllCall("Sleep",UInt,50)
 		send {%FwdKey% down}
+		DllCall("Sleep",UInt,500)
+		send {space}
+		send {space}
+		send {%RightKey% down}
+		DllCall("Sleep",UInt,3900)
 		send {%RightKey% up}
-		DllCall("Sleep",UInt,1000*MovespeedFactor)
+		DllCall("Sleep",UInt,2000)
+		send {%RightKey% down}
+		DllCall("Sleep",UInt,2000)
+		send {%RightKey% up}
 		send {space down}
-		DllCall("Sleep",UInt,100)
-		send {space up}
-		DllCall("Sleep",UInt,1500*MovespeedFactor)
-		nm_Move(700*MoveSpeedFactor, LeftKey)
-		DllCall("Sleep",UInt,3000*MovespeedFactor)
-		nm_Move(1500*MoveSpeedFactor, RightKey)
-		send {space down}
-		DllCall("Sleep",UInt,100)
+		DllCall("Sleep",UInt,50)
 		send {space up}
 		DllCall("Sleep",UInt,750)
 		send {space down}
-		DllCall("Sleep",UInt,100)
+		DllCall("Sleep",UInt,50)
 		send {space up}
-		DllCall("Sleep",UInt,850)
+		DllCall("Sleep",UInt,750)
 		send {space down}
-		DllCall("Sleep",UInt,100)
+		DllCall("Sleep",UInt,50)
 		send {space up}
-		DllCall("Sleep",UInt,2500*MovespeedFactor)		
-		send {space down}
-		DllCall("Sleep",UInt,100)
-		send {space up}
-		DllCall("Sleep",UInt,5500*MovespeedFactor)
+		DllCall("Sleep",UInt,3000*MovespeedFactor)
 		send {%RightKey% down}
-		DllCall("Sleep",UInt,500)
+		send {space down}
+		DllCall("Sleep",UInt,50)
+		send {space up}
+		DllCall("Sleep",UInt,5000*MovespeedFactor)
 		send {space down}
 		DllCall("Sleep",UInt,100)
 		send {space up}
-		DllCall("Sleep",UInt,100)
+		DllCall("Sleep",UInt,1500*MovespeedFactor)
 		send {%FwdKey% up}
-		send {space down}
-		DllCall("Sleep",UInt,100)
-		send {space up}
-		DllCall("Sleep",UInt,5800*MovespeedFactor)
+		DllCall("Sleep",UInt,2000*MovespeedFactor)
 		send {space down}
 		DllCall("Sleep",UInt,100)
 		send {space up}
 		DllCall("Sleep",UInt,1000*MovespeedFactor)
 		send {%RightKey% up}
+		send {%FwdKey% up}
 		loop 2 {
 			send {%RotRight%}
 		}
-		nm_Move(7000*MoveSpeedFactor, FwdKey)
-		nm_Move(5000*MoveSpeedFactor, RightKey)
-		nm_Move(3000*MoveSpeedFactor, LeftKey, BackKey)
+		nm_Move(6000*MoveSpeedFactor, FwdKey)
+		nm_Move(1500*MoveSpeedFactor, BackKey)
 	}
 	else if(location="coconut"){
-		nm_gotoCannon()
-		DllCall("Sleep",UInt,500)
 		send, {e}
 		DllCall("Sleep",UInt,50)
 		send {%FwdKey% down}
@@ -15734,7 +15679,7 @@ ba_placePlanter(fieldName, planter, planterNum){
 	;nm_setObjective(planter[1] . "(" . fieldName . ")")
 	objective:=(planter[1] . "(" . fieldName . ")")
 	nm_gotoRamp()
-	;nm_gotoCannon() ~ zaappiix planter paths rework
+	nm_gotoCannon() ; ~ zaappiix planter paths rework, comment this
 	;nm_cannonTo(fieldName)
 	nm_cannonToPlanter(fieldName)
 	global MyField:=fieldName
@@ -15978,7 +15923,7 @@ ba_harvestPlanter(planterNum){
 	nm_Reset()
 	objective:=(PlanterName%planterNum% . " (" . PlanterField%planterNum% . ")")
 	nm_gotoRamp()
-	;nm_gotoCannon() ~ zaappiix planter path rework
+	nm_gotoCannon() ; ~ zaappiix planter path rework, comment this
 	planterName:=PlanterName%planterNum%
 	fieldName:=PlanterField%planterNum%
 	nm_setStatus("Collecting", (planterName . " (" . fieldName . ")"))
@@ -16263,7 +16208,16 @@ ba_SavePlacedPlanter(fieldName, planter, planterNum, nectar){
 	IniWrite, %fieldname%, settings\ba_config.ini, Planters, Last%nectar%Field
 }
 ba_showPlanterTimers(){
-	run, %A_ScriptDir%\PlanterTimers.ahk
+	Prev_DetectHiddenWindows := A_DetectHiddenWindows
+	Prev_TitleMatchMode := A_TitleMatchMode
+	DetectHiddenWindows, On
+	SetTitleMatchMode, 2
+	if !WinExist("PlanterTimers.ahk ahk_class AutoHotkey")
+		run, %A_ScriptDir%\PlanterTimers.ahk
+	else
+		WinClose
+	DetectHiddenWindows, %Prev_DetectHiddenWindows%
+	SetTitleMatchMode, %Prev_TitleMatchMode%
 }
 ba_resetConfig(){
 	if(fileexist("settings\ba_config.ini")) {

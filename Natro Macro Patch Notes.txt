@@ -1,3 +1,12 @@
+0.8.1 Patch Notes
+
+Bugs
+-Reverted planter paths back to using cannon since some were causing problems.
+
+Other
+-"Show Timers" now closes Planter Timers window if it is open.
+
+
 0.8.0 Patch Notes
 
 New Features
