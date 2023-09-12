@@ -1,4 +1,26 @@
-﻿paths["cactus"] := "
+﻿if (MoveMethod = "walk")
+{
+paths["cactus"] := "
+(LTrim Join`r`n
+;gotoramp
+" nm_Walk(67.5, BackKey, LeftKey) "
+send {" RotRight " 4}
+" nm_Walk(31, FwdKey) "
+" nm_Walk(7.8, LeftKey) "
+" nm_Walk(10, BackKey) "
+" nm_Walk(5, RightKey) "
+"nm_Walk(1.5, FwdKey) "
+" nm_Walk(60, LeftKey) "
+" nm_Walk(49.5, FwdKey) "
+send {" RotRight " 2}
+" nm_Walk(35.5, FwdKey) "
+" nm_Walk(3, RightKey) "
+" nm_Walk(7, BackKey) "
+send {" RotRight " 2}
+)"
+}
+else {
+paths["cactus"] := "
 (LTrim Join`r`n
 ;gotoramp
 ;gotocannon
@@ -18,3 +40,5 @@ HyperSleep(600)
 " nm_Walk(7, LeftKey) "
 send {" RotLeft " 4}
 )"
+}
+;path 230729 noobyguy

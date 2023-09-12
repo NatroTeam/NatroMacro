@@ -1,3 +1,37 @@
+0.9.5 Patch Notes
+
+New Features 
+- Added two more calculators.. the Treat calculator and the SSA calculator (Thanks to gyhkijffk#4789)
+- Added a help button to the boss area to help explain features with a description
+- Added a button to configure snail and chick health to help with health detection readings 
+- Added a health detection system to bug runs and mondo
+- Added time estimation to Commando and Snail
+- Added remote control features to the new gui options
+  ?SnailTime & ChickTime use (5|10|15|Kill)
+  ?InputChickhealth use an integer between 1-100 for a percentage of its health
+  ?InputSnailHealth use the amount of its health remaining
+- Added deeplinking support to Natro (Thanks to SP)
+- Redid some paths for stability (Thanks to nooby)
+- Added a reconnect test to the misc tab
+- Auto import styles from the styles folder
+
+Bug fixes
+- Fixed Whirligig system not detecting hive (This system will recieve a rework in the future) 
+- Added the "Warning" tag to Status.AHK
+- Fixed walk issues with patterns (Thanks to SP)
+- Added a legacy system just in case roblox breaks deeplinking again -_- (Thanks to SP)
+- Fixed the gtp-blueflower, gtq-bucko, gtb-blue, gtp-mushroom, gtp-pineapple paths from the path overhauls (Thanks to Nooby)
+- Fixed format time being shown in local time and not UTC time
+- Imported the new walk system instead of the current system used in 9.4 (9.4 used an outdated version and fork will have issues since it was made to work with that vers)
+- Made the KeyDelay feature an up down box
+- Fixed the inital field drift in stump from being turned on 
+- Snail dance will not run and field drift will not run when macroing snail if you don't have supreme saturator equipped
+- Fixed status not showing the correctly updated value for snailtime or chicktime
+- Fixed error thrown when SnailTime, and ChickTime werent added to enum-str.ahk correctly 
+- Added RBPDelevelCheck, and LastRBPDelevel to remote control
+- Fixed non-ASCII characters to be read as something else
+
+
 0.9.4 Patch Notes
 
 New Features

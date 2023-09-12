@@ -1,4 +1,24 @@
-﻿paths["bamboo"] := "
+﻿if (MoveMethod = "walk") 
+{
+paths["bamboo"] := "
+(LTrim Join`r`n
+;gotoramp
+" nm_Walk(67.5, BackKey, LeftKey) "
+send {" RotRight " 4}
+" nm_Walk(23.5, FwdKey) "
+" nm_Walk(31.5, FwdKey, RightKey) "
+" nm_Walk(10, RightKey) "
+send {" RotRight " 2}
+" nm_Walk(20, FwdKey) "
+" nm_Walk(5, FwdKey, LeftKey) "
+" nm_Walk(7, LeftKey) "
+" nm_Walk(1, FwdKey) "
+" nm_Walk(8, RightKey) "
+" nm_Walk(8, BackKey) "
+)"
+}
+else {
+paths["bamboo"] := "
 (LTrim Join`r`n
 ;gotoramp
 ;gotocannon
@@ -6,32 +26,17 @@ send {" RotLeft " 2}{e down}
 HyperSleep(100)
 send {e up}{" FwdKey " down}
 HyperSleep(800)
-send {space 2}
+send {" SC_space " 2}
 HyperSleep(3000)
 send {" FwdKey " up}{" LeftKey " down}
 HyperSleep(1000)
-send {space}
-Walk(12)
-send {space down}
-HyperSleep(300)
-send {space up}
-HyperSleep(300)
-send {space down}
-HyperSleep(300)
-send {space up}
-HyperSleep(2000)
-Walk(6)
-send {" LeftKey " up}{" FwdKey " down}
-send {space down}
-HyperSleep(300)
-send {space up}
-HyperSleep(300)
-send {space down}
-HyperSleep(300)
-send {space up}
-HyperSleep(2000)
-Walk(12)
-send {" FwdKey " up}
+send {" SC_space "}
+send {" LeftKey " up}
+HyperSleep(1000)
+" nm_Walk(20, LeftKey) "
+" nm_Walk(30, FwdKey) "
 " nm_Walk(8, RightKey) "
 " nm_Walk(8, BackKey) "
 )"
+}
+;path 230729 noobyguy

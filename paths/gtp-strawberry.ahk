@@ -1,4 +1,19 @@
-﻿paths["strawberry"] := "
+﻿if (MoveMethod = "walk") {
+paths["strawberry"] := "
+(LTrim Join`r`n
+;gotoramp
+" nm_Walk(67.5, BackKey, LeftKey) "
+send {" RotRight " 4}
+" nm_Walk(31, FwdKey) "
+" nm_Walk(7, FwdKey, LeftKey) "
+" nm_Walk(30.25, LeftKey) "
+" nm_Walk(30, FwdKey, LeftKey) "
+send {" RotLeft " 2}
+" nm_Walk(10, BackKey, LeftKey) "
+)"
+}
+else {
+paths["strawberry"] := "
 (LTrim Join`r`n
 ;gotoramp
 ;gotocannon
@@ -17,3 +32,5 @@ Sleep, 2000
 " nm_Walk(15, FwdKey) "
 " nm_Walk(10, BackKey, LeftKey) "
 )"
+}
+;path 230729 noobyguy

@@ -47,4 +47,6 @@
 	, "FallbackServer3"
 	, "NightAnnouncementName"
 	, "NightAnnouncementPingID"
-	, "NightAnnouncementWebhook"]
+	, "NightAnnouncementWebhook"
+	, "SnailTime"
+	, "ChickTime"]

@@ -1,8 +1,33 @@
-﻿if (MoveMethod = "walk")
-{
-	paths["strawberrydis"] := "
-	(LTrim Join`r`n
-	;gotoramp
+﻿paths["strawberrydis"] := "
+(LTrim Join`r`n
+if (" HiveBees " > 25) {
+    ;gotoramp
+    send {space down}
+    HyperSleep(300)
+    Send {space up}
+    " nm_Walk(36, RightKey) "
+    send {space down}
+    HyperSleep(300)
+    send {space up}
+    " nm_Walk(6, RightKey) "
+    HyperSleep(500)
+    send {" RotRight " 2}
+    send {space down}
+    HyperSleep(100)
+    send {space up}
+    " nm_Walk(3, FwdKey) "
+    HyperSleep(1000)
+    send {space down}{" RightKey " down}
+    HyperSleep(100)
+    send {space up}
+    HyperSleep(300)
+    send {space}{" RightKey " up}
+    HyperSleep(1000)
+    " nm_Walk(7.5, Backkey, RightKey)"
+}
+else {
+
+    ;gotoramp
 	" nm_Walk(67.5, BackKey, LeftKey) "
 	send {" RotRight " 4}
 	" nm_Walk(31.5, FwdKey) "
@@ -20,23 +45,6 @@
 	" nm_Walk(23.85, FwdKey) "
 	" nm_Walk(22.95, LeftKey) "
 	" nm_Walk(11.25, BackKey) "
-	)"
 }
-else
-{
-	paths["strawberrydis"] := "
-	(LTrim Join`r`n
-	;gotoramp
-	;gotocannon
-	send {e down}
-	HyperSleep(100)
-	send {e up}{" FwdKey " down}{" RightKey " down}
-	HyperSleep(450)
-	send {space 2}
-	HyperSleep(2080)
-	send {" FwdKey " up}
-	HyperSleep(1050)
-	send {" RightKey " up}{space}{" RotRight " 2}
-	Sleep, 1000
-	)"
-}
+)"
+;dual path 230629 noobyguy

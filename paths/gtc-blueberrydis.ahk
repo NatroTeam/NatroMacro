@@ -5,13 +5,12 @@
 	;gotoramp
 	" nm_Walk(88.875, BackKey, LeftKey) "
 	" nm_Walk(27, LeftKey) "
+	HyperSleep(50)
 	send {" RotLeft " 2}
-	" nm_Walk(14, LeftKey) "
-	" nm_Walk(26, FwdKey) "
-	" nm_Walk(5, BackKey) "	
-	" nm_Walk(7.5, RightKey) "
-	" nm_Walk(9, FwdKey) "
-	" nm_Walk(14, FwdKey, RightKey) "
+	HyperSleep(50)
+	" nm_Walk(30, FwdKey) "
+	" nm_Walk(11.5, FwdKey, RightKey) "
+	" nm_Walk(2, RightKey) "
 	)"
 }
 else
@@ -29,11 +28,18 @@ else
 	send {" LeftKey " up}{space}
 	HyperSleep(1000)
 	send {" RotLeft " 2}
-	" nm_Walk(19, LeftKey) "
-	" nm_Walk(17, FwdKey) "
-	" nm_Walk(5, BackKey) "	
-	" nm_Walk(7.5, RightKey) "
-	" nm_Walk(9, FwdKey) "
-	" nm_Walk(14, FwdKey, RightKey) "
+	" nm_Walk(10, LeftKey) "
+	" nm_Walk(10, RightKey) "
+	;inside
+	" nm_Walk(10, FwdKey) "
+	send {" RotRight " 1}
+	HyperSleep(100)
+	" nm_Walk(1.6, FwdKey) "
+	send {FwdKey down}{space down}
+	HyperSleep(300)
+	send {space up}
+	send {space}
+	HyperSleep(1300)
 	)"
 }
+;path 230629 noobyguy

@@ -1,6 +1,6 @@
 ﻿/*
 Natro Macro, https://bit.ly/NatroMacro
-Copyright © 2022-2023 Natro Dev Team (natromacroserver@gmail.com)
+Copyright Â© 2022-2023 Natro Dev Team (natromacroserver@gmail.com)
 
 This file is part of Natro Macro. Our source code will always be open and available.
 
@@ -81,7 +81,7 @@ If (!FileExist("settings")) ; make sure the settings folder exists
 	}
 }
 
-VersionID := "0.9.4"
+VersionID := "0.9.5"
 currentWalk := {"pid":"", "name":""} ; stores "pid" (script process ID) and "name" (pattern/movement name)
 
 DetectHiddenWindows, On
@@ -490,8 +490,8 @@ config["Collect"] := {"ClockCheck":1
 	, "LastWreath":1
 	, "FeastCheck":0
 	, "LastFeast":1
-	, "RBPDelevelCheck" :1
-	, "LastRBPDelevel" :0
+	, "RBPDelevelCheck" :0
+	, "LastRBPDelevel" :1
 	, "GingerbreadCheck":0
 	, "LastGingerbread":1
 	, "SnowMachineCheck":0
@@ -532,6 +532,10 @@ config["Collect"] := {"ClockCheck":1
 	, "KingBeetleBabyCheck":0
 	, "KingBeetleAmuletMode":1
 	, "LastKingBeetle":1
+	, "InputSnailHealth":100.00
+	, "SnailTime":15
+	, "InputChickHealth":100.00
+	, "ChickTime":15
 	, "StumpSnailCheck":0
 	, "ShellAmuletMode":1
 	, "LastStumpSnail":1
@@ -548,7 +552,9 @@ config["Collect"] := {"ClockCheck":1
 	, "StingerCloverCheck":1
 	, "StingerDailyBonusCheck":0
 	, "NightLastDetected":1
-	, "VBLastKilled":1}
+	, "VBLastKilled":1
+	, "BlenderCheck":0
+	, "LastBlender":1}
 
 config["Boost"] := {"FieldBoostStacks":0
 	, "FieldBooster1":"None"
@@ -666,6 +672,13 @@ for k,v in config ; load the default values as globals, will be overwritten if a
 
 if FileExist(A_ScriptDir "\settings\nm_config.ini") ; update default values with new ones read from any existing .ini
 	nm_ReadIni(A_ScriptDir "\settings\nm_config.ini")
+
+loop, 3 {
+    if (FieldPattern%A_Index% = "Typewriter") {
+		FieldPattern%A_Index% := "e_lol"
+        IniWrite, % FieldPattern%A_Index%, settings\nm_config.ini, Gather, FieldPattern%A_Index%
+	}
+}
 
 ini := ""
 for k,v in config ; overwrite any existing .ini with updated one with all new keys and old values
@@ -814,8 +827,7 @@ PepperPlanters:=[["PlanterOfPlenty", 1.5, 1.5, 10.67] ; 2.25
 	, ["PaperPlanter", .75, 1, 1] ; 0.75
 	, ["TicketPlanter", 2, 1, 2]] ; 2
 
-PineTreePlanters:=[["TicketPlanter", 2, 1, 2] ; 2
-	, ["HydroponicPlanter", 1.4, 1.42, 8.46] ; 1.988
+PineTreePlanters:=[["HydroponicPlanter", 1.4, 1.42, 8.46] ; 1.988
 	, ["PetalPlanter", 1.5, 1.08, 12.97] ; 1.62
 	, ["PlanterOfPlenty", 1.5, 1, 16] ; 1.5
 	, ["BlueClayPlanter", 1.2, 1.21, 4.96] ; 1.452
@@ -825,7 +837,8 @@ PineTreePlanters:=[["TicketPlanter", 2, 1, 2] ; 2
 	, ["RedClayPlanter", 1, 1, 6] ; 1
 	, ["PesticidePlanter", 1, 1, 10] ; 1
 	, ["HeatTreatedPlanter", 1, 1, 12] ; 1
-	, ["PaperPlanter", .75, 1, 1]] ; 0.75
+	, ["PaperPlanter", .75, 1, 1] ; 0.75
+	, ["TicketPlanter", 2, 1, 2]] ; 2 
 
 PineapplePlanters:=[["PetalPlanter", 1.5, 1.445, 9.69] ; 2.1675
 	, ["CandyPlanter", 1, 1.5, 2.67] ; 1.5
@@ -1324,7 +1337,7 @@ FieldDefault["Stump"] := {"pattern":"Stationary"
 	, "percent":95
 	, "gathertime":10
 	, "convert":"Walk"
-	, "drift":1
+	, "drift":0
 	, "shiftlock":0
 	, "invertFB":0
 	, "invertLR":0}
@@ -1449,7 +1462,7 @@ if FileExist(A_ScriptDir "\settings\field_config.ini") ; update default values w
 	nm_LoadFieldDefaults()
 
 ini := ""
-for k,v in FieldDefault ; overwrite any existing .ini with updated one with all new keys and old values
+for k,v in FieldDefault ; overwrite any e_configxisting .ini with updated one with all new keys and old values
 {
 	ini .= "[" k "]`r`n"
 	for i,j in v
@@ -1936,7 +1949,7 @@ Gui, Tab, Misc
 Gui, Font, w700
 Gui, Add, GroupBox, x5 y24 w160 h144, Hive Tools
 Gui, Add, GroupBox, x5 y168 w160 h62, Other Tools
-Gui, Add, GroupBox, x170 y168 w160 h62, Calculators
+Gui, Add, GroupBox, x170 y24 w160 h144, Calculators
 Gui, Add, GroupBox, x335 y24 w160 h84, Macro Tools
 Gui, Add, GroupBox, x335 y108 w160 h60, Discord Tools
 Gui, Add, GroupBox, x335 y168 w160 h62, Reporting
@@ -1948,11 +1961,13 @@ Gui, Add, Button, x10 y124 w150 h40 Disabled, Auto-Mutator`n(coming soon!)
 ;other tools
 Gui, Add, Button, x10 y184 w150 h42 gnm_GenerateBeeList, Export Hive Bee List`n(for Hive Builder)
 ;calculators
-Gui, Add, Button, x175 y184 w150 h42 gnm_TicketShopCalculatorButton, Ticket Shop Calculator`n(Google Sheets)
+Gui, Add, Button, x175 y40 w150 h40 gnm_TicketShopCalculatorButton, Ticket Shop Calculator`n(Google Sheets)
+Gui, Add, Button, x175 y82 w150 h40 gnm_SSACalculatorButton, SSA Calculator`n(Google Sheets)
+Gui, Add, Button, x175 y124 w150 h40 gnm_BondCalculatorButton, Bond Calculator`n(Google Sheets)
 ;macro tools
 Gui, Add, Button, x340 y40 w150 h20 gnm_HotkeyGUI, Change Hotkeys
 Gui, Add, Button, x340 y62 w150 h20 gnm_DebugLogGUI, Debug Log Options
-Gui, Add, Button, x340 y84 w150 h20 Disabled, Error Check (soon!)
+Gui, Add, Button, x340 y84 w150 h20 gnm_testReconnect, Test Reconnect
 ;discord tools
 Gui, Add, Button, x340 y124 w150 h40 gnm_NightAnnouncementGUI, Night Detection`nAnnouncement
 ;reporting
@@ -1989,7 +2004,9 @@ Gui, Tab, Settings
 Gui, Add, GroupBox, x5 y25 w160 h65, GUI SETTINGS
 Gui, Add, Checkbox, x10 y73 vAlwaysOnTop gnm_AlwaysOnTop Checked%AlwaysOnTop%, Always On Top
 Gui, Add, Text, x10 y40 w70 +left +BackgroundTrans,GUI Theme:
-Gui, Add, DropDownList, x85 y34 w72 h100 vGuiTheme gnm_guiThemeSelect Disabled, % LTrim(StrReplace("|Allure|Ayofe|BluePaper|Concaved|Core|Cosmo|Fanta|GrayGray|Hana|Invoice|Lakrits|Luminous|MacLion3|Minimal|Museo|Panther|PaperAGV|PINK|Relapse|Simplex3|SNAS|Stomp|VS7|WhiteGray|Woodwork|", "|" GuiTheme "|", "|" GuiTheme "||"), "|")
+nm_importStyles()
+
+Gui, Add, DropDownList, x85 y34 w72 h100 vGuiTheme gnm_guiThemeSelect Disabled, % LTrim(StrReplace(StylesList, "|" GuiTheme "|", "|" GuiTheme "||"), "|")
 Gui, Add, Text, x10 y57 w100 +left +BackgroundTrans,GUI Transparency:
 Gui, Add, DropDownList, x105 y55 w52 h100 vGuiTransparency gnm_guiTransparencySet Disabled, % LTrim(StrReplace("|0|5|10|15|20|25|30|35|40|45|50|55|60|65|70|", "|" GuiTransparency "|", "|" GuiTransparency "||"), "|")
 
@@ -2016,7 +2033,8 @@ Gui, Add, Button, x20 y207 w130 h22 gnm_ResetConfig, Reset All Settings
 ;input settings
 Gui, Add, GroupBox, x170 y25 w160 h93, INPUT SETTINGS
 Gui, Add, Text, x180 y40 w100 +left +BackgroundTrans,Add Key Delay (ms):
-Gui, Add, Edit, x280 y38 w40 h18 limit4 number vKeyDelay gnm_saveConfig Disabled, %KeyDelay%
+Gui, Add, Edit, % "x280 y38 w40 h18 limit4 number vKeyDelayEdit gnm_saveKeyDelay Disabled", KeyDelay
+Gui, Add, UpDown, % "Range0-9999 vKeyDelay gnm_saveKeyDelay Disabled"
 Gui, Font, Underline
 Gui, Add, Text, x182 y58 w85 -Wrap c0x0046ee vAutoClickerButton, AutoClicker (%AutoClickerHotkey%)
 Gui, Font, s8 cDefault Norm, Tahoma
@@ -2115,11 +2133,11 @@ beesmasActive:=1
 Gui, Font, w700
 Gui, Add, GroupBox, x10 y153 w290 h84 vBeesmasGroupBox, % "Beesmas" (beesmasActive ? "" : " (Reserved)")
 Gui, Font, s8 cDefault Norm, Tahoma
-hBM := Gdip_CreateHBITMAPFromBitmap(bitmaps["beesmas"])
-Gui, Add, Picture, % "+BackgroundTrans x77 y150 w20 h20 vBeesmasImage Hidden" !beesmasActive, HBITMAP:*%hBM%
+hBM := Gdip_CreateHBITMAPFromBitmap(bitmaps["beesmas"]) 
+Gui, Add, Picture, +BackgroundTrans x77 y150 w20 h20 vBeesmasImage, % (beesmasActive ? "HBITMAP:*" . hBM : "")
 DllCall("DeleteObject", "ptr", hBM)
 Gdip_DisposeImage(bitmaps["beesmas"])
-Gui, Add, Checkbox, % "x102 y154 +BackgroundTrans vBeesmasGatherInterruptCheck gnm_saveCollect Checked" (BeesmasGatherInterruptCheck && beesmasActive) " Disabled" !beesmasActive, Allow Gather Interrupt
+Gui, Add, Checkbox, % "x142 y154 +BackgroundTrans vBeesmasGatherInterruptCheck gnm_saveCollect Checked" (BeesmasGatherInterruptCheck && beesmasActive) " Disabled" !beesmasActive, Allow Gather Interrupt
 Gui, Add, Checkbox, % "x15 y170 w62 +BackgroundTrans vStockingsCheck gnm_saveCollect Checked" (StockingsCheck && beesmasActive) " Disabled" !beesmasActive, Stockings
 Gui, Add, Checkbox, % "x15 yp+17 +BackgroundTrans vWreathCheck gnm_saveCollect Checked" (WreathCheck && beesmasActive) " Disabled" !beesmasActive, Honey Wreath
 Gui, Add, Checkbox, % "x15 yp+17 +BackgroundTrans vFeastCheck gnm_saveCollect Checked" (FeastCheck && beesmasActive) " Disabled" !beesmasActive, Feast
@@ -2137,7 +2155,7 @@ Gui, Font, w700
 Gui, Add, GroupBox, x10 y42 w180 h188 vBugRunGroupBox Hidden, Bug Run
 Gui, Font, s8 cDefault Norm, Tahoma
 Gui, Add, Checkbox, x80 y43 vBugRunCheck gnm_BugRunCheck Checked%BugRunCheck% Hidden, Select All
-Gui, Add, Text, x16 y62 +BackgroundTrans Hidden vTextMonsterRespawn, % "–       % Monster Respawn Time"
+Gui, Add, Text, x16 y62 +BackgroundTrans Hidden vTextMonsterRespawn, % "-       % Monster Respawn Time"
 Gui, Add, Edit, x24 y61 w18 h16 Limit2 number +BackgroundTrans vMonsterRespawnTime gnm_MonsterRespawnTime Hidden, %MonsterRespawnTime%
 Gui, Add, Button, x173 y62 w12 h14 gnm_MonsterRespawnTimeHelp vMonsterRespawnTimeHelp Hidden, ?
 Gui, Add, Checkbox, x20 y82 w125 h15 +BackgroundTrans vBugrunInterruptCheck gnm_saveCollect Checked%BugrunInterruptCheck% Hidden, Allow Gather Interrupt
@@ -2186,18 +2204,30 @@ Gui, Add, Picture, +BackgroundTrans vBabyLovePicture1 x313 y122 w18 h18 Hidden, 
 Gui, Add, Picture, +BackgroundTrans vBabyLovePicture2 x313 y142 w18 h18 Hidden, HBITMAP:*%hBM%
 DllCall("DeleteObject", "ptr", hBM)
 Gdip_DisposeImage(bitmaps["babylovegui"])
-Gui, Add, Checkbox, x345 y125 w13 h13 +BackgroundTrans vKingBeetleAmuletMode gnm_saveAmulet Checked%KingBeetleAmuletMode% Disabled Hidden
-Gui, Add, Checkbox, x345 y185 w13 h13 +BackgroundTrans vShellAmuletMode gnm_saveAmulet Checked%ShellAmuletMode% Disabled Hidden
+Gui, Add, Checkbox, x368 y125 w13 h13 +BackgroundTrans vKingBeetleAmuletMode gnm_saveAmulet Checked%KingBeetleAmuletMode% Disabled Hidden
+Gui, Add, Checkbox, x368 y145 w13 h13 +BackgroundTrans vShellAmuletMode gnm_saveAmulet Checked%ShellAmuletMode% Disabled Hidden
 hBM := Gdip_CreateHBITMAPFromBitmap(bitmaps["kingbeetleamu"])
-Gui, Add, Picture, +BackgroundTrans vKingBeetleAmuPicture x362 y121 w20 h20 Hidden, HBITMAP:*%hBM%
+Gui, Add, Picture, +BackgroundTrans vKingBeetleAmuPicture x386 y121 w20 h20 Hidden, HBITMAP:*%hBM%
 DllCall("DeleteObject", "ptr", hBM)
 Gdip_DisposeImage(bitmaps["kingbeetleamu"])
 hBM := Gdip_CreateHBITMAPFromBitmap(bitmaps["supremeshellamu"])
-Gui, Add, Picture, +BackgroundTrans vShellAmuPicture x362 y181 w20 h20 Hidden, HBITMAP:*%hBM%
+Gui, Add, Picture, +BackgroundTrans vShellAmuPicture x386 y141 w20 h20 Hidden, HBITMAP:*%hBM%
 DllCall("DeleteObject", "ptr", hBM)
 Gdip_DisposeImage(bitmaps["supremeshellamu"])
-Gui, Add, Text, x386 y125 w100 vKingBeetleAmuletModeText Hidden, % (KingBeetleAmuletMode = 1) ? "Always Keep Old" : "Leave On Screen"
-Gui, Add, Text, x386 y185 w100 vShellAmuletModeText Hidden, % (ShellAmuletMode = 1) ? "Always Keep Old" : "Leave On Screen"
+Gui, Add, Button, x260 y105 w12 h14 gnm_BossConfigHelp vBossConfigHelp Hidden, ?
+Gui, Add, Text, x410 y125 w78 vKingBeetleAmuletModeText Hidden, % (KingBeetleAmuletMode = 1) ? "Keep Old" : "Do Nothing"
+Gui, Add, Text, x410 y145 w78 vShellAmuletModeText Hidden, % (ShellAmuletMode = 1) ? "Keep Old" : "Do Nothing"
+Gui, Add, Button, x295 y185 w90 h15 +Center vInputSnailHealth gnm_setSnailHealth Hidden, Edit Snail Health
+;Gui, Add, Text, x295 y185 w5 +Left +BackgroundTrans vHPtext  Hidden, % "HP%:"
+;Gui, Add, Edit, x325 y185 w60 h16 +BackgroundTrans limit5 Range1-100 vInputSnailHealth gnm_setSnailHealth  Hidden, %InputSnailHealth%
+Gui, Add, Text, x395 y185 w5 +Left +BackgroundTrans vTime  Hidden, Mins:
+Gui, Add, DropDownList, x425 y183 w55 vSnailTime gnm_SnailTime Hidden, % LTrim(StrReplace("|5|10|15|Kill|", "|" SnailTime "|", "|" SnailTime "||"), "|")
+Gui, Add, Button, x295 y205 w90 h15 +Center vInputChickHealth gnm_setChickHealth Hidden, Edit Chick Health 
+;Gui, Add, Text, x295 y205 w5 +Left +BackgroundTrans vHPtext2  Hidden, % "HP%:"
+;Gui, Add, Edit, x325 y205 w60 h16 +BackgroundTrans limit5 Range1-100 vInputChickHealth gnm_setChickHealth  Hidden, %InputChickHealth%
+Gui, Add, Text, x395 y205 w5 +Left +BackgroundTrans vTime2  Hidden, Mins:
+Gui, Add, DropDownList, x425 y203 w55 vChickTime gnm_ChickTime Hidden, % LTrim(StrReplace("|5|10|15|Kill|", "|" ChickTime "|", "|" ChickTime "||"), "|")
+
 
 nm_saveCollect()
 PostMessage, 0x5555, 55, 0, , ahk_pid %lp_PID%
@@ -2600,7 +2630,7 @@ mp_Planter() {
 
 	if (PlanterMode != 1)
 		return
-	FormatTime, utc_min, A_NowUTC, m
+	FormatTime, utc_min, %A_NowUTC%, m
 	If (VBState == 1 || ((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag")) || ((nowUnix()-GatherFieldBoostedStart)<900 || (nowUnix()-LastGlitter)<900 || nm_boostBypassCheck()))
 		Return
 
@@ -3061,10 +3091,6 @@ while (i := RegExMatch(A_ScriptDir, "[^\x00-\x7F]", m, i+StrLen(m)))
 if (StrLen(str)>0)
 	msgbox, 0x1030, WARNING!!, % "Your file path: " A_ScriptDir "`nInvalid characters found in file path: " str "`n`nYour Natro Macro file path contains non-ASCII characters (generally non-English characters). This will cause the macro to fail when launching new processes. Please extract your macro to a different folder!`n`nExamples of valid file paths: 'C:\Macro\Natro_Macro_v" versionID "', 'C:\Users\user\Downloads\Natro_Macro_v" versionID "'", 60
 
-DllCall("shlwapi\AssocQueryString","Int",0,"Int",1,"Str","http","Str","open","Ptr",0,"UIntP",l)
-if (l=0)
-	msgbox, 0x1030, WARNING!!, % "No default browser detected! This will cause problems when the macro has to reconnect. Please consult the Knowledge Base guide in the Natro Macro Discord Server to set a default browser.", 60
-
 WinClose, ahk_pid %lp_PID% ahk_class AutoHotkey
 DetectHiddenWindows, Off
 Gui, Show, x%GuiX% y%GuiY% w500 h285, Natro Macro
@@ -3331,7 +3357,7 @@ nm_saveAdvanced(){
 	DetectHiddenWindows %Prev_DetectHiddenWindows%
 	SetTitleMatchMode %Prev_TitleMatchMode%
 }
-nm_testButton(){
+nm_testButton(){ ;~~ lines 3464 and 3465 have the same change as 14156
 	global
 	local Test1:="", Test2:="", file
 	GuiControlGet, Test1Check
@@ -3445,8 +3471,8 @@ nm_testButton(){
 		MouseMove, 350, 100
 		" ((TestMsgBox = 1) ? "msgbox, 0x40044, Test Paths/Patterns, % """"Start Cycle: """" A_Index """"````r````nContinue?""""`r`n`t`tIfMsgBox, No`r`n`t`tExitApp" : "tooltip % """"Testing````nCycle: """" A_Index") "
 		" ((TestReset = 1) ? "nm_reset()" : "") "
-		" ((NewWalk = 1) ? """ Test1 """ : (""" RegExReplace(Test1, ""im)Walk\((?<param>(?:\([^)]*\)|[^(),]*)+).*\)"", ""HyperSleep(2000/9*"" round(18/" MoveSpeedNum ", 2) ""*(${param}))"") """)) "
-		" ((NewWalk = 1) ? """ Test2 """ : (""" RegExReplace(Test2, ""im)Walk\((?<param>(?:\([^)]*\)|[^(),]*)+).*\)"", ""HyperSleep(2000/9*"" round(18/" MoveSpeedNum ", 2) ""*(${param}))"") """)) "
+		" ((NewWalk = 1) ? """ Test1 """ : (""" RegExReplace(Test1, ""im)Walk\((?<param>.+?)(?:\,|\)(?=[^()]*(?:\(|$)))(?:.*\))?"", ""HyperSleep(2000/9*"" round(18/" MoveSpeedNum ", 2) ""*(${param}))"") """)) "
+		" ((NewWalk = 1) ? """ Test2 """ : (""" RegExReplace(Test2, ""im)Walk\((?<param>.+?)(?:\,|\)(?=[^()]*(?:\(|$)))(?:.*\))?"", ""HyperSleep(2000/9*"" round(18/" MoveSpeedNum ", 2) ""*(${param}))"") """)) "
 	}
 	msgbox, 0x40040, Test Paths/Patterns, Test Complete!
 	ExitApp
@@ -4454,8 +4480,104 @@ nm_saveAmulet(hCtrl){
 	local k
 	GuiControlGet, k, Name, %hCtrl%
 	GuiControlGet, %k%
-	GuiControl, , %k%Text, % (%k% = 1) ? "Always Keep Old" : "Leave On Screen"
+	GuiControl, , %k%Text, % (%k% = 1) ? "Keep Old" : "Do Nothing"
 	IniWrite, % %k%, settings\nm_config.ini, Collect, %k%
+}
+nm_setSnailHealth()
+{
+    global InputSnailHealth
+	Loop
+    {
+        InputBox, inputHP, Snail HP Settings, Enter Snail's health to convert to percentage notation`n`nCurrent HP Left:  %InputSnailHealth% percent, , 250, 175
+        if ErrorLevel
+        {
+            break
+        }
+        if (inputHP <= 30000000 && inputHP > 0)
+        {
+            NewSnailHealth := Round((inputHP / 30000000) * 100, 2)
+			InputSnailHealth := NewSnailHealth
+			IniWrite, %NewSnailHealth%, settings\nm_config.ini, Collect, InputSnailHealth
+        	MsgBox, Snail's Health has been updated to %InputSnailHealth% percent.
+            break
+        }
+        else
+        {
+            MsgBox % "Invalid input."
+        }
+    }
+}
+nm_setChickHealth(hEdit)
+{
+    global InputChickHealth
+	;Gumdrops carried me, they so pro
+	static chickArray := {3: 150
+	, 4: 2000
+	, 5: 10000
+	, 6: 15000
+	, 7: 25000
+	, 8: 50000
+	, 9: 100000
+	, 10: 150000
+	, 11: 200000
+	, 12: 300000
+	, 13: 400000
+	, 14: 500000
+	, 15: 750000
+	, 16: 1000000
+	, 17: 2500000
+	, 18: 5000000
+	, 19: 7500000
+	, 20: 10000000}
+    Loop
+    {
+        InputBox, inputHP, Chick HP Settings, Enter Chick's HP to convert to percentage notation`n`nCurrent HP Left: %InputChickHealth% percent, , 250, 175
+        if ErrorLevel
+        {
+            break
+        }
+		InputBox, chickLevel, Chick HP Settings, Enter The current chick level, , 250, 125
+		if ErrorLevel
+        {
+        	break
+        }
+		for k, v in chickArray
+		{
+			if (chickLevel < 20 && chickLevel >= 3)
+			{
+				if (k = chickLevel)
+				{
+					totalHP := v 
+				}
+			}
+			else if (chickLevel > 20)
+			{
+				totalHP := 10000000
+			}
+		}
+        if (inputHP <= totalHP && inputHP > 0)
+        {
+            NewChickHealth := Round((inputHP / totalHP) * 100, 2)
+			InputChickHealth := NewChickHealth
+			IniWrite, %NewChickHealth%, settings\nm_config.ini, Collect, InputChickHealth
+        	MsgBox, Chick's Health has been updated to %InputChickHealth% percent.
+            break
+        }
+        else
+        {
+            MsgBox % "Invalid input."
+        }
+    }
+}
+nm_SnailTime(){
+	global SnailTime
+	GuiControlGet SnailTime
+	IniWrite, %SnailTime%, settings\nm_config.ini, Collect, SnailTime
+}
+nm_ChickTime(){
+	global ChickTime
+	GuiControlGet ChickTime
+	IniWrite, %ChickTime%, settings\nm_config.ini, Collect, ChickTime
 }
 nm_BugrunCheck(){
 	GuiControlGet, BugrunCheck
@@ -4539,8 +4661,13 @@ nm_TabCollectLock(){
 	GuiControl, disable, StumpSnailCheck
 	GuiControl, disable, ShellAmuletMode
 	GuiControl, disable, CommandoCheck
+	GuiControl, disable, InputSnailHealth
+	GuiControl, disable, SnailTime
+	GuiControl, disable, InputChickHealth
+	GuiControl, disable, ChickTime
 }
 nm_TabCollectUnLock(){
+	global beesmasActive
 	GuiControl, enable, ClockCheck
 	GuiControl, enable, MondoBuffCheck
 	GuiControl, enable, MondoAction
@@ -4592,6 +4719,10 @@ nm_TabCollectUnLock(){
 	GuiControl, enable, StumpSnailCheck
 	GuiControl, enable, ShellAmuletMode
 	GuiControl, enable, CommandoCheck
+	GuiControl, enable, InputSnailHealth
+	GuiControl, enable, SnailTime
+	GuiControl, enable, InputChickHealth
+	GuiControl, enable,	ChickTime
 }
 nm_saveBoost(){
 	global
@@ -4768,6 +4899,30 @@ nm_HotbarWhile(hCtrl:=0){
 			IniWrite, % HotbarWhile%i%, settings\nm_config.ini, Boost, HotbarWhile%i%
 		}
 	}
+}
+nm_importStyles() {
+	global StylesList, GuiTheme
+	StylesList := ""
+	Loop, Files, %A_ScriptDir%\nm_image_assets\Styles\*.msstyles
+		StylesList .= "|" A_LoopFileName
+
+	StylesList .= "|", StylesList := StrReplace(StylesList, ".msstyles")
+
+	if !(Instr(StylesList, GuiTheme))
+		StylesList .= GuiTheme "|"
+}
+nm_InputSnailHealth() {
+	global InputSnailHealth
+	if (InputSnailHealth > 30000000)
+		InputSnailhealth := 30000000
+	InputSnailHealth := Round((InputSnailHealth / 30000000) * 100, 2)
+	IniWrite, %InputSnailHealth%, settings\nm_config.ini, Kill, InputSnailHealth
+}
+nm_InputChickHealth() {
+	global InputChickHealth
+	if (InputChickHealth > 100)
+		InputChickHealth := 100
+	IniWrite, %InputChickHealth%, settings\nm_config.ini, Kill, InputChickHealth
 }
 nm_HotkeyEditTime(hCtrl){
 	global
@@ -5942,6 +6097,12 @@ nm_DebugLogCheck(){
 	DetectHiddenWindows %Prev_DetectHiddenWindows%
 	SetTitleMatchMode %Prev_TitleMatchMode%
 }
+nm_testReconnect(){
+	for p in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process where Name like '%Roblox%'")
+		Process, Close, % p.ProcessID
+	if (DisconnectCheck(1) = 1)
+		msgbox success
+}
 nm_GotoDebugLogButton(){
 	Run, % "explorer.exe /e`, /n`, /select`," A_ScriptDir "\settings\debug_log.txt"
 }
@@ -6110,12 +6271,12 @@ nm_ServerLink(hEdit){
 	GuiControlGet, k, Name, %hEdit%
 	GuiControlGet, str, , %hEdit%
 
-	RegExMatch(str, "i)((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/(1537690962|4189852503)\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*", NewPrivServer)
+	RegExMatch(str, "i)((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*", NewPrivServer)
     if ((StrLen(str) > 0) && (StrLen(NewPrivServer) = 0))
 	{
         GuiControl, , %hEdit%, % %k%
         SendMessage, 0xB1, % p-2, % p-2, , ahk_id %hEdit%
-		nm_ShowErrorBalloonTip(hEdit, "Invalid Private Server Link", "Make sure your link is:`r`n- copied correctly and completely`r`n- for Bee Swarm Simulator or BSS Rejoin")
+		nm_ShowErrorBalloonTip(hEdit, "Invalid Private Server Link", "Make sure your link is:`r`n- copied correctly and completely`r`n- for Bee Swarm Simulator by Onett")
     }
     else
 	{
@@ -6954,13 +7115,16 @@ nm_NewWalkHelp(){ ; movespeed correction information
 	msgbox, 0x40000, MoveSpeed Correction, DESCRIPTION:`nWhen this option is enabled, the macro will detect your Haste, Bear Morph, Coconut Haste, Haste+, Oil and Super Smoothie values real-time. Using this information, it will calculate the distance you have moved and use that for more accurate movements. If working as intended, this option will dramatically reduce drift and make Traveling anywhere in game much more accurate.`n`nIMPORTANT:`nIf you have this option enabled, make sure your 'Movement Speed' value is EXACTLY as shown in BSS Settings menu without haste or other temporary buffs (e.g. write 33.6 as 33.6 without any rounding). Also, it is ESSENTIAL that your Display Scale is 100`%, otherwise the buffs will not be detected properly.
 }
 nm_PublicFallbackHelp(){ ; public fallback information
-	msgbox, 0x40000, Public Server Fallback, DESCRIPTION:`nWhen this option is enabled, the macro will revert to attempting to join a Public Server if your Server Link failed three times. Otherwise, it will keep trying the Server Link you entered above until it succeeds.`n`nIMPORTANT:`nNatro uses a selection of server links from the game 'BSS Rejoin' by e_lol to join a Public Server. If your Roblox account's age is set to under 13, you must create your own 'BSS Rejoin' Private Server and use it as the Server Link above!
+	msgbox, 0x40000, Public Server Fallback, DESCRIPTION:`nWhen this option is enabled, the macro will revert to attempting to join a Public Server if your Server Link failed three times. Otherwise, it will keep trying the Server Link you entered above until it succeeds.
 }
 nm_NatroSoBrokeHelp(){ ; so broke information
 	msgbox, 0x40000, Natro so broke :weary:, DESCRIPTION:`nEnable this to have the macro say 'Natro so broke :weary:' in chat after it reconnects! This is a reference to e_lol's macros which type 'e_lol so pro :weary:' in chat.
 }
 nm_MonsterRespawnTimeHelp(){ ; monster respawn time information
 	msgbox, 0x40000, Monster Respawn Time, DESCRIPTION:`nEnter the sum of all of your Monster Respawn Time buffs here. These can come from:`n- Gifted Vicious Bee (-15`%)`n- Stick Bug Amulet (up to -10`%)`n- Icicles Beequip (-1`% to -5`%)`n`nEXAMPLE:`nI have a Gifted Vicious Bee (-15`%), a Stick Bug Amulet with -8`% Monster Respawn Time, and 2 Icicles Beequips with -2`% Monster Respawn Time each. I will enter '27' in the input box.
+}
+nm_BossConfigHelp(){ ; monster respawn time information
+	msgbox, 0x40000, Boss configuration, DESCRIPTION:`nThe Bosses menu allows for you to customize whether to wait for baby love, to keep your old amulet or keep it on the screen for manual input and to configure the health and time interval for Snail and chick.`n`nBaby Love`n- The baby love option will allow for the macro to wait a certain amount of time to try to get a baby love token to increase loot luck. This option is only for king beetle and tunnel bear.`n`nBoss Amulet options`n- Enabling the checkbox will allow for the macro to automatically keep your old amulet so that you don't lose your perfect amulet. Unchecking this box will allow for the amulet prompt to stay on screen for manual input whether to keep or replace. The only bosses with this feature are Stump Snail and King beetle`n`nBoss health/time settings`n- Enter the boss's health in the text box. The health needs to be written in wihtout commas seperating the health and it will automatically be converted into a percentage. As for the time, the time options are in 5,10,15 minutes with another option being the kill option. The Kill option will basically attack the boss until the boss dies or if you die. The only bosses with this feature are Stump Snail and Commando Chick.
 }
 nm_ReconnectTimeHelp(){
 	global ReconnectHour, ReconnectMin, ReconnectInterval
@@ -7056,7 +7220,7 @@ nm_ContributorsImage(page:=1){
 			, ["mariposa#5719","gold"]
 			, ["imdom#2002","gold"]
 			, ["SagePage590#1084","gold"]
-			, ["Čäm just Çãm#6392","gold"]
+			, ["ÄÃ¤m just ÃÃ£m#6392","gold"]
 			, ["Pizza Guy#9720","gold"]
 			, ["WolfySoy#7178","gold"]
 			, ["jak#1000","gold"]
@@ -7069,7 +7233,7 @@ nm_ContributorsImage(page:=1){
 			, ["Diosaur#5829","gold"]
 			, ["templan#4763","gold"]
 			, ["Householdsage60","gold"]
-			, ["老頭 OldMan#8750","gold"]
+			, ["èé ­ OldMan#8750","gold"]
 			, ["Memoryless#3001","gold"]
 			, ["N&R Games#7387","gold"]
 			, ["Izu#1234","gold"]
@@ -7085,7 +7249,7 @@ nm_ContributorsImage(page:=1){
 			, ["wholg#5801","gold"]
 			, ["idiot#9999","gold"]
 			, ["Blu#6083","gold"]
-			, ["レッドステッド#1111","gold"]
+			, ["ã¬ããã¹ããã#1111","gold"]
 			, ["Argentina#2302","gold"]
 			, ["-ryann#8474","gold"]
 			, ["SKNinja#0690","gold"])
@@ -7101,7 +7265,7 @@ nm_ContributorsImage(page:=1){
 			, ["NoddaPro","gold"]
 			, ["Hoboyo#1752","gold"]
 			, ["Rodr1c#1896","gold"]
-			, ["ꃳ꒒꒤ꋪ#6807","gold"]
+			, ["ê³êê¤êª#6807","gold"]
 			, ["DrPepperMan#6686","gold"]
 			, ["PogChong2#6885","gold"]
 			, ["Guff#3659","gold"]
@@ -7110,7 +7274,7 @@ nm_ContributorsImage(page:=1){
 			, ["NerdDrummerBoi","gold"]
 			, ["PooDilly#8488","gold"]
 			, ["3706#0001","gold"]
-			, ["ツ Ⓙ ⓤ ⓢ ⓣ ⓘ ⓝ","gold"]
+			, ["ã â¿ â¤ â¢ â£ â â","gold"]
 			, ["chloeshih#0001","gold"]
 			, ["tim57#2100","gold"])
 		contributors.Push(["Anonymous 1","gold"]
@@ -7146,7 +7310,7 @@ nm_ContributorsImage(page:=1){
 			, ["Heyee#6624","blue"]
 			, ["Zip#1313","blue"]
 			, ["nikiPOW3#8874","blue"]
-			, ["T-ℝex♛#0325","blue"]
+			, ["T-âexâ#0325","blue"]
 			, ["Memoryless#3001","blue"]
 			, ["Fiva.#8959","blue"]
 			, ["KrazyBro#6300","blue"]
@@ -7310,7 +7474,7 @@ nm_ContributorsPageButton(hwnd){
 nm_CollectKillButton(hCtrl){
 	global
 	static CollectControls := ["CollectGroupBox","DispensersGroupBox","BeesmasGroupBox","BeesmasImage","ClockCheck","MondoBuffCheck","MondoAction","AntPassCheck","AntPassAction","RoboPassCheck","HoneystormCheck","HoneyDisCheck","TreatDisCheck","BlueberryDisCheck","StrawberryDisCheck","CoconutDisCheck","RoyalJellyDisCheck","GlueDisCheck","BeesmasGatherInterruptCheck","StockingsCheck","WreathCheck","FeastCheck","RBPDelevelCheck","GingerbreadCheck","SnowMachineCheck","CandlesCheck","SamovarCheck","LidArtCheck","GummyBeaconCheck"]
-	, KillControls := ["BugRunGroupBox","BugRunCheck","MonsterRespawnTime","TextMonsterRespawn","MonsterRespawnTimeHelp","BugrunInterruptCheck","TextLoot","TextKill","TextLineBugRun1","TextLineBugRun2","BugrunLadybugsLoot","BugrunRhinoBeetlesLoot","BugrunSpiderLoot","BugrunMantisLoot","BugrunScorpionsLoot","BugrunWerewolfLoot","BugrunLadybugsCheck","BugrunRhinoBeetlesCheck","BugrunSpiderCheck","BugrunMantisCheck","BugrunScorpionsCheck","BugrunWerewolfCheck","StingersGroupBox","StingerCheck","StingerDailyBonusCheck","StingerCloverCheck","StingerSpiderCheck","StingerCactusCheck","StingerRoseCheck","StingerMountainTopCheck","StingerPepperCheck","BossesGroupBox","TunnelBearCheck","KingBeetleCheck","CocoCrabCheck","StumpSnailCheck","CommandoCheck","TunnelBearBabyCheck","KingBeetleBabyCheck","BabyLovePicture1","BabyLovePicture2","KingBeetleAmuletMode","ShellAmuletMode","KingBeetleAmuPicture","ShellAmuPicture","KingBeetleAmuletModeText","ShellAmuletModeText"]
+	, KillControls := ["BugRunGroupBox","BugRunCheck","MonsterRespawnTime","TextMonsterRespawn","MonsterRespawnTimeHelp","BugrunInterruptCheck","TextLoot","TextKill","TextLineBugRun1","TextLineBugRun2","BugrunLadybugsLoot","BugrunRhinoBeetlesLoot","BugrunSpiderLoot","BugrunMantisLoot","BugrunScorpionsLoot","BugrunWerewolfLoot","BugrunLadybugsCheck","BugrunRhinoBeetlesCheck","BugrunSpiderCheck","BugrunMantisCheck","BugrunScorpionsCheck","BugrunWerewolfCheck","StingersGroupBox","StingerCheck","StingerDailyBonusCheck","StingerCloverCheck","StingerSpiderCheck","StingerCactusCheck","StingerRoseCheck","StingerMountainTopCheck","StingerPepperCheck","BossesGroupBox","TunnelBearCheck","KingBeetleCheck","CocoCrabCheck","StumpSnailCheck","CommandoCheck","TunnelBearBabyCheck","KingBeetleBabyCheck","BabyLovePicture1","BabyLovePicture2","KingBeetleAmuletMode","ShellAmuletMode","KingBeetleAmuPicture","ShellAmuPicture","KingBeetleAmuletModeText","ShellAmuletModeText","InputChickHealth","Time","SnailTime","InputSnailHealth","Time2","ChickTime","BossConfigHelp"]
 
 	p := (hCtrl = hKill)
 	GuiControl, % (p ? "Enable" : "Disable"), % hCollect
@@ -7343,9 +7507,23 @@ nm_saveAutoClicker(){
 	GuiControl, % (ClickMode ? "Disable" : "Enable"), ClickCount
 	GuiControl, % (ClickMode ? "Disable" : "Enable"), ClickCountEdit
 }
+nm_saveKeyDelay(){
+    global GuiControlGet, KeyDelay
+    IniWrite, %KeyDelay%, settings\nm_config.ini, Settings, KeyDelay
+	GuiControl,, KeyDelayEdit, %KeyDelay% 
+}
 nm_TicketShopCalculatorButton(){
 	Run, https://docs.google.com/spreadsheets/d/1_5JP_9uZUv7PUqjL76T5orEA3MIHe4R8gLu27L8KJ-A/
 }
+nm_SSACalculatorButton()
+{
+	Run, https://docs.google.com/spreadsheets/d/1nupF_6g1TLJk1W5MpLBsfe1yk6C99-ooMMffuxdn580/edit?usp=sharing
+}
+nm_BondCalculatorButton()
+{
+	Run, https://docs.google.com/spreadsheets/d/1TFTAahwsB4WRmRkX4YiM8mPQyk53CDmfAKOSOYv-Bow/edit?usp=sharing
+}
+
 nm_RunDiscord(path){
 	static init := VarSetCapacity(cmd, 512) + DllCall("shlwapi\AssocQueryString","Int",0,"Int",1,"Str","discord","Str","open","Str",cmd, "IntP",512) + DllCall("Shell32\SHEvaluateSystemCommandTemplate","WStr",cmd,"PtrP",pEXE,"Ptr",0,"PtrP",pPARAMS)
 	, exe := StrGet(pEXE)
@@ -7494,6 +7672,7 @@ nm_TabSettingsLock(){
 	GuiControl, disable, ZoomIn
 	GuiControl, disable, ZoomOut
 	GuiControl, disable, KeyDelay
+	GuiControl, disable, KeyDelayEdit
 	GuiControl, disable, MoveSpeedNum
 	GuiControl, disable, MoveMethod
 	GuiControl, disable, SprinklerType
@@ -7516,6 +7695,7 @@ nm_TabSettingsUnLock(){
 	GuiControl, enable, GuiTheme
 	GuiControl, enable, GuiTransparency
 	GuiControl, enable, KeyDelay
+	GuiControl, enable, KeyDelayEdit
 	GuiControl, enable, MoveSpeedNum
 	GuiControl, enable, MoveMethod
 	GuiControl, enable, SprinklerType
@@ -7850,6 +8030,131 @@ nm_PlanterTimeUpdate(FieldName)
 		}
 	}
 }
+;syspalk if you're reading this hi
+;(+) Keep this in for the final
+nm_HealthDetection() 
+{
+	static pBMHealth, pBMDamage
+    HealthBars := []
+    if (pBMHealth= "" || pBMDamage= "")
+	{
+		pBMHealth := Gdip_CreateBitmap(1,4)
+		pGraphics := Gdip_GraphicsFromImage(pBMHealth), Gdip_GraphicsClear(pGraphics, 0xff1fe744), Gdip_DeleteGraphics(pGraphics)
+        pBMDamage := Gdip_CreateBitmap(1,4)
+        pGraphics := Gdip_GraphicsFromImage(pBMDamage), Gdip_GraphicsClear(pGraphics, 0xff6b131a), Gdip_DeleteGraphics(pGraphics)
+	}
+	WinActivate, Roblox ahk_exe RobloxPlayerBeta.exe
+	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
+	pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY "|" windowWidth "|" windowHeight)
+    G := Gdip_GraphicsFromImage(pBMScreen)
+    pBrush := Gdip_BrushCreateSolid(0xff000000)
+    while ((Gdip_ImageSearch(pBMScreen, pBMHealth, HPStart, , , , , , , 5) > 0) || (Gdip_ImageSearch(pBMScreen, pBMDamage, HPStart, , , , , , , 5) > 0))
+    {
+        x := SubStr(HPStart, 1, InStr(HPStart, ",")-1), y := SubStr(HPStart, InStr(HPStart, ",")+1)
+        x1 := x, y1 := y
+        loop % (windowWidth - x)
+        {
+            i := x + A_Index - 1 
+            switch % Gdip_GetPixel(pBMScreen, i, y)
+            { 
+                case 4280280900:
+                x1++
+
+                case 4285207322:
+                x2 := i 
+
+                default:
+                Break
+            }
+        }
+        loop % (windowHeight - y)
+        {
+            switch % Gdip_GetPixel(pBMScreen, x, y1)
+            {
+                case 4280280900, 4285207322: 
+                y1++
+
+                default: 
+                Break
+            }
+        } 
+		HealthBarPercent := (x1 > x) ? ((x2 > x) ? Round((x1-x)/(x2-x)*100, 2) : 100.00) : 0.00
+        Gdip_FillRectangle(G, pBrush, x, y, i-x, y1-y)
+        HealthBars.Push(HealthBarPercent) 
+		if (A_Index > 100)
+		{
+			Break
+		}
+    }
+    Gdip_DeleteBrush(pBrush), Gdip_DisposeImage(pBMScreen), Gdip_DeleteGraphics(G)
+    Return HealthBars  
+} 
+;;Time interval in minutes 
+nm_KillTimeEstimation(bossName, bossTimer)
+{
+	global InputSnailHealth, SnailTime, InputChickHealth, ChickTime, intialHealthCheck
+    static bosses := {}
+	confidenceArray := []
+	confidenceTotal := 0
+	if (!intialHealthCheck)
+	{
+	    bosses[bossName "Health"] := (Input%bossName%Health > 0) ? Input%bossName%Health : 100
+	    intialHealthCheck := 1
+	}
+	bosses[bossName "TimeInterval"] := bossTimer 
+	loop 5
+	{
+	    HealthBars := nm_HealthDetection()
+	    for i, v in HealthBars
+	    {
+	        if (v = 100.00) ;Not enough damage was dealt or there is a planter detected
+	        {
+	            continue
+	        }
+	        else if (!healthDiff || (Abs(bosses[bossName "Health"] - v) < healthDiff))
+	        {
+	            healthDiff := Abs(bosses[bossName "Health"] - v)
+	            lastHealth := v
+	            confidenceArray.Push(v)
+	        }
+	    }
+	}
+	for index, value in confidenceArray
+	{
+	    confidenceTotal += value
+	}
+	confidenceMean := confidenceTotal / confidenceArray.Length()
+	if ((confidenceMean >= lastHealth - 1) && (confidenceMean <= lastHealth + 1))
+	{
+		dmgDealt := round((bosses[bossName "Health"]-lastHealth)/(bosses[bossName "TimeInterval"]/60000), 4)
+    	timeEstimation := round(lastHealth/abs(dmgDealt), 2)
+		elapsedMins := floor(bossTimer/60000)
+		elapsedSecs := Mod(bossTimer, 60)
+		if ((dmgDealt >= 0) && ((abs(bosses[bossName "Health"]-lastHealth) >= 2.5) && lastHealth > 0))
+		{
+    		if (timeEstimation > 60) 
+			{
+				sHours := Floor(timeEstimation/60)
+				sMinutes := Mod(timeEstimation, 60)
+    			nm_setStatus("Detected", "Health`nBoss: " bossName "`n Est Previous Health: " round(bosses[bossName "Health"], 2) "%`n Est Current Health: " lastHealth "%`n Est Change of health: " round(abs(dmgDealt), 2) "% Per minute`nEst Time until dead: " round(sHours) " Hours " round(sMinutes) " Minutes`nTime Elasped: " elapsedMins " Minutes " elapsedSecs " Seconds")
+			}
+			else 
+			{
+				sMinutes := Floor(timeEstimation)
+				Sseconds := Round((timeEstimation - sMinutes) * 60)
+   				nm_setStatus("Detected", "Health`nBoss: " bossName "`n Est Previous Health: " round(bosses[bossName "Health"], 2) "%`n Est Current Health: " lastHealth "%`n EstChange of health: " round(abs(dmgDealt), 2) "% Per minute`nEst Time until dead: " round(sMinutes) " Minutes " round(sSeconds) " Seconds `nTime Elasped: " elapsedMins " Minutes  " elapsedSecs " Seconds")
+			}
+			IniWrite, %lastHealth%, settings\nm_config.ini, Collect, Input%bossName%Health
+			bosses[bossName "Health"] := lastHealth
+		}
+		else
+		{
+			Return 0
+		}
+	}
+}
+
+
 nm_imgSearch(fileName,v,aim := "full", trans:="none"){
 	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
     ;xi := 0
@@ -8440,7 +8745,7 @@ nm_toAnyBooster(){
 	static blueBoosterFields:=["Pine Tree", "Bamboo", "Blue Flower"], redBoosterFields:=["Rose", "Strawberry", "Mushroom"], mountainBoosterfields:=["Cactus", "Pumpkin", "Pineapple", "Spider", "Clover", "Dandelion", "Sunflower"]
 	if(VBState=1)
 		return
-	FormatTime, utc_min, A_NowUTC, m
+	FormatTime, utc_min, %A_NowUTC%, m
 	if((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck  && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag"))
 		return
 	if (QuestGatherField!="None" && QuestGatherField)
@@ -8483,7 +8788,7 @@ nm_Collect(){
 
 	if(VBState=1)
 		return
-	FormatTime, utc_min, A_NowUTC, m
+	FormatTime, utc_min, %A_NowUTC%, m
 	if((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck  && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag"))
 		return
 	if ((nowUnix()-GatherFieldBoostedStart<900) || (nowUnix()-LastGlitter<900) || nm_boostBypassCheck())
@@ -8516,7 +8821,6 @@ nm_Collect(){
 		}
 		LastClock:=nowUnix()
 		IniWrite, %LastClock%, settings\nm_config.ini, Collect, LastClock
-
 		if (StockingsCheck && (nowUnix()-LastStockings)>3580) { ;stockings from clock
 			Sleep, 500
 			nm_setStatus("Traveling", "Stockings (Clock)")
@@ -9268,7 +9572,7 @@ nm_Collect(){
 	}
 	;Daily Honey LB
 	if (HoneySSCheck) {
-		FormatTime, utc_hour, A_NowUTC, H
+		FormatTime, utc_hour, %A_NowUTC%, H
 		if ((utc_hour = 4) && (nowUnix()-LastHoneyLB)>3600) {
 			nm_Reset()
 			nm_setStatus("Traveling", "Daily Honey LB")
@@ -9334,23 +9638,23 @@ nm_Bugrun(){
 	global BuckoRhinoBeetles, BuckoMantis, RileyLadybugs, RileyScorpions, RileyAll
 	global CurrentAction, PreviousAction
 	global GatherFieldBoostedStart, LastGlitter
-	global BeesmasGatherInterruptCheck, StockingsCheck, LastStockings, FeastCheck, LastFeast, RBPDelevelCheck, LastRBPDelevel, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon
+	global BeesmasGatherInterruptCheck, StockingsCheck, LastStockings, FeastCheck, LastFeast, RBPDelevelCheck, LastRBPDelevel, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon, beesmasActive
 	global MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff
-	global BugrunSpiderCheck, BugrunSpiderLoot, LastBugrunSpider, BugrunLadybugsCheck, BugrunLadybugsLoot, LastBugrunLadybugs, BugrunRhinoBeetlesCheck, BugrunRhinoBeetlesLoot, LastBugrunRhinoBeetles, BugrunMantisCheck, BugrunMantisLoot, LastBugrunMantis, BugrunWerewolfCheck, BugrunWerewolfLoot, LastBugrunWerewolf, BugrunScorpionsCheck, BugrunScorpionsLoot, LastBugrunScorpions
-	global CocoCrabCheck, LastCocoCrab, StumpSnailCheck, LastStumpSnail, CommandoCheck, LastCommando, TunnelBearCheck, TunnelBearBabyCheck, KingBeetleCheck, KingBeetleBabyCheck, LastTunnelBear, LastKingBeetle
+	global BugrunSpiderCheck, BugrunSpiderLoot, LastBugrunSpider, BugrunLadybugsCheck, BugrunLadybugsLoot, LastBugrunLadybugs, BugrunRhinoBeetlesCheck, BugrunRhinoBeetlesLoot, LastBugrunRhinoBeetles, BugrunMantisCheck, BugrunMantisLoot, LastBugrunMantis, BugrunWerewolfCheck, BugrunWerewolfLoot, LastBugrunWerewolf, BugrunScorpionsCheck, BugrunScorpionsLoot, LastBugrunScorpions, intialHealthCheck
+	global CocoCrabCheck, LastCocoCrab, StumpSnailCheck, LastStumpSnail, CommandoCheck, LastCommando, TunnelBearCheck, TunnelBearBabyCheck, KingBeetleCheck, KingBeetleBabyCheck, LastTunnelBear, LastKingBeetle, InputSnailHealth, SnailTime, InputChickHealth, ChickTime, SprinklerType
 	global TotalBossKills, SessionBossKills, TotalBugKills, SessionBugKills
 	global KingBeetleAmuletMode, ShellAmuletMode
 
 	;interrupts
 	if(VBState=1)
 		return
-	FormatTime, utc_min, A_NowUTC, m
+	FormatTime, utc_min, %A_NowUTC%, m
 	if((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck  && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag"))
 		return
 	if((nowUnix()-GatherFieldBoostedStart<900) || (nowUnix()-LastGlitter<900) || nm_boostBypassCheck()){
 		return
 	}
-	if (BeesmasGatherInterruptCheck && ((StockingsCheck && (nowUnix()-LastStockings)>3600) || (FeastCheck && (nowUnix()-LastFeast)>5400) || (RBPDelevelCheck && (nowUnix()-LastRBPDelevel)>10800) || (GingerbreadCheck && (nowUnix()-LastGingerbread)>7200) || (SnowMachineCheck && (nowUnix()-LastSnowMachine)>7200) || (CandlesCheck && (nowUnix()-LastCandles)>14400) || (SamovarCheck && (nowUnix()-LastSamovar)>21600) || (LidArtCheck && (nowUnix()-LastLidArt)>28800) || (GummyBeaconCheck && (nowUnix()-LastGummyBeacon)>28800)))
+	if ((BeesmasGatherInterruptCheck && beesmasActive) && ((StockingsCheck && (nowUnix()-LastStockings)>3600) || (FeastCheck && (nowUnix()-LastFeast)>5400) || (RBPDelevelCheck && (nowUnix()-LastRBPDelevel)>10800) || (GingerbreadCheck && (nowUnix()-LastGingerbread)>7200) || (SnowMachineCheck && (nowUnix()-LastSnowMachine)>7200) || (CandlesCheck && (nowUnix()-LastCandles)>14400) || (SamovarCheck && (nowUnix()-LastSamovar)>21600) || (LidArtCheck && (nowUnix()-LastLidArt)>28800) || (GummyBeaconCheck && (nowUnix()-LastGummyBeacon)>28800)))
 		return
 
 	nm_setShiftLock(0)
@@ -9376,27 +9680,57 @@ nm_Bugrun(){
 				else {
 					nm_cannonTo(BugRunField)
 				}
-				nm_setStatus("Attacking", "Spider")
-				send {%SC_1%}
-				if(!DisableToolUse)
-					click, down
-				loop 30 { ;wait to kill
-					if(A_Index=30)
-						success:=1
-					searchRet := nm_imgSearch("spider.png",30,"lowright")
-					If (searchRet[1] = 0) {
-						success:=1
+				found:=0 
+				loop, 20
+				{
+					spiderBug:=nm_HealthDetection()
+					if(spiderBug.Length() > 0)
+					{ 
+						found:= 1
 						break
-					}
-					if(youDied)
-						break
-					if(!DisableToolUse)
-						click
-					sleep, 1000
+					} 
+					sleep, 150
 				}
-				click, up
-				if(VBState=1)
-					return
+				if (found)
+				{
+					nm_setStatus("Attacking", "Spider")
+					send {%SC_1%}
+					sendinput {%RotUp% 4}
+					if(!DisableToolUse)
+						click, down
+					loop, 30 
+					{ ;wait to kill
+						if(A_Index=30)
+							success:=1
+						loop, 20
+						{
+							spiderDead:=nm_HealthDetection()
+							if(spiderDead.Length() > 0)
+								Break
+							if (A_Index=10)
+							{
+								sendinput {%RotLeft% 2}
+								r := 1
+							}
+							sendinput {%ZoomOut%}
+							Sleep, 100
+							if (A_Index=20)
+							{
+								success:=1
+								break 2
+							}
+						}
+						if(youDied)
+							break
+						if(!DisableToolUse)
+							click
+					}
+					sendinput % "{" RotDown " 4}" ((r = 1) ? "{" RotRight " 2}" : "")
+					sleep, 500
+					click, up
+					if(VBState=1)
+						return
+				}
 			}
 			LastBugrunSpider:=nowUnix()
 			IniWrite, %LastBugrunSpider%, settings\nm_config.ini, Collect, LastBugrunSpider
@@ -9479,27 +9813,58 @@ nm_Bugrun(){
 						Sleep, 1000
 					}
 					bypass:=0
-					nm_setStatus("Attacking", "Ladybugs (Strawberry)")
-					send {%SC_1%}
-					if(!DisableToolUse)
-						click, down
-					loop 10 { ;wait to kill
-						if(A_Index=10)
-							success:=1
-						searchRet := nm_imgSearch("ladybug.png",30,"lowright")
-						If (searchRet[1] = 0) {
-							success:=1
+					;(+) new detection
+					found:=0 
+					loop 20
+					{
+						strawBug:=nm_HealthDetection()
+						if(strawBug.Length() > 0)
+						{ 
+							found:= 1
 							break
-						}
-						if(youDied)
-							break
-						if(!DisableToolUse)
-							Click
-						sleep, 1000
+						} 
+						sleep, 150
 					}
-					click, up
-					if(VBState=1)
-						return
+					if (found)
+					{
+						nm_setStatus("Attacking", "Ladybugs (Strawberry)")
+						sendinput {%RotUp% 4}
+						send {%SC_1%}
+						if(!DisableToolUse)
+							click, down
+						loop 10 
+						{ ;wait to kill
+							if(A_Index=10)
+								success:=1
+							loop, 10
+							{
+								ladybugDead:=nm_HealthDetection()
+								if(ladybugDead.Length() > 0)
+									Break
+								if (A_Index=5)
+								{
+									sendinput {%RotLeft% 2}
+									r := 1
+								}
+								Sleep, 100
+								sendinput {%ZoomOut%}
+								if (A_Index=10)
+								{
+									success:=1
+									break 2
+								}
+							}
+							if(youDied)
+								break
+							if(!DisableToolUse)
+								Click
+						}
+						sendinput % "{" RotDown " 4}" ((r = 1) ? "{" RotRight " 2}" : "")
+						sleep, 500
+						click, up
+						if(VBState=1)
+							return
+					}
 				}
 				TotalBugKills:=TotalBugKills+2
 				SessionBugKills:=SessionBugKills+2
@@ -9573,27 +9938,58 @@ nm_Bugrun(){
 					sendinput {%RotLeft% 2}
 				}
 				bypass:=0
-				nm_setStatus("Attacking", "Ladybugs (Mushroom)")
-				send {%SC_1%}
-				if(!DisableToolUse)
-					click, down
-				loop 10 { ;wait to kill
-					if(A_Index=10)
-						success:=1
-					searchRet := nm_imgSearch("ladybug.png",30,"lowright")
-					If (searchRet[1] = 0) {
-						success:=1
+				found:=0 
+				loop 20
+				{
+					mushBug:=nm_HealthDetection()
+					if(mushBug.Length() > 0)
+					{ 
+						found:= 1
 						break
-					}
-					if(youDied)
-						break
-					if(!DisableToolUse)
-						click
-					sleep, 1000
+					} 
+					sleep, 150
 				}
-				click, up
-				if(VBState=1)
-					return
+				if(found)
+				{
+					nm_setStatus("Attacking", "Ladybugs (Mushroom)")
+					send {%SC_1%}
+					sendinput {%RotUp% 4}
+					if(!DisableToolUse)
+						click, down
+					loop 10 { ;wait to kill
+						if(A_Index=10)
+							success:=1
+						loop, 20
+						{
+							ladybugDead:=nm_HealthDetection()
+							if(ladybugDead.Length() > 0)
+								Break
+							if (A_Index=10)
+							{
+								sendinput {%RotLeft% 2}
+								r := 1
+							}
+							Sleep, 100
+							sendinput {%ZoomOut%}
+							if (A_Index=20)
+							{
+								success:=1
+								break 2
+							}
+						}
+						if(youDied)
+							break
+						if(!DisableToolUse)
+							click
+					}
+					sendinput % "{" RotDown " 4}" ((r = 1) ? "{" RotRight " 2}" : "")
+					sleep, 500
+					click, up
+					if(VBState=1)
+					{
+						return
+					}
+				}
 			}
 			TotalBugKills:=TotalBugKills+1
 			SessionBugKills:=SessionBugKills+1
@@ -9660,36 +10056,52 @@ nm_Bugrun(){
 					}
 				}
 				bypass:=0
-				nm_setStatus("Attacking")
-				send {%SC_1%}
-				if(!DisableToolUse)
-					click, down
-				loop 10 { ;wait to kill
-					if(A_Index=10)
-						success:=1
-					if((BugrunLadybugsCheck || QuestLadybugs || RileyLadybugs || RileyAll)){
-						searchRet := nm_imgSearch("ladybug.png",30,"lowright")
-						If (searchRet[1] = 0) {
-							success:=1
-							break
-						}
-					}
-					if((BugrunRhinoBeetlesCheck || QuestRhinoBeetles || BuckoRhinoBeetles || RileyAll)){
-						searchRet := nm_imgSearch("rhino.png",30,"lowright")
-						If (searchRet[1] = 0) {
-							success:=1
-							break
-						}
-					}
-					if(youDied)
+				found:=0 
+				loop 20
+				{
+					cloverBug:=nm_HealthDetection()
+					if(cloverBug.Length() > 0)
+					{ 
+						found:= 1
 						break
-					if(!DisableToolUse)
-						Click
-					sleep, 1000
+					} 
+					sleep, 150
 				}
-				click up
-				if(VBState=1)
-					return
+				if (found)
+				{
+					nm_setStatus("Attacking")
+					send {%SC_1%}
+					sendinput {%RotUp% 4}
+					if(!DisableToolUse)
+						click, down
+					loop 10 { ;wait to kill
+						if(A_Index=10)
+							success:=1
+						loop, 10
+						{
+							cloverDead:=nm_HealthDetection()
+							if(cloverDead.Length() > 0)
+								Break
+							else if (A_Index=10)
+							{
+								success:=1
+								break 2
+							}
+							Sleep, 250
+						}
+						if(youDied)
+							break
+						if(!DisableToolUse)
+						{
+							Click
+						}
+					}
+					sendinput {%RotDown% 4}
+					click up
+					if(VBState=1)
+						return
+				}
+				
 			}
 			;done with ladybugs
 			LastBugrunLadybugs:=nowUnix()
@@ -9775,27 +10187,56 @@ nm_Bugrun(){
 			while (not success){
 				if(A_Index>=3)
 					break
-				nm_setStatus("Attacking")
-				send {%SC_1%}
-				if(!DisableToolUse)
-					click, down
-				loop 12 { ;wait to kill
-					if(A_Index=12)
-						success:=1
-					searchRet := nm_imgSearch("rhino.png",30,"lowright")
-					If (searchRet[1] = 0) {
-						success:=1
+				found:=0 
+				loop 20
+				{
+					blufBug:=nm_HealthDetection()
+					if(blufBug.Length() > 0)
+					{ 
+						found:= 1
 						break
-					}
-					if(youDied)
-						break
-					if(!DisableToolUse)
-						Click
-					sleep, 1000
+					} 
+					sleep, 150
 				}
-				click, up
-				if(VBState=1)
-					return
+				if (found)
+				{
+					nm_setStatus("Attacking")
+					send {%SC_1%}
+					sendinput {%RotUp% 4}
+					if(!DisableToolUse)
+						click, down
+					loop 12 { ;wait to kill
+						if(A_Index=12)
+							success:=1
+						loop, 20
+						{
+							blufDead:=nm_HealthDetection()
+							if(blufDead.Length() > 0)
+								Break
+							if (A_Index=10)
+							{
+								sendinput {%RotLeft% 2}
+								r := 1
+							}
+							Sleep, 100
+							sendinput {%ZoomOut%}
+							if (A_Index=20)
+							{
+								success:=1
+								break 2
+							}
+						}
+						if(youDied)
+							break
+						if(!DisableToolUse)
+							Click
+					}
+					sendinput % "{" RotDown " 4}" ((r = 1) ? "{" RotRight " 2}" : "")
+					sleep, 500
+					click, up
+					if(VBState=1)
+						return
+				}
 			}
 			;done with Rhino Beetles if Hive has less than 5 bees
 			if(HiveBees<5){
@@ -9851,29 +10292,57 @@ nm_Bugrun(){
 						}
 					}
 					bypass:=0
-					nm_setStatus("Attacking")
-					send {%SC_1%}
-					if(!DisableToolUse)
-						click, down
-					loop 15 { ;wait to kill
-						if(A_Index=15)
-							success:=1
-						searchRet := nm_imgSearch("rhino.png",30,"lowright")
-						If (searchRet[1] = 0) {
-							success:=1
-							sleep 3000
+					found:=0 
+					loop 20
+					{
+						bambBug:=nm_HealthDetection()
+						if(bambBug.Length() > 0)
+						{ 
+							found:= 1
 							break
-						}
-						if(youDied)
-							break
-						if(!DisableToolUse)
-							Click
-						sleep, 1000
+						} 
+						sleep, 150
 					}
-					click, up
-					if(VBState=1)
-						return
-				}
+					if (found)
+					{
+						nm_setStatus("Attacking")
+						send {%SC_1%}
+						sendinput {%RotUp% 4}
+						if(!DisableToolUse)
+							click, down
+						loop 15 { ;wait to kill
+							if(A_Index=15)
+								success:=1
+							loop, 20
+							{
+								bambDead:=nm_HealthDetection()
+								if(bambDead.Length() > 0)
+									Break
+								if (A_Index=10)
+								{
+									sendinput {%RotLeft% 2}
+									r := 1
+								}
+								Sleep, 100
+								sendinput {%ZoomOut%}
+								if (A_Index=20)
+								{
+									success:=1
+									break 2
+								}
+							}
+							if(youDied)
+								break
+							if(!DisableToolUse)
+								Click
+						}
+						sendinput % "{" RotDown " 4}" ((r = 1) ? "{" RotRight " 2}" : "")
+						sleep, 500
+						click, up
+						if(VBState=1)
+							return
+					}
+				}	
 				;done with Rhino Beetles if Hive has less than 10 bees
 				if(HiveBees<10){
 					LastBugrunRhinoBeetles:=nowUnix()
@@ -9986,37 +10455,59 @@ nm_Bugrun(){
 					}
 				}
 				bypass:=0
-				nm_setStatus("Attacking")
-				send {%SC_1%}
-				if(!DisableToolUse)
-					click, down
-				;disableDayOrNight:=1
-				loop 20 { ;wait to kill
-					if(A_Index=20)
-						success:=1
-					if(not (BugrunMantisCheck || QuestMantis || BuckoMantis) && (BugrunRhinoBeetlesCheck || QuestRhinoBeetles || BuckoRhinoBeetles || RileyAll)){
-						searchRet := nm_imgSearch("rhino.png",30,"lowright")
-						If (searchRet[1] = 0) {
-							success:=1
-							break
-						}
-					} else if((BugrunMantisCheck || QuestMantis || BuckoMantis || RileyAll)){
-						searchRet := nm_imgSearch("mantis.png",30,"lowright")
-						If (searchRet[1] = 0) {
-							success:=1
-							break
-						}
-					}
-					if(youDied)
+				found:=0 
+				loop 20
+				{
+					pineappleBug:=nm_HealthDetection()
+					if(pineappleBug.Length() > 0)
+					{ 
+						found:= 1
 						break
-					if(!DisableToolUse)
-						Click
-					sleep, 1000
+					} 
+					sleep, 150
 				}
-				click, up
-				;disableDayOrNight:=0
-				if(VBState=1)
-					return
+				if (found)
+				{
+					nm_setStatus("Attacking")
+					send {%SC_1%}
+					sendinput {%RotUp% 4}
+					if(!DisableToolUse)
+						click, down
+					;disableDayOrNight:=1
+					loop 20 { ;wait to kill
+						if(A_Index=20)
+							success:=1
+						loop, 20
+						{
+							pineappleDead:=nm_HealthDetection()
+							if(pineappleDead.Length() > 0)
+								Break
+							if (A_Index=10)
+							{
+								sendinput {%RotLeft% 2}
+								r := 1
+							}
+							Sleep, 100
+							sendinput {%ZoomOut%}
+							if (A_Index=20)
+							{
+								success:=1
+								break 2
+							}
+						}
+						if(youDied)
+							break
+						if(!DisableToolUse)
+							Click
+						sleep, 250
+					}
+					sendinput % "{" RotDown " 4}" ((r = 1) ? "{" RotRight " 2}" : "")
+					sleep, 500
+					click, up
+					;disableDayOrNight:=0
+					if(VBState=1)
+						return
+				}
 			}
 			;done with Rhino Beetles
 			LastBugrunRhinoBeetles:=nowUnix()
@@ -10074,52 +10565,108 @@ nm_Bugrun(){
 					else {
 						nm_cannonTo(BugRunField)
 					}
-					nm_setStatus("Attacking", "Werewolf (Pumpkin)")
-					send {%SC_1%}
-					if(!DisableToolUse)
-						click, down
-					loop 25 { ;wait to kill
-						i:=A_Index
-						if(mod(A_Index,4)=1){
-							nm_Move(1500*MoveSpeedFactor, FwdKey)
-							searchRet := nm_imgSearch("werewolf.png",30,"lowright")
-							If (searchRet[1] = 0) {
-								success:=1
-								break
-							}
-						} else if(mod(A_Index,4)=2){
-							nm_Move(1500*MoveSpeedFactor, LeftKey)
-							searchRet := nm_imgSearch("werewolf.png",30,"lowright")
-							If (searchRet[1] = 0) {
-								success:=1
-								break
-							}
-						} else if(mod(A_Index,4)=3){
-							nm_Move(1500*MoveSpeedFactor, BackKey)
-							searchRet := nm_imgSearch("werewolf.png",30,"lowright")
-							If (searchRet[1] = 0) {
-								success:=1
-								break
-							}
-						} else if(mod(A_Index,4)=0){
-							nm_Move(1500*MoveSpeedFactor, RightKey)
-							searchRet := nm_imgSearch("werewolf.png",30,"lowright")
-							If (searchRet[1] = 0) {
-								success:=1
-								break
-							}
-						}
-						if(A_Index=25)
-							success:=1
-						if(youDied)
+					found:=0 
+					loop 20
+					{
+						wereBug:=nm_HealthDetection()
+						if(wereBug.Length() > 0)
+						{ 
+							found:= 1
 							break
-						if(!DisableToolUse)
-							Click
-						;sleep, 1000
+						} 
+						sleep, 150
 					}
-					click, up
-					if(VBState=1)
-						return
+					if (found)
+					{
+						nm_setStatus("Attacking", "Werewolf (Pumpkin)")
+						send {%SC_1%}
+						sendinput {%RotUp% 4}
+						if(!DisableToolUse)
+							click, down
+						loop 25 { ;wait to kill
+							i:=A_Index
+							if(mod(A_Index,4)=1){
+								nm_Move(1500*MoveSpeedFactor, FwdKey)
+								loop 5
+								{
+									wereDead:=nm_HealthDetection()
+									if(wereDead.Length() > 0)
+									{
+										Break
+									}
+									if (A_Index=5)
+									{
+										Success:=1
+										Break 2
+									}
+									sendinput {%ZoomOut%}
+									Sleep, 250
+								}
+							} else if(mod(A_Index,4)=2){
+								nm_Move(1500*MoveSpeedFactor, LeftKey)
+								loop 5
+								{
+									wereDead:=nm_HealthDetection()
+									if(wereDead.Length() > 0)
+									{
+										Break
+									}
+									if (A_Index=5)
+									{
+										Success:=1
+										Break 2
+									}
+									sendinput {%ZoomOut%}
+									Sleep, 250
+								}
+							} else if(mod(A_Index,4)=3){
+								nm_Move(1500*MoveSpeedFactor, BackKey)
+								loop 5
+								{
+									wereDead:=nm_HealthDetection()
+									if(wereDead.Length() > 0)
+									{
+										Break
+									}
+									if (A_Index=5)
+									{
+										Success:=1
+										Break 2
+									}
+									sendinput {%ZoomOut%}
+									Sleep, 250
+								}
+							} else if(mod(A_Index,4)=0){
+								nm_Move(1500*MoveSpeedFactor, RightKey)
+								loop 5
+								{
+									wereDead:=nm_HealthDetection()
+									if(wereDead.Length() > 0)
+									{
+										Break
+									}
+									if (A_Index=5)
+									{
+										Success:=1
+										Break 2
+									}
+									sendinput {%ZoomOut%}
+									Sleep, 250
+								}
+							}
+							if(A_Index=25)
+								success:=1
+							if(youDied)
+								break
+							if(!DisableToolUse)
+								Click
+						}
+						sendinput {%RotDown% 4}
+						sleep, 500
+						click, up
+						if(VBState=1)
+							return
+					}
 				}
 				LastBugrunWerewolf:=nowUnix()
 				IniWrite, %LastBugrunWerewolf%, settings\nm_config.ini, Collect, LastBugrunWerewolf
@@ -10196,28 +10743,56 @@ nm_Bugrun(){
 						}
 					}
 					bypass:=0
-					nm_setStatus("Attacking")
-					send {%SC_1%}
-					if(!DisableToolUse)
-						click, down
-					loop 20 { ;wait to kill
-						if(A_Index=20)
-							success:=1
-						searchRet := nm_imgSearch("mantis.png",30,"lowright")
-						If (searchRet[1] = 0) {
-							success:=1
-							sleep, 4000
+					found:=0 
+					loop 20
+					{
+						pineBug:=nm_HealthDetection()
+						if(pineBug.Length() > 0)
+						{ 
+							found:= 1
 							break
-						}
-						if(youDied)
-							break
-						if(!DisableToolUse)
-							Click
-						sleep, 1000
+						} 
+						sleep, 200
 					}
-					click, up
-					if(VBState=1)
-						return
+					if (found)
+					{
+						nm_setStatus("Attacking")
+						send {%SC_1%}
+						sendinput {%RotUp% 4}
+						if(!DisableToolUse)
+							click, down
+						loop 20 { ;wait to kill
+							if(A_Index=20)
+								success:=1
+							loop, 10
+							{
+								pineDead:=nm_HealthDetection()
+								if(pineDead.Length() > 0)
+									Break
+								if (A_Index=5)
+								{
+									sendinput {%RotLeft% 2}
+									r := 1
+								}
+								Sleep, 100
+								sendinput {%ZoomOut%}
+								if (A_Index=10)
+								{
+									success:=1
+									break 2
+								}
+							}
+							if(youDied)
+								break
+							if(!DisableToolUse)
+								Click
+						}
+						sendinput % "{" RotDown " 4}" ((r = 1) ? "{" RotRight " 2}" : "")
+						sleep, 500
+						click, up
+						if(VBState=1)
+							return
+					}
 				}
 				;done with Mantis
 				LastBugrunMantis:=nowUnix()
@@ -10311,54 +10886,107 @@ nm_Bugrun(){
 						}
 					}
 					bypass:=0
-					nm_setStatus("Attacking")
-					send {%SC_1%}
-					if(!DisableToolUse)
-						click, down
-					loop 17 { ;wait to kill
-						i:=A_Index
-						if(mod(A_Index,4)=1){
-							nm_Move(1500*MoveSpeedFactor, FwdKey)
-							searchRet := nm_imgSearch("scorpion.png",30,"lowright")
-							If (searchRet[1] = 0) {
-								nm_Move(1500*MoveSpeedFactor, BackKey)
-								success:=1
-								break
-							}
-						} else if(mod(A_Index,4)=2){
-							nm_Move(1500*MoveSpeedFactor, LeftKey)
-							searchRet := nm_imgSearch("scorpion.png",30,"lowright")
-							If (searchRet[1] = 0) {
-								nm_Move(1500*MoveSpeedFactor, BackKey)
-								success:=1
-								break
-							}
-						} else if(mod(A_Index,4)=3){
-							nm_Move(1500*MoveSpeedFactor, BackKey)
-							searchRet := nm_imgSearch("scorpion.png",30,"lowright")
-							If (searchRet[1] = 0) {
-								success:=1
-								break
-							}
-						} else if(mod(A_Index,4)=0){
-							nm_Move(1500*MoveSpeedFactor, RightKey)
-							searchRet := nm_imgSearch("scorpion.png",30,"lowright")
-							If (searchRet[1] = 0) {
-								success:=1
-								break
-							}
-						}
-						if(A_Index=17)
-							success:=1
-						if(youDied)
+					found:=0 
+					loop 20
+					{
+						roseBug:=nm_HealthDetection()
+						if(roseBug.Length() > 0)
+						{ 
+							found:= 1
 							break
-						if(!DisableToolUse)
-							Click
-						;sleep, 1000
+						} 
+						sleep, 150
 					}
-					click, up
-					if(VBState=1)
-						return
+					if (found)
+					{
+						nm_setStatus("Attacking")
+						sendinput {%RotUp% 4}
+						send {%SC_1%}
+						if(!DisableToolUse)
+							click, down
+						loop 17 { ;wait to kill
+							i:=A_Index
+							if(mod(A_Index,4)=1){
+								nm_Move(1500*MoveSpeedFactor, FwdKey)
+								loop 5
+								{
+									roseDead:=nm_HealthDetection()
+									if(roseDead.Length() > 0)
+									{
+										Break
+									}
+									sendinput {%ZoomOut%}
+									if (A_Index=5)
+									{
+										Success:=1
+										Break 2
+									}
+									Sleep, 250
+								}
+							} else if(mod(A_Index,4)=2){
+								nm_Move(1500*MoveSpeedFactor, LeftKey)
+								loop 5
+								{
+									roseDead:=nm_HealthDetection()
+									if(roseDead.Length() > 0)
+									{
+										Break
+									}
+									if (A_Index=5)
+									{
+										Success:=1
+										Break 2
+									}
+									Sleep, 250
+								}
+							} else if(mod(A_Index,4)=3){
+								nm_Move(1500*MoveSpeedFactor, BackKey)
+								loop 5
+								{
+									roseDead:=nm_HealthDetection()
+									if(roseDead.Length() > 0)
+									{
+										Break
+									}
+									sendinput {%ZoomOut%}
+									if (A_Index=5)
+									{
+										Success:=1
+										Break 2
+									}
+									Sleep, 250
+								}
+							} else if(mod(A_Index,4)=0){
+								nm_Move(1500*MoveSpeedFactor, RightKey)
+								loop 5
+								{
+									roseDead:=nm_HealthDetection()
+									if(roseDead.Length() > 0)
+									{
+										Break
+									}
+									sendinput {%ZoomOut%}
+									if (A_Index=5)
+									{
+										Success:=1
+										Break 2
+									}
+									Sleep, 250
+								}
+							}
+							if(A_Index=17)
+								success:=1
+							if(youDied)
+								break
+							if(!DisableToolUse)
+								Click
+						}
+						sendinput {%RotDown% 4}
+						sleep, 500
+						click, up
+						if(VBState=1)
+							return
+					}
 				}
 				;done with Scorpions
 				LastBugrunScorpions:=nowUnix()
@@ -10464,22 +11092,16 @@ nm_Bugrun(){
 				nm_Move(6000*MoveSpeedFactor, BackKey)
 				nm_Move(550*MoveSpeedFactor, LeftKey)
 				found:=0
-				loop 3 {
-					DllCall("Sleep",UInt,1000)
-					if(nm_imgSearch("planterConfirm3.png",10,"high")[1] = 0){
+				 ;(+) new detection here
+				loop 20
+				{
+					tBear:= nm_HealthDetection()
+					if(tBear.Length() > 0)
+					{
 						found:=1
 						break
-					} else {
-						nm_Move(250*MoveSpeedFactor, FwdKey)
-						DllCall("Sleep",UInt,150)
-						loop 3{
-							DllCall("Sleep",UInt,1000)
-							if(nm_imgSearch("planterConfirm3.png",10,"high")[1] = 0){
-								found:=1
-								break
-							}
-						}
 					}
+					DllCall("Sleep",UInt,250) 
 				}
 				;attack tunnel bear
 				TBdead:=0
@@ -10610,12 +11232,17 @@ nm_Bugrun(){
 				;search for king beetle
 				nm_setStatus("Searching", "King Beetle")
 				found:=0
-				loop 50 {
-					sleep 200
-					if(nm_imgSearch("planterConfirm3.png",10,"right")[1] = 0){
+				;(+) new detection here
+				;(+) Update health detection
+				loop 20
+				{
+					kBeetle:= nm_HealthDetection()
+					if(kBeetle.Length() > 0)
+					{
 						found:=1
 						break
 					}
+					Sleep, 250
 				}
 				if(!found) { ;No King Beetle here...try again in 2 hours
 					if(A_Index=2){
@@ -10744,27 +11371,26 @@ nm_Bugrun(){
 				;search for Stump snail
 				nm_setStatus("Searching", "Stump Snail")
 				found:=0
-				loop 2 {
-					Sleep, 1000
-					if(nm_imgSearch("planterConfirm3.png",10,"high")[1] = 0){
+				loop 20
+				{
+					sSnail:= nm_HealthDetection()
+					if(sSnail.Length() > 0)
+					{
 						found:=1
 						break
-					} else {
-						nm_Move(250*MoveSpeedFactor, FwdKey)
-						Sleep, 150
-						loop 3{
-							Sleep, 1000
-							if(nm_imgSearch("planterConfirm3.png",10,"high")[1] = 0){
-								found:=1
-								break
-							}
-						}
 					}
+					Sleep, 150
 				}
 				;attack Snail
+				movement := "
+				(LTrim Join`r`n
+				" nm_Walk(1, FwdKey) "
+				)"
+				nm_createWalk(movement, "snailWalk")
+				KeyWait, F14, D T5 L
+				KeyWait, F14, T60 L
+				nm_endWalk()
 
-				Global SnailStartTime
-				Global ElaspedSnailTime
 				movement := "
 				(LTrim Join`r`n
 				" nm_Walk(2.5, RightKey) "
@@ -10784,28 +11410,31 @@ nm_Bugrun(){
 
 				Ssdead:=0
 				if(found) {
-					loop 10 {
-						send {%RotUp%}
-					}
 					nm_setStatus("Attacking", "Stump Snail")
-
 					DllCall("GetSystemTimeAsFileTime", "int64p", SnailStartTime)
-
+					KillCheck := SnailStartTime
+					UpdateTimer := SnailStartTime
 					Send {%SC_1%}
-
+					loop 2
+					{
+						Send {%RotUp%}
+					}
 					inactiveHoney:=0
-					loop { ;30 minute Stump timer to keep blessings, Will rehunt in an hour
-
-						if (currentWalk["name"] != "snail"){
-							nm_createWalk(movement, "snail") ; create cycled walk script for this gather session
+					loop ;Custom Stump timer to keep blessings, Will rehunt in an hour
+					{ 
+						if (SprinklerType = "Supreme")
+						{
+							if (currentWalk["name"] != "snail")
+							{
+								nm_createWalk(movement, "snail") ; create cycled walk script for this snail session
+							}
+							else
+							{
+								Send {F13} ; start new cycle
+							}
+							KeyWait, F14, D T5 L ; wait for pattern start
 						}
-						else
-							Send {F13} ; start new cycle
-
-						KeyWait, F14, D T5 L ; wait for pattern start
-
-						if(!DisableToolUse)
-							click, down
+						click, down
 						Loop, 600
 						{
 							Sleep, 50
@@ -10828,10 +11457,10 @@ nm_Bugrun(){
 								if (inactiveHoney>=10)
 									break 2
 							}
-							if (Mod(A_Index, 20) = 0){
+							if(Mod(A_Index, 20) = 0){
 								if (disconnectCheck())
 									break
-								FormatTime, utc_min, A_NowUTC, m
+								FormatTime, utc_min, %A_NowUTC%, m
 								if((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck  && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag"))
 									break
 							}
@@ -10842,24 +11471,37 @@ nm_Bugrun(){
 								click, up
 								return
 							}
-							if((A_Index = 600) || !GetKeyState("F14"))
+							if (SprinklerType = "Supreme")
 							{
-								nm_fieldDriftCompensation()
-								break
+								if (!GetKeyState("F14") || A_Index = 600)
+								{
+									nm_fieldDriftCompensation()
+									Break
+								}
 							}
 						}
-
-						DllCall("GetSystemTimeAsFileTime", "int64p", time)
-
-						ElaspedSnailTime :=  (time - SnailStartTime)//10000
-						If(ElaspedSnailTime > 900000){
+						click, up
+						;(+) New detection system for snail
+						DllCall("GetSystemTimeAsFileTime", "int64p", currentTime)
+						ElaspedSnailTime :=  (currentTime - SnailStartTime)//10000
+						LastHealthCheck := (currentTime - KillCheck)//10000
+						LastUpdate := (currentTime - UpdateTimer)//10000
+						If(ElaspedSnailTime > SnailTime*60000 && SnailTime != "Kill")
+						{
 							nm_setStatus("Time Limit", "Stump Snail")
 							LastStumpSnail:=nowUnix()-floor(345600*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01))+1800
 							break
 						}
+						if (LastUpdate > 60000)
+						{
+							if (nm_KillTimeEstimation("Snail", LastHealthCheck) != 0)
+							{
+								KillCheck := currentTime
+							}
+							UpdateTimer := currentTime
+						}
 					}
 					nm_endWalk()
-					click, up
 				}
 				else { ;No Stump Snail try again in 2 hours
 					LastStumpSnail:=nowUnix()-floor(345600*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01))+7200
@@ -10884,6 +11526,9 @@ nm_Bugrun(){
 					IniWrite, %SessionBossKills%, settings\nm_config.ini, Status, SessionBossKills
 					LastStumpSnail:=nowUnix()
 					IniWrite, %LastStumpSnail%, settings\nm_config.ini, Collect, LastStumpSnail
+					InputSnailHealth := 100.00
+					IniWrite, %InputSnailHealth%, settings\nm_config.ini, Collect, InputSnailHealth
+					intialHealthCheck:=0
 					break
 				}
 				else if (A_Index = 2){ ;stump snail not dead, come again in 30 mins
@@ -10894,6 +11539,7 @@ nm_Bugrun(){
 		}
 		if(VBState=1)
 			return
+
 		;Commando
 		if((CommandoCheck) && (nowUnix()-LastCommando)>floor(1800*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01))){ ;30 minutes
 			loop, 2 {
@@ -11069,58 +11715,86 @@ nm_Bugrun(){
 				loop 4 {
 					Send {%ZoomIn%}
 				}
-				loop 3 {
-				;	DllCall("Sleep",UInt,1000)
-				;	nm_Move(10* MoveSpeedFactor, FwdKey)
-					if(nm_imgSearch("planterConfirm3.png",10,"high")[1] = 0){
+				;(+) Update health detection
+				loop 20
+				{
+					cChick:= nm_HealthDetection()
+					if(cChick.Length() > 0)
+					{
 						found:=1
 						break
-					} else {
-						DllCall("Sleep",UInt,150)
-						loop 3{
-							DllCall("Sleep",UInt,1000)
-							if(nm_imgSearch("planterConfirm3.png",10,"high")[1] = 0){
-								found:=1
-								break
-							}
-						}
 					}
+					Sleep, 250
 				}
 				Global ChickStartTime
 				Global ElaspedChickTime
-
 				Ccdead:=0
 				if(found) {
 					nm_setStatus("Attacking", "Commando Chick")
 
 					DllCall("GetSystemTimeAsFileTime", "int64p", ChickStartTime)
-
+					KillCheck := ChickStartTime 
+					UpdateTimer := ChickStartTime
+					chickStrikes := 0
 					loop { ;10 minute chick timer to keep blessings, Will rehunt in an hour
 						click
 						sleep 100
-
+						;do later
 						if(nm_imgSearch("ChickDead.png",50,"lowright")[1] = 0){
 							CCdead:=1
 							break
 						}
 						if(youDied)
 							break
-
 						if (Mod(A_Index, 20) = 0){
 							if (disconnectCheck())
 								break
-							FormatTime, utc_min, A_NowUTC, m
+							FormatTime, utc_min, %A_NowUTC%, m
 							if((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck  && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag"))
 								break
 						}
-
-						DllCall("GetSystemTimeAsFileTime", "int64p", time)
-						ElaspedChickTime := (time-ChickStartTime)//10000
-						If(ElaspedChickTime > 600000){
+						;(+) New detection system for Chick
+						DllCall("GetSystemTimeAsFileTime", "int64p", currentTime)
+						LastHealthCheck := (currentTime - KillCheck)//10000
+						ElaspedChickTime := (currentTime-ChickStartTime)//10000
+						LastUpdate := (currentTime - UpdateTimer)//10000
+						If(ElaspedChickTime > ChickTime*60000 && ChickTime != "Kill")
+						{
 							nm_setStatus("Time Limit", "Commando Chick")
-							LastCommando:=nowUnix()
-							Return
+							LastCommando:=nowUnix()-floor(1800*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01))+1800
+							Break
 						}
+						if (LastUpdate > 60000)
+						{
+							if (nm_KillTimeEstimation("Chick", LastHealthCheck) != 0)
+							{
+								KillCheck := currentTime
+							}
+							UpdateTimer := currentTime
+						}
+						loop 20
+						{
+							comChick:= nm_HealthDetection()
+							if(comChick.Length() > 0)
+								break
+							if(A_Index=20)
+							{
+								if (chickStrikes <= 10)
+								{
+									chickStrikes += 1
+								}
+								else
+								{
+									CCdead:=1
+									Break, 2
+								}
+							}
+							if(nm_imgSearch("ChickDead.png",50,"lowright")[1] = 0){
+								CCdead:=1
+								break 2
+							}
+							sleep, 250
+						}	
 					}
 				}
 				else { ;No Commando chick try again in 30 mins
@@ -11147,6 +11821,9 @@ nm_Bugrun(){
 					IniWrite, %SessionBossKills%, settings\nm_config.ini, Status, SessionBossKills
 					LastCommando:=nowUnix()
 					IniWrite, %LastCommando%, settings\nm_config.ini, Collect, LastCommando
+					InputChickHealth:=100.00
+					IniWrite, %InputChickHealth%, settings\nm_config.ini, Collect, InputChickHealth
+					intialHealthCheck:=0
 					break
 				}
 			}
@@ -11155,7 +11832,7 @@ nm_Bugrun(){
 			return
 		;crab
 		if((CocoCrabCheck) && (nowUnix()-LastCocoCrab)>floor(129600*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01))){ ;1.5 days
-			loop 2 {
+			loop 6 {
 				wait:=min(20000, (50-HiveBees)*1000)
 				nm_Reset(1, wait)
 				nm_setStatus("Traveling", "Coco Crab")
@@ -11171,21 +11848,17 @@ nm_Bugrun(){
 				;search for Crab
 				nm_setStatus("Searching", "Coco Crab")
 				found:=0
-				loop 3 {
-					if(nm_imgSearch("planterConfirm3.png",10,"high")[1] = 0){
+
+				 ;(+) new detection here
+				loop 20
+				{
+					cCrab:= nm_HealthDetection()
+					if(cCrab.Length() > 0)
+					{
 						found:=1
 						break
-					} else {
-						DllCall("Sleep",UInt,150)
-						loop 3{
-							DllCall("Sleep",UInt,1000)
-							if(nm_imgSearch("planterConfirm3.png",10,"high")[1] = 0){
-								found:=1
-								break
-							}
-						}
 					}
-					Sleep, 1000
+					Sleep, 250
 				}
 				;attack Crab
 
@@ -11235,7 +11908,6 @@ nm_Bugrun(){
 
 					nm_setStatus("Attacking", "Coco Crab")
 					DllCall("GetSystemTimeAsFileTime", "int64p", CrabStartTime)
-
 					inactiveHoney:=0
 					loop { ;30 minute crab timer to keep blessings, Will rehunt in an hour
 						DllCall("GetSystemTimeAsFileTime", "int64p", PatternStartTime)
@@ -11266,7 +11938,6 @@ nm_Bugrun(){
 								break
 							Sleep, 50
 						}
-
 						DllCall("GetSystemTimeAsFileTime", "int64p", time)
 						ElaspedCrabTime := (time-CrabStartTime)//10000
 						If (ElaspedCrabTime > 900000){
@@ -11342,7 +12013,7 @@ nm_Mondo(){
 		return
 	if(VBState=1)
 		return
-	FormatTime, utc_min, A_NowUTC, m
+	FormatTime, utc_min, %A_NowUTC%, m
 	if((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck  && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag")){
 		mondobuff := nm_imgSearch("mondobuff.png",50,"buff")
 		If (mondobuff[1] = 0) {
@@ -11375,13 +12046,15 @@ nm_Mondo(){
                 movement := "
                 (LTrim Join`r`n
                 send {" SC_E " down}
-                HyperSleep(100)
-                send {" SC_E " up}
-                HyperSleep(2500)
-                " nm_Walk(29, FwdKey) "
-                " nm_Walk(25, RightKey) "
-                " nm_Walk(3, LeftKey) "
-                " nm_Walk(12, BackKey) "
+				HyperSleep(100)
+				send {" SC_E " up}
+				HyperSleep(2500)
+				" nm_Walk(29, FwdKey) "
+				" nm_Walk(25, RightKey) "
+				" nm_Walk(3, LeftKey) "
+				" nm_Walk(19, BackKey) "
+				HyperSleep(200)
+				send {" RotLeft " 1}
                 )"
 
                 nm_createWalk(movement)
@@ -11389,73 +12062,122 @@ nm_Mondo(){
                 KeyWait, F14, T90 L
                 nm_endWalk()
             }
-			nm_setStatus("Attacking")
-			if(MondoAction="Buff"){
-				repeat:=0
-				loop 120 { ;2 mins
-					nm_autoFieldBoost(CurrentField)
-					if(youDied || AFBrollingDice || AFBuseGlitter || AFBuseBooster)
-						break
-					sleep, 1000
+			;;; (+) new conditions probably
+			found := 0 
+			loop 20
+			{
+				mChick:= nm_HealthDetection()
+				if(mChick.Length() > 0)
+				{
+					found:=1
+					break
 				}
+				Sleep, 250
 			}
-			else if(MondoAction="Tag"){
-				repeat:=0
-				;zaappiix5
-				nm_Move(2000*MoveSpeedFactor, LeftKey)
-				nm_Move(2000*MoveSpeedFactor, BackKey)
-				nm_Move(1000*MoveSpeedFactor, LeftKey)
-				nm_Move(3500*MoveSpeedFactor, FwdKey)
-				loop 25 { ;25 sec
-					if(youDied)
-						break
-					sleep, 1000
-				}
+			if (found)
+			{
+				nm_setStatus("Found")
+			    for index, value in mChick ;Mondo is already dmging itself before we get there 
+			    {
+			        if (v = 100.00) ;Planter detected since mondo will already have taken dmg by the time you come up
+			        { 
+			            continue
+			        }
+			        else 
+			        {
+			            mondoChick:=1
+			        }
+			    } 
+			    if (mondoChick)
+			    {
+					nm_setStatus("Attacking")
+			        if(MondoAction="Buff"){
+			            repeat:=0
+			            loop 120 { ;2 mins
+			                nm_autoFieldBoost(CurrentField)
+			                if(youDied || AFBrollingDice || AFBuseGlitter || AFBuseBooster)
+			                    break
+			                sleep, 1000
+			            }
+			        }
+			        else if(MondoAction="Tag"){
+			            repeat:=0
+			            ;zaappiix5
+			            nm_Move(2000*MoveSpeedFactor, LeftKey)	
+			            nm_Move(2000*MoveSpeedFactor, BackKey)	
+			            nm_Move(1000*MoveSpeedFactor, LeftKey)	
+			            nm_Move(3500*MoveSpeedFactor, FwdKey)	
+			            loop 25 { ;25 sec
+			                if(youDied)
+			                    break
+			                sleep, 1000
+			            }
+			        } 
+			        else if(MondoAction="Guid" && PMondoGuid=1 && PMondoGuidComplete=0){
+			            repeat:=0
+			            PMondoGuidComplete:=1
+			            while ((nowUnix()-LastGuid)<=210 && utc_min<15 && A_Index<210) { ;3.5 mins since guid
+			                if(youDied)
+			                    break
+			                ;check for mondo death here
+			                mondo := nm_imgSearch("mondo3.png",50,"lowright")
+			                If (mondo[1] = 0) {
+			                    break
+			                }
+			                sleep, 1000
+			                FormatTime, utc_min, %A_NowUTC%, m
+			            }
+			        } else if(MondoAction="Kill"){
+			            repeat:=1
+			            loop 900 { ;15 mins
+			                nm_autoFieldBoost(CurrentField)
+			                if(youDied || VBState=1 || AFBrollingDice || AFBuseGlitter || AFBuseBooster)
+			                    break
+			                if(utc_min>14) {
+			                    repeat:=0
+			                    break
+			                }
+			                ;check for mondo death here
+							loop 20
+							{
+								mondoDead:=nm_HealthDetection()
+								if(mondoDead.Length() > 0)
+									Break
+								if (A_Index=20)
+								{
+									repeat:=0
+									send {%RotRight%}
+			            			;loot mondo after death
+									nm_setStatus("Looting")
+									nm_Move(1500*MoveSpeedFactor, FwdKey)
+									nm_Move(500*MoveSpeedFactor, LeftKey)
+									nm_Move(1400*MoveSpeedFactor, BackKey)
+									nm_Move(100*MoveSpeedFactor, LeftKey)
+									nm_loot(13.5, 6, "left")
+                        			nm_loot(13.5, 6, "right")
+                        			nm_loot(13.5, 6, "left")
+									break 2
+								}
+								Sleep, 250
+							}	
+							if(A_Index=900)
+							{
+								repeat:=0
+			                    break
+							}
+			                if(Mod(A_Index, 60)=0)
+			                    click
+			                sleep, 1000
+			                FormatTime, utc_min, %A_NowUTC%, m
+			            }
+			        }
+			    }
 			}
-			else if(MondoAction="Guid" && PMondoGuid=1 && PMondoGuidComplete=0){
-				repeat:=0
-				PMondoGuidComplete:=1
-				while ((nowUnix()-LastGuid)<=210 && utc_min<15 && A_Index<210) { ;3.5 mins since guid
-					if(youDied)
-						break
-					;check for mondo death here
-					mondo := nm_imgSearch("mondo3.png",50,"lowright")
-					If (mondo[1] = 0) {
-						break
-					}
-					sleep, 1000
-					FormatTime, utc_min, A_NowUTC, m
-				}
-			} else if(MondoAction="Kill"){
-				repeat:=1
-				loop 900 { ;15 mins
-					nm_autoFieldBoost(CurrentField)
-					if(youDied || VBState=1 || AFBrollingDice || AFBuseGlitter || AFBuseBooster)
-						break
-					if(utc_min>14) {
-						repeat:=0
-						break
-					}
-					;check for mondo death here
-					mondo := nm_imgSearch("mondo3.png",50,"lowright")
-                    If (mondo[1] = 0) {
-                        ;loot mondo after death
-                        nm_setStatus("Looting")
-                        nm_Move(500*MoveSpeedFactor, LeftKey)
-                        nm_Move(1400*MoveSpeedFactor, BackKey)
-                        nm_Move(100*MoveSpeedFactor, LeftKey)
-                        nm_loot(13.5, 6, "left")
-                        nm_loot(13.5, 6, "right")
-                        nm_loot(13.5, 6, "left")
-                        repeat:=0
-                        break
-                    }
-					if(Mod(A_Index, 60)=0)
-						click
-					sleep, 1000
-					FormatTime, utc_min, A_NowUTC, m
-				}
+			else
+			{
+				Break
 			}
+
 		}
 		LastMondoBuff:=nowUnix()
 		IniWrite, %LastMondoBuff%, settings\nm_config.ini, Collect, LastMondoBuff
@@ -11583,7 +12305,7 @@ nm_walkFrom(field:="none")
 }
 nm_GoGather(){
 	global youDied, VBState
-	global TCFBKey, AFCFBKey, TCLRKey, AFCLRKey, FwdKey, LeftKey, BackKey, RightKey, RotLeft, RotRight, SC_E
+	global TCFBKey, AFCFBKey, TCLRKey, AFCLRKey, FwdKey, LeftKey, BackKey, RightKey, RotLeft, RotRight, SC_E, KeyDelay
 	global MoveMethod
 	global CurrentFieldNum
 	global objective
@@ -11600,17 +12322,17 @@ nm_GoGather(){
 	global PlanterMode, gotoPlanterField
 	global QuestLadybugs, QuestRhinoBeetles, QuestSpider, QuestMantis, QuestScorpions, QuestWerewolf
 	global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, BugrunInterruptCheck, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BlackQuestCheck, BlackQuestComplete, QuestGatherField, BuckoQuestCheck, BuckoQuestComplete, RileyQuestCheck, RileyQuestComplete, PolarQuestCheck, PolarQuestComplete, RotateQuest, QuestGatherMins, QuestGatherReturnBy, BuckoRhinoBeetles, BuckoMantis, RileyLadybugs, RileyScorpions, RileyAll, GameFrozenCounter, HiveSlot, BugrunLadybugsCheck, BugrunRhinoBeetlesCheck, BugrunSpiderCheck, BugrunMantisCheck, BugrunScorpionsCheck, BugrunWerewolfCheck, MonsterRespawnTime
-	global BeesmasGatherInterruptCheck, StockingsCheck, LastStockings, FeastCheck, LastFeast, RBPDelevelCheck, LastRBPDelevel, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon
+	global BeesmasGatherInterruptCheck, StockingsCheck, LastStockings, FeastCheck, LastFeast, RBPDelevelCheck, LastRBPDelevel, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon, beesmasActive
 	global GatherStartTime, TotalGatherTime, SessionGatherTime, ConvertStartTime, TotalConvertTime, SessionConvertTime
 	global bitmaps
-	FormatTime, utc_min, A_NowUTC, m
+	FormatTime, utc_min, %A_NowUTC%, m
 	if !((nowUnix()-GatherFieldBoostedStart<900) || (nowUnix()-LastGlitter<900) || nm_boostBypassCheck()){
 		;BUGS GatherInterruptCheck
 		if ((((BugrunInterruptCheck && BugrunLadybugsCheck) || (PolarQuestCheck && PolarQuestGatherInterruptCheck && QuestLadybugs) || (RileyQuestCheck && RileyQuestGatherInterruptCheck && (RileyLadybugs || RileyAll))) && ((nowUnix()-LastBugrunLadybugs)>floor(330*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01)))) || (((BugrunInterruptCheck && BugrunRhinoBeetlesCheck) || (PolarQuestCheck && PolarQuestGatherInterruptCheck && QuestRhinoBeetles) || (RileyQuestCheck && RileyQuestGatherInterruptCheck && RileyAll) || (BuckoQuestCheck && BuckoQuestGatherInterruptCheck && BuckoRhinoBeetles)) && ((nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01)))) || (((BugrunInterruptCheck && BugrunSpiderCheck) || (PolarQuestCheck && PolarQuestGatherInterruptCheck && QuestSpider) || (RileyQuestCheck && RileyQuestGatherInterruptCheck && RileyAll)) && ((nowUnix()-LastBugrunSpider)>floor(1830*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01)))) || (((BugrunInterruptCheck && BugrunMantisCheck) || (PolarQuestCheck && PolarQuestGatherInterruptCheck && QuestMantis) || (RileyQuestCheck && RileyQuestGatherInterruptCheck && RileyAll) || (BuckoQuestCheck && BuckoQuestGatherInterruptCheck && BuckoMantis)) && ((nowUnix()-LastBugrunMantis)>floor(1230*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01)))) || (((BugrunInterruptCheck && BugrunScorpionsCheck) || (PolarQuestCheck && PolarQuestGatherInterruptCheck && QuestScorpions) || (RileyQuestCheck && RileyQuestGatherInterruptCheck && (RileyScorpions || RileyAll))) && ((nowUnix()-LastBugrunScorpions)>floor(1230*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01)))) || (((BugrunInterruptCheck && BugrunWerewolfCheck) || (PolarQuestCheck && PolarQuestGatherInterruptCheck && QuestWerewolf) || (RileyQuestCheck && RileyQuestGatherInterruptCheck && RileyAll)) && ((nowUnix()-)>floor(3600*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01))))){
 			return
 		}
 		;BEESMAS GatherInterruptCheck
-		if (BeesmasGatherInterruptCheck && ((StockingsCheck && (nowUnix()-LastStockings)>3600) || (FeastCheck && (nowUnix()-LastFeast)>5400) || (RBPDelevelCheck && (nowUnix()-LastRBPDelevel)>10800) || (GingerbreadCheck && (nowUnix()-LastGingerbread)>7200) || (SnowMachineCheck && (nowUnix()-LastSnowMachine)>7200) || (CandlesCheck && (nowUnix()-LastCandles)>14400) || (SamovarCheck && (nowUnix()-LastSamovar)>21600) || (LidArtCheck && (nowUnix()-LastLidArt)>28800) || (GummyBeaconCheck && (nowUnix()-LastGummyBeacon)>28800)))
+		if (BeesmasGatherInterruptCheck && beesmasActive) && ((StockingsCheck && (nowUnix()-LastStockings)>3600) || (FeastCheck && (nowUnix()-LastFeast)>5400) || (RBPDelevelCheck && (nowUnix()-LastRBPDelevel)>10800) || (GingerbreadCheck && (nowUnix()-LastGingerbread)>7200) || (SnowMachineCheck && (nowUnix()-LastSnowMachine)>7200) || (CandlesCheck && (nowUnix()-LastCandles)>14400) || (SamovarCheck && (nowUnix()-LastSamovar)>21600) || (LidArtCheck && (nowUnix()-LastLidArt)>28800) || (GummyBeaconCheck && (nowUnix()-LastGummyBeacon)>28800))
 			return
 		;MONDO
 		if((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck  && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag"))
@@ -11962,7 +12684,7 @@ nm_GoGather(){
 		if ((nowUnix()-GatherFieldBoostedStart<900) || (nowUnix()-LastGlitter<900) || nm_boostBypassCheck())
 			continue
 		;low priority interrupts
-		FormatTime, utc_min, A_NowUTC, m
+		FormatTime, utc_min, %A_NowUTC%, m
 		if ((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck  && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag")){
 			interruptReason := "Mondo"
 			if (PMondoGuidComplete)
@@ -11974,7 +12696,7 @@ nm_GoGather(){
 			interruptReason := "Kill Bugs"
 			break
 		}
-		if (BeesmasGatherInterruptCheck && ((StockingsCheck && (nowUnix()-LastStockings)>3600) || (FeastCheck && (nowUnix()-LastFeast)>5400) || (RBPDelevelCheck && (nowUnix()-LastRBPDelevel)>10800) || (GingerbreadCheck && (nowUnix()-LastGingerbread)>7200) || (SnowMachineCheck && (nowUnix()-LastSnowMachine)>7200) || (CandlesCheck && (nowUnix()-LastCandles)>14400) || (SamovarCheck && (nowUnix()-LastSamovar)>21600) || (LidArtCheck && (nowUnix()-LastLidArt)>28800) || (GummyBeaconCheck && (nowUnix()-LastGummyBeacon)>28800))){
+		if (BeesmasGatherInterruptCheck && beesmasActive) && ((StockingsCheck && (nowUnix()-LastStockings)>3600) || (FeastCheck && (nowUnix()-LastFeast)>5400) || (RBPDelevelCheck && (nowUnix()-LastRBPDelevel)>10800) || (GingerbreadCheck && (nowUnix()-LastGingerbread)>7200) || (SnowMachineCheck && (nowUnix()-LastSnowMachine)>7200) || (CandlesCheck && (nowUnix()-LastCandles)>14400) || (SamovarCheck && (nowUnix()-LastSamovar)>21600) || (LidArtCheck && (nowUnix()-LastLidArt)>28800) || (GummyBeaconCheck && (nowUnix()-LastGummyBeacon)>28800)){
 			interruptReason := "Beesmas Machine"
 			break
 		}
@@ -12052,7 +12774,7 @@ nm_GoGather(){
 		nm_PlanterTimeUpdate(FieldName)
 		;whirligig
 		if(FieldReturnType="walk") { ;walk back
-			if((WhirligigKey!="none" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="none" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted)){
+			if((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted)){
 				if(FieldName="sunflower"){
 					loop 2 {
 						send, {%RotLeft%}
@@ -12119,10 +12841,31 @@ nm_GoGather(){
 					}
 				}
 				send {%WhirligigKey%}
-				LastWhirligig:=nowUnix()
-				HiveConfirmed := 1
-				IniWrite, %LastWhirligig%, settings\nm_config.ini, Boost, LastWhirligig
-				sleep, 1000
+				sleep (2500+KeyDelay)
+				;Confirm hive
+				send {PgUp 4}
+				loop 8 {
+					Send {%ZoomOut%}
+				}
+				loop 4
+				{
+					If ((nm_imgSearch("hive4.png",20,"actionbar")[1] = 0) || (nm_imgSearch("hive_honeystorm.png",20,"actionbar")[1] = 0) || (nm_imgSearch("hive_snowstorm.png",20,"actionbar")[1] = 0))
+					{
+						send {%RotRight% 4}{PgDn 4}
+						HiveConfirmed:=1
+						LastWhirligig:=nowUnix()
+						IniWrite, %LastWhirligig%, settings\nm_config.ini, Boost, LastWhirligig
+						sleep, 1000
+						break
+					}
+					sendinput {%RotRight% 4}
+					sleep (250+KeyDelay)
+					If (A_Index=4)
+					{
+						nm_setStatus("Warning", "No Whirligigs")
+						WhirligigKey:="None"
+					}
+				}
 			} else { ;walk to hive
 				nm_walkFrom(FieldName)
 				DisconnectCheck()
@@ -12180,7 +12923,7 @@ nm_GoGather(){
 				nm_findHiveSlot()
 			}
 		} else { ;reset back
-			if ((WhirligigKey!="none" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="none" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted)) {
+			if ((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted)) {
 				if(FieldName="sunflower"){
 					loop 2 {
 						send, {%RotLeft%}
@@ -12247,15 +12990,36 @@ nm_GoGather(){
 					}
 				}
 				send {%WhirligigKey%}
-				LastWhirligig:=nowUnix()
-				HiveConfirmed := 1
-				IniWrite, %LastWhirligig%, settings\nm_config.ini, Boost, LastWhirligig
-				sleep, 1000
+				sleep (2500+KeyDelay)
+				;Confirm hive
+				send {PgUp 4}
+				loop 8 {
+					Send {%ZoomOut%}
+				}
+				loop 4
+				{
+					If ((nm_imgSearch("hive4.png",20,"actionbar")[1] = 0) || (nm_imgSearch("hive_honeystorm.png",20,"actionbar")[1] = 0) || (nm_imgSearch("hive_snowstorm.png",20,"actionbar")[1] = 0))
+					{
+						send {%RotRight% 4}{PgDn 4}
+						HiveConfirmed:=1
+						LastWhirligig:=nowUnix()
+						IniWrite, %LastWhirligig%, settings\nm_config.ini, Boost, LastWhirligig
+						sleep, 1000
+						break
+					}
+					sendinput {%RotRight% 4}
+					sleep (250+KeyDelay)
+					If (A_Index=4)
+					{
+						nm_setStatus("Missing", "Whirligig")
+						WhirligigKey:="None"
+					}
+				}
 			}
 		}
 	}
 	nm_currentFieldDown()
-	FormatTime, utc_min, A_NowUTC, m
+	FormatTime, utc_min, %A_NowUTC%, m
 	if(CurrentField="mountain top" && (utc_min>=0 && utc_min<15)) ;mondo dangerzone! skip over this field if possible
 		nm_currentFieldDown()
 }
@@ -13253,41 +14017,46 @@ nm_gather(pattern, index, patternsize:="M", reps:=1, facingcorner:=0){
 		}
 		)"
 
-		patterns["typewriter"] := "
+		patterns["SuperCat"] := " 
 		(LTrim Join`r`n
-		spacingDelay:=274 ;183
-		send {" TCLRKey " down}
-		Walk(spacingDelay*9/2000*(" reps "*2+1))
-		send {" TCLRKey " up}{" AFCFBKey " down}
-		Walk(" 5 * size ")
-		send {" AFCFBKey " up}
 		loop " reps " {
-			send {" AFCLRKey " down}
-			Walk(spacingDelay*9/2000)
-			send {" AFCLRKey " up}{" TCFBKey " down}
-			Walk(" 5 * size ")
-			send {" TCFBKey " up}{" AFCLRKey " down}
-			Walk(spacingDelay*9/2000)
-			send {" AFCLRKey " up}{" AFCFBKey " down}
-			Walk((1094+25*" facingcorner ")*9/2000*" size ")
+			send {" TCLRKey " down} ; Left 1.5
+			Walk(" 1.25 * size ")
+			send {" TCLRKey " up}{" TCFBKey " down} ;Left forward 78
+			Walk(" 7 * size ", 10)
+			send {" TCFBKey " up}{" TCLRKey " down} ; Forward Left 1.5
+			Walk(" 1.25 * size ")
+			send {" TCLRKey " up}{" AFCFBKey " down} ;Left Back 6.66
+			Walk(" 6.66 * size ", 10)
+			send {" AFCFBKey " up}{" TCLRKey " down} ;Back Left 1.5
+			Walk(" 1.25 * size ")
+			send {" TCLRKey " up}{" TCFBKey " down} ;Left forward 78
+			Walk(" 7 * size ", 10)
+			send {" TCFBKey " up}{" TCLRKey " down} ; Forward Left 1.5
+			Walk(" 2 * size ")
+			send {" TCLRKey " up}{" AFCFBKey " down} ;Left Back 6.66
+			Walk(" 6.5 * size ", 10)
 			send {" AFCFBKey " up}
-		}
-		send {" TCLRKey " down}
-		Walk(spacingDelay*9/2000*(" reps "*2+0.5))
-		send {" TCLRKey " up}{" TCFBKey " down}
-		Walk(" 5 * size ")
-		send {" TCFBKey " up}
+			}
 		loop " reps " {
-			send {" AFCLRKey " down}
-			Walk(spacingDelay*9/2000)
-			send {" AFCLRKey " up}{" AFCFBKey " down}
-			Walk((1094+25*" facingcorner ")*9/2000*" size ")
-			send {" AFCFBKey " up}{" AFCLRKey " down}
-			Walk(spacingDelay*9/2000*1.5)
-			send {" AFCLRKey " up}{" TCFBKey " down}
-			Walk(" 5 * size ")
-			send {" TCFBKey " up}
-		}
+			send {" AFCLRKey " down} ; Right 1.5
+			Walk(" 1.25 * size ")
+			send {" AFCLRKey " up}{" TCFBKey " down} ; Right Forward 7
+			Walk(" 7 * size ", 10)
+			send {" TCFBKey " up}{" AFCLRKey " down} ; Forward Right 1.5
+			Walk(" 1 * size ")
+			send {" AFCLRKey " up}{" AFCFBKey " down} ;Right Back 6.66
+			Walk(" 6.66 * size ", 10)
+			send {" AFCFBKey " up}{" AFCLRKey " down} ;Back Right 1.5
+			Walk(" 1.25 * size ")
+			send {" AFCLRKey " up}{" TCFBKey " down} ; Right Forward 6.66
+			Walk(" 7 * size ", 10)
+			send {" TCFBKey " up}{" AFCLRKey " down} ; Forward Right 1.5
+			Walk(" 1.25 * size ")
+			send {" AFCLRKey " up}{" AFCFBKey " down} ;Right Back 6.66
+			Walk(" 6.5 * size ", 10)
+			send {" AFCFBKey " up}
+			}
 		)"
 
 		patterns["Xsnake"] := "
@@ -13445,7 +14214,7 @@ nm_createWalk(movement, name:="") ; this function generates the 'walk' code and 
 		)" ; this is just ahk code, it will be executed as a new script
 	}
 	else
-	{
+	{ ;~~ ;line 14156 regex change (https://discord.com/channels/1012610056921038868/1021295942965673995/1138315469158371410)
 		script := "
 		(LTrim Join`r`n
 		#NoEnv
@@ -13467,7 +14236,7 @@ nm_createWalk(movement, name:="") ; this function generates the 'walk' code and 
 
 		F13::
 		Send {F14 down}
-		" RegExReplace(movement, "im)Walk\((?<param>(?:\([^)]*\)|[^(),]*)+).*\)", "HyperSleep(2000/9*" round(18/MoveSpeedNum, 2) "*(${param}))") "
+		" RegExReplace(movement, "im)Walk\((?<param>.+?)(?:\,|\)(?=[^()]*(?:\(|$)))(?:.*\))?", "HyperSleep(2000/9*" round(18/MoveSpeedNum, 2) "*(${param}))") "
 		Send {F14 up}
 		return
 
@@ -13888,170 +14657,143 @@ nm_Move(MoveTime, MoveKey1, MoveKey2:="None"){
 		send, {%MoveKey2% up}
 	SetKeyDelay, PrevKeyDelay
 }
-DisconnectCheck(){
-	global LastClock, LastGingerbread, KeyDelay, HiveSlot, CurrentAction, PreviousAction, PrivServer, TotalDisconnects, SessionDisconnects, DailyReconnect, PublicFallback, resetTime, SC_Esc, SC_R, SC_Enter, SC_E, bitmaps, PlanterName1, PlanterName2, PlanterName3, PlanterHarvestTime1, PlanterHarvestTime2, PlanterHarvestTime3, MacroState, ReconnectDelay, FallbackServer1, FallbackServer2, FallbackServer3
-	static init := VarSetCapacity(cmd, 512) + DllCall("shlwapi\AssocQueryString","Int",0,"Int",1,"Str","http","Str","open","Str",cmd, "IntP",512) + DllCall("Shell32\SHEvaluateSystemCommandTemplate","WStr",cmd,"PtrP",pEXE,"Ptr",0,"PtrP",pPARAMS), exe := StrGet(pEXE), params := StrGet(pPARAMS)
-		, PublicServer:=["https://www.roblox.com/games/4189852503?privateServerLinkCode=94175309348158422142147035472390"
-		, "https://www.roblox.com/games/4189852503?privateServerLinkCode=67638568200755121963952934967879"
-		, "https://www.roblox.com/games/4189852503?privateServerLinkCode=24262120063156705121074729566447"
-		, "https://www.roblox.com/games/4189852503?privateServerLinkCode=99290510522180059587431510446613"
-		, "https://www.roblox.com/games/4189852503?privateServerLinkCode=75908441775181472560138244729490"
-		, "https://www.roblox.com/games/4189852503?privateServerLinkCode=39932261356868784375906027447412"
-		, "https://www.roblox.com/games/4189852503?privateServerLinkCode=35586820242929920103315802001744"
-		, "https://www.roblox.com/games/4189852503?privateServerLinkCode=56511033403232366819916242922747"]
-
-	if (nm_imgSearch("disconnected.png",25, "center")[1] = 1 && WinExist("Roblox ahk_exe RobloxPlayerBeta.exe")){
+DisconnectCheck(testCheck := 0)
+{
+	global LastClock, LastGingerbread, KeyDelay, HiveSlot, CurrentAction, PreviousAction, PrivServer, TotalDisconnects, SessionDisconnects, DailyReconnect, PublicFallback, resetTime, SC_Esc, SC_R, SC_Enter, SC_E, bitmaps, PlanterName1, PlanterName2, PlanterName3, PlanterHarvestTime1, PlanterHarvestTime2, PlanterHarvestTime3, MacroState, ReconnectDelay, FallbackServer1, FallbackServer2, FallbackServer3, beesmasActive
+	static ServerLabels := {0: "Public Server Link", 1: "Private Server Link", 2: "Fallback Server Link 1", 3: "Fallback Server Link 2", 4: "Fallback Server Link 3"}, LegacyOverride := 0
+	
+	; return if not disconnected or crashed
+	if (nm_imgSearch("disconnected.png",25, "center")[1] = 1 && WinExist("Roblox ahk_exe RobloxPlayerBeta.exe") && !WinExist("Roblox Crash"))
 		return 0
-	}
 
-	if (ReconnectDelay){
+	; end any residual movement and set reconnect start time
+	nm_endWalk()
+	ReconnectStart := nowUnix()
+	PreviousAction:=CurrentAction
+	CurrentAction:="Reconnect"
+
+	; wait for any requested delay time (e.g. from remote control or daily reconnect)
+	if (ReconnectDelay)
+	{
 		nm_setStatus("Waiting", ReconnectDelay " seconds before Reconnect")
 		Sleep, 1000*ReconnectDelay
 		ReconnectDelay := 0
 	}
+	if (DailyReconnect)
+	{
+		staggerDelay:=30000*HiveSlot
+		nm_setStatus("Waiting", round(2+(staggerDelay/60000), 1) " minutes before Reconnect")
+		sleep, 120000+staggerDelay
+		DailyReconnect := 0
+		Prev_DetectHiddenWindows := A_DetectHiddenWindows
+		Prev_TitleMatchMode := A_TitleMatchMode
+		DetectHiddenWindows On
+		SetTitleMatchMode 2
+		if WinExist("background.ahk ahk_class AutoHotkey"){
+			PostMessage, 0x5554, 6, 0
+		}
+		DetectHiddenWindows %Prev_DetectHiddenWindows%
+		SetTitleMatchMode %Prev_TitleMatchMode%
+	}
+	else if (MacroState = 2)
+	{
+		TotalDisconnects:=TotalDisconnects+1
+		SessionDisconnects:=SessionDisconnects+1
+		Prev_DetectHiddenWindows := A_DetectHiddenWindows
+		Prev_TitleMatchMode := A_TitleMatchMode
+		DetectHiddenWindows On
+		SetTitleMatchMode 2
+		if WinExist("StatMonitor.ahk ahk_class AutoHotkey") {
+			PostMessage, 0x5555, 6, 1
+		}
+		DetectHiddenWindows %Prev_DetectHiddenWindows%
+		SetTitleMatchMode %Prev_TitleMatchMode%
+		IniWrite, %TotalDisconnects%, settings\nm_config.ini, Status, TotalDisconnects
+		IniWrite, %SessionDisconnects%, settings\nm_config.ini, Status, SessionDisconnects
+		nm_setStatus("Disconnected", "Reconnecting")
+	}
 
-	loop {
-		if (A_Index = 1)
-			ReconnectStart := nowUnix()
-		nm_endWalk()
-		PreviousAction:=CurrentAction
-		CurrentAction:="Reconnect"
-		if (PrivServer && !RegExMatch(PrivServer, "i)^((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/(1537690962|4189852503)\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*$")){ ; updated ps link RegEx, only send "Invalid Link" if PrivServer actually contains an input
-			;null out the invalid private server link
-			PrivServer:=""
-			nm_setStatus("Error", "Private Server Link Invalid")
-			Sleep, 1000
-		}
-		;Daily Reconnect
-		if(DailyReconnect) {
-			staggerDelay:=30000*HiveSlot
-			nm_setStatus("Waiting", round(2+(staggerDelay/60000), 1) " minutes before Reconnect")
-			sleep, 120000+staggerDelay
-			DailyReconnect := 0
-			Prev_DetectHiddenWindows := A_DetectHiddenWindows
-			Prev_TitleMatchMode := A_TitleMatchMode
-			DetectHiddenWindows On
-			SetTitleMatchMode 2
-			if WinExist("background.ahk ahk_class AutoHotkey"){
-				PostMessage, 0x5554, 6, 0
-			}
-			DetectHiddenWindows %Prev_DetectHiddenWindows%
-			SetTitleMatchMode %Prev_TitleMatchMode%
-		}
-		else if (MacroState = 2)
+	; obtain link codes from Private Server and Fallback Server links
+	linkCodes := {}
+	for k,v in ["PrivServer", "FallbackServer1", "FallbackServer2", "FallbackServer3"]
+	{
+		if (%v% && (StrLen(%v%) > 0))
 		{
-			if (A_Index = 1)
-			{
-				TotalDisconnects:=TotalDisconnects+1
-				SessionDisconnects:=SessionDisconnects+1
-				Prev_DetectHiddenWindows := A_DetectHiddenWindows
-				Prev_TitleMatchMode := A_TitleMatchMode
-				DetectHiddenWindows On
-				SetTitleMatchMode 2
-				if WinExist("StatMonitor.ahk ahk_class AutoHotkey") {
-					PostMessage, 0x5555, 6, 1
-				}
-				DetectHiddenWindows %Prev_DetectHiddenWindows%
-				SetTitleMatchMode %Prev_TitleMatchMode%
-				IniWrite, %TotalDisconnects%, settings\nm_config.ini, Status, TotalDisconnects
-				IniWrite, %SessionDisconnects%, settings\nm_config.ini, Status, SessionDisconnects
-				nm_setStatus("Disconnected", "Reconnecting" ((A_Index > 1) ? (" (Attempt " A_Index ")") : ""))
-			}
+			if RegexMatch(%v%, "i)(?<=privateServerLinkCode=)(.{32})", linkCode)
+				linkCodes[k] := linkCode
+			else
+				nm_setStatus("Error", ServerLabels[k] " Invalid")
 		}
-		;Close Roblox
-		for p in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process where Name like '%Roblox%'")
-			Process, Close, % p.ProcessID
-		;Run Server Link
-		switch A_Index
-		{
-			case 1,2,3:
-			if (PrivServer && (StrLen(PrivServer) > 0))
-				nm_setStatus("Attempting", "Private Server Link"), url := PrivServer, server := 1
-			else
-			{
-				nm_setStatus("Attempting", "Public Server Link")
-				random, x, 1, % PublicServer.Length()
-				url := PublicServer[x], server := 0
-			}
-
-			case 4,5,6:
-			if (FallbackServer1 && (StrLen(FallbackServer1) > 0))
-				nm_setStatus("Attempting", "Fallback Server Link 1"), url := FallbackServer1, server := 2
-			else if ((PublicFallback = 0) && PrivServer && (StrLen(PrivServer) > 0))
-				nm_setStatus("Attempting", "Private Server Link"), url := PrivServer, server := 1
-			else
-			{
-				nm_setStatus("Attempting", "Public Server Link")
-				random, x, 1, % PublicServer.Length()
-				url := PublicServer[x], server := 0
-			}
-
-			case 7,8,9:
-			if (FallbackServer2 && (StrLen(FallbackServer2) > 0))
-				nm_setStatus("Attempting", "Fallback Server Link 2"), url := FallbackServer2, server := 3
-			else if ((PublicFallback = 0) && PrivServer && (StrLen(PrivServer) > 0))
-				nm_setStatus("Attempting", "Private Server Link"), url := PrivServer, server := 1
-			else
-			{
-				nm_setStatus("Attempting", "Public Server Link")
-				random, x, 1, % PublicServer.Length()
-				url := PublicServer[x], server := 0
-			}
-
-			case 10,11,12:
-			if (FallbackServer3 && (StrLen(FallbackServer3) > 0))
-				nm_setStatus("Attempting", "Fallback Server Link 3"), url := FallbackServer3, server := 4
-			else if ((PublicFallback = 0) && PrivServer && (StrLen(PrivServer) > 0))
-				nm_setStatus("Attempting", "Private Server Link"), url := PrivServer, server := 1
-			else
-			{
-				nm_setStatus("Attempting", "Public Server Link")
-				random, x, 1, % PublicServer.Length()
-				url := PublicServer[x], server := 0
-			}
-
-			default:
-			if ((PublicFallback = 0) && PrivServer && (StrLen(PrivServer) > 0))
-				nm_setStatus("Attempting", "Private Server Link"), url := PrivServer, server := 1
-			else
-			{
-				nm_setStatus("Attempting", "Public Server Link")
-				random, x, 1, % PublicServer.Length()
-				url := PublicServer[x], server := 0
-			}
-		}
-		ShellRun(exe, StrReplace(params, "%1", url))
+	}
+	
+	; main reconnect loop
+	Loop {	
+		;Decide Server
+		server := ((A_Index <= 12) && linkCodes.HasKey(n := (A_Index-1)//3 + 1)) ? n : ((PublicFallback = 0) && (n := linkCodes.MinIndex())) ? n : 0
+		
+		;Wait For Success
 		i := A_Index, success := 0
 		Loop, 1 {
-			;STAGE 1 - wait for Roblox Launcher
-			Loop, 120 {
-				sleep, 1000 ; timeout 2 mins, slow internet / not logged in
-				if WinExist("Roblox") {
-					break
+			;START
+			switch % LegacyOverride ? 0 : Mod(i, 3)
+			{
+				case 1:
+				;Close Roblox
+				for p in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process where Name like '%Roblox%'")
+					Process, Close, % p.ProcessID
+				;Run Server Deeplink
+				nm_setStatus("Attempting", ServerLabels[server])
+				Run % "roblox://placeID=1537690962" (server ? ("&linkCode=" linkCodes[server]) : "")
+				
+				case 2:
+				;Run Server Deeplink (without closing)
+				nm_setStatus("Attempting", ServerLabels[server])
+				Run % "roblox://placeID=1537690962" (server ? ("&linkCode=" linkCodes[server]) : "")
+				
+				default:
+				if server
+				{
+					;Close Roblox
+					for p in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process where Name like '%Roblox%'")
+						Process, Close, % p.ProcessID
+					;Run Server Link (legacy method w/ browser)
+					nm_setStatus("Attempting", ServerLabels[server] " (Browser)")
+					if (success := LegacyReconnect(linkCodes[server]) = 1)
+					{
+						LegacyOverride := 1
+						nm_setStatus("Warning", "Deeplink reconnect failed, legacy reconnect enabled for this session!") 
+						;Add ((state = "Interupted") || (state = "Reporting") || (state = "Warning")) ? 14408468 ; yellow - alert to update the Status.ahk file
+						break
+					}
+					else
+						continue 2
 				}
-				if (A_Index = 120) {
-					nm_setStatus("Error", "No Roblox Found`nRetry: " i)
-					Sleep, 1000
-					break 2
+				else 
+				{
+					;Close Roblox
+					if (i = 1)
+						for p in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process where Name like '%Roblox%'")
+							Process, Close, % p.ProcessID
+					;Run Server Link (spam deeplink method)
+					Run % "roblox://placeID=1537690962"
 				}
 			}
-			;STAGE 2 - wait for RobloxPlayerBeta.exe
-			Loop, 180 {
-				sleep, 1000 ; timeout 3 mins, wait for any Roblox update to finish
+			;STAGE 1 - wait for RobloxPlayerBeta.exe
+			Loop, 240 {
 				if WinExist("Roblox ahk_exe RobloxPlayerBeta.exe") {
 					WinActivate
 					nm_setStatus("Detected", "Roblox Open")
 					break
 				}
-				if (A_Index = 180) {
+				if (A_Index = 240) {
 					nm_setStatus("Error", "No Roblox Found`nRetry: " i)
 					Sleep, 1000
 					break 2
 				}
+				sleep, 1000 ; timeout 4 mins, wait for any Roblox update to finish
 			}
-			;STAGE 3 - wait for loading screen (or loaded game)
+			;STAGE 2 - wait for loading screen (or loaded game)
 			Loop, 180 {
-				sleep, 1000 ; timeout 3 mins, slow loading
 				WinActivate, Roblox ahk_exe RobloxPlayerBeta.exe
 				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
 				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+30 "|" windowWidth "|150")
@@ -14074,15 +14816,15 @@ DisconnectCheck(){
 					Sleep, 1000
 					break 2
 				}
-				if (A_Index = 180) {
+				if (A_Index = 30) {
 					nm_setStatus("Error", "No BSS Found`nRetry: " i)
 					Sleep, 1000
 					break 2
 				}
+				sleep, 1000 ; timeout 3 mins, slow loading
 			}
-			;STAGE 4 - wait for loaded game
-			Loop, 240 {
-				sleep, 1000 ; timeout 4 mins, slow loading
+			;STAGE 3 - wait for loaded game
+			Loop, 180 {
 				WinActivate, Roblox ahk_exe RobloxPlayerBeta.exe
 				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
 				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+30 "|" windowWidth "|150")
@@ -14104,29 +14846,10 @@ DisconnectCheck(){
 					Sleep, 1000
 					break 2
 				}
+				sleep, 1000 ; timeout 4 mins, slow loading
 			}
 		}
-		;Close Browser Tab
-		WinGet, list, List
-		Loop, %list%
-		{
-			hwnd := list%A_Index%
-			WinGet, p, ProcessName, ahk_id %hwnd%
-			if (InStr(p, "Roblox") || InStr(p, "AutoHotkey"))
-				continue ; skip roblox and AHK windows
-			WinGetTitle, title, ahk_id %hwnd%
-			if (title = "")
-				continue ; skip empty title windows
-			WinGet, s, Style, ahk_id %hwnd%
-			if ((s & 0x8000000) || !(s & 0x10000000))
-				continue ; skip NoActivate and invisible windows
-			WinGet, s, ExStyle, ahk_id %hwnd%
-			if ((s & 0x80) || (s & 0x40000) || (s & 0x8))
-				continue ; skip ToolWindow and AlwaysOnTop windows
-			WinActivate, ahk_id %hwnd%
-			Send ^{w}
-			break
-		}
+		
 		;Successful Reconnect
 		if (success = 1)
 		{
@@ -14137,8 +14860,11 @@ DisconnectCheck(){
 
 			LastClock:=nowUnix()
 			IniWrite, %LastClock%, settings\nm_config.ini, Collect, LastClock
-			LastGingerbread += ReconnectDuration ? ReconnectDuration : 300
-			IniWrite, %LastGingerbread%, settings\nm_config.ini, Collect, LastGingerbread
+			if (beesmasActive)
+			{
+				LastGingerbread += ReconnectDuration ? ReconnectDuration : 300
+				IniWrite, %LastGingerbread%, settings\nm_config.ini, Collect, LastGingerbread
+			}
 			Loop, 3 {
 				IniRead, PlanterHarvestTime%A_Index%, settings\nm_config.ini, Planters, PlanterHarvestTime%A_Index%
 				PlanterHarvestTime%A_Index% += PlanterName%A_Index% ? (ReconnectDuration ? ReconnectDuration : 300) : 0
@@ -14165,11 +14891,123 @@ DisconnectCheck(){
 			DetectHiddenWindows %Prev_DetectHiddenWindows%
 			SetTitleMatchMode %Prev_TitleMatchMode%
 
-			;Claim Hive Slot
-			if (nm_claimHiveSlot() = 1)
-				return 1
+			if (testCheck || (nm_claimHiveSlot() = 1))
+				return 1 
 		}
 	}
+}
+LegacyReconnect(linkCode)
+{ 
+	static init := VarSetCapacity(cmd, 512) + DllCall("shlwapi\AssocQueryString","Int",0,"Int",1,"Str","http","Str","open","Str",cmd, "IntP",512) + DllCall("Shell32\SHEvaluateSystemCommandTemplate","WStr",cmd,"PtrP",pEXE,"Ptr",0,"PtrP",pPARAMS), exe := StrGet(pEXE), params := StrGet(pPARAMS)
+	
+	ShellRun(exe, StrReplace(params, "%1", "https://www.roblox.com/games/1537690962?privateServerLinkCode=" linkCode)), success := 0
+	Loop, 1 {
+		;STAGE 1 - wait for Roblox Launcher
+		Loop, 120 {
+			if WinExist("Roblox") {
+				break
+			}
+			if (A_Index = 120) {
+				nm_setStatus("Error", "No Roblox Found`nRetry: " i)
+				Sleep, 1000
+				break 2
+			}
+			sleep, 1000 ; timeout 2 mins, slow internet / not logged in
+		}
+		;STAGE 2 - wait for RobloxPlayerBeta.exe
+		Loop, 180 {
+			if WinExist("Roblox ahk_exe RobloxPlayerBeta.exe") {
+				WinActivate
+				nm_setStatus("Detected", "Roblox Open")
+				break
+			}
+			if (A_Index = 180) {
+				nm_setStatus("Error", "No Roblox Found`nRetry: " i)
+				Sleep, 1000
+				break 2
+			}
+			sleep, 1000 ; timeout 3 mins, wait for any Roblox update to finish
+		}
+		;STAGE 3 - wait for loading screen (or loaded game)
+		Loop, 180 {
+			WinActivate, Roblox ahk_exe RobloxPlayerBeta.exe
+			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
+			pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+30 "|" windowWidth "|150")
+			if (Gdip_ImageSearch(pBMScreen, bitmaps["loading"], , , , , , 4) = 1)
+			{
+				Gdip_DisposeImage(pBMScreen)
+				nm_setStatus("Detected", "Game Open")
+				break
+			}
+			if (Gdip_ImageSearch(pBMScreen, bitmaps["science"], , , , , , 2) = 1)
+			{
+				Gdip_DisposeImage(pBMScreen)
+				nm_setStatus("Detected", "Game Loaded")
+				success := 1
+				break 2
+			}
+			Gdip_DisposeImage(pBMScreen)
+			if (nm_imgSearch("disconnected.png",25, "center")[1] = 0){
+				nm_setStatus("Error", "Disconnected during Reconnect`nRetry: " i)
+				Sleep, 1000
+				break 2
+			}
+			if (A_Index = 180) {
+				nm_setStatus("Error", "No BSS Found`nRetry: " i)
+				Sleep, 1000
+				break 2
+			}
+			sleep, 1000 ; timeout 3 mins, slow loading
+		}
+		;STAGE 4 - wait for loaded game
+		Loop, 240 {
+			WinActivate, Roblox ahk_exe RobloxPlayerBeta.exe
+			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
+			pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+30 "|" windowWidth "|150")
+			if ((Gdip_ImageSearch(pBMScreen, bitmaps["loading"], , , , , , 4) = 0) || (Gdip_ImageSearch(pBMScreen, bitmaps["science"], , , , , , 2) = 1))
+			{
+				Gdip_DisposeImage(pBMScreen)
+				nm_setStatus("Detected", "Game Loaded")
+				success := 1
+				break 2
+			}
+			Gdip_DisposeImage(pBMScreen)
+			if (nm_imgSearch("disconnected.png",25, "center")[1] = 0){
+				nm_setStatus("Error", "Disconnected during Reconnect`nRetry: " i)
+				Sleep, 1000
+				break 2
+			}
+			if (A_Index = 240) {
+				nm_setStatus("Error", "BSS Load Timeout`nRetry: " i)
+				Sleep, 1000
+				break 2
+			}
+			sleep, 1000 ; timeout 4 mins, slow loading
+		}
+	}
+	;Close Browser Tab
+	WinGet, list, List
+	Loop, %list%
+	{
+		hwnd := list%A_Index%
+		WinGet, p, ProcessName, ahk_id %hwnd%
+		if (InStr(p, "Roblox") || InStr(p, "AutoHotkey"))
+			continue ; skip roblox and AHK windows
+		WinGetTitle, title, ahk_id %hwnd%
+		if (title = "")
+			continue ; skip empty title windows
+		WinGet, s, Style, ahk_id %hwnd%
+		if ((s & 0x8000000) || !(s & 0x10000000))
+			continue ; skip NoActivate and invisible windows
+		WinGet, s, ExStyle, ahk_id %hwnd%
+		if ((s & 0x80) || (s & 0x40000) || (s & 0x8))
+			continue ; skip ToolWindow and AlwaysOnTop windows
+		WinActivate, ahk_id %hwnd%
+		Sleep, 500
+		Send ^{w}
+		break
+	}
+	return success
 }
 /*
   ShellRun by Lexikos
@@ -14181,8 +15019,9 @@ DisconnectCheck(){
   Shell.ShellExecute(File [, Arguments, Directory, Operation, Show])
   http://msdn.microsoft.com/en-us/library/windows/desktop/gg537745
 */
+;Note might have to use for deeplinking if we have roblox admin issues
 ShellRun(prms*)
-{
+{ 
     shellWindows := ComObjCreate("Shell.Application").Windows
     VarSetCapacity(_hwnd, 4, 0)
     desktop := shellWindows.FindWindowSW(0, "", 8, ComObj(0x4003, &_hwnd), 1)
@@ -15489,7 +16328,7 @@ nm_QuestRotate(){
 		return
 	if ((nowUnix()-GatherFieldBoostedStart<900) || (nowUnix()-LastGlitter<900) || nm_boostBypassCheck())
 		return
-	FormatTime, utc_min, A_NowUTC, m
+	FormatTime, utc_min, %A_NowUTC%, m
 	if((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck  && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag"))
 		return
 
@@ -17509,7 +18348,7 @@ ba_planter(){
 		return
 	if(VBState=1)
 		return
-	FormatTime, utc_min, A_NowUTC, m
+	FormatTime, utc_min, %A_NowUTC%, m
 	if((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck  && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag"))
 		return
 	if ((nowUnix()-GatherFieldBoostedStart)<900 || (nowUnix()-LastGlitter)<900 || nm_boostBypassCheck())
@@ -18860,7 +19699,7 @@ WinActivate, Roblox ahk_exe RobloxPlayerBeta.exe
 ;check UIPI
 PostMessage, 0x100, 0x7, 0, , Roblox ahk_exe RobloxPlayerBeta.exe
 if (ErrorLevel = 1)
-	msgbox, 0x1030, WARNING!!, % "Your Roblox window is run as admin, but the macro is not!`nThis means the macro will be unable to send any inputs to Roblox.`nYou must either reinstall Roblox without administrative rights, or run Natro Macro as admin!``nnNOTE: It is recommended to stop the macro now, as this issue also causes hotkeys to not work while Roblox is active.", 60
+	msgbox, 0x1030, WARNING!!, % "Your Roblox window is run as admin, but the macro is not!`nThis means the macro will be unable to send any inputs to Roblox.`nYou must either reinstall Roblox without administrative rights, or run Natro Macro as admin!`n`nNOTE: It is recommended to stop the macro now, as this issue also causes hotkeys to not work while Roblox is active.", 60
 PostMessage, 0x101, 0x7, 0xC0000000, , Roblox ahk_exe RobloxPlayerBeta.exe
 nm_setShiftLock(0)
 nm_OpenMenu()
@@ -19389,6 +20228,18 @@ nm_UpdateGUIVar(var)
 		case "HotbarTime2", "HotbarTime3", "HotbarTime4", "HotbarTime5", "HotbarTime6", "HotbarTime7":
 		GuiControl, , %k%, % %k%
 		nm_HotbarWhile()
+
+		Case "SnailTime":
+		Guicontrol, , %k%, % StrReplace("|5|10|15|Kill|", "|" %k% "|", "|" %k% "||")
+
+		Case "ChickTime":
+		Guicontrol, , %k%, % StrReplace("|5|10|15|Kill|", "|" %k% "|", "|" %k% "||")
+
+		case "InputSnailHealth":
+		nm_InputSnailHealth()
+
+		case "InputChickHealth":
+		nm_InputChickHealth()
 
 		case "":
 

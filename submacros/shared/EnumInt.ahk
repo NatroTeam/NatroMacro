@@ -223,4 +223,8 @@
 	, "StingerDailyBonusCheck"
 	, "GatherDoubleReset"
 	, "HoneystormCheck"
-	, "LastHoneystorm"]
+	, "LastHoneystorm"
+	, "InputSnailHealth"
+	, "InputChickHealth"
+	, "RBPDelevelCheck"
+	, "LastRBPDelevel"]

@@ -1,4 +1,20 @@
-﻿paths["clover"] := "
+﻿if (MoveMethod = "walk")
+{
+paths["clover"] := "
+(LTrim Join`r`n
+;gotoramp
+" nm_Walk(47.25, BackKey, LeftKey) "
+" nm_Walk(52.5, LeftKey) "
+" nm_Walk(2.2, BackKey, RightKey) "
+" nm_Walk(6.7, BackKey)"
+" nm_Walk(25.5, LeftKey) "
+" nm_Walk(35, FwdKey, LeftKey)"
+" nm_Walk(7, BackKey, RightKey) "
+" nm_Walk(12, RightKey) "
+)"
+}
+else {
+paths["clover"] := "
 (LTrim Join`r`n
 ;gotoramp
 ;gotocannon
@@ -18,3 +34,5 @@ HyperSleep(1000)
 " nm_Walk(7, BackKey, RightKey) "
 " nm_Walk(12, RightKey) "
 )"
+}
+;path 230729 noobyguy

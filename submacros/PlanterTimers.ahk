@@ -18,6 +18,22 @@ You should have received a copy of the GNU General Public License along with Nat
 global TimerGuiTransparency:=0
 global TimerX:=150
 global TimerY:=150
+
+if (TimerX && TimerY)
+{
+	SysGet, MonitorCount, MonitorCount
+	loop %MonitorCount%
+	{
+		SysGet, Mon, MonitorWorkArea, %A_Index%
+		if(TimerX>MonLeft && TimerX<MonRight && GuiY>MonTop && GuiY<MonBottom)
+			break
+		if(A_Index=MonitorCount)
+			TimerX:=TimerY:=0
+	}
+}
+else
+	TimerX:=TimerY:=0
+	
 SetWorkingDir %A_ScriptDir%\..
 RunWith(32)
 RunWith(bits) {

@@ -57,13 +57,18 @@ else
 	" nm_Walk(2, RightKey) "
 	" nm_Walk(13, FwdKey) "
 	send {" RotLeft " 2}
-	" nm_Walk(1.5, FwdKey) "
-	send {space down}
-	HyperSleep(100)
+	" nm_Walk(6, FwdKey) "
+	" nm_Walk(4, LeftKey) "
+	" nm_Walk(1, RightKey) "
+	" nm_Walk(7, FwdKey) "
+	sleep 250
+	send {FwdKey down}{space down}
+	HyperSleep(300)
 	send {space up}
-	" nm_Walk(8.5, FwdKey) "
-	" nm_Walk(3, LeftKey) "
-	" nm_Walk(20, FwdKey) "
-	Sleep 500
+	send {space}
+	sleep 1050
+	send {space}{FwdKey up}
+	sleep 1000
 	)"
 }
+;paths 230629 noobyguy

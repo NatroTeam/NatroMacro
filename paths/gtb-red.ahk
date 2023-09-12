@@ -26,24 +26,33 @@ else
 	paths["red"] := "
 	(LTrim Join`r`n
 	;gotoramp
-	;gotocannon
-	send {e down}
+	Send {space down}
+	HyperSleep(300)
+	Send {space up}
+	" nm_Walk(36, RightKey) "
+	send {space down}
+	HyperSleep(300)
+	send {space up}
+	" nm_Walk(6, RightKey) "
+	HyperSleep(500)
+	send {" RotRight " 2}
+	send {space down}
 	HyperSleep(100)
-	send {e up}{" RightKey " down}
-	HyperSleep(550)
-	send {space 2}
-	HyperSleep(2500)
-	send {" RightKey " up}{space}{" RotLeft " 4}
+	send {space up}
+	" nm_Walk(3, FwdKey) "
 	HyperSleep(1000)
-	" nm_Walk(17, FwdKey) "
-	" nm_Walk(10, RightKey) "
+	send {space down}{" RightKey " down}
+	HyperSleep(100)
+	send {space up}
+	HyperSleep(300)
+	send {space}{" RightKey " up}
+	HyperSleep(1000)
 	" nm_Walk(8, FwdKey, RightKey) "
-	" nm_Walk(8, FwdKey) "
-	" nm_Walk(20, BackKey) "
+	" nm_Walk(6.75, RightKey) "
+	HyperSleep(1000)
 	send {" RotRight " 4}
-	" nm_Walk(22, FwdKey) "
-	" nm_Walk(10, BackKey) "
-	" nm_Walk(12, RightKey) "
-	" nm_Walk(11.25, FwdKey) "
+	HyperSleep(100)
+	" nm_Walk(20, FwdKey) "
 	)"
 }
+;path 230629 noobyguy

@@ -1,6 +1,6 @@
-/*
+﻿/*
 Natro Macro, https://bit.ly/NatroMacro
-Copyright © 2022-2023 Natro Dev Team (natromacroserver@gmail.com)
+Copyright Â© 2022-2023 Natro Dev Team (natromacroserver@gmail.com)
 
 This file is part of Natro Macro. Our source code will always be open and available.
 
@@ -144,7 +144,7 @@ settings["commandPrefix"] := {"enum": 6, "type": "str", "section": "Status", "re
 settings["MoveMethod"] := {"enum": 7, "type": "str", "section": "Settings", "regex": "i)^(cannon|walk)$"}
 settings["SprinklerType"] := {"enum": 8, "type": "str", "section": "Settings", "regex": "i)^(none|basic|silver|gold|diamond|supreme)$"}
 settings["ConvertBalloon"] := {"enum": 9, "type": "str", "section": "Settings", "regex": "i)^(always|never|every)$"}
-settings["PrivServer"] := {"enum": 10, "type": "str", "section": "Settings", "regex": "i)^((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/(1537690962|4189852503)\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*$"}
+settings["PrivServer"] := {"enum": 10, "type": "str", "section": "Settings", "regex": "i)^((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*$"}
 settings["FieldName1"] := {"enum": 11, "type": "str", "section": "Gather", "regex": "i)^(Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower)$"}
 settings["FieldName2"] := {"enum": 12, "type": "str", "section": "Gather", "regex": "i)^(None|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower)$"}
 settings["FieldName3"] := {"enum": 13, "type": "str", "section": "Gather", "regex": "i)^(None|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower)$"}
@@ -185,6 +185,8 @@ settings["FallbackServer3"] := {"enum": 47, "type": "str", "section": "Settings"
 settings["NightAnnouncementName"] := {"enum": 48, "type": "str", "section": "Status", "regex": "i)^[^\\]$"}
 settings["NightAnnouncementPingID"] := {"enum": 49, "type": "str", "section": "Status", "regex": "i)^&?[0-9]*$"}
 settings["NightAnnouncementWebhook"] := {"enum": 50, "type": "str", "section": "Status", "regex": "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$"}
+settings["SnailTime"] := {"enum": 51, "type": "str", "section": "Collect", "regex": "i)^(5|10|15|Kill)$"}
+settings["ChickTime"] := {"enum": 52, "type": "str", "section": "Collect", "regex": "i)^(5|10|15|Kill)$"}
 
 ;settings["discordMode"] := {"enum": 1, "type": "int", "section": "Status", "regex": "i)^(0|1|2)$"} dangerous
 ;settings["discordCheck"] := {"enum": 2, "type": "int", "section": "Status", "regex": "i)^(0|1)$"} dangerous
@@ -412,6 +414,10 @@ settings["StingerDailyBonusCheck"] := {"enum": 223, "type": "int", "section": "C
 settings["GatherDoubleReset"] := {"enum": 224, "type": "int", "section": "Settings", "regex": "i)^(0|1)$"}
 settings["HoneystormCheck"] := {"enum": 225, "type": "int", "section": "Collect", "regex": "i)^(0|1)$"}
 settings["LastHoneystorm"] := {"enum": 226, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
+settings["InputSnailhealth"] := {"enum": 227, "type": "int", "section": "Collect", "regex": "i)^\d{1,8}$"}
+settings["InputChickHealth"] := {"enum": 228, "type": "int", "section": "Collect", "regex": "i)^\d{1,3}$"}
+settings["RBPDelevelCheck"] := {"enum": 229, "type": "int", "section": "Collect", "regex": "i)^(0|1)$"}
+settings["LastRBPDeLevel"] := {"enum": 230, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
 
 bitmaps := {}
 bitmaps["moon"] := Gdip_BitmapFromBase64("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")
@@ -458,7 +464,7 @@ nm_status(status)
 			color := ((state = "Disconnected") || (state = "You Died") || (state = "Failed") || (state = "Error") || (state = "Aborting") || (state = "Missing") || (state = "Canceling") || InStr(objective, "Phantom") || InStr(objective, "No Balloon Convert")) ? 15085139 ; red - error
 			: (InStr(objective, "Tunnel Bear") || InStr(objective, "King Beetle") || InStr(objective, "Vicious Bee") || InStr(objective, "Snail") || InStr(objective, "Crab") || InStr(objective, "Mondo") || InStr(objective, "Commando")) ? 7036559 ; purple - boss / attacking
 			: (InStr(objective, "Planter") || (state = "Placing") || (state = "Collecting")) ? 48355 ; blue - planters
-			: ((state = "Interupted") || (state = "Reporting")) ? 14408468 ; yellow - alert
+			: ((state = "Interupted") || (state = "Reporting") || (state = "Warning")) ? 14408468 ; yellow - alert 
 			: ((state = "Gathering")) ? 9755247 ; light green - gathering
 			: ((state = "Converting")) ? 8871681 ; yellow-brown - converting
 			: ((state = "Boosted") || (state = "Looting") || (state = "Keeping") || (state = "Claimed") || (state = "Completed") || (state = "Collected") || (state = "Obtained") || InStr(stateString,"confirmed") || InStr(stateString,"found")) ? 48128 ; green - success

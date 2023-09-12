@@ -1,19 +1,11 @@
 ﻿paths["mushroom"] := "
 (LTrim Join`r`n
 ;gotoramp
-" nm_Walk(31, LeftKey, BackKey) "
-send {" BackKey " down}{space down}
-DllCall(""Sleep"",UInt,300)
-send {space up}
-DllCall(""Sleep"",UInt,300)
-send {space down}
-DllCall(""Sleep"",UInt,300)
-send {space up}
-DllCall(""Sleep"",UInt,900)
-send {" BackKey " up}{" RotRight " 2}{" RightKey " down}
-Walk(50)
-send {" RightKey " up}
-" nm_Walk(16, FwdKey) "
-" nm_Walk(10, BackKey, LeftKey) "
-send {" RotRight " 2}
+send {" RotRight " 4}
+HyperSleep(200)
+" nm_Walk(55.75, FwdKey, RightKey) "
+" nm_Walk(26.5, FwdKey) "
+" nm_Walk(10, FwdKey, RightKey) "
+" nm_Walk(5, LeftKey) "
 )"
+;path 230729 noobyguy

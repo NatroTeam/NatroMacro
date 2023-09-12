@@ -1,4 +1,16 @@
-﻿paths["spider"] := "
+﻿if (MoveMethod = "walk") {
+paths["spider"] := "
+(LTrim Join`r`n
+;gotoramp
+" nm_Walk(67.5, BackKey, LeftKey) "
+send {" RotRight " 4}
+" nm_Walk(37.5, FwdKey) "
+" nm_Walk(38, LeftKey, FwdKey) "
+" nm_Walk(9, BackKey, RightKey) "
+)"
+}
+else {
+paths["spider"] := "
 (LTrim Join`r`n
 ;gotoramp
 ;gotocannon
@@ -15,3 +27,5 @@ Sleep, 1500
 " nm_Walk(10, LeftKey) "
 " nm_Walk(9, BackKey, RightKey) "
 )"
+}
+;path 230729 noobyguy

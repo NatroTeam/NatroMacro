@@ -5,10 +5,11 @@
 	;gotoramp
 	" nm_Walk(67.5, BackKey, LeftKey) "
 	send {" RotRight " 4}
-	" nm_Walk(45, FwdKey) "
+	" nm_Walk(30, FwdKey) "
+	" nm_Walk(20, FwdKey, RightKey) "
 	send {" RotRight " 2}
-	" nm_Walk(58.5, FwdKey) "
-	" nm_Walk(18, RightKey) "
+	" nm_Walk(43.5, FwdKey) "
+	" nm_Walk(16, RightKey) "
 	send {" FwdKey " down}
 	HyperSleep(200)
 	send {space down}
@@ -37,3 +38,4 @@ else
 	Sleep, 1500
 	)"
 }
+;path 230630 noobyguy - walk updated

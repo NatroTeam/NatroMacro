@@ -19,7 +19,7 @@ bitmaps["pBMHaste"] := Gdip_CreateBitmap(10,1)
 pGraphics := Gdip_GraphicsFromImage(bitmaps["pBMHaste"]), Gdip_GraphicsClear(pGraphics, 0xfff0f0f0), Gdip_DeleteGraphics(pGraphics)
 bitmaps["pBMMelody"] := Gdip_CreateBitmap(3,2)
 pGraphics := Gdip_GraphicsFromImage(bitmaps["pBMMelody"]), Gdip_GraphicsClear(pGraphics, 0xff242424), Gdip_DeleteGraphics(pGraphics)
-bitmaps["pBMHastePlus"] := Gdip_CreateBitmap(10,1)
+bitmaps["pBMHastePlus"] := Gdip_CreateBitmap(20,1)
 pGraphics := Gdip_GraphicsFromImage(bitmaps["pBMHastePlus"]), Gdip_GraphicsClear(pGraphics, 0xffeddb4c), Gdip_DeleteGraphics(pGraphics)
 bitmaps["pBMOil"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAABQAAAABBAMAAAAsvJMWAAAALVBMVEVKRDlNRjlXTTpgVDtwXjhzXzV5ZDaDaziefjutiT3Gm0LWp0XsuEv8xE/+xlCsCySdAAAAFklEQVR4AQELAPT/AO7bl1MQACRorO4cdQTqnFFEXAAAAABJRU5ErkJggg==")
 bitmaps["pBMSmoothie"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAABgAAAABBAMAAAA2gHOYAAAAMFBMVEVKRDlKRTlYTjpjVjtvXjh1YDV2YTV5YzeNcjmkgzywiz3PokTotUr0vk36w0/+xlDRVtQJAAAAGElEQVR4AQENAPL/AP7JcxAAAAACRWir3x4xBISoIvpcAAAAAElFTkSuQmCC")
@@ -36,57 +36,59 @@ Walk(n, hasteCap:=0)
 	;hasteCap values > 0 will cause all haste values lower than it to be treated as no haste but haste values above it will be treated as the cap value.
 	;In otherwords, no haste compensation up to the cap and then 100% compensation after that.
 	static freq, init := DllCall("QueryPerformanceFrequency", "Int64*", freq) ; obtain frequency on first execution
-
-	distance := 0, length := n * freq * 4 ; 4 studs in a tile
-
-	while (distance < length)
-	{
-		DllCall("QueryPerformanceCounter", "Int64*", start)
-		movespeed := DetectMovespeed(hasteCap)
-		DllCall("QueryPerformanceCounter", "Int64*", finish)
-		distance += movespeed * (finish - start)
-	}
+	
+	d := freq // 8, l := n * freq * 4 ; 4 studs in a tile
+	
+	d += (v := DetectMovespeed(s, f, hasteCap)) * (f - s)
+	while (d < l)
+		d += ((v + 0) + (v := DetectMovespeed(s, f, hasteCap)))/2 * (f - s)
 }
 
-DetectMovespeed(hasteCap:=0)
+DetectMovespeed(ByRef s, ByRef f, hasteCap:=0)
 {
+	DllCall("QueryPerformanceCounter", "Int64*", s)
+	
 	global hasty_guard, gifted_hasty, base_movespeed, buff_characters, bitmaps
-
+	
 	; check roblox window exists
 	WinGetClientPos(_x, _y, _w, _h, "Roblox ahk_exe RobloxPlayerBeta.exe")
 	if (_w = 0)
-		return 10000000 ; large number to break walk loop
-
+		return (10000000, DllCall("QueryPerformanceCounter", "Int64*", f)) ; large number to break walk loop
+	
 	; get screen bitmap of buff area from client window
-	pBMArea := Gdip_BitmapFromScreen(_x "|" _y+30 "|" _w "|50")
-
+	chdc := CreateCompatibleDC(), hbm := CreateDIBSection(_w, 30, chdc), obm := SelectObject(chdc, hbm), hhdc := GetDC()
+	BitBlt(chdc, 0, 0, _w, 30, hhdc, _x, _y+48)
+	ReleaseDC(hhdc)
+	pBMArea := Gdip_CreateBitmapFromHBITMAP(hbm)
+	SelectObject(chdc, obm), DeleteObject(hbm), DeleteDC(hhdc), DeleteDC(chdc)
+	
 	; find haste buffs (haste, coconut haste)
 	x := 0
 	haste := 0 ; initially haste is number of hastes found (since haste = coconut haste icon)
 	Loop, 3 ; melody, haste, coconut haste
 	{
-		if (Gdip_ImageSearch(pBMArea, bitmaps["pBMHaste"], list, x, 30, , , , , 6) = 0)
+		if (Gdip_ImageSearch(pBMArea, bitmaps["pBMHaste"], list, x, 14, , , , , 6) = 0)
 			break ; no possibility of haste
-
-		x := SubStr(list, 1, InStr(list, ",")-1) ; obtain x-coordinate of buff found
-
-		if (Gdip_ImageSearch(pBMArea, bitmaps["pBMMelody"], , x+2, 15, x+34, 40, 12) = 0)
+		
+		x := SubStr(list, 1, InStr(list, ",")-1), y := SubStr(list, InStr(list, ",")+1)
+		
+		if (Gdip_ImageSearch(pBMArea, bitmaps["pBMMelody"], , x+2, , x+Max(16, 2*y-24), y, 12) = 0)
 		{
 			haste++ ; not melody, so haste
 			if (haste = 1)
-				x1 := x ; normal haste is always leftmost image
+				x1 := x, y1 := y ; normal haste is always leftmost image
 		}
-
-		x += 44 ; skip this buff on next search
+		
+		x += 2*y-14 ; skip this buff on next search
 	}
-
+	
 	; analyse haste stacks (haste: 0=none, 1=haste, 2=haste+coconut)
 	coconut_haste := (haste = 2) ? 1 : 0
 	if haste
 	{
 		Loop, 9 ; look for each digit
 		{
-			if Gdip_ImageSearch(pBMArea, buff_characters[10-A_Index], , x1+6, 15, x1+44, 50)
+			if (Gdip_ImageSearch(pBMArea, buff_characters[10-A_Index], , x1+2*y1-44, Max(0, y1-18), x1+2*y1-14, y1-1) = 1)
 			{
 				haste := (A_Index = 9) ? 10 : 10 - A_Index ; haste now becomes stack number
 				break
@@ -95,35 +97,26 @@ DetectMovespeed(hasteCap:=0)
 				haste := 1 ; no multiplier, therefore 1x
 		}
 	}
-
+	
 	; find other movespeed affecting buffs (haste+, bear, oil, super smoothie)
-	haste_plus := (Gdip_ImageSearch(pBMArea, bitmaps["pBMHastePlus"], , , 30, , , , , 2) = 0) ? 0 : 1 ; SearchDirection 2 is faster for on/off
-	oil := (Gdip_ImageSearch(pBMArea, bitmaps["pBMOil"], , , 40, , , , , 2) = 0) ? 0 : 1
-	smoothie := (Gdip_ImageSearch(pBMArea, bitmaps["pBMSmoothie"], , , 40, , , , , 2) = 0) ? 0 : 1
+	haste_plus := (Gdip_ImageSearch(pBMArea, bitmaps["pBMHastePlus"], , , 25, , 27, , , 2) = 1) ; SearchDirection 2 is faster for on/off
+	oil := (Gdip_ImageSearch(pBMArea, bitmaps["pBMOil"], , , 25, , 27, 4, , 2) = 1)
+	smoothie := (Gdip_ImageSearch(pBMArea, bitmaps["pBMSmoothie"], , , 25, , 27, 4, , 2) = 1)
 	bear := 0
 	for k,v in ["Brown","Black","Panda","Polar","Gummy","Science","Mother"]
 	{
-		if Gdip_ImageSearch(pBMArea, bitmaps["pBMBear" v], , , 43, , 45, 6, , 2)
+		if (Gdip_ImageSearch(pBMArea, bitmaps["pBMBear" v], , , 25, , 27, 8, , 2) = 1)
 		{
 			bear := 1
 			break
 		}
 	}
 	Gdip_DisposeImage(pBMArea)
-	;nate
+	
 	; use movespeed formula on obtained values
-	if(hasteCap>10) {
-		hasteCap:=10
-		coconut_haste:=0
-		bear:=0
-		hasty_guard:=0
-		gifted_hasty:=0
-		haste_plus:=0
-		oil:=0
-		smoothie:=0
-	}
-	;/nate
-	return ((base_movespeed + (coconut_haste ? 10 : 0) + (bear ? 6 : 0)) * (hasty_guard ? 1.1 : 1) * (gifted_hasty ? 1.2 : 1) * (1 + max(0, haste-hasteCap)*0.1) * (haste_plus ? 2 : 1) * (oil ? 1.2 : 1) * (smoothie ? 1.25 : 1))
+	v := ((base_movespeed + (coconut_haste ? 10 : 0) + (bear ? 6 : 0)) * (hasty_guard ? 1.1 : 1) * (gifted_hasty ? 1.2 : 1) * (1 + max(0, haste-hasteCap)*0.1) * (haste_plus ? 2 : 1) * (oil ? 1.2 : 1) * (smoothie ? 1.25 : 1))
+	
+	return (v, DllCall("QueryPerformanceCounter", "Int64*", f))
 }
 
 WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", WinTitle:="", WinText:="", ExcludeTitle:="", ExcludeText:="")
@@ -131,8 +124,8 @@ WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", Win
     local hWnd, RECT
     hWnd := WinExist(WinTitle, WinText, ExcludeTitle, ExcludeText)
     VarSetCapacity(RECT, 16, 0)
-    DllCall("user32\GetClientRect", Ptr,hWnd, Ptr,&RECT)
-    DllCall("user32\ClientToScreen", Ptr,hWnd, Ptr,&RECT)
+    DllCall("GetClientRect", "UPtr",hWnd, "Ptr",&RECT)
+    DllCall("ClientToScreen", "UPtr",hWnd, "Ptr",&RECT)
     X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
     Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
 }

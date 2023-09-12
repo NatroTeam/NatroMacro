@@ -5,17 +5,21 @@
 	;gotoramp
 	" nm_Walk(88.875, BackKey, LeftKey) "
 	" nm_Walk(27, LeftKey) "
+	HyperSleep(50)
 	send {" RotLeft " 2}
-	" nm_Walk(45, FwdKey) "
+	;inside
+	" nm_Walk(50, FwdKey) " 
 	send {space down}
 	HyperSleep(100)
 	send {space up}
 	" nm_Walk(6, FwdKey) "
-	" nm_Walk(16, RightKey) "
+	" nm_Walk(5, RightKey) "
+	" nm_Walk(9, RightKey, BackKey) "
+	" nm_Walk(4, RightKey) "
 	" nm_Walk(2, LeftKey) "
-	" nm_Walk(27, BackKey) "
-	" nm_Walk(3, FwdKey, LeftKey) "
-	" nm_Walk(18, LeftKey) "
+	" nm_Walk(21, BackKey) "
+	" nm_Walk(3.4, FwdKey, LeftKey) "
+	" nm_Walk(16, LeftKey) "
 	)"
 }
 else
@@ -33,17 +37,24 @@ else
 	send {" LeftKey " up}{space}
 	HyperSleep(1000)
 	send {" RotLeft " 2}
-	" nm_Walk(20, LeftKey) "
-	" nm_Walk(7.5, RightKey) "
-	" nm_Walk(50, FwdKey) "
+	" nm_Walk(4, BackKey, LeftKey) "
+	" nm_Walk(8, FwdKey, LeftKey) "
+	" nm_Walk(6, FwdKey) "
+	" nm_Walk(5, BackKey) "
+	" nm_Walk(8, RightKey) "
+	;inside
+	" nm_Walk(30, FwdKey) "
 	send {space down}
 	HyperSleep(100)
 	send {space up}
 	" nm_Walk(6, FwdKey) "
-	" nm_Walk(16, RightKey) "
+	" nm_Walk(5, RightKey) "
+	" nm_Walk(9, RightKey, BackKey) "
+	" nm_Walk(4, RightKey) "
 	" nm_Walk(2, LeftKey) "
-	" nm_Walk(27, BackKey) "
-	" nm_Walk(3, FwdKey, LeftKey) "
-	" nm_Walk(18, LeftKey) "
+	" nm_Walk(21, BackKey) "
+	" nm_Walk(3.4, FwdKey, LeftKey) "
+	" nm_Walk(16, LeftKey) "
 	)"
 }
+;path 230630 noobyguy
