@@ -23,7 +23,8 @@ OnMessage(0x5556, "nm_SetHeartbeat")
 
 LastRobloxWindow := LastStatusHeartbeat := LastMainHeartbeat := LastBackgroundHeartbeat := nowUnix()
 MacroState := 0
-path := A_ScriptDir "\..\natro_macro.ahk"
+SplitPath, A_AhkPath, exe
+path := (exe = "natro_macro.exe") ? ("""" A_AhkPath """") :  ("""" A_AhkPath """ """ A_ScriptDir "\..\natro_macro.ahk" """")
 
 Loop
 {
@@ -35,7 +36,7 @@ Loop
 	; request heartbeat
 	DetectHiddenWindows, On
 	SetTitleMatchMode, 2
-	if WinExist("natro_macro.ahk ahk_class AutoHotkey")
+	if WinExist("natro_macro ahk_class AutoHotkey")
 		PostMessage, 0x5556
 	if WinExist("Status.ahk ahk_class AutoHotkey")
 		PostMessage, 0x5556
@@ -53,7 +54,7 @@ Loop
 		Prev_MacroState := MacroState, MacroState := 0
 		Loop
 		{
-			while WinExist("natro_macro.ahk ahk_class AutoHotkey")
+			while WinExist("natro_macro ahk_class AutoHotkey")
 			{
 				WinGet, natroPID, PID
 				Process, Close, % natroPID
@@ -63,12 +64,12 @@ Loop
 			
 			ForceStart := (Prev_MacroState = 2)
 			
-			run, "%A_AhkPath%" "%path%" "%ForceStart%" "%A_ScriptHwnd%"
+			run, %path% "%ForceStart%" "%A_ScriptHwnd%"
 			WinWait, Natro ahk_class AutoHotkeyGUI, , 300
 			if (success := !ErrorLevel)
 			{
 				Sleep, 2000
-				Send_WM_COPYDATA("Error: " reason "`nSuccessfully restarted macro!", "natro_macro.ahk ahk_class AutoHotkey")
+				Send_WM_COPYDATA("Error: " reason "`nSuccessfully restarted macro!", "natro_macro ahk_class AutoHotkey")
 				Sleep, 1000
 				LastRobloxWindow := LastStatusHeartbeat := LastMainHeartbeat := LastBackgroundHeartbeat := nowUnix()
 				break

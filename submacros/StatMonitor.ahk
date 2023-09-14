@@ -256,19 +256,8 @@ for objItem in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_OperatingSy
     os_version := StrReplace(objItem.Caption, "Microsoft ")
 	
 ; obtain natro version and other options (if exist)
-natro_version := ""
-if FileExist("natro_macro.ahk")
-{
-	; get version
-	Loop, Read, natro_macro.ahk
-	{
-		if (SubStr(A_LoopReadLine, 1, 13) = "VersionID := ")
-		{
-			RegExMatch(A_LoopReadLine, "(?<="")(.*?)(?="")", natro_version)
-			break
-		}
-	}
-	
+if (natro_version := A_Args[1])
+{	
 	; read information from settings\nm_config.ini
 	Loop, 3
 		IniRead, FieldName%A_Index%, settings\nm_config.ini, Gather, FieldName%A_Index%, N/A
