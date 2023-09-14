@@ -11,6 +11,13 @@ Natro Macro is distributed in the hope that it will be useful. This does not giv
 You should have received a copy of the GNU General Public License along with Natro Macro. If not, see https://www.gnu.org/licenses/.
 */
 
+;Compiler directives:
+;@Ahk2Exe-SetName Natro Macro
+;@Ahk2Exe-SetDescription Natro Macro
+;@Ahk2Exe-SetCompanyName Natro Dev Team
+;@Ahk2Exe-SetCopyright Copyright © 2022-2023 Natro Dev Team
+;@Ahk2Exe-SetOrigFilename natro_macro.exe
+
 #NoEnv
 #MaxThreads 255
 #SingleInstance Force
@@ -27,7 +34,7 @@ CoordMode, Pixel, Client
 ; checks for the correct AHK version before starting
 RunWith(32)
 RunWith(bits) {
-	If (A_IsUnicode && (A_PtrSize = (bits = 32 ? 4 : 8)))
+	If (A_IsCompiled || (A_IsUnicode && (A_PtrSize = (bits = 32 ? 4 : 8))))
 		Return
 
 	SplitPath, A_AhkPath,, ahkDirectory
@@ -41,8 +48,10 @@ RunWith(bits) {
 }
 Reload(ahkpath) {
 	static cmd := DllCall("GetCommandLine", "Str"), params := DllCall("shlwapi\PathGetArgs","Str",cmd,"Str")
-	Run, "%ahkpath%" /r %params%
+	Run % (A_IsCompiled ? ("""" ahkpath """ /r " params) : ("""" ahkpath """ /r " params))
 }
+global exe_path := A_IsCompiled ? A_ScriptFullPath : A_AhkPath
+
 ; close any remnant running natro scripts and start heartbeat
 DetectHiddenWindows, On
 SetTitleMatchMode, 2
@@ -51,7 +60,7 @@ WinGet, script_list, List, % A_ScriptDir " ahk_class AutoHotkey"
 		if (((script_hwnd := script_list%A_Index%) != A_ScriptHwnd) && (script_hwnd != A_Args[2]))
 			WinClose, ahk_id %script_hwnd%
 if !WinExist("Heartbeat.ahk ahk_class AutoHotkey")
-	run, "%A_AhkPath%" "submacros\Heartbeat.ahk"
+	run, "%exe_path%" /script "submacros\Heartbeat.ahk" "%VersionID%"
 DetectHiddenWindows, Off
 SetTitleMatchMode, 1
 
@@ -121,7 +130,7 @@ KeyDelay:=20
 nm_import() ; at every start of macro, import patterns
 {
 	global
-	local import, path, path64, dir, script, stdout, file, pattern, exec, init, oldimport, new_patterns, _args
+	local import, script, stdout, file, pattern, exec, init, oldimport, new_patterns, _args
 
 	If !FileExist("settings\imported") ; make sure the import folder exists
 	{
@@ -135,8 +144,6 @@ nm_import() ; at every start of macro, import patterns
 
 	import := ""
 	patternlist := "|"
-	SplitPath, A_AhkPath, , dir
-	path := (A_Is64bitOS && FileExist(path64 := dir "\AutoHotkeyU64.exe")) ? path64 : A_AhkPath
 
 	Loop, Files, %A_ScriptDir%\patterns\*.ahk
 	{
@@ -191,7 +198,7 @@ nm_import() ; at every start of macro, import patterns
 		}
 		`)""
 
-		exec := ComObjCreate(""WScript.Shell"").Exec(""" path " /iLib nul /ErrorStdOut *""), exec.StdIn.Write(script), exec.StdIn.Close()
+		exec := ComObjCreate(""WScript.Shell"").Exec(""" exe_path " /script /iLib nul /ErrorStdOut *""), exec.StdIn.Write(script), exec.StdIn.Close()
 		if (stdout := exec.StdErr.ReadAll())
 			FileAppend, % stdout, **
 
@@ -206,7 +213,7 @@ nm_import() ; at every start of macro, import patterns
 		}
 		)"
 
-		exec := ComObjCreate("WScript.Shell").Exec(path " /ErrorStdOut *"), exec.StdIn.Write(script), exec.StdIn.Close()
+		exec := ComObjCreate("WScript.Shell").Exec(exe_path " /script /ErrorStdOut *"), exec.StdIn.Write(script), exec.StdIn.Close()
 		if (stdout := exec.StdErr.ReadAll())
 			msgbox, 0x40010, Unable to Import Pattern!, % "Unable to import '" StrReplace(A_LoopFileName, ".ahk") "' pattern! Click 'OK' to continue loading the macro without this pattern installed, otherwise fix the error and reload the macro.`r`n`r`nThe error found on loading is stated below:`r`n" stdout, 60
 		else
@@ -227,7 +234,7 @@ nm_import() ; at every start of macro, import patterns
 	if init
 	{
 		WinClose, ahk_pid %lp_PID% ahk_class AutoHotkey
-		Reload(A_AhkPath)
+		Reload(exe_path)
 		Sleep, 10000
 	}
 
@@ -239,7 +246,7 @@ nm_import() ; at every start of macro, import patterns
 		else
 		{
 			WinClose, ahk_pid %lp_PID% ahk_class AutoHotkey
-			Reload(A_AhkPath)
+			Reload(exe_path)
 			Sleep, 10000
 		}
 	}
@@ -1656,9 +1663,7 @@ PostMessage, 0x5555, 10, 0, , ahk_pid %lp_PID%
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; STATUS HANDLER
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-SplitPath, A_AhkPath, , dir
-path := (A_Is64bitOS && FileExist(path64 := dir "\AutoHotkeyU64.exe")) ? path64 : A_AhkPath
-run, "%path%" "submacros\Status.ahk" "%discordMode%" "%discordCheck%" "%webhook%" "%bottoken%" "%MainChannelCheck%" "%MainChannelID%" "%ReportChannelCheck%" "%ReportChannelID%" "%WebhookEasterEgg%" "%ssCheck%" "%ssDebugging%" "%CriticalSSCheck%" "%AmuletSSCheck%" "%MachineSSCheck%" "%BalloonSSCheck%" "%ViciousSSCheck%" "%DeathSSCheck%" "%PlanterSSCheck%" "%HoneySSCheck%" "%criticalCheck%" "%discordUID%" "%CriticalErrorPingCheck%" "%DisconnectPingCheck%" "%GameFrozenPingCheck%" "%PhantomPingCheck%" "%UnexpectedDeathPingCheck%" "%EmergencyBalloonPingCheck%" "%commandPrefix%" "%NightAnnouncementCheck%" "%NightAnnouncementName%" "%NightAnnouncementPingID%" "%NightAnnouncementWebhook%" "%PrivServer%" "%DebugLogEnabled%"
+run, "%exe_path%" /script "submacros\Status.ahk" "%discordMode%" "%discordCheck%" "%webhook%" "%bottoken%" "%MainChannelCheck%" "%MainChannelID%" "%ReportChannelCheck%" "%ReportChannelID%" "%WebhookEasterEgg%" "%ssCheck%" "%ssDebugging%" "%CriticalSSCheck%" "%AmuletSSCheck%" "%MachineSSCheck%" "%BalloonSSCheck%" "%ViciousSSCheck%" "%DeathSSCheck%" "%PlanterSSCheck%" "%HoneySSCheck%" "%criticalCheck%" "%discordUID%" "%CriticalErrorPingCheck%" "%DisconnectPingCheck%" "%GameFrozenPingCheck%" "%PhantomPingCheck%" "%UnexpectedDeathPingCheck%" "%EmergencyBalloonPingCheck%" "%commandPrefix%" "%NightAnnouncementCheck%" "%NightAnnouncementName%" "%NightAnnouncementPingID%" "%NightAnnouncementWebhook%" "%PrivServer%" "%DebugLogEnabled%"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; GDIP BITMAPS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3085,12 +3090,6 @@ PostMessage, 0x5555, 100, 0, , ahk_pid %lp_PID%
 if (A_ScreenDPI*100//96 != 100)
 	msgbox, 0x1030, WARNING!!, % "Your Display Scale seems to be a value other than 100`%. This means the macro will NOT work correctly!`n`nTo change this, right click on your Desktop -> Click 'Display Settings' -> Under 'Scale & Layout', set Scale to 100`% -> Close and Restart Roblox before starting the macro.", 60
 
-str:="", i:=1
-while (i := RegExMatch(A_ScriptDir, "[^\x00-\x7F]", m, i+StrLen(m)))
-    str.=m
-if (StrLen(str)>0)
-	msgbox, 0x1030, WARNING!!, % "Your file path: " A_ScriptDir "`nInvalid characters found in file path: " str "`n`nYour Natro Macro file path contains non-ASCII characters (generally non-English characters). This will cause the macro to fail when launching new processes. Please extract your macro to a different folder!`n`nExamples of valid file paths: 'C:\Macro\Natro_Macro_v" versionID "', 'C:\Users\user\Downloads\Natro_Macro_v" versionID "'", 60
-
 WinClose, ahk_pid %lp_PID% ahk_class AutoHotkey
 DetectHiddenWindows, Off
 Gui, Show, x%GuiX% y%GuiY% w500 h285, Natro Macro
@@ -3111,7 +3110,7 @@ nm_TabSettingsUnLock()
 nm_setStatus()
 
 if(TimersOpen && (PlanterMode != 0))
-    run, "%A_AhkPath%" "submacros\PlanterTimers.ahk" "%hwndstate%"
+    run, "%exe_path%" "submacros\PlanterTimers.ahk" "%hwndstate%"
 
 settimer, Background, 2000
 if (A_Args[1] = 1)
@@ -3202,11 +3201,8 @@ nm_LoadingProgress(){
 	}
 	)"
 
-	SplitPath, A_AhkPath, , dir
-	path := (A_Is64bitOS && FileExist(path64 := dir "\AutoHotkeyU64.exe")) ? path64 : A_AhkPath
-
 	shell := ComObjCreate("WScript.Shell")
-    exec := shell.Exec(path " /f *")
+    exec := shell.Exec(exe_path " /script /f *")
     exec.StdIn.Write(script), exec.StdIn.Close()
 
 	return exec.ProcessID
@@ -3615,11 +3611,8 @@ nm_testButton(){ ;~~ lines 3464 and 3465 have the same change as 14156
 	}
 	`)""
 
-	SplitPath, A_AhkPath, , dir
-	path := (A_Is64bitOS && FileExist(path64 := dir ""\AutoHotkeyU64.exe"")) ? path64 : A_AhkPath
-
 	shell := ComObjCreate(""WScript.Shell"")
-    exec := shell.Exec(path "" /f *"")
+    exec := shell.Exec(""" exe_path " /script /f *"")
     exec.StdIn.Write(script), exec.StdIn.Close()
 	ExitApp
 
@@ -3634,11 +3627,8 @@ nm_testButton(){ ;~~ lines 3464 and 3465 have the same change as 14156
 	}
 	)"
 
-	SplitPath, A_AhkPath, , dir
-	path := (A_Is64bitOS && FileExist(path64 := dir "\AutoHotkeyU64.exe")) ? path64 : A_AhkPath
-
 	shell := ComObjCreate("WScript.Shell")
-    exec := shell.Exec(path " /f *")
+    exec := shell.Exec(exe_path " /script /f *")
     exec.StdIn.Write(script), exec.StdIn.Close()
 }
 nm_setState(newState){
@@ -6350,7 +6340,7 @@ nm_setReconnectMin(hEdit){
 }
 nm_WebhookGUI(){
 	global
-	local script, dir, path, path64, exec, shell
+	local script, exec, shell
 
 	Process, Close, %WGUIPID%
 
@@ -6820,11 +6810,8 @@ nm_WebhookGUI(){
 	}
 	)"
 
-	SplitPath, A_AhkPath, , dir
-	path := (A_Is64bitOS && FileExist(path64 := dir "\AutoHotkeyU64.exe")) ? path64 : A_AhkPath
-
 	shell := ComObjCreate("WScript.Shell")
-    exec := shell.Exec(path " /f *")
+    exec := shell.Exec(exe_path " /script /f *")
     exec.StdIn.Write(script), exec.StdIn.Close()
 
 	return (WGUIPID := exec.ProcessID)
@@ -6866,8 +6853,8 @@ nm_AutoStartManager(){
 	#SingleInstance Force
 	#Requires AutoHotkey v1.1.36.01+
 
-	if !A_IsAdmin || !(DllCall(""GetCommandLine"",""Str"")~="" /restart(?!\S)"")
-	Try RunWait % ""*RunAs """""" (A_IsCompiled?A_ScriptFullPath """""" /restart"":A_AhkPath """""" /restart """""" A_ScriptFullPath """""""")
+	if (!A_IsAdmin || !(DllCall(""GetCommandLine"",""Str"") ~= "" /restart(?!\S)""))
+		Try RunWait, *RunAs ""%A_AhkPath%"" /script /restart ""%A_ScriptFullPath%""
 	if !A_IsAdmin {
 		msgbox You must allow Auto-Start Manager to run as admin, otherwise it will not be able to get and create tasks!
 		ExitApp
@@ -6888,8 +6875,8 @@ nm_AutoStartManager(){
 			SplitPath, % v.args[1], ahkExe, ahkDir
 			SplitPath, A_AhkPath, , validAhkDir
 			validAhk := (ahkdir = validAhkDir)
-			validScript := (v.args[2] = """ A_ScriptFullPath """)
-			autostart := (v.args[3] = 1)
+			validScript := ((v.args[2] = """ A_ScriptFullPath """) || (" A_IsCompiled " && (v.args[1] = """ A_ScriptFullPath """)))
+			autostart := ((v.args[3] = 1) || (" A_IsCompiled " && (v.args[2] = 1)))
 			delay := v.delay ? v.delay : ""None""
 			level := v.level
 			status := (validAhk && validScript) ? 0 : 3
@@ -6986,7 +6973,7 @@ nm_AutoStartManager(){
 		action := def.Actions.Create(0)
 		action.ID := ""Run Natro Macro""
 		action.Path := """"""" A_AhkPath """""""
-		action.Arguments := """"""" A_ScriptFullPath """"""" ((autostart = 1) ?  "" """"1"""""" : """")
+		action.Arguments := " (A_IsCompiled ? "" : ("""""""" A_ScriptFullPath """"" """)) " ((autostart = 1) ?  """"""1"""""" : """")
 
 		def.Settings.Enabled := 1
 		def.Settings.Hidden := 0
@@ -7068,7 +7055,7 @@ nm_AutoStartManager(){
 					for a in t.Definition.Actions
 						if (a.Type = 0) ; exec
 							for i,arg in (args := Args(a.Path "" "" a.Arguments))
-								if ((SubStr(arg, -14) = ""natro_macro.ahk"") && (tasks[t.Name] := {""args"":args,""delay"":tr.Delay,""level"":t.Definition.Principal.RunLevel}))
+								if ((SubStr(arg, -14, 11) = ""natro_macro"") && (tasks[t.Name] := {""args"":args,""delay"":tr.Delay,""level"":t.Definition.Principal.RunLevel}))
 									continue 4
 		return tasks
 	}
@@ -7107,7 +7094,7 @@ nm_AutoStartManager(){
 	)"
 
 	file := FileOpen(path := A_ScriptDir "\submacros\AutoStartManager.ahk", "w-d"), file.Write(script), file.Close()
-	Run, "%A_AhkPath%" "%path%" "%hGUI%"
+	Run, "%exe_path%" /script "%path%" "%hGUI%"
 
 	return
 }
@@ -13394,11 +13381,8 @@ nm_BitterberryFeeder()
 	}
 	)"
 
-	SplitPath, A_AhkPath, , dir
-	path := (A_Is64bitOS && FileExist(path64 := dir "\AutoHotkeyU64.exe")) ? path64 : A_AhkPath
-
 	shell := ComObjCreate("WScript.Shell")
-    exec := shell.Exec(path " /f *")
+    exec := shell.Exec(exe_path " /script /f *")
     exec.StdIn.Write(script), exec.StdIn.Close()
 }
 nm_BasicEggHatcher()
@@ -13539,11 +13523,8 @@ nm_BasicEggHatcher()
 	}
 	)"
 
-	SplitPath, A_AhkPath, , dir
-	path := (A_Is64bitOS && FileExist(path64 := dir "\AutoHotkeyU64.exe")) ? path64 : A_AhkPath
-
 	shell := ComObjCreate("WScript.Shell")
-    exec := shell.Exec(path " /f *")
+    exec := shell.Exec(exe_path " /script /f *")
     exec.StdIn.Write(script), exec.StdIn.Close()
 }
 nm_GenerateBeeList()
@@ -14265,11 +14246,8 @@ nm_createWalk(movement, name:="") ; this function generates the 'walk' code and 
 		)"
 	}
 
-	SplitPath, A_AhkPath, , dir
-	path := (A_Is64bitOS && FileExist(path64 := dir "\AutoHotkeyU64.exe")) ? path64 : A_AhkPath
-
 	shell := ComObjCreate("WScript.Shell")
-    exec := shell.Exec(path " /f *")
+    exec := shell.Exec(exe_path " /script /f *")
     exec.StdIn.Write(script), exec.StdIn.Close()
 
 	WinWait, % "ahk_class AutoHotkey ahk_pid " exec.ProcessID, , 2
@@ -19610,7 +19588,7 @@ ba_showPlanterTimers(){
 	DetectHiddenWindows, On
 	SetTitleMatchMode, 2
 	if !WinExist("PlanterTimers.ahk ahk_class AutoHotkey")
-		run, "%A_AhkPath%" "submacros\PlanterTimers.ahk" "%hwndstate%"
+		run, "%exe_path%" /script "submacros\PlanterTimers.ahk" "%hwndstate%"
 	else
 		WinClose
 	DetectHiddenWindows, %Prev_DetectHiddenWindows%
@@ -19855,13 +19833,10 @@ if(AutoFieldBoostActive){
 	}
 }
 ;start ancillary macros
-run, "%A_AhkPath%" "submacros\background.ahk" "%NightLastDetected%" "%VBLastKilled%" "%StingerCheck%" "%StingerDailyBonusCheck%" "%AnnounceGuidingStar%" "%ReconnectInterval%" "%ReconnectHour%" "%ReconnectMin%" "%EmergencyBalloonPingCheck%" "%ConvertBalloon%"
+run, "%exe_path%" /script "submacros\background.ahk" "%NightLastDetected%" "%VBLastKilled%" "%StingerCheck%" "%StingerDailyBonusCheck%" "%AnnounceGuidingStar%" "%ReconnectInterval%" "%ReconnectHour%" "%ReconnectMin%" "%EmergencyBalloonPingCheck%" "%ConvertBalloon%"
 ;(re)start stat monitor
-if (discordCheck && (((discordMode = 0) && RegExMatch(webhook, "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) || ((discordMode = 1) && (ReportChannelCheck = 1) && (ReportChannelID || MainChannelID)))) {
-	SplitPath, A_AhkPath, , dir
-	path := (A_Is64bitOS && FileExist(path64 := dir "\AutoHotkeyU64.exe")) ? path64 : A_AhkPath
-	run, "%path%" "submacros\StatMonitor.ahk"
-}
+if (discordCheck && (((discordMode = 0) && RegExMatch(webhook, "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$")) || ((discordMode = 1) && (ReportChannelCheck = 1) && (ReportChannelID || MainChannelID))))
+	run, "%exe_path%" /script "submacros\StatMonitor.ahk" 
 ;start main loop
 nm_setStatus(0, "Main Loop")
 nm_Start()
