@@ -1,19 +1,19 @@
 ﻿nm_OpenMenu(menu:="", refresh:=0){
 	global bitmaps
 	static x := {"itemmenu":30, "questlog":85, "beemenu":140}, open:=""
-	
-	if WinExist("Roblox ahk_exe RobloxPlayerBeta.exe")
-		WinActivate
+
+	if GetRobloxHWND()
+		WinActivate, Roblox
 	else
 		return 0
-	
+
 	if ((menu = "") || (refresh = 1)) ; close
 	{
 		if open ; close the open menu
 		{
 			Loop, 10
 			{
-				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
+				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+72 "|350|80")
 				if (Gdip_ImageSearch(pBMScreen, bitmaps[open], , , , , , 2) != 1) {
 					Gdip_DisposeImage(pBMScreen)
@@ -21,9 +21,9 @@
 					break
 				}
 				Gdip_DisposeImage(pBMScreen)
-				MouseMove, x[open], 120
+				MouseMove, windowX+x[open], windowY+120
 				Click
-				MouseMove, 350, 100
+				MouseMove, windowX+350, windowY+100
 				sleep, 500
 			}
 		}
@@ -33,16 +33,16 @@
 			{
 				Loop, 10
 				{
-					WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
+					WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 					pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+72 "|350|80")
 					if (Gdip_ImageSearch(pBMScreen, bitmaps[k], , , , , , 2) != 1) {
 						Gdip_DisposeImage(pBMScreen)
 						break
 					}
 					Gdip_DisposeImage(pBMScreen)
-					MouseMove, v, 120
+					MouseMove, windowX+v, windowY+120
 					Click
-					MouseMove, 350, 100
+					MouseMove, windowX+350, windowY+100
 					sleep, 500
 				}
 			}
@@ -55,7 +55,7 @@
 		{
 			Loop, 10
 			{
-				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
+				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+72 "|350|80")
 				if (Gdip_ImageSearch(pBMScreen, bitmaps[open], , , , , , 2) != 1) {
 					Gdip_DisposeImage(pBMScreen)
@@ -63,16 +63,16 @@
 					break
 				}
 				Gdip_DisposeImage(pBMScreen)
-				MouseMove, x[open], 120
+				MouseMove, windowX+x[open], windowY+120
 				Click
-				MouseMove, 350, 100
+				MouseMove, windowX+350, windowY+100
 				sleep, 500
 			}
 		}
 		; open the desired menu
 		Loop, 10
 		{
-			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
+			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 			pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+72 "|350|80")
 			if (Gdip_ImageSearch(pBMScreen, bitmaps[menu], , , , , , 2) = 1) {
 				Gdip_DisposeImage(pBMScreen)
@@ -80,29 +80,29 @@
 				break
 			}
 			Gdip_DisposeImage(pBMScreen)
-			MouseMove, x[menu], 120
+			MouseMove, windowX+x[menu], windowY+120
 			Click
-			MouseMove, 350, 100
+			MouseMove, windowX+350, windowY+100
 			sleep, 500
 		}
 	}
 }
 
-nm_InventorySearch(item, direction:="down", prescroll:=0, prescrolldir:="", scrolltoend:=1, max := 70){ ;~ item: string of item; direction: down or up; prescroll: number of scrolls before direction switch; prescrolldir: direction to prescroll, set blank for same as direction; scrolltoend: set 0 to omit scrolling to top/bottom after prescrolls; max: number of scrolls in total
+nm_InventorySearch(item, direction:="down", prescroll:=0, prescrolldir:="", scrolltoend:=1, max:=70){ ;~ item: string of item; direction: down or up; prescroll: number of scrolls before direction switch; prescrolldir: direction to prescroll, set blank for same as direction; scrolltoend: set 0 to omit scrolling to top/bottom after prescrolls; max: number of scrolls in total
 	global bitmaps
 	static hRoblox, l:=0
-	
+
 	nm_OpenMenu("itemmenu")
-	
+
 	; detect inventory end for current hwnd
-	if (hwnd := WinExist("Roblox ahk_exe RobloxPlayerBeta.exe"))
+	if (hwnd := WinExist("ahk_id " GetRobloxHWND()))
 	{
 		if (hwnd != hRoblox)
 		{
-			WinActivate, Roblox ahk_exe RobloxPlayerBeta.exe
-			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
+			WinActivate, Roblox
+			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 			pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+150 "|306|" windowHeight-150)
-			
+
 			Loop, 40
 			{
 				if (Gdip_ImageSearch(pBMScreen, bitmaps["item"], lpos, , , 6, , 2, , 2) = 1)
@@ -117,27 +117,27 @@ nm_InventorySearch(item, direction:="down", prescroll:=0, prescrolldir:="", scro
 					{
 						Gdip_DisposeImage(pBMScreen)
 						return 0
-					}				
+					}
 					else
 					{
 						Sleep, 50
 						Gdip_DisposeImage(pBMScreen)
 						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+150 "|306|" windowHeight-150)
-					}				
+					}
 				}
 			}
 		}
 	}
 	else
 		return 0 ; no roblox
-	
-	; search inventory	
+
+	; search inventory
 	Loop %max%
 	{
-		WinActivate, Roblox ahk_exe RobloxPlayerBeta.exe
-		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
+		WinActivate, Roblox
+		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+150 "|306|" l)
-		
+
 		; wait for red vignette effect to disappear
 		Loop, 40
 		{
@@ -149,22 +149,22 @@ nm_InventorySearch(item, direction:="down", prescroll:=0, prescrolldir:="", scro
 				{
 					Gdip_DisposeImage(pBMScreen)
 					return 0
-				}				
+				}
 				else
 				{
 					Sleep, 50
 					Gdip_DisposeImage(pBMScreen)
 					pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+150 "|306|" l)
-				}				
+				}
 			}
 		}
-		
+
 		if (Gdip_ImageSearch(pBMScreen, bitmaps[item], pos, , , , , 10, , 5) = 1) {
 			Gdip_DisposeImage(pBMScreen)
 			break ; item found
 		}
 		Gdip_DisposeImage(pBMScreen)
-		
+
 		switch A_Index
 		{
 			case (prescroll+1): ; scroll entire inventory on (prescroll+1)th search
@@ -172,13 +172,13 @@ nm_InventorySearch(item, direction:="down", prescroll:=0, prescrolldir:="", scro
 			{
 				Loop, 100
 				{
-					MouseMove, 30, 200, 5
+					MouseMove, windowX+30, windowY+200, 5
 					sendinput % "{Wheel" ((direction = "down") ? "Up" : "Down") "}"
 					Sleep, 50
 				}
 			}
 			default: ; scroll once
-			MouseMove, 30, 200, 5
+			MouseMove, windowX+30, windowY+200, 5
 			sendinput % "{Wheel" ((A_Index <= prescroll) ? (prescrolldir ? ((prescrolldir = "Down") ? "Down" : "Up") : ((direction = "down") ? "Down" : "Up")) : ((direction = "down") ? "Down" : "Up")) "}"
 			Sleep, 50
 		}
@@ -196,4 +196,17 @@ WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", Win
     DllCall("ClientToScreen", "UPtr",hWnd, "Ptr",&RECT)
     X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
     Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
+}
+
+GetRobloxHWND()
+{
+	if (hwnd := WinExist("Roblox ahk_exe RobloxPlayerBeta.exe"))
+		return hwnd
+	else if (WinExist("Roblox ahk_exe ApplicationFrameHost.exe"))
+	{
+		ControlGet, hwnd, Hwnd, , ApplicationFrameInputSinkWindow1, Roblox ahk_exe ApplicationFrameHost.exe
+		return hwnd
+	}
+	else
+		return 0
 }

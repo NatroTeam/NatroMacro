@@ -30,7 +30,7 @@ Loop
 	DetectHiddenWindows, Off
 	SetTitleMatchMode, 1
 	time := nowUnix()
-	if WinExist("Roblox ahk_exe RobloxPlayerBeta.exe")
+	if (WinExist("Roblox ahk_exe RobloxPlayerBeta.exe") || WinExist("Roblox ahk_exe ApplicationFrameHost.exe"))
 		LastRobloxWindow := time
 	; request heartbeat
 	DetectHiddenWindows, On
@@ -58,7 +58,7 @@ Loop
 				WinGet, natroPID, PID
 				Process, Close, % natroPID
 			}
-			for p in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process where Name like '%Roblox%'")
+			for p in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process WHERE Name LIKE '%Roblox%' OR CommandLine LIKE '%ROBLOXCORPORATION%'")
 				Process, Close, % p.ProcessID
 			
 			ForceStart := (Prev_MacroState = 2)

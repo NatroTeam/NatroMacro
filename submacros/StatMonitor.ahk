@@ -555,7 +555,7 @@ DetectBuffs()
 	i := (time_value = 0) ? 600 : time_value
 	
 	; check roblox window exists
-	WinGetClientPos(_x, _y, _w, _h, "Roblox ahk_exe RobloxPlayerBeta.exe")
+	WinGetClientPos(_x, _y, _w, _h, "ahk_id " GetRobloxHWND())
 	if (_w = 0)
 	{
 		for k,v in buff_values
@@ -811,7 +811,7 @@ DetectHoney()
 	global honey_values, start_honey, start_time, ocr_language
 	
 	; check roblox window exists
-	WinGetClientPos(_x, _y, _w, _h, "Roblox ahk_exe RobloxPlayerBeta.exe")
+	WinGetClientPos(_x, _y, _w, _h, "ahk_id " GetRobloxHWND())
 	if (_w = 0)
 		return 0
 	
@@ -1994,6 +1994,19 @@ WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", Win
     DllCall("ClientToScreen", "UPtr",hWnd, "Ptr",&RECT)
     X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
     Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
+}
+
+GetRobloxHWND()
+{
+	if (hwnd := WinExist("Roblox ahk_exe RobloxPlayerBeta.exe"))
+		return hwnd
+	else if (WinExist("Roblox ahk_exe ApplicationFrameHost.exe"))
+	{
+		ControlGet, hwnd, Hwnd, , ApplicationFrameInputSinkWindow1, Roblox ahk_exe ApplicationFrameHost.exe
+		return hwnd
+	}
+	else
+		return 0
 }
 
 Send_WM_COPYDATA(ByRef StringToSend, ByRef TargetScriptTitle, wParam:=0)

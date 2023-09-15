@@ -435,7 +435,7 @@ nm_status(status)
 {
 	global
 	static colorIndex:=0
-	local stateString, state, objective, log, color, content, message, channel, pBM, x, y, w, h, timestamp, payload_json, postData, contentType
+	local stateString, state, objective, log, color, content, message, channel, pBM, hwnd, x, y, w, h, timestamp, payload_json, postData, contentType
 
 	stateString := SubStr(status, InStr(status, "] ")+2)
 	state := SubStr(stateString, 1, InStr(stateString, ": ")-1), objective := SubStr(stateString, InStr(stateString, ": ")+2)
@@ -499,7 +499,7 @@ nm_status(status)
 			|| ((HoneySSCheck = 1) && InStr(stateString, "Reporting: Daily Honey LB") && ((discordMode = 0) || (channel := (StrLen(ReportChannelID) < 17) ? MainChannelID : ReportChannelID)))
 			|| ((ssDebugging = 1) && ((state = "Placing") || (state = "Collecting") || (state = "Failed") || InStr(stateString, "Next Quest Step")))))
 		{
-			WinGetClientPos(x, y, w, h, "Roblox ahk_exe RobloxPlayerBeta.exe")
+			WinGetClientPos(x, y, w, h, "ahk_id " ((hwnd := WinExist("Roblox ahk_exe RobloxPlayerBeta.exe")) ? hwnd : (hwnd := WinExist("Roblox ahk_exe ApplicationFrameHost.exe")) ? hwnd : 0))
 			pBM := Gdip_BitmapFromScreen((w > 0) ? (x "|" y "|" w "|" h) : 0)
 		}
 		
