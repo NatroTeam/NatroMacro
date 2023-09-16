@@ -220,8 +220,8 @@ nm_backpackPercent(){
 	;LowerRight X2 = windowWidth/2+59+220
 	;LowerRight Y2 = 3+5
 	;Bar = 220 pixels wide = 11 pixels per 5%
-	X1:=windowWidth//2+59+3
-	Y1:=6
+	X1:=windowX+windowWidth//2+59+3
+	Y1:=windowY+6
 	PixelGetColor, backpackColor, %X1%, %Y1%, RGB fast
 	BackpackPercent:=0
 
