@@ -15993,14 +15993,14 @@ nm_HoneyQuest(){
 		;quest objective bar height = 40 pixels
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 		MouseMove, windowX+350, windowY+100
-		xi := 0
-		yi := Qfound[3]
-		ww := 306
-		wh := windowHeight
+		xi := windowX
+		yi := windowY+Qfound[3]
+		ww := windowX+306
+		wh := windowY+windowHeight
 		fileName:="questbargap.png"
 		IfExist, %A_ScriptDir%\nm_image_assets\
 		{
-			ImageSearch, FoundX, FoundY, windowX + xi, windowY + yi, windowX + ww, windowY + wh, *5 %A_ScriptDir%\nm_image_assets\%fileName%
+			ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *5 %A_ScriptDir%\nm_image_assets\%fileName%
 			if (ErrorLevel = 2) {
 				nm_setStatus("Error", "Image file " filename " was not found in:`n" A_ScriptDir "\nm_image_assets\" fileName)
 				Sleep, 5000
@@ -16013,11 +16013,11 @@ nm_HoneyQuest(){
 		;determine quest bar sizes and spacing
 		if(QuestBarGapSize=0 || QuestBarSize=0 || QuestBarInset=0) {
 			Loop, 3 {
-				xi := 0
-				yi := HoneyStart[3]+15
-				ww := 306
-				wh := HoneyStart[3]+100
-				ImageSearch, FoundX, FoundY, windowX + xi, windowY + yi, windowX + ww, windowY + wh, *5 nm_image_assets\questbargap.png
+				xi := windowX
+				yi := windowY+HoneyStart[3]+15
+				ww := windowX+306
+				wh := windowY+HoneyStart[3]+100
+				ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *5 nm_image_assets\questbargap.png
 				if(ErrorLevel=0) {
 					QuestBarSize:=FoundY-windowY-HoneyStart[3]
 					QuestBarGapSize:=3
@@ -16025,7 +16025,7 @@ nm_HoneyQuest(){
 					NextY:=FoundY+1
 					NextX:=FoundX+1
 					loop 20 {
-						ImageSearch, FoundX, FoundY, %FoundX%, %NextY%, windowX + ww, windowY + wh, *5 nm_image_assets\questbargap.png
+						ImageSearch, FoundX, FoundY, FoundX, NextY, ww, wh, *5 nm_image_assets\questbargap.png
 						if(ErrorLevel=0) {
 							NextY:=FoundY+1
 							QuestBarGapSize:=QuestBarGapSize+1
@@ -16033,9 +16033,9 @@ nm_HoneyQuest(){
 							break
 						}
 					}
-					wh := HoneyStart[3]+200
+					wh := windowY+HoneyStart[3]+200
 					loop 20 {
-						ImageSearch, FoundX, FoundY, %NextX%, windowY + yi, windowX + ww, windowY + wh, *5 nm_image_assets\questbarinset.png
+						ImageSearch, FoundX, FoundY, NextX, yi, ww, wh, *5 nm_image_assets\questbarinset.png
 						if(ErrorLevel=0) {
 							NextX:=FoundX+1
 							QuestBarInset:=QuestBarInset+1
@@ -16162,14 +16162,14 @@ nm_PolarQuestProg(){
 		;quest objective bar height = 40 pixels
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 		MouseMove, windowX+350, windowY+100
-		xi := 0
-		yi := Qfound[3]
-		ww := 306
-		wh := windowHeight
+		xi := windowX
+		yi := windowY+Qfound[3]
+		ww := windowX+306
+		wh := windowY+windowHeight
 		fileName:="questbargap.png"
 		IfExist, %A_ScriptDir%\nm_image_assets\
 		{
-			ImageSearch, FoundX, FoundY, windowX + xi, windowY + yi, windowX + ww, windowY + wh, *5 %A_ScriptDir%\nm_image_assets\%fileName%
+			ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *5 %A_ScriptDir%\nm_image_assets\%fileName%
 			if (ErrorLevel = 2) {
 				nm_setStatus("Error", "Image file " filename " was not found in:`n" A_ScriptDir "\nm_image_assets\" fileName)
 				Sleep, 5000
@@ -16182,19 +16182,19 @@ nm_PolarQuestProg(){
 		;determine quest bar sizes and spacing
 		if(QuestBarGapSize=0 || QuestBarSize=0 || QuestBarInset=0) {
 			Loop, 3 {
-				xi := 0
-				yi := PolarStart[3]+15
-				ww := 306
-				wh := PolarStart[3]+100
-				ImageSearch, FoundX, FoundY, windowX + xi, windowY + yi, windowX + ww, windowY + wh, *5 nm_image_assets\questbargap.png
+				xi := windowX
+				yi := windowY+PolarStart[3]+15
+				ww := windowX+306
+				wh := windowY+PolarStart[3]+100
+				ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *5 nm_image_assets\questbargap.png
 				if(ErrorLevel=0) {
-					QuestBarSize:=FoundY-PolarStart[3]
+					QuestBarSize:=FoundY-windowY-PolarStart[3]
 					QuestBarGapSize:=3
 					QuestBarInset:=3
 					NextY:=FoundY+1
 					NextX:=FoundX+1
 					loop 20 {
-						ImageSearch, FoundX, FoundY, %FoundX%, %NextY%, windowX + ww, windowY + wh, *5 nm_image_assets\questbargap.png
+						ImageSearch, FoundX, FoundY, FoundX, NextY, ww, wh, *5 nm_image_assets\questbargap.png
 						if(ErrorLevel=0) {
 							NextY:=FoundY+1
 							QuestBarGapSize:=QuestBarGapSize+1
@@ -16202,9 +16202,9 @@ nm_PolarQuestProg(){
 							break
 						}
 					}
-					wh := PolarStart[3]+200
+					wh := windowY+PolarStart[3]+200
 					loop 20 {
-						ImageSearch, FoundX, FoundY, %NextX%, windowY + yi, windowX + ww, windowY + wh, *5 nm_image_assets\questbarinset.png
+						ImageSearch, FoundX, FoundY, NextX, yi, ww, wh, *5 nm_image_assets\questbarinset.png
 						if(ErrorLevel=0) {
 							NextX:=FoundX+1
 							QuestBarInset:=QuestBarInset+1
@@ -16226,22 +16226,22 @@ nm_PolarQuestProg(){
 		}
 		;MouseMove, Qstart[2], Qstart[3], 5
 		;determine Quest name
-		xi := 0
-		yi := PolarStart[3]-30
-		ww := 306
-		wh := PolarStart[3]
+		xi := windowX
+		yi := windowY+PolarStart[3]-30
+		ww := windowX+306
+		wh := windowY+PolarStart[3]
 		for key, value in PolarBear {
 			filename:=(key . ".png")
-			ImageSearch, FoundX, FoundY, windowX + xi, windowY + yi, windowX + ww, windowY + wh, *10 nm_image_assets\%fileName%
+			ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *10 nm_image_assets\%fileName%
 			if(ErrorLevel=0) {
 				PolarQuest:=key
 				questSteps:=PolarBear[key].length()
 				;make sure full quest is visible
 				loop 5 {
 					found:=0
-					NextY:=PolarStart[3]
+					NextY:=windowY+PolarStart[3]
 					loop %questSteps% {
-						ImageSearch, FoundX, FoundY, windowX+QuestBarInset, windowY+NextY, windowX+QuestBarInset+300, windowY+NextY+QuestBarGapSize, *5 nm_image_assets\questbargap.png
+						ImageSearch, FoundX, FoundY, windowX+QuestBarInset, NextY, windowX+QuestBarInset+300, NextY+QuestBarGapSize, *5 nm_image_assets\questbargap.png
 						if(ErrorLevel=0) {
 							NextY:=NextY+QuestBarSize
 							found:=found+1
@@ -16548,14 +16548,14 @@ nm_RileyQuestProg(){
 		;quest objective bar height = 40 pixels
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 		MouseMove, windowX+350, windowY+100
-		xi := 0
-		yi := Qfound[3]
-		ww := 306
-		wh := windowHeight
+		xi := windowX
+		yi := windowY+Qfound[3]
+		ww := windowX+306
+		wh := windowY+windowHeight
 		fileName:="questbargap.png"
 		IfExist, %A_ScriptDir%\nm_image_assets\
 		{
-			ImageSearch, FoundX, FoundY, windowX + xi, windowY + yi, windowX + ww, windowY + wh, *5 %A_ScriptDir%\nm_image_assets\%fileName%
+			ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *5 %A_ScriptDir%\nm_image_assets\%fileName%
 			if (ErrorLevel = 2) {
 				nm_setStatus("Error", "Image file " filename " was not found in:`n" A_ScriptDir "\nm_image_assets\" fileName)
 				Sleep, 5000
@@ -16568,19 +16568,19 @@ nm_RileyQuestProg(){
 		;determine quest bar sizes and spacing
 		if(QuestBarGapSize=0 || QuestBarSize=0 || QuestBarInset=0) {
 			Loop, 3 {
-				xi := 0
-				yi := RileyStart[3]+15
-				ww := 306
-				wh := RileyStart[3]+100
-				ImageSearch, FoundX, FoundY, windowX + xi, windowY + yi, windowX + ww, windowY + wh, *5 nm_image_assets\questbargap.png
+				xi := windowX
+				yi := windowY+RileyStart[3]+15
+				ww := windowX+306
+				wh := windowY+RileyStart[3]+100
+				ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *5 nm_image_assets\questbargap.png
 				if(ErrorLevel=0) {
-					QuestBarSize:=FoundY-RileyStart[3]
+					QuestBarSize:=FoundY-windowY-RileyStart[3]
 					QuestBarGapSize:=3
 					QuestBarInset:=3
 					NextY:=FoundY+1
 					NextX:=FoundX+1
 					loop 20 {
-						ImageSearch, FoundX, FoundY, %FoundX%, %NextY%, windowX + ww, windowY + wh, *5 nm_image_assets\questbargap.png
+						ImageSearch, FoundX, FoundY, FoundX, NextY, ww, wh, *5 nm_image_assets\questbargap.png
 						if(ErrorLevel=0) {
 							NextY:=FoundY+1
 							QuestBarGapSize:=QuestBarGapSize+1
@@ -16588,9 +16588,9 @@ nm_RileyQuestProg(){
 							break
 						}
 					}
-					wh := RileyStart[3]+200
+					wh := windowY+RileyStart[3]+200
 					loop 20 {
-						ImageSearch, FoundX, FoundY, %NextX%, windowY + yi, windowX + ww, windowY + wh, *5 nm_image_assets\questbarinset.png
+						ImageSearch, FoundX, FoundY, NextX, yi, ww, wh, *5 nm_image_assets\questbarinset.png
 						if(ErrorLevel=0) {
 							NextX:=FoundX+1
 							QuestBarInset:=QuestBarInset+1
@@ -16611,14 +16611,14 @@ nm_RileyQuestProg(){
 			}
 		}
 		;determine Quest name
-		xi := 0
-		yi := RileyStart[3]-30
-		ww := 306
-		wh := RileyStart[3]
+		xi := windowX
+		yi := windowY+RileyStart[3]-30
+		ww := windowX+306
+		wh := windowY+RileyStart[3]
 		missing:=1
 		for key, value in RileyBee {
 			filename:=(key . ".png")
-			ImageSearch, FoundX, FoundY, windowX + xi, windowY + yi, windowX + ww, windowY + wh, *100 nm_image_assets\%fileName%
+			ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *100 nm_image_assets\%fileName%
 			if(ErrorLevel=0) {
 				RileyQuest:=key
 				questSteps:=RileyBee[key].length()
@@ -16626,9 +16626,9 @@ nm_RileyQuestProg(){
 				;make sure full quest is visible
 				loop 5 {
 					found:=0
-					NextY:=RileyStart[3]
+					NextY:=windowY+RileyStart[3]
 					loop %questSteps% {
-						ImageSearch, FoundX, FoundY, windowX+QuestBarInset, windowY+NextY, windowX+QuestBarInset+300, windowY+NextY+QuestBarGapSize, *5 nm_image_assets\questbargap.png
+						ImageSearch, FoundX, FoundY, windowX+QuestBarInset, NextY, windowX+QuestBarInset+300, NextY+QuestBarGapSize, *5 nm_image_assets\questbargap.png
 						if(ErrorLevel=0) {
 							NextY:=NextY+QuestBarSize
 							found:=found+1
@@ -16883,14 +16883,14 @@ nm_BuckoQuestProg(){
 		;quest objective bar height = 40 pixels
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 		MouseMove, windowX+350, windowY+100
-		xi := 0
-		yi := Qfound[3]
-		ww := 306
-		wh := windowHeight
+		xi := windowX
+		yi := windowY+Qfound[3]
+		ww := windowX+306
+		wh := windowY+windowHeight
 		fileName:="questbargap.png"
 		IfExist, %A_ScriptDir%\nm_image_assets\
 		{
-			ImageSearch, FoundX, FoundY, windowX + xi, windowY + yi, windowX + ww, windowY + wh, *5 %A_ScriptDir%\nm_image_assets\%fileName%
+			ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *5 %A_ScriptDir%\nm_image_assets\%fileName%
 			if (ErrorLevel = 2) {
 				nm_setStatus("Error", "Image file " filename " was not found in:`n" A_ScriptDir "\nm_image_assets\" fileName)
 				Sleep, 5000
@@ -16903,19 +16903,19 @@ nm_BuckoQuestProg(){
 		;determine quest bar sizes and spacing
 		if(QuestBarGapSize=0 || QuestBarSize=0 || QuestBarInset=0) {
 			Loop, 3 {
-				xi := 0
-				yi := BuckoStart[3]+15
-				ww := 306
-				wh := BuckoStart[3]+100
-				ImageSearch, FoundX, FoundY, windowX + xi, windowY + yi, windowX + ww, windowY + wh, *5 nm_image_assets\questbargap.png
+				xi := windowX
+				yi := windowY+BuckoStart[3]+15
+				ww := windowX+306
+				wh := windowY+BuckoStart[3]+100
+				ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *5 nm_image_assets\questbargap.png
 				if(ErrorLevel=0) {
-					QuestBarSize:=FoundY-BuckoStart[3]
+					QuestBarSize:=FoundY-windowY-BuckoStart[3]
 					QuestBarGapSize:=3
 					QuestBarInset:=3
 					NextY:=FoundY+1
 					NextX:=FoundX+1
 					loop 20 {
-						ImageSearch, FoundX, FoundY, %FoundX%, %NextY%, windowX + ww, windowY + wh, *5 nm_image_assets\questbargap.png
+						ImageSearch, FoundX, FoundY, FoundX, NextY, ww, wh, *5 nm_image_assets\questbargap.png
 						if(ErrorLevel=0) {
 							NextY:=FoundY+1
 							QuestBarGapSize:=QuestBarGapSize+1
@@ -16923,9 +16923,9 @@ nm_BuckoQuestProg(){
 							break
 						}
 					}
-					wh := BuckoStart[3]+200
+					wh := windowY+BuckoStart[3]+200
 					loop 20 {
-						ImageSearch, FoundX, FoundY, %NextX%, windowY + yi, windowX + ww, windowY + wh, *5 nm_image_assets\questbarinset.png
+						ImageSearch, FoundX, FoundY, NextX, yi, ww, wh, *5 nm_image_assets\questbarinset.png
 						if(ErrorLevel=0) {
 							NextX:=FoundX+1
 							QuestBarInset:=QuestBarInset+1
@@ -16946,14 +16946,14 @@ nm_BuckoQuestProg(){
 			}
 		}
 		;determine Quest name
-		xi := 0
-		yi := BuckoStart[3]-30
-		ww := 306
-		wh := BuckoStart[3]
+		xi := windowX
+		yi := windowY+BuckoStart[3]-30
+		ww := windowX+306
+		wh := windowY+BuckoStart[3]
 		missing:=1
 		for key, value in BuckoBee {
 			filename:=(key . ".png")
-			ImageSearch, FoundX, FoundY, windowX + xi, windowY + yi, windowX + ww, windowY + wh, *100 nm_image_assets\%fileName%
+			ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *100 nm_image_assets\%fileName%
 			if(ErrorLevel=0) {
 				BuckoQuest:=key
 				missing:=0
@@ -16961,9 +16961,9 @@ nm_BuckoQuestProg(){
 				questSteps:=BuckoBee[key].length()
 				loop 5 {
 					found:=0
-					NextY:=BuckoStart[3]
+					NextY:=windowY+BuckoStart[3]
 					loop %questSteps% {
-						ImageSearch, FoundX, FoundY, windowX+QuestBarInset, windowY+NextY, windowX+QuestBarInset+300, windowY+NextY+QuestBarGapSize, *5 nm_image_assets\questbargap.png
+						ImageSearch, FoundX, FoundY, windowX+QuestBarInset, NextY, windowX+QuestBarInset+300, NextY+QuestBarGapSize, *5 nm_image_assets\questbargap.png
 						if(ErrorLevel=0) {
 							NextY:=NextY+QuestBarSize
 							found:=found+1
@@ -17228,14 +17228,14 @@ nm_BlackQuestProg(){
 		;quest objective bar height = 40 pixels
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 		MouseMove, windowX+350, windowY+100
-		xi := 0
-		yi := Qfound[3]
-		ww := 306
-		wh := windowHeight
+		xi := windowX
+		yi := windowY+Qfound[3]
+		ww := windowX+306
+		wh := windowY+windowHeight
 		fileName:="questbargap.png"
 		IfExist, %A_ScriptDir%\nm_image_assets\
 		{
-			ImageSearch, FoundX, FoundY, windowX + xi, windowY + yi, windowX + ww, windowY + wh, *5 %A_ScriptDir%\nm_image_assets\%fileName%
+			ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *5 %A_ScriptDir%\nm_image_assets\%fileName%
 			if (ErrorLevel = 2) {
 				nm_setStatus("Error", "Image file " filename " was not found in:`n" A_ScriptDir "\nm_image_assets\" fileName)
 				Sleep, 5000
@@ -17248,19 +17248,19 @@ nm_BlackQuestProg(){
 		;determine quest bar sizes and spacing
 		if(QuestBarGapSize=0 || QuestBarSize=0 || QuestBarInset=0) {
 			Loop, 3 {
-				xi := 0
-				yi := BlackStart[3]+15
-				ww := 306
-				wh := BlackStart[3]+100
-				ImageSearch, FoundX, FoundY, windowX + xi, windowY + yi, windowX + ww, windowY + wh, *5 nm_image_assets\questbargap.png
+				xi := windowX
+				yi := windowY+BlackStart[3]+15
+				ww := windowX+306
+				wh := windowY+BlackStart[3]+100
+				ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *5 nm_image_assets\questbargap.png
 				if(ErrorLevel=0) {
-					QuestBarSize:=FoundY-BlackStart[3]
+					QuestBarSize:=FoundY-windowY-BlackStart[3]
 					QuestBarGapSize:=3
 					QuestBarInset:=3
 					NextY:=FoundY+1
 					NextX:=FoundX+1
 					loop 20 {
-						ImageSearch, FoundX, FoundY, %FoundX%, %NextY%, windowX + ww, windowY + wh, *5 nm_image_assets\questbargap.png
+						ImageSearch, FoundX, FoundY, FoundX, NextY, ww, wh, *5 nm_image_assets\questbargap.png
 						if(ErrorLevel=0) {
 							NextY:=FoundY+1
 							QuestBarGapSize:=QuestBarGapSize+1
@@ -17268,9 +17268,9 @@ nm_BlackQuestProg(){
 							break
 						}
 					}
-					wh := BlackStart[3]+200
+					wh := windowY+BlackStart[3]+200
 					loop 20 {
-						ImageSearch, FoundX, FoundY, %NextX%, windowY + yi, windowX + ww, windowY + wh, *5 nm_image_assets\questbarinset.png
+						ImageSearch, FoundX, FoundY, NextX, yi, ww, wh, *5 nm_image_assets\questbarinset.png
 						if(ErrorLevel=0) {
 							NextX:=FoundX+1
 							QuestBarInset:=QuestBarInset+1
@@ -17293,14 +17293,14 @@ nm_BlackQuestProg(){
 		;MouseMove, Blackstart[2], Blackstart[3], 5
 		;msgbox % Blackstart[2] Blackstart[3]
 		;determine Quest name
-		xi := 0
-		yi := BlackStart[3]-30
-		ww := 306
-		wh := BlackStart[3]
+		xi := windowX
+		yi := windowY+BlackStart[3]-30
+		ww := windowX+306
+		wh := windowY+BlackStart[3]
 		missing:=1
 		for key, value in BlackBear {
 			filename:=(key . ".png")
-			ImageSearch, FoundX, FoundY, windowX + xi, windowY + yi, windowX + ww, windowY + wh, *100 nm_image_assets\%fileName%
+			ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *100 nm_image_assets\%fileName%
 			if(ErrorLevel=0) {
 				BlackQuest:=key
 				missing:=0
@@ -17308,9 +17308,9 @@ nm_BlackQuestProg(){
 				questSteps:=BlackBear[key].length()
 				loop 5 {
 					found:=0
-					NextY:=BlackStart[3]
+					NextY:=windowY+BlackStart[3]
 					loop %questSteps% {
-						ImageSearch, FoundX, FoundY, windowX+QuestBarInset, windowY+NextY, windowX+QuestBarInset+300, windowY+NextY+QuestBarGapSize, *5 nm_image_assets\questbargap.png
+						ImageSearch, FoundX, FoundY, windowX+QuestBarInset, NextY, windowX+QuestBarInset+300, NextY+QuestBarGapSize, *5 nm_image_assets\questbargap.png
 						if(ErrorLevel=0) {
 							NextY:=NextY+QuestBarSize
 							found:=found+1
