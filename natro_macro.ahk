@@ -16058,7 +16058,7 @@ nm_HoneyQuest(){
 		;Update Honey quest progress in GUI
 		honeyProgress:=""
 		;also set next steps
-		PixelGetColor, questbarColor, windowX+QuestBarInset+10, windowY+HoneyStart[3]+QuestBarGapSize+1, RGB fast
+		PixelGetColor, questbarColor, windowX+QuestBarInset+10, windowY+HoneyStart[3]+QuestBarGapSize+5, RGB fast
 		;temp%A_Index%:=questbarColor
 		if((questbarColor=Format("{:d}",0xF46C55)) || (questbarColor=Format("{:d}",0x6EFF60))) {
 			HoneyQuestComplete:=0
@@ -16224,7 +16224,6 @@ nm_PolarQuestProg(){
 				}
 			}
 		}
-		;MouseMove, Qstart[2], Qstart[3], 5
 		;determine Quest name
 		xi := windowX
 		yi := windowY+PolarStart[3]-30
@@ -16273,7 +16272,7 @@ nm_PolarQuestProg(){
 		loop %num% {
 			action:=PolarBear[PolarQuest][A_Index][2]
 			where:=PolarBear[PolarQuest][A_Index][3]
-			PixelGetColor, questbarColor, windowX+QuestBarInset+10, windowY+QuestBarSize*(PolarBear[PolarQuest][A_Index][1]-1)+PolarStart[3]+QuestBarGapSize+1, RGB fast
+			PixelGetColor, questbarColor, windowX+QuestBarInset+10, windowY+QuestBarSize*(PolarBear[PolarQuest][A_Index][1]-1)+PolarStart[3]+QuestBarGapSize+5, RGB fast
 			if((questbarColor=Format("{:d}",0xF46C55)) || (questbarColor=Format("{:d}",0x6EFF60))) {
 				PolarQuestComplete:=0
 				completeness:="Incomplete"
@@ -16615,14 +16614,12 @@ nm_RileyQuestProg(){
 		yi := windowY+RileyStart[3]-30
 		ww := windowX+306
 		wh := windowY+RileyStart[3]
-		missing:=1
 		for key, value in RileyBee {
 			filename:=(key . ".png")
 			ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *100 nm_image_assets\%fileName%
 			if(ErrorLevel=0) {
 				RileyQuest:=key
 				questSteps:=RileyBee[key].length()
-				missing:=0
 				;make sure full quest is visible
 				loop 5 {
 					found:=0
@@ -16664,7 +16661,7 @@ nm_RileyQuestProg(){
 		loop %num% {
 			action:=RileyBee[RileyQuest][A_Index][2]
 			where:=RileyBee[RileyQuest][A_Index][3]
-			PixelGetColor, questbarColor, windowX+QuestBarInset+10, windowY+QuestBarSize*(RileyBee[RileyQuest][A_Index][1]-1)+RileyStart[3]+QuestBarGapSize+1, RGB fast
+			PixelGetColor, questbarColor, windowX+QuestBarInset+10, windowY+QuestBarSize*(RileyBee[RileyQuest][A_Index][1]-1)+RileyStart[3]+QuestBarGapSize+5, RGB fast
 			if((questbarColor=Format("{:d}",0xF46C55)) || (questbarColor=Format("{:d}",0x6EFF60))) {
 				RileyQuestComplete:=0
 				completeness:="Incomplete"
@@ -16950,15 +16947,13 @@ nm_BuckoQuestProg(){
 		yi := windowY+BuckoStart[3]-30
 		ww := windowX+306
 		wh := windowY+BuckoStart[3]
-		missing:=1
 		for key, value in BuckoBee {
 			filename:=(key . ".png")
 			ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *100 nm_image_assets\%fileName%
 			if(ErrorLevel=0) {
 				BuckoQuest:=key
-				missing:=0
-				;make sure full quest is visible
 				questSteps:=BuckoBee[key].length()
+				;make sure full quest is visible
 				loop 5 {
 					found:=0
 					NextY:=windowY+BuckoStart[3]
@@ -16999,7 +16994,7 @@ nm_BuckoQuestProg(){
 		loop %num% {
 			action:=BuckoBee[BuckoQuest][A_Index][2]
 			where:=BuckoBee[BuckoQuest][A_Index][3]
-			PixelGetColor, questbarColor, windowX+QuestBarInset+10, windowY+QuestBarSize*(BuckoBee[BuckoQuest][A_Index][1]-1)+BuckoStart[3]+QuestBarGapSize+1, RGB fast
+			PixelGetColor, questbarColor, windowX+QuestBarInset+10, windowY+QuestBarSize*(BuckoBee[BuckoQuest][A_Index][1]-1)+BuckoStart[3]+QuestBarGapSize+5, RGB fast
 			if((questbarColor=Format("{:d}",0xF46C55)) || (questbarColor=Format("{:d}",0x6EFF60))) {
 				BuckoQuestComplete:=0
 				completeness:="Incomplete"
@@ -17290,22 +17285,18 @@ nm_BlackQuestProg(){
 				}
 			}
 		}
-		;MouseMove, Blackstart[2], Blackstart[3], 5
-		;msgbox % Blackstart[2] Blackstart[3]
 		;determine Quest name
 		xi := windowX
 		yi := windowY+BlackStart[3]-30
 		ww := windowX+306
 		wh := windowY+BlackStart[3]
-		missing:=1
 		for key, value in BlackBear {
 			filename:=(key . ".png")
 			ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *100 nm_image_assets\%fileName%
 			if(ErrorLevel=0) {
 				BlackQuest:=key
-				missing:=0
-				;make sure full quest is visible
 				questSteps:=BlackBear[key].length()
+				;make sure full quest is visible
 				loop 5 {
 					found:=0
 					NextY:=windowY+BlackStart[3]
@@ -17343,7 +17334,7 @@ nm_BlackQuestProg(){
 		loop %num% {
 			action:=BlackBear[BlackQuest][A_Index][2]
 			where:=BlackBear[BlackQuest][A_Index][3]
-			PixelGetColor, questbarColor, windowX+QuestBarInset+10, windowY+QuestBarSize*(BlackBear[BlackQuest][A_Index][1]-1)+BlackStart[3]+QuestBarGapSize+1, RGB fast
+			PixelGetColor, questbarColor, windowX+QuestBarInset+10, windowY+QuestBarSize*(BlackBear[BlackQuest][A_Index][1]-1)+BlackStart[3]+QuestBarGapSize+5, RGB fast
 			if((questbarColor=Format("{:d}",0xF46C55)) || (questbarColor=Format("{:d}",0x6EFF60))) {
 				BlackQuestComplete:=0
 				completeness:="Incomplete"
