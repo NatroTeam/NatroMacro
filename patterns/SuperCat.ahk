@@ -39,8 +39,3 @@ loop " reps " {
 	send {" AFCFBKey " up}
 	}
 )"
-
-TCFBKey:=FwdKey
-    AFCFBKey:=BackKey
-    TCLRKey:=LeftKey
-    AFCLRKey:=RightKey

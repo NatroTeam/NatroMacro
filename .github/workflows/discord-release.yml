@@ -1,0 +1,13 @@
+on:
+  release:
+    types: [published]
+
+jobs:
+  release-to-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: send-discord-webhook
+        id: discord
+        uses: NatroTeam/discord-release-action@v1.0
+        with:
+          webhook_url: ${{secrets.WEBHOOK_URL}}

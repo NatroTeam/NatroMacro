@@ -1,14 +1,14 @@
-/*
-Natro Macro, https://bit.ly/NatroMacro
-Copyright © 2022-2023 Natro Dev Team (natromacroserver@gmail.com)
+﻿/*
+Natro Macro (https://github.com/NatroTeam/NatroMacro)
+Copyright © 2022-2023 Natro Team (https://github.com/NatroTeam)
 
 This file is part of Natro Macro. Our source code will always be open and available.
 
 Natro Macro is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-Natro Macro is distributed in the hope that it will be useful. This does not give you the right to steal sections from our code, distribute it under your own name, then slander the macro. 
+Natro Macro is distributed in the hope that it will be useful. This does not give you the right to steal sections from our code, distribute it under your own name, then slander the macro.
 
-You should have received a copy of the GNU General Public License along with Natro Macro. If not, see https://www.gnu.org/licenses/. 
+You should have received a copy of the license along with Natro Macro. If not, please redownload from an official source.
 */
 
 #NoEnv
@@ -41,7 +41,7 @@ ReconnectMin := A_Args[8]
 EmergencyBalloonPingCheck := A_Args[9]
 ConvertBalloon := A_Args[10]
 
-CoordMode, Pixel, Client
+CoordMode, Pixel, Screen
 DetectHiddenWindows On
 SetTitleMatchMode 2
 
@@ -54,7 +54,7 @@ OnMessage(0x5555, "nm_setState", 255)
 OnMessage(0x5556, "nm_sendHeartbeat")
 
 loop {
-	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "Roblox ahk_exe RobloxPlayerBeta.exe")
+	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 	nm_deathCheck()
 	nm_guidCheck()
 	nm_popStarCheck()
@@ -86,11 +86,11 @@ nm_deathCheck(){
 	global windowX, windowY, windowWidth, windowHeight, resetTime
 	static LastDeathDetected:=0
 	if (((nowUnix()-resetTime)>20) && ((nowUnix()-LastDeathDetected)>10)) {
-		ImageSearch, , , windowWidth/2, windowHeight/2, windowWidth, windowHeight, *50 %imgfolder%\died.png	
+		ImageSearch, , , windowX+windowWidth//2, windowY+windowHeight//2, windowX+windowWidth, windowY+windowHeight, *50 %imgfolder%\died.png	
 		if(ErrorLevel=0){
-			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+			if WinExist("natro_macro ahk_class AutoHotkey") {
 				PostMessage, 0x5555, 1, 1
-				Send_WM_COPYDATA("You Died", "natro_macro.ahk ahk_class AutoHotkey")
+				Send_WM_COPYDATA("You Died", "natro_macro ahk_class AutoHotkey")
 			}
 			LastDeathDetected := nowUnix()
 		}
@@ -100,14 +100,14 @@ nm_deathCheck(){
 nm_guidCheck(){
 	global windowX, windowY, windowWidth, windowHeight, state
 	static LastFieldGuidDetected:=1, FieldGuidDetected:=0, confirm:=0
-	ImageSearch, , , 0, 30, windowWidth, 90, *50 %imgfolder%\boostguidingstar.png
+	ImageSearch, , , windowX, windowY+30, windowX+windowWidth, windowY+90, *50 %imgfolder%\boostguidingstar.png
 	if(ErrorLevel=0){ ;Guid Detected
 		confirm:=0
 		if ((FieldGuidDetected = 0) && (state = 1)) {
 			FieldGuidDetected := 1
-			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+			if WinExist("natro_macro ahk_class AutoHotkey") {
 				PostMessage, 0x5555, 6, 1
-				Send_WM_COPYDATA("Detected: Guiding Star Active", "natro_macro.ahk ahk_class AutoHotkey")
+				Send_WM_COPYDATA("Detected: Guiding Star Active", "natro_macro ahk_class AutoHotkey")
 			}
 			LastFieldGuidDetected := nowUnix()
 		}
@@ -117,7 +117,7 @@ nm_guidCheck(){
 		if (comfirm >= 5) {
 			confirm:=0
 			FieldGuidDetected := 0
-			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+			if WinExist("natro_macro ahk_class AutoHotkey") {
 				PostMessage, 0x5555, 6, 0
 			}
 		}
@@ -127,17 +127,17 @@ nm_guidCheck(){
 nm_popStarCheck(){
 	global windowX, windowY, windowWidth, windowHeight, state
 	static HasPopStar:=0, PopStarActive:=0
-	ImageSearch, , , windowWidth//2 - 275, 3*windowHeight//4, windowWidth//2 + 275, windowHeight, *30 %imgfolder%\popstar_counter.png
+	ImageSearch, , , windowX + windowWidth//2 - 275, windowY + 3*windowHeight//4, windowX + windowWidth//2 + 275, windowY + windowHeight, *30 %imgfolder%\popstar_counter.png
 	if(ErrorLevel=0){ ;Has Pop
 		if (HasPopStar = 0){
 			HasPopStar := 1
-			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+			if WinExist("natro_macro ahk_class AutoHotkey") {
 				PostMessage, 0x5555, 7, 1
 			}
 		}
 		if (HasPopStar && (PopStarActive = 1)){
 			PopStarActive := 0
-			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+			if WinExist("natro_macro ahk_class AutoHotkey") {
 				PostMessage, 0x5555, 8, 0
 			}
 			if WinExist("StatMonitor.ahk ahk_class AutoHotkey") {
@@ -148,9 +148,9 @@ nm_popStarCheck(){
 	else if(ErrorLevel=1){
 		if (HasPopStar && (PopStarActive = 0) && (state = 1)){
 			PopStarActive := 1
-			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+			if WinExist("natro_macro ahk_class AutoHotkey") {
 				PostMessage, 0x5555, 8, 1
-				;Send_WM_COPYDATA("Detected: Pop Star Active", "natro_macro.ahk ahk_class AutoHotkey")
+				;Send_WM_COPYDATA("Detected: Pop Star Active", "natro_macro ahk_class AutoHotkey")
 			}
 			if WinExist("StatMonitor.ahk ahk_class AutoHotkey") {
 				PostMessage, 0x5556, 1, 1
@@ -168,15 +168,15 @@ nm_dayOrNight(){
 		return
 	if(((VBState=1) && ((nowUnix()-NightLastDetected)>400 || (nowUnix()-NightLastDetected)<0)) || ((VBState=2) && ((nowUnix()-VBLastKilled)>(600) || (nowUnix()-VBLastKilled)<0))) {
 		VBState:=0
-		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+		if WinExist("natro_macro ahk_class AutoHotkey") {
 			PostMessage, 0x5555, 3, 0
 		}
 	}
-	ImageSearch, , , 0, windowHeight/2, windowWidth, windowHeight, *5 %imgfolder%\grassD.png
+	ImageSearch, , , windowX, windowY + windowHeight/2, windowX + windowWidth, windowY + windowHeight, *5 %imgfolder%\grassD.png
 	if(ErrorLevel=0){
 		dayOrNight:="Day"
 	} else {
-		ImageSearch, , , 0, windowHeight/2, windowWidth, windowHeight, *5 %imgfolder%\grassN.png	
+		ImageSearch, , , windowX, windowY + windowHeight/2, windowX + windowWidth, windowY + windowHeight, *5 %imgfolder%\grassN.png	
 		if(ErrorLevel=0){
 			dayOrNight:="Dusk"
 		} else {
@@ -193,13 +193,13 @@ nm_dayOrNight(){
 		if((nowUnix()-NightLastDetected)>300 || (nowUnix()-NightLastDetected)<0) {
 			NightLastDetected:=nowUnix()
 			IniWrite, %NightLastDetected%, ..\settings\nm_config.ini, Collect, NightLastDetected
-			if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+			if WinExist("natro_macro ahk_class AutoHotkey") {
 				PostMessage, 0x5555, 2, %NightLastDetected%
-				Send_WM_COPYDATA("Detected: Night", "natro_macro.ahk ahk_class AutoHotkey")
+				Send_WM_COPYDATA("Detected: Night", "natro_macro ahk_class AutoHotkey")
 			}
 			if((StingerCheck=1) && ((StingerDailyBonusCheck=0) || (nowUnix()-VBLastKilled)>79200) && VBState=0) {
 				VBState:=1 ;0=no VB, 1=searching for VB, 2=VB found
-				if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+				if WinExist("natro_macro ahk_class AutoHotkey") {
 					PostMessage, 0x5555, 3, 1
 				}
 			}
@@ -220,8 +220,8 @@ nm_backpackPercent(){
 	;LowerRight X2 = windowWidth/2+59+220
 	;LowerRight Y2 = 3+5
 	;Bar = 220 pixels wide = 11 pixels per 5%
-	X1:=windowWidth//2+59+3
-	Y1:=6
+	X1:=windowX+windowWidth//2+59+3
+	Y1:=windowY+6
 	PixelGetColor, backpackColor, %X1%, %Y1%, RGB fast
 	BackpackPercent:=0
 
@@ -326,7 +326,7 @@ nm_backpackPercent(){
 			}
 		}
 	}
-	if ((BackpackPercent != LastBackpackPercent) && WinExist("natro_macro.ahk ahk_class AutoHotkey")) {
+	if ((BackpackPercent != LastBackpackPercent) && WinExist("natro_macro ahk_class AutoHotkey")) {
 		PostMessage, 0x5555, 4, %BackpackPercent%
 		LastBackpackPercent := BackpackPercent
 	}
@@ -353,7 +353,7 @@ nm_backpackPercentFilter(){
 	}
 	i:=Mod(i+1, 6)
 	if (BackpackPercentFiltered != LastBackpackPercentFiltered) {
-		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+		if WinExist("natro_macro ahk_class AutoHotkey") {
 			PostMessage, 0x5555, 5, BackpackPercentFiltered
 		}
 		LastBackpackPercentFiltered := BackpackPercentFiltered
@@ -367,12 +367,14 @@ nm_guidingStarDetect(){
 	if ((AnnounceGuidingStar=0) || (nowUnix()-LastGuidDetected<10))
 		return
 	
-	xi:=windowWidth/2
-	yi:=windowHeight/2
+	xi:=windowX+windowWidth//2
+	yi:=windowY+windowHeight//2
+	ww:=windowX+windowWidth
+	wh:=windowY+windowHeight
 	
 	GSfound:=0
 	Loop, 2 {
-		ImageSearch, , , xi, yi, windowWidth, windowHeight, *50 %imgfolder%\guiding_star_icon%A_Index%.png
+		ImageSearch, , , xi, yi, ww, wh, *50 %imgfolder%\guiding_star_icon%A_Index%.png
 		if(ErrorLevel=0) {
 			GSfound:=1
 			break
@@ -381,10 +383,10 @@ nm_guidingStarDetect(){
 	
 	if(GSfound){
 		for key, value in fieldnames {
-			ImageSearch, , , xi, yi, windowWidth, windowHeight, *50 %imgfolder%\guiding_star_%value%.png
+			ImageSearch, , , xi, yi, ww, wh, *50 %imgfolder%\guiding_star_%value%.png
 			if(ErrorLevel=0){
-				if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
-					Send_WM_COPYDATA(value, "natro_macro.ahk ahk_class AutoHotkey", 1)
+				if WinExist("natro_macro ahk_class AutoHotkey") {
+					Send_WM_COPYDATA(value, "natro_macro ahk_class AutoHotkey", 1)
 					LastGuidDetected := nowUnix()
 					break
 				}
@@ -410,9 +412,9 @@ nm_dailyReconnect(){
 	}
 	if((ReconnectMin=RCminUTC) && HourReady && (DailyReconnect=0) && (MacroState = 2)) {
 		DailyReconnect:=1
-		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+		if WinExist("natro_macro ahk_class AutoHotkey") {
 			PostMessage, 0x5555, 9, 1
-			Send_WM_COPYDATA("Closing: Roblox, Daily Reconnect", "natro_macro.ahk ahk_class AutoHotkey")
+			Send_WM_COPYDATA("Closing: Roblox, Daily Reconnect", "natro_macro ahk_class AutoHotkey")
 			PostMessage, 0x5557
 		}
 	}
@@ -423,9 +425,9 @@ nm_EmergencyBalloon(){
 	static LastEmergency:=0
 	if ((EmergencyBalloonPingCheck = 1) && (ConvertBalloon != "Never") && (nowUnix() - LastEmergency > 60) && ((time := nowUnix() - LastConvertBalloon) > 2700) && (time < 3600))
 	{
-		if WinExist("natro_macro.ahk ahk_class AutoHotkey") {
+		if WinExist("natro_macro ahk_class AutoHotkey") {
 			VarSetCapacity(duration,256), DllCall("GetDurationFormatEx","Ptr",0,"UInt",0,"Ptr",0,"Int64",time*10000000,"WStr",((time >= 60) ? "m'm' s" : "") "s's'","Str",duration,"Int",256)
-			Send_WM_COPYDATA("Detected: No Balloon Convert in " duration, "natro_macro.ahk ahk_class AutoHotkey")
+			Send_WM_COPYDATA("Detected: No Balloon Convert in " duration, "natro_macro ahk_class AutoHotkey")
 			LastEmergency := nowUnix()
 		}
 	}
@@ -491,6 +493,18 @@ WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", Win
     DllCall("ClientToScreen", "UPtr",hWnd, "Ptr",&RECT)
     X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
     Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
+}
+GetRobloxHWND()
+{
+	if (hwnd := WinExist("Roblox ahk_exe RobloxPlayerBeta.exe"))
+		return hwnd
+	else if (WinExist("Roblox ahk_exe ApplicationFrameHost.exe"))
+	{
+		ControlGet, hwnd, Hwnd, , ApplicationFrameInputSinkWindow1
+		return hwnd
+	}
+	else
+		return 0
 }
 
 ExitFunc()

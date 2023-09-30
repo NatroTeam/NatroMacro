@@ -30,7 +30,7 @@
 }
 else
 {
-	paths["blue"] := "
+	paths["bucko"] := "
 	(LTrim Join`r`n
 	;gotoramp
 	;gotocannon

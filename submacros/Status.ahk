@@ -1,14 +1,14 @@
 ﻿/*
-Natro Macro, https://bit.ly/NatroMacro
-Copyright Â© 2022-2023 Natro Dev Team (natromacroserver@gmail.com)
+Natro Macro (https://github.com/NatroTeam/NatroMacro)
+Copyright © 2022-2023 Natro Team (https://github.com/NatroTeam)
 
 This file is part of Natro Macro. Our source code will always be open and available.
 
 Natro Macro is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-Natro Macro is distributed in the hope that it will be useful. This does not give you the right to steal sections from our code, distribute it under your own name, then slander the macro. 
+Natro Macro is distributed in the hope that it will be useful. This does not give you the right to steal sections from our code, distribute it under your own name, then slander the macro.
 
-You should have received a copy of the GNU General Public License along with Natro Macro. If not, see https://www.gnu.org/licenses/. 
+You should have received a copy of the license along with Natro Macro. If not, please redownload from an official source.
 */
 
 #NoEnv
@@ -133,6 +133,7 @@ timers.beesmas.values[9] := {"varname": "GummyBeacon", "name": "Gummy Beacon", "
 
 Loop, Files, patterns\*.ahk
 	patternlist .= ((A_Index = 1) ? "" : "|") StrReplace(A_LoopFileName, ".ahk")
+patternlist .= "|Stationary"
 
 settings := {}
 settings["webhook"] := {"enum": 1, "type": "str", "section": "Status", "regex":"i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$"}
@@ -187,6 +188,8 @@ settings["NightAnnouncementPingID"] := {"enum": 49, "type": "str", "section": "S
 settings["NightAnnouncementWebhook"] := {"enum": 50, "type": "str", "section": "Status", "regex": "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$"}
 settings["SnailTime"] := {"enum": 51, "type": "str", "section": "Collect", "regex": "i)^(5|10|15|Kill)$"}
 settings["ChickTime"] := {"enum": 52, "type": "str", "section": "Collect", "regex": "i)^(5|10|15|Kill)$"}
+settings["InputSnailHealth"] := {"enum": 53, "type": "str", "section": "Collect", "regex": "i)^(?:100(?:\.00?)?|\d?\d(?:\.\d\d?)?)$"}
+settings["InputChickHealth"] := {"enum": 54, "type": "str", "section": "Collect", "regex": "i)^(?:100(?:\.00?)?|\d?\d(?:\.\d\d?)?)$"}
 
 ;settings["discordMode"] := {"enum": 1, "type": "int", "section": "Status", "regex": "i)^(0|1|2)$"} dangerous
 ;settings["discordCheck"] := {"enum": 2, "type": "int", "section": "Status", "regex": "i)^(0|1)$"} dangerous
@@ -414,10 +417,8 @@ settings["StingerDailyBonusCheck"] := {"enum": 223, "type": "int", "section": "C
 settings["GatherDoubleReset"] := {"enum": 224, "type": "int", "section": "Settings", "regex": "i)^(0|1)$"}
 settings["HoneystormCheck"] := {"enum": 225, "type": "int", "section": "Collect", "regex": "i)^(0|1)$"}
 settings["LastHoneystorm"] := {"enum": 226, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
-settings["InputSnailhealth"] := {"enum": 227, "type": "int", "section": "Collect", "regex": "i)^\d{1,8}$"}
-settings["InputChickHealth"] := {"enum": 228, "type": "int", "section": "Collect", "regex": "i)^\d{1,3}$"}
-settings["RBPDelevelCheck"] := {"enum": 229, "type": "int", "section": "Collect", "regex": "i)^(0|1)$"}
-settings["LastRBPDeLevel"] := {"enum": 230, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
+settings["RBPDelevelCheck"] := {"enum": 227, "type": "int", "section": "Collect", "regex": "i)^(0|1)$"}
+settings["LastRBPDeLevel"] := {"enum": 228, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
 
 bitmaps := {}
 bitmaps["moon"] := Gdip_BitmapFromBase64("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")
@@ -435,7 +436,7 @@ nm_status(status)
 {
 	global
 	static colorIndex:=0
-	local stateString, state, objective, log, color, content, message, channel, pBM, x, y, w, h, timestamp, payload_json, postData, contentType
+	local stateString, state, objective, log, color, content, message, channel, pBM, hwnd, x, y, w, h, timestamp, payload_json, postData, contentType
 
 	stateString := SubStr(status, InStr(status, "] ")+2)
 	state := SubStr(stateString, 1, InStr(stateString, ": ")-1), objective := SubStr(stateString, InStr(stateString, ": ")+2)
@@ -499,7 +500,7 @@ nm_status(status)
 			|| ((HoneySSCheck = 1) && InStr(stateString, "Reporting: Daily Honey LB") && ((discordMode = 0) || (channel := (StrLen(ReportChannelID) < 17) ? MainChannelID : ReportChannelID)))
 			|| ((ssDebugging = 1) && ((state = "Placing") || (state = "Collecting") || (state = "Failed") || InStr(stateString, "Next Quest Step")))))
 		{
-			WinGetClientPos(x, y, w, h, "Roblox ahk_exe RobloxPlayerBeta.exe")
+			WinGetClientPos(x, y, w, h, "ahk_id " ((hwnd := WinExist("Roblox ahk_exe RobloxPlayerBeta.exe")) ? hwnd : (hwnd := WinExist("Roblox ahk_exe ApplicationFrameHost.exe")) ? hwnd : 0))
 			pBM := Gdip_BitmapFromScreen((w > 0) ? (x "|" y "|" w "|" h) : 0)
 		}
 		
@@ -733,7 +734,7 @@ nm_command(command)
 		case "stop":
 		DetectHiddenWindows, On
 		SetTitleMatchMode, 2
-		if WinExist("natro_macro.ahk ahk_class AutoHotkey")
+		if WinExist("natro_macro ahk_class AutoHotkey")
 		{
 			PostMessage, 0x5550, 3
 			discord.SendEmbed("Stopping Macro...", 5066239, , , , id)
@@ -749,7 +750,7 @@ nm_command(command)
 		{
 			DetectHiddenWindows, On
 			SetTitleMatchMode, 2
-			if WinExist("natro_macro.ahk ahk_class AutoHotkey")
+			if WinExist("natro_macro ahk_class AutoHotkey")
 			{
 				PostMessage, 0x5550, 2
 				discord.SendEmbed(((MacroState = 2) ? "Pausing" : "Unpausing") " Macro...", 5066239, , , , id)
@@ -764,7 +765,7 @@ nm_command(command)
 		{
 			DetectHiddenWindows, On
 			SetTitleMatchMode, 2
-			if WinExist("natro_macro.ahk ahk_class AutoHotkey"){
+			if WinExist("natro_macro ahk_class AutoHotkey"){
 				PostMessage, 0x5550, 1
 				discord.SendEmbed("Starting Macro...", 5066239, , , , id)
 			}
@@ -782,7 +783,7 @@ nm_command(command)
 		{
 			WinGet, windowPID, PID
 			DetectHiddenWindows, On
-			if WinExist("natro_macro.ahk ahk_class AutoHotkey")
+			if WinExist("natro_macro ahk_class AutoHotkey")
 				WinGet, natroPID, PID
 			DetectHiddenWindows, Off
 			if (windowPID = natroPID)
@@ -831,7 +832,7 @@ nm_command(command)
 			delay := params[2] ? params[2] : 0
 			DetectHiddenWindows, On
 			SetTitleMatchMode, 2
-			if WinExist("natro_macro.ahk ahk_class AutoHotkey")
+			if WinExist("natro_macro ahk_class AutoHotkey")
 			{
 				PostMessage, 0x5557, delay
 				discord.SendEmbed((delay > 0) ? ("Rejoining after " delay " seconds!") : "Rejoining...", 5066239, , , , id)
@@ -850,7 +851,7 @@ nm_command(command)
 		case "keep":
 		DetectHiddenWindows, On
 		SetTitleMatchMode, 2
-		if WinExist("natro_macro.ahk ahk_class AutoHotkey")
+		if WinExist("natro_macro ahk_class AutoHotkey")
 		{
 			SendMessage, 0x5558, 1, , , , , , , 2000
 			switch % ErrorLevel
@@ -872,7 +873,7 @@ nm_command(command)
 		case "replace":
 		DetectHiddenWindows, On
 		SetTitleMatchMode, 2
-		if WinExist("natro_macro.ahk ahk_class AutoHotkey")
+		if WinExist("natro_macro ahk_class AutoHotkey")
 		{
 			SendMessage, 0x5558, 2, , , , , , , 2000
 			switch % ErrorLevel
@@ -1560,7 +1561,7 @@ nm_command(command)
 			state := (params[2] = "on") ? 1 : (params[2] = "off") ? 0 : params[2]
 			DetectHiddenWindows, On
 			SetTitleMatchMode, 2
-			if WinExist("natro_macro.ahk ahk_class AutoHotkey")
+			if WinExist("natro_macro ahk_class AutoHotkey")
 			{
 				SendMessage, 0x5551, state, , , , , , , 2000
 				(ErrorLevel = 2) ? discord.SendEmbed("No Roblox window found!", 16711731, , , , id) : discord.SendEmbed(((state = 1) ? "Enabled" : "Disabled") " Shift Lock!", 5066239, , , , id)
@@ -1628,9 +1629,9 @@ class discord
 		if FileExist(filepath)
 		{
 			FileGetSize, size, % filepath
-			if (size > 8388284)
+			if (size > 26214076)
 			{
-				this.SendEmbed("'" StrReplace(StrReplace(filepath, "\", "\\"), """", "\""") "' is above the Discord file size limit of 8MiB!", 16711731, , , , replyID)
+				this.SendEmbed("'" StrReplace(StrReplace(filepath, "\", "\\"), """", "\""") "' is above the Discord file size limit of 25MiB!", 16711731, , , , replyID)
 				return -1
 			}
 		}
@@ -1997,7 +1998,7 @@ UpdateStr(var, value, section)
 	IniWrite, % (%var% := value), settings\nm_config.ini, %section%, %var%
 	DetectHiddenWindows, On
 	SetTitleMatchMode, 2
-	if WinExist("natro_macro.ahk ahk_class AutoHotkey")
+	if WinExist("natro_macro ahk_class AutoHotkey")
 		PostMessage, 0x5553, settings[var].enum, sections[section]
 	if WinExist("background.ahk ahk_class AutoHotkey")
 		PostMessage, 0x5553, settings[var].enum, sections[section]
@@ -2009,7 +2010,7 @@ UpdateInt(var, value, section)
 	IniWrite, % (%var% := value), settings\nm_config.ini, %section%, %var%
 	DetectHiddenWindows, On
 	SetTitleMatchMode, 2
-	if WinExist("natro_macro.ahk ahk_class AutoHotkey")
+	if WinExist("natro_macro ahk_class AutoHotkey")
 		PostMessage, 0x5552, settings[var].enum, value
 	if WinExist("background.ahk ahk_class AutoHotkey")
 		PostMessage, 0x5552, settings[var].enum, value

@@ -49,4 +49,6 @@
 	, "NightAnnouncementPingID"
 	, "NightAnnouncementWebhook"
 	, "SnailTime"
-	, "ChickTime"]
+	, "ChickTime"
+	, "InputSnailHealth"
+	, "InputChickHealth"]

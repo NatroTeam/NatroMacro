@@ -51,7 +51,7 @@ DetectMovespeed(ByRef s, ByRef f, hasteCap:=0)
 	global hasty_guard, gifted_hasty, base_movespeed, buff_characters, bitmaps
 	
 	; check roblox window exists
-	WinGetClientPos(_x, _y, _w, _h, "Roblox ahk_exe RobloxPlayerBeta.exe")
+	WinGetClientPos(_x, _y, _w, _h, "ahk_id " GetRobloxHWND())
 	if (_w = 0)
 		return (10000000, DllCall("QueryPerformanceCounter", "Int64*", f)) ; large number to break walk loop
 	
@@ -128,4 +128,17 @@ WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", Win
     DllCall("ClientToScreen", "UPtr",hWnd, "Ptr",&RECT)
     X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
     Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
+}
+
+GetRobloxHWND()
+{
+	if (hwnd := WinExist("Roblox ahk_exe RobloxPlayerBeta.exe"))
+		return hwnd
+	else if (WinExist("Roblox ahk_exe ApplicationFrameHost.exe"))
+	{
+		ControlGet, hwnd, Hwnd, , ApplicationFrameInputSinkWindow1
+		return hwnd
+	}
+	else
+		return 0
 }

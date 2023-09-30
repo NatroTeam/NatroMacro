@@ -1,14 +1,14 @@
 ﻿/*
-Natro Macro, https://bit.ly/NatroMacro
-Copyright © 2022-2023 Natro Dev Team (natromacroserver@gmail.com)
+Natro Macro (https://github.com/NatroTeam/NatroMacro)
+Copyright © 2022-2023 Natro Team (https://github.com/NatroTeam)
 
 This file is part of Natro Macro. Our source code will always be open and available.
 
 Natro Macro is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-Natro Macro is distributed in the hope that it will be useful. This does not give you the right to steal sections from our code, distribute it under your own name, then slander the macro. 
+Natro Macro is distributed in the hope that it will be useful. This does not give you the right to steal sections from our code, distribute it under your own name, then slander the macro.
 
-You should have received a copy of the GNU General Public License along with Natro Macro. If not, see https://www.gnu.org/licenses/. 
+You should have received a copy of the license along with Natro Macro. If not, please redownload from an official source.
 */
 
 #NoEnv
@@ -253,22 +253,11 @@ OnMessage(0x5557, "SetBackpack", 255)
 ; OBTAIN DATA
 ; detect OS version
 for objItem in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_OperatingSystem")
-    os_version := StrReplace(objItem.Caption, "Microsoft ")
+    os_version := Trim(StrReplace(StrReplace(StrReplace(StrReplace(objItem.Caption, "Microsoft"), "Майкрософт"), "مايكروسوفت"), "微软"))
 	
 ; obtain natro version and other options (if exist)
-natro_version := ""
-if FileExist("natro_macro.ahk")
+if (natro_version := A_Args[1])
 {
-	; get version
-	Loop, Read, natro_macro.ahk
-	{
-		if (SubStr(A_LoopReadLine, 1, 13) = "VersionID := ")
-		{
-			RegExMatch(A_LoopReadLine, "(?<="")(.*?)(?="")", natro_version)
-			break
-		}
-	}
-	
 	; read information from settings\nm_config.ini
 	Loop, 3
 		IniRead, FieldName%A_Index%, settings\nm_config.ini, Gather, FieldName%A_Index%, N/A
@@ -555,7 +544,7 @@ DetectBuffs()
 	i := (time_value = 0) ? 600 : time_value
 	
 	; check roblox window exists
-	WinGetClientPos(_x, _y, _w, _h, "Roblox ahk_exe RobloxPlayerBeta.exe")
+	WinGetClientPos(_x, _y, _w, _h, "ahk_id " GetRobloxHWND())
 	if (_w = 0)
 	{
 		for k,v in buff_values
@@ -811,7 +800,7 @@ DetectHoney()
 	global honey_values, start_honey, start_time, ocr_language
 	
 	; check roblox window exists
-	WinGetClientPos(_x, _y, _w, _h, "Roblox ahk_exe RobloxPlayerBeta.exe")
+	WinGetClientPos(_x, _y, _w, _h, "ahk_id " GetRobloxHWND())
 	if (_w = 0)
 		return 0
 	
@@ -1130,7 +1119,7 @@ SendHourlyReport()
 					: (i = "redboost") ? 0xffe46156
 					: 0xff56a4e4
 				
-				pBrush := Gdip_BrushCreateSolid(color), Gdip_TextToGraphics(G, "x" . (count ? Round(total/count, 3) : "0.000"), "s32 Center Bold c" pBrush " x" v[1]-190 " y" v[2]+(72-36*A_Index), "Segoe UI"), Gdip_DeleteBrush(pBrush)
+				pBrush := Gdip_BrushCreateSolid(color), Gdip_TextToGraphics(G, "x" . (count ? Round(total/count, 3) : "0.000"), "s32 Center Bold x" v[1]-190 " y" v[2]+(72-36*A_Index), "Segoe UI", , , , pBrush), Gdip_DeleteBrush(pBrush)
 					
 				points := []
 				
@@ -1218,7 +1207,7 @@ SendHourlyReport()
 				: (k = "precision") ? 0xff8f4eb4
 				: (k = "reindeerfetch") ? 0xffcc2c2c : 0
 			
-			pBrush := Gdip_BrushCreateSolid(color), Gdip_TextToGraphics(G, "x" . (count ? Round(total/count, 3) : "0.000"), "s32 Center Bold c" pBrush " x" v[1]-190 " y" v[2]+36, "Segoe UI"), Gdip_DeleteBrush(pBrush)
+			pBrush := Gdip_BrushCreateSolid(color), Gdip_TextToGraphics(G, "x" . (count ? Round(total/count, 3) : "0.000"), "s32 Center Bold x" v[1]-190 " y" v[2]+36, "Segoe UI", , , , pBrush), Gdip_DeleteBrush(pBrush)
 			
 			points := []
 			
@@ -1434,14 +1423,14 @@ SendHourlyReport()
 		pPen := Gdip_CreatePen(color-0xd0000000, 32), Gdip_DrawArc(G, pPen, stat_regions["buffs"][1]+50+(A_Index-1)*(stat_regions["buffs"][3]-100-200)/4, stat_regions["buffs"][2]+410, 200, 200, -90-1+(nectar_value+projected_value)/100*360, 360+2-(nectar_value+projected_value)/100*360), Gdip_DeletePen(pPen)
 		
 		pBrush := Gdip_BrushCreateSolid(color)
-		Gdip_TextToGraphics(G, nectar_value "%", "s54 Center Bold c" pBrush " x" stat_regions["buffs"][1]+150+(A_Index-1)*(stat_regions["buffs"][3]-100-200)/4 " y" stat_regions["buffs"][2]+(projected_value ? 456 : 472), "Segoe UI")
-		Gdip_TextToGraphics(G, Format("{1:Us}", SubStr(j, 1, 3)), "s48 Center Bold c" pBrush " x" stat_regions["buffs"][1]+150+(A_Index-1)*(stat_regions["buffs"][3]-100-200)/4 " y" stat_regions["buffs"][2]+630, "Segoe UI")
+		Gdip_TextToGraphics(G, nectar_value "%", "s54 Center Bold x" stat_regions["buffs"][1]+150+(A_Index-1)*(stat_regions["buffs"][3]-100-200)/4 " y" stat_regions["buffs"][2]+(projected_value ? 456 : 472), "Segoe UI", , , , pBrush)
+		Gdip_TextToGraphics(G, Format("{1:Us}", SubStr(j, 1, 3)), "s48 Center Bold x" stat_regions["buffs"][1]+150+(A_Index-1)*(stat_regions["buffs"][3]-100-200)/4 " y" stat_regions["buffs"][2]+630, "Segoe UI", , , , pBrush)
 		Gdip_DeleteBrush(pBrush)
 		
 		if projected_value
 		{
 			pBrush := Gdip_BrushCreateSolid(color-0x40000000)
-			Gdip_TextToGraphics(G, "(+" Round(projected_value) "%)", "s28 Center Bold c" pBrush " x" stat_regions["buffs"][1]+150+(A_Index-1)*(stat_regions["buffs"][3]-100-200)/4 " y" stat_regions["buffs"][2]+516, "Segoe UI")
+			Gdip_TextToGraphics(G, "(+" Round(projected_value) "%)", "s28 Center Bold x" stat_regions["buffs"][1]+150+(A_Index-1)*(stat_regions["buffs"][3]-100-200)/4 " y" stat_regions["buffs"][2]+516, "Segoe UI", , , , pBrush)
 			Gdip_DeleteBrush(pBrush)
 		}	
 	}
@@ -1513,13 +1502,13 @@ SendHourlyReport()
 	; section 6: info	
 	; row 1: statmonitor and natro version
 	y := stat_regions["info"][2]+60
-	pos := Gdip_TextToGraphics(G, "StatMonitor v" version " by SP#0305", "s56 Center Bold c00ffffff x" stat_regions["info"][1]+stat_regions["info"][3]//2 " y" y, "Segoe UI")
+	pos := Gdip_TextToGraphics(G, "StatMonitor v" version " by SP", "s56 Center Bold c00ffffff x" stat_regions["info"][1]+stat_regions["info"][3]//2 " y" y, "Segoe UI")
 	x := SubStr(pos, 1, InStr(pos, "|", , , 1)-1)
 	
 	pos := Gdip_TextToGraphics(G, "StatMonitor v" version " by ", "s56 Left Bold cafffffff x" x " y" y, "Segoe UI")
 	x := SubStr(pos, 1, InStr(pos, "|", , , 1)-1)+SubStr(pos, InStr(pos, "|", , , 2)+1, InStr(pos, "|", , , 3)-InStr(pos, "|", , , 2)-1)
 	
-	pos := Gdip_TextToGraphics(G, "SP#0305", "s56 Left Bold cffff5f1f x" x " y" y, "Segoe UI")
+	pos := Gdip_TextToGraphics(G, "SP", "s56 Left Bold cffff5f1f x" x " y" y, "Segoe UI")
 	x := SubStr(pos, 1, InStr(pos, "|", , , 1)-1)+SubStr(pos, InStr(pos, "|", , , 2)+1, InStr(pos, "|", , , 3)-InStr(pos, "|", , , 2)-1)
 	
 	; row 2: report timestamp
@@ -1557,10 +1546,10 @@ SendHourlyReport()
 	
 	pos := Gdip_TextToGraphics(G, "Natro v" natro_version, "s56 Left Bold c00ffffff x" x " y" y, "Segoe UI")
 	x -= SubStr(pos, InStr(pos, "|", , , 2)+1, InStr(pos, "|", , , 3)-InStr(pos, "|", , , 2)-1)/2
-	pos := Gdip_TextToGraphics(G, "bit.ly/NatroMacro", "s56 Left Bold c00ffffff x" x " y" y, "Segoe UI")
+	pos := Gdip_TextToGraphics(G, "discord.gg/natromacro", "s56 Left Bold c00ffffff x" x " y" y, "Segoe UI")
 	x -= SubStr(pos, InStr(pos, "|", , , 2)+1, InStr(pos, "|", , , 3)-InStr(pos, "|", , , 2)-1)/2
 	
-	pos := Gdip_TextToGraphics(G, "bit.ly/NatroMacro", "s56 Left Bold Underline cff3366cc x" x " y" y, "Segoe UI")
+	pos := Gdip_TextToGraphics(G, "discord.gg/natromacro", "s56 Left Bold Underline cff3366cc x" x " y" y, "Segoe UI")
 	x := SubStr(pos, 1, InStr(pos, "|", , , 1)-1)+SubStr(pos, InStr(pos, "|", , , 2)+1, InStr(pos, "|", , , 3)-InStr(pos, "|", , , 2)-1)
 	Gdip_DrawImage(G, bitmaps["pBMNatroLogo"], x+10, y, 80, 80)
 	Gdip_TextToGraphics(G, "Natro v" natro_version, "s56 Left Bold cffb47bd1 x" x+100 " y" y, "Segoe UI")
@@ -1994,6 +1983,19 @@ WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", Win
     DllCall("ClientToScreen", "UPtr",hWnd, "Ptr",&RECT)
     X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
     Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
+}
+
+GetRobloxHWND()
+{
+	if (hwnd := WinExist("Roblox ahk_exe RobloxPlayerBeta.exe"))
+		return hwnd
+	else if (WinExist("Roblox ahk_exe ApplicationFrameHost.exe"))
+	{
+		ControlGet, hwnd, Hwnd, , ApplicationFrameInputSinkWindow1
+		return hwnd
+	}
+	else
+		return 0
 }
 
 Send_WM_COPYDATA(ByRef StringToSend, ByRef TargetScriptTitle, wParam:=0)

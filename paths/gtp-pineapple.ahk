@@ -1,4 +1,4 @@
-﻿If (HiveBees < 25) && (MoveMethod = "cannon")
+﻿If (HiveBees >= 25) && (MoveMethod = "cannon")
 {
 paths["pineapple"] := "
 (LTrim Join`r`n

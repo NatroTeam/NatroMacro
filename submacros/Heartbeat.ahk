@@ -1,14 +1,14 @@
 ﻿/*
-Natro Macro, https://bit.ly/NatroMacro
-Copyright © 2022-2023 Natro Dev Team (natromacroserver@gmail.com)
+Natro Macro (https://github.com/NatroTeam/NatroMacro)
+Copyright © 2022-2023 Natro Team (https://github.com/NatroTeam)
 
 This file is part of Natro Macro. Our source code will always be open and available.
 
 Natro Macro is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-Natro Macro is distributed in the hope that it will be useful. This does not give you the right to steal sections from our code, distribute it under your own name, then slander the macro. 
+Natro Macro is distributed in the hope that it will be useful. This does not give you the right to steal sections from our code, distribute it under your own name, then slander the macro.
 
-You should have received a copy of the GNU General Public License along with Natro Macro. If not, see https://www.gnu.org/licenses/. 
+You should have received a copy of the license along with Natro Macro. If not, please redownload from an official source.
 */
 
 #NoEnv
@@ -23,19 +23,20 @@ OnMessage(0x5556, "nm_SetHeartbeat")
 
 LastRobloxWindow := LastStatusHeartbeat := LastMainHeartbeat := LastBackgroundHeartbeat := nowUnix()
 MacroState := 0
-path := A_ScriptDir "\..\natro_macro.ahk"
+SplitPath, A_AhkPath, exe
+path := (exe = "natro_macro.exe") ? ("""" A_AhkPath """") :  ("""" A_AhkPath """ """ A_ScriptDir "\..\natro_macro.ahk" """")
 
 Loop
 {
 	DetectHiddenWindows, Off
 	SetTitleMatchMode, 1
 	time := nowUnix()
-	if WinExist("Roblox ahk_exe RobloxPlayerBeta.exe")
+	if (WinExist("Roblox ahk_exe RobloxPlayerBeta.exe") || WinExist("Roblox ahk_exe ApplicationFrameHost.exe"))
 		LastRobloxWindow := time
 	; request heartbeat
 	DetectHiddenWindows, On
 	SetTitleMatchMode, 2
-	if WinExist("natro_macro.ahk ahk_class AutoHotkey")
+	if WinExist("natro_macro ahk_class AutoHotkey")
 		PostMessage, 0x5556
 	if WinExist("Status.ahk ahk_class AutoHotkey")
 		PostMessage, 0x5556
@@ -53,22 +54,22 @@ Loop
 		Prev_MacroState := MacroState, MacroState := 0
 		Loop
 		{
-			while WinExist("natro_macro.ahk ahk_class AutoHotkey")
+			while WinExist("natro_macro ahk_class AutoHotkey")
 			{
 				WinGet, natroPID, PID
 				Process, Close, % natroPID
 			}
-			for p in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process where Name like '%Roblox%'")
+			for p in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process WHERE Name LIKE '%Roblox%' OR CommandLine LIKE '%ROBLOXCORPORATION%'")
 				Process, Close, % p.ProcessID
 			
 			ForceStart := (Prev_MacroState = 2)
 			
-			run, "%A_AhkPath%" "%path%" "%ForceStart%" "%A_ScriptHwnd%"
+			run, %path% "%ForceStart%" "%A_ScriptHwnd%"
 			WinWait, Natro ahk_class AutoHotkeyGUI, , 300
 			if (success := !ErrorLevel)
 			{
 				Sleep, 2000
-				Send_WM_COPYDATA("Error: " reason "`nSuccessfully restarted macro!", "natro_macro.ahk ahk_class AutoHotkey")
+				Send_WM_COPYDATA("Error: " reason "`nSuccessfully restarted macro!", "natro_macro ahk_class AutoHotkey")
 				Sleep, 1000
 				LastRobloxWindow := LastStatusHeartbeat := LastMainHeartbeat := LastBackgroundHeartbeat := nowUnix()
 				break

@@ -224,7 +224,5 @@
 	, "GatherDoubleReset"
 	, "HoneystormCheck"
 	, "LastHoneystorm"
-	, "InputSnailHealth"
-	, "InputChickHealth"
 	, "RBPDelevelCheck"
 	, "LastRBPDelevel"]
