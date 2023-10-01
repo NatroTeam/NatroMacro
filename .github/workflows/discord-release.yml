@@ -10,4 +10,4 @@ jobs:
         id: discord
         uses: NatroTeam/discord-release-action@v1.0
         with:
-          webhook_url: ${{secrets.WEBHOOK_URL}}
+          webhook_url: ${{secrets.RELEASE_WEBHOOK_URL}}
