@@ -20,3 +20,5 @@ jobs:
         with:
           name: STAR_USERS
           path: star_users.json
+    concurrency:
+      group: discord-star-${{github.event.sender.login}}
