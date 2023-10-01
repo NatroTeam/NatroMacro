@@ -1,0 +1,22 @@
+on:
+  watch:
+    types: [started]
+
+jobs:
+  star-to-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: download-log
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: STAR_USERS
+          if_no_artifact_found: warn
+      - name: send-discord-webhook
+        uses: NatroTeam/discord-star-action@v1.0
+        with:
+          webhook_url: ${{secrets.STAR_WEBHOOK_URL}}
+      - name: update-log
+        uses: actions/upload-artifact@v3
+        with:
+          name: STAR_USERS
+          path: star_users.json
