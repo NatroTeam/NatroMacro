@@ -19682,7 +19682,7 @@ if(AutoFieldBoostActive){
 }
 ;Field drift compensation warning
 loop, 3 {
-	if (FieldName%A_Index% && FieldDriftCheck%A_Index% && SprinklerType != "Supreme" && FDCWarn = 1) { ;if gathering in a field with FDC on and without supreme set in settings, warn user
+	if (FieldName%A_Index% != "None" && FieldName%A_Index% && FieldDriftCheck%A_Index% && SprinklerType != "Supreme" && FDCWarn = 1) { ;if gathering in a field with FDC on and without supreme set in settings, warn user
 		msgbox, 64, Field Drift Compensation ,% "You have Field Drift Compensation enabled for Gathering Field " A_Index " , however you do not have supreme saturator as your sprinkler type set in settings.`nPlease note that Field Drift Compensation requires you to own the Supreme saturator, as it searches for the blue pixel.", 30
 		msgbox, 292, Field Drift Compensation , Would you like to disable this warning for the future?, 30
 		ifmsgbox Yes
