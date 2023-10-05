@@ -379,7 +379,8 @@ config["Settings"] := {"GuiTheme":"MacLion3"
 	, "StopHotkey":"F3"
 	, "AutoClickerHotkey":"F4"
 	, "TimersHotkey":"F5"
-	, "ShowOnPause":0}
+	, "ShowOnPause":0
+	, "FDCWarn":1}
 
 config["Status"] := {"StatusLogReverse":0
 	, "TotalRuntime":0
@@ -19651,6 +19652,47 @@ GuiControl, -g, ImageUpdateLink
 Gui, Font, s8 cDefault Norm Tahoma
 nm_setStatus("Begin", "Macro")
 Sleep, 100
+;Auto Field Boost WARNING @ start
+if(AutoFieldBoostActive){
+    if(AFBDiceEnable)
+        if(AFBDiceLimitEnable)
+            futureDice:=AFBDiceLimit-AFBdiceUsed
+        else
+            futureDice:="ALL"
+    else
+        futureDice:="None"
+    if(AFBGlitterEnable)
+        if(AFBGlitterLimitEnable)
+            futureGlitter:=AFBGlitterLimit-AFBglitterUsed
+        else
+            futureGlitter:="ALL"
+    else
+        futureGlitter:="None"
+	if(A_Args[1]!=1){
+		msgbox, 257, WARNING!!, % """Automatic Field Boost"" is ACTIVATED.`n------------------------------------------------------------------------------------`nIf you continue the following quantity of items can be used:`nDice: " futureDice "`nGlitter: " futureGlitter "`n`nHIGHLY RECOMMENDED:`nDisable any non-essential tasks such as quests, bug runs, stingers, etc. Any time away from your gathering field can result in the loss of your field boost.", 30
+		IfMsgBox Cancel
+			return
+	}
+}
+;Field drift compensation warning
+loop, 3 {
+	/*
+	loop, 3 { ;get values
+	GuiControlGet FieldName%A_Index%
+	GuiControlGet FieldDriftCheck%A_Index%
+	}
+	GuiControlGet SprinklerType
+	*/
+	if (FieldName%A_Index% && FieldDriftCheck%A_Index% && SprinklerType != "Supreme" && FDCWarn = 1) { ;if gathering in a field with FDC on and without supreme set in settings, warn user
+		msgbox, 64, Field Drift Compensation ,% "You have Field Drift Compensation enabled for Gathering Field " A_Index " , however you do not have supreme saturator as your sprinkler type set in settings.`nPlease note that Field Drift Compensation requires you to own the Supreme saturator, as it searches for the blue pixel.", 30
+		msgbox, 292, Field Drift Compensation , Would you like to disable this warning for the future?, 30
+		ifmsgbox Yes
+			FDCWarn := 0
+		if (FDCWarn = 0)
+			IniWrite, 1, %A_ScriptDir%\settings\nm_config.ini, Settings, FDCWarn
+		break
+	}
+}
 if !GetRobloxHWND()
 	disconnectCheck()
 WinActivate, Roblox
@@ -19789,28 +19831,6 @@ loop 6 {
 	if(HotbarWhile%slot%="Snowflake") {
 		ActiveHotkeys.push(["Snowflake", slot, HotbarTime%slot%, LastHotkey%slot%])
 		break
-	}
-}
-;Auto Field Boost WARNING @ start
-if(AutoFieldBoostActive){
-    if(AFBDiceEnable)
-        if(AFBDiceLimitEnable)
-            futureDice:=AFBDiceLimit-AFBdiceUsed
-        else
-            futureDice:="ALL"
-    else
-        futureDice:="None"
-    if(AFBGlitterEnable)
-        if(AFBGlitterLimitEnable)
-            futureGlitter:=AFBGlitterLimit-AFBglitterUsed
-        else
-            futureGlitter:="ALL"
-    else
-        futureGlitter:="None"
-	if(A_Args[1]!=1){
-		msgbox, 257, WARNING!!, % """Automatic Field Boost"" is ACTIVATED.`n------------------------------------------------------------------------------------`nIf you continue the following quantity of items can be used:`nDice: " futureDice "`nGlitter: " futureGlitter "`n`nHIGHLY RECOMMENDED:`nDisable any non-essential tasks such as quests, bug runs, stingers, etc. Any time away from your gathering field can result in the loss of your field boost.", 30
-		IfMsgBox Cancel
-			return
 	}
 }
 ;start ancillary macros
