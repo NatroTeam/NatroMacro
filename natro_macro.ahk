@@ -1917,7 +1917,7 @@ Gui, Add, DropDownList, x18 y57 w96 vFieldName1 gnm_FieldSelect1 Disabled, % LTr
 Gui, Add, DropDownList, xp yp+60 wp vFieldName2 gnm_FieldSelect2 Disabled, % LTrim(StrReplace("|None|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower|", "|" FieldName2 "|", "|" FieldName2 "||"), "|")
 Gui, Add, DropDownList, xp yp+60 wp vFieldName3 gnm_FieldSelect3 Disabled, % LTrim(StrReplace("|None|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower|", "|" FieldName3 "|", "|" FieldName3 "||"), "|")
 hBM := Gdip_CreateHBITMAPFromBitmap(bitmaps["savefield"])
-Gui, Add, Picture, x5 y86 w18 h18 gnm_SaveFieldDefault hwndhSaveFieldDefault1, HBITMAP:*%hBM%
+Gui, Add, Picture, x2 y86 w18 h18 gnm_SaveFieldDefault hwndhSaveFieldDefault1, HBITMAP:*%hBM%
 DllCall("DeleteObject", "ptr", hBM)
 hBM := Gdip_CreateHBITMAPFromBitmap(bitmaps[(FieldName2 = "None") ? "savefielddisabled" : "savefield"])
 Gui, Add, Picture, xp yp+60 wp hp gnm_SaveFieldDefault hwndhSaveFieldDefault2, HBITMAP:*%hBM%
@@ -1925,7 +1925,7 @@ DllCall("DeleteObject", "ptr", hBM)
 hBM := Gdip_CreateHBITMAPFromBitmap(bitmaps[(FieldName3 = "None") ? "savefielddisabled" : "savefield"])
 Gui, Add, Picture, xp yp+60 wp hp gnm_SaveFieldDefault hwndhSaveFieldDefault3, HBITMAP:*%hBM%
 DllCall("DeleteObject", "ptr", hBM)
-Gui, Add, Checkbox, x28 y83 w86 +BackgroundTrans +Center vFieldDriftCheck1 gnm_SaveGather Checked%FieldDriftCheck1% Disabled,Field Drift`nCompensation
+Gui, Add, Checkbox, x20 y83 w86 +BackgroundTrans +Center vFieldDriftCheck1 gnm_SaveGather Checked%FieldDriftCheck1% Disabled,Field Drift`nCompensation
 Gui, Add, Checkbox, xp yp+60 wp +BackgroundTrans +Center vFieldDriftCheck2 gnm_SaveGather Checked%FieldDriftCheck2% Disabled,Field Drift`nCompensation
 Gui, Add, Checkbox, xp yp+60 wp +BackgroundTrans +Center vFieldDriftCheck3 gnm_SaveGather Checked%FieldDriftCheck3% Disabled,Field Drift`nCompensation
 Gui, Add, DropDownList, x121 y57 w112 vFieldPattern1 gnm_SaveGather Disabled, % LTrim(StrReplace(patternlist "Stationary|", "|" FieldPattern1 "|", "|" FieldPattern1 "||"), "|")
@@ -1979,6 +1979,9 @@ Gui, Add, Text, xp yp+60 wp +BackgroundTrans +Center, Distance:
 Gui, Add, DropDownList, x433 y93 w40 vFieldSprinklerDist1 gnm_SaveGather Disabled, % LTrim(StrReplace("|1|2|3|4|5|6|7|8|9|10|", "|" FieldSprinklerDist1 "|", "|" FieldSprinklerDist1 "||"), "|")
 Gui, Add, DropDownList, xp yp+60 wp vFieldSprinklerDist2 gnm_SaveGather Disabled, % LTrim(StrReplace("|1|2|3|4|5|6|7|8|9|10|", "|" FieldSprinklerDist2 "|", "|" FieldSprinklerDist2 "||"), "|")
 Gui, Add, DropDownList, xp yp+60 wp vFieldSprinklerDist3 gnm_SaveGather Disabled, % LTrim(StrReplace("|1|2|3|4|5|6|7|8|9|10|", "|" FieldSprinklerDist3 "|", "|" FieldSprinklerDist3 "||"), "|")
+Gui, Add, Button, x105 y89 w12 h14 gnm_FDCHelp, ?
+Gui, Add, Button, xp yp+60 w12 h14 gnm_FDCHelp, ?
+Gui, Add, Button, xp yp+60 w12 h14 gnm_FDCHelp, ?
 PostMessage, 0x5555, 25, 0, , ahk_pid %lp_PID%
 
 ;Contributors TAB
@@ -7193,6 +7196,9 @@ nm_ReconnectTimeHelp(){
 }
 nm_HiveBeesHelp(){
 	msgbox, 0x40000, Hive Bees, DESCRIPTION:`nEnter the number of Bees you have in your Hive. This doesn't have to be exactly the same as your in-game amount, but the macro will use this value to determine whether it can travel to the 35 Bee Zone, use the Red Cannon, etc.`n`nNOTE:`nLowering this number will increase the time your character waits at hive after converting or before going to battle. If you notice that your bees don't finish converting or haven't recovered to fight mobs, reduce this value but keep it above 35 to enable access to all areas in the map.
+}
+nm_FDCHelp(){
+	msgbox, 0x40000, Field Drift Compensation, DESCRIPTION:`nField Drift Compensation is a way to stop what we call field drift (AKA falling/running out of the field.) Enabling this checkbox will re-align you to your saturator every so often by searching for the neon blue pixel and moving towards it. `n`nNote that this feature requires The Supreme Saturator, otherwise you will drift more. If you would like more info, join our discord.
 }
 nm_ContributorsImage(page:=1){
 	static hCtrl, hBM1, hBM2, hBM3, hBM4, hBM5, hBM6, hBM7, hBM8, hBM9 ; 9 pages max
