@@ -1,0 +1,69 @@
+name: 🐞 Bug Report
+description: Report an issue or error message in Natro Macro.
+labels: ["bug", "needs triage"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+      
+        Thank you for reporting a bug! Use the sections below to submit a bug report.
+
+        - Make sure you have asked in our [Discord server](https://discord.gg/natromacro) for support.
+        - All bug reports are welcome - we want to fix them!
+        - Natro Macro is maintained by volunteers. Please be patient when waiting for a response.
+        - Remember to include sufficient details and context.
+        - If you have multiple bugs to report, please submit them in separate issues.
+        - We accept pull requests. If you know how to fix it - go ahead!
+
+  - type: dropdown
+    attributes:
+      label: Have you searched the existing bug reports?
+      description: Please search [here](../labels/bug) to see if an issue already exists for the bug you encountered.
+      options:
+        - 'No'
+        - 'Yes'
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug
+    attributes:
+      label: What happened?
+      description: Please provide as much info as possible!
+      placeholder: Tell us what you saw! Feel free to attach pictures/videos if it helps.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: How do you reproduce this? Please provide as much step-by-step detail as possible.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What would you expect to happen?
+      description: What should have happened after reproducing the steps above?
+      placeholder: Tell us what you expected to see! Feel free to attach pictures/videos if it helps.
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Natro Macro version
+      description: What version of Natro Macro were you using?
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: What is your Discord username?
+      description: This is not required, but it would help us contact you and provide you with more support.
