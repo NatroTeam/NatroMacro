@@ -6312,8 +6312,9 @@ nm_ServerLink(hEdit){
 	ControlGet, p, CurrentCol, , , ahk_id %hEdit%
 	GuiControlGet, k, Name, %hEdit%
 	GuiControlGet, str, , %hEdit%
-
-	RegExMatch(str, "i)((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*", NewPrivServer)
+	RegExMatch(str, "i)((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/share\?code=.{32}&type=Server(\&[^\/]*)*", NewPrivServer)
+	if (NewPrivServer = "")
+		RegExMatch(str, "i)((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*", NewPrivServer)
     if ((StrLen(str) > 0) && (StrLen(NewPrivServer) = 0))
 	{
         GuiControl, , %hEdit%, % %k%
