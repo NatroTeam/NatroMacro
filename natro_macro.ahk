@@ -2002,6 +2002,7 @@ Gui, Font, w700
 Gui, Add, GroupBox, x5 y24 w160 h144, Hive Tools
 Gui, Add, GroupBox, x5 y168 w160 h62, Other Tools
 Gui, Add, GroupBox, x170 y24 w160 h144, Calculators
+Gui, Add, GroupBox, x170 y168 w160 h62 vAutoClickerButton, AutoClicker (%AutoClickerHotkey%)
 Gui, Add, GroupBox, x335 y24 w160 h84, Macro Tools
 Gui, Add, GroupBox, x335 y108 w160 h60, Discord Tools
 Gui, Add, GroupBox, x335 y168 w160 h62, Reporting
@@ -2016,6 +2017,8 @@ Gui, Add, Button, x10 y184 w150 h42 gnm_GenerateBeeList, Export Hive Bee List`n(
 Gui, Add, Button, x175 y40 w150 h40 gnm_TicketShopCalculatorButton, Ticket Shop Calculator`n(Google Sheets)
 Gui, Add, Button, x175 y82 w150 h40 gnm_SSACalculatorButton, SSA Calculator`n(Google Sheets)
 Gui, Add, Button, x175 y124 w150 h40 gnm_BondCalculatorButton, Bond Calculator`n(Google Sheets)
+;autoclicker
+Gui, Add, Button, x175 y184 w150 h42 gnm_autoclickerbutton, AutoClicker`nSettings
 ;macro tools
 Gui, Add, Button, x340 y40 w150 h20 gnm_HotkeyGUI, Change Hotkeys
 Gui, Add, Button, x340 y62 w150 h20 gnm_DebugLogGUI, Debug Log Options
@@ -2053,7 +2056,9 @@ PostMessage, 0x5555, 35, 0, , ahk_pid %lp_PID%
 ;------------------------
 Gui, Tab, Settings
 ;gui settings
-Gui, Add, GroupBox, x5 y25 w160 h65, GUI SETTINGS
+Gui, Font, w700
+Gui, Add, GroupBox, x5 y25 w160 h65, Gui
+Gui, Font, s8 cDefault Norm, Tahoma
 Gui, Add, Checkbox, x10 y73 vAlwaysOnTop gnm_AlwaysOnTop Checked%AlwaysOnTop%, Always On Top
 Gui, Add, Text, x10 y40 w70 +left +BackgroundTrans,GUI Theme:
 nm_importStyles()
@@ -2062,7 +2067,9 @@ Gui, Add, Text, x10 y57 w100 +left +BackgroundTrans,GUI Transparency:
 Gui, Add, DropDownList, x105 y55 w52 h100 vGuiTransparency gnm_guiTransparencySet Disabled, % LTrim(StrReplace("|0|5|10|15|20|25|30|35|40|45|50|55|60|65|70|", "|" GuiTransparency "|", "|" GuiTransparency "||"), "|")
 
 ;hive settings
-Gui, Add, GroupBox, x5 y95 w160 h65, HIVE SETTINGS
+Gui, Font, w700
+Gui, Add, GroupBox, x5 y95 w160 h65, Hive
+Gui, Font, s8 cDefault Norm, Tahoma
 Gui, Add, Text, x10 y110 w60 +left +BackgroundTrans,Hive Slot:
 Gui, Font, s6
 Gui, Add, Text, x61 y112 w60 +left +BackgroundTrans,(6-5-4-3-2-1)
@@ -2077,54 +2084,52 @@ Gui, Add, Edit, x33 y141 w18 h16 Limit2 number +BackgroundTrans vConvertDelay gn
 Gui, Add, Text, x54 y142 w110 +left +BackgroundTrans,seconds after convert
 
 ;reset settings
-Gui, Add, GroupBox, x5 y165 w160 h70, RESET SETTINGS
+Gui, Font, w700
+Gui, Add, GroupBox, x5 y165 w160 h70, Reset
+Gui, Font, s8 cDefault Norm, Tahoma
 Gui, Add, Button, x20 y183 w130 h22 gnm_ResetFieldDefaultGUI, Reset Field Defaults
 Gui, Add, Button, x20 y207 w130 h22 gnm_ResetConfig, Reset All Settings
 
 ;input settings
-Gui, Add, GroupBox, x170 y25 w160 h93, INPUT SETTINGS
-Gui, Add, Text, x180 y40 w100 +left +BackgroundTrans,Add Key Delay (ms):
-Gui, Add, Edit, x280 y38 w47 h18 limit4 number vKeyDelayEdit gnm_saveKeyDelay
-Gui, Add, UpDown, Range0-9999 vKeyDelay gnm_saveKeyDelay Disabled, % KeyDelay
-Gui, Font, Underline
-Gui, Add, Text, x182 y58 w85 -Wrap c0x0046ee vAutoClickerButton, AutoClicker (%AutoClickerHotkey%)
+Gui, Font, w700
+Gui, Add, GroupBox, x170 y25 w160 h35, Input
 Gui, Font, s8 cDefault Norm, Tahoma
-Gui, Add, Checkbox, x267 y59 +BackgroundTrans vClickMode gnm_saveAutoClicker Checked%ClickMode%, Infinite
-Gui, Add, Text, x182 y77, Repeat
-Gui, Add, Edit, % "x221 y75 w64 h18 vClickCountEdit +BackgroundTrans gnm_saveAutoClicker Number Disabled" ClickMode
-Gui, Add, UpDown, % "vClickCount gnm_saveAutoClicker Range0-99999 Disabled" ClickMode, %ClickCount%
-Gui, Add, Text, x290 y77, times
-Gui, Add, Text, x182 y96, Click Interval (ms):
-Gui, Add, Edit, x277 y94 w40 h18 +BackgroundTrans Number vClickDelay gnm_saveAutoClicker, %ClickDelay%
+Gui, Add, Text, x176 y40 w100 +left +BackgroundTrans,Add Key Delay (ms):
+Gui, Add, Edit, x276 y38 w47 h18 limit4 number vKeyDelayEdit gnm_saveKeyDelay
+Gui, Add, UpDown, Range0-9999 vKeyDelay gnm_saveKeyDelay Disabled, % KeyDelay
 
 ;reconnect settings
-Gui, Add, GroupBox, x170 y123 w160 h112, RECONNECT SETTINGS
-Gui, Add, Text, x180 y140 w80 +Left +BackgroundTrans,Server Link:
-Gui, Add, Edit, x240 y139 w82 h16 +BackgroundTrans vPrivServer gnm_ServerLink Disabled, %PrivServer%
-Gui, Add, Text, x180 y159 +BackgroundTrans, Reconnect every
-Gui, Add, Edit, x265 y158 w18 h16 Number Limit2 vReconnectInterval gnm_setReconnectInterval, %ReconnectInterval%
-Gui, Add, Text, x287 y159 +BackgroundTrans, hours
-Gui, Add, Text, x196 y177 +BackgroundTrans, starting at
-Gui, Add, Edit, x250 y176 w18 h16 Number Limit2 vReconnectHour gnm_setReconnectHour, %ReconnectHour%
+Gui, Font, w700
+Gui, Add, GroupBox, x170 y65 w160 h112, Reconnect
+Gui, Font, s8 cDefault Norm, Tahoma
+Gui, Add, Text, x180 y82 w80 +Left +BackgroundTrans,Server Link:
+Gui, Add, Edit, x240 y81 w82 h16 +BackgroundTrans vPrivServer gnm_ServerLink Disabled, %PrivServer%
+Gui, Add, Text, x180 y101 +BackgroundTrans, Reconnect every
+Gui, Add, Edit, x265 y100 w18 h16 Number Limit2 vReconnectInterval gnm_setReconnectInterval, %ReconnectInterval%
+Gui, Add, Text, x287 y101 +BackgroundTrans, hours
+Gui, Add, Text, x196 y119 +BackgroundTrans, starting at
+Gui, Add, Edit, x250 y118 w18 h16 Number Limit2 vReconnectHour gnm_setReconnectHour, %ReconnectHour%
 Gui, font, w1000 s11
-Gui, Add, Text, x269 y173 +BackgroundTrans, :
+Gui, Add, Text, x269 y115 +BackgroundTrans, :
 Gui, Font, s8 cDefault Norm, Tahoma
-Gui, Add, Edit, x275 y176 w18 h16 Number Limit2 vReconnectMin gnm_setReconnectMin, %ReconnectMin%
+Gui, Add, Edit, x275 y118 w18 h16 Number Limit2 vReconnectMin gnm_setReconnectMin, %ReconnectMin%
 Gui, font, s6 w700
-Gui, Add, Text, x295 y179 +BackgroundTrans, UTC
+Gui, Add, Text, x295 y121 +BackgroundTrans, UTC
 Gui, Font, s8 cDefault Norm, Tahoma
-Gui, Add, Button, x315 y176 w10 h15 gnm_ReconnectTimeHelp, ?
-Gui, Add, CheckBox, x180 y195 w88 h15 vReconnectMessage gnm_saveConfig +BackgroundTrans Checked%ReconnectMessage%, Natro so broke
+Gui, Add, Button, x315 y118 w10 h15 gnm_ReconnectTimeHelp, ?
+Gui, Add, CheckBox, x180 y137 w88 h15 vReconnectMessage gnm_saveConfig +BackgroundTrans Checked%ReconnectMessage%, Natro so broke
 hBM := Gdip_CreateHBITMAPFromBitmap(bitmaps["weary"])
-Gui, Add, Picture, +BackgroundTrans x269 y193 w20 h20, HBITMAP:*%hBM%
+Gui, Add, Picture, +BackgroundTrans x269 y135 w20 h20, HBITMAP:*%hBM%
 DllCall("DeleteObject", "ptr", hBM)
 Gdip_DisposeImage(bitmaps["weary"])
-Gui, Add, Button, x315 y194 w10 h15 gnm_NatroSoBrokeHelp, ?
-Gui, Add, CheckBox, x180 y212 w132 h15 vPublicFallback gnm_saveConfig +BackgroundTrans Checked%PublicFallback%, Fallback to Public Server
-Gui, Add, Button, x315 y212 w10 h15 gnm_PublicFallbackHelp, ?
+Gui, Add, Button, x315 y136 w10 h15 gnm_NatroSoBrokeHelp, ?
+Gui, Add, CheckBox, x180 y154 w132 h15 vPublicFallback gnm_saveConfig +BackgroundTrans Checked%PublicFallback%, Fallback to Public Server
+Gui, Add, Button, x315 y154 w10 h15 gnm_PublicFallbackHelp, ?
 
 ;character settings
-Gui, Add, GroupBox, x335 y25 w160 h210, CHARACTER SETTINGS
+Gui, Font, w700
+Gui, Add, GroupBox, x335 y25 w160 h210, Character
+Gui, Font, s8 cDefault Norm, Tahoma
 Gui, Add, Text, x345 y40 w110 +left +BackgroundTrans,Movement Speed:
 Gui, Font, s6
 Gui, Add, Text, x345 y55 w80 +right +BackgroundTrans,(WITHOUT HASTE)
@@ -7411,16 +7416,40 @@ nm_CollectKillButton(hCtrl){
 		}
 	}
 }
+nm_autoclickerbutton()
+{
+	global
+	Gui, clicker:Destroy
+	Gui, clicker:+AlwaysOnTop +Border
+	Gui, clicker:Font, s8 cDefault w700, Tahoma
+	Gui, clicker:Add, Groupbox, x5 y2 w161 h60, Settings
+	Gui, clicker:Font, Norm
+	Gui, clicker:Add, Checkbox, x76 y2 +BackgroundTrans vClickMode gnm_saveAutoClicker Checked%ClickMode%, Infinite
+	Gui, clicker:Add, Text, x13 y21, Repeat
+	Gui, clicker:Add, Edit, % "x50 y19 w80 h18 vClickCountEdit +BackgroundTrans gnm_saveAutoClicker Number Limit7 Disabled" ClickMode
+	Gui, clicker:Add, UpDown, % "vClickCount gnm_saveAutoClicker Range0-9999999 Disabled" ClickMode, %ClickCount%
+	Gui, clicker:Add, Text, x133 y21, times
+	Gui, clicker:Add, Text, x10 y41, Click Interval (ms):
+	Gui, clicker:Add, Edit, x100 y39 w61 h18 +BackgroundTrans Number gnm_saveAutoClicker Limit5, %ClickDelay%
+	Gui, clicker:Add, UpDown, vClickDelay gnm_saveAutoClicker Range0-99999, %ClickDelay%
+	Gui, clicker:Add, Button, x45 y68 w80 h20 gnm_StartAutoClicker, Start (%AutoClickerHotkey%)
+	Gui, clicker:Show, w170, AutoClicker
+}
 nm_saveAutoClicker(){
 	global
-	GuiControlGet, ClickDelay
-	GuiControlGet, ClickCount
-	GuiControlGet, ClickMode
+	GuiControlGet, ClickDelay, clicker:
+	GuiControlGet, ClickCount, clicker:
+	GuiControlGet, ClickMode, clicker:
 	IniWrite, %ClickDelay%, settings\nm_config.ini, Settings, ClickDelay
 	IniWrite, %ClickCount%, settings\nm_config.ini, Settings, ClickCount
 	IniWrite, %ClickMode%, settings\nm_config.ini, Settings, ClickMode
 	GuiControl, % (ClickMode ? "Disable" : "Enable"), ClickCount
 	GuiControl, % (ClickMode ? "Disable" : "Enable"), ClickCountEdit
+}
+nm_StartAutoClicker(){
+	Gui, clicker:Destroy
+	Gui, Minimize
+	autoclicker()
 }
 nm_saveKeyDelay(){
     global 
@@ -19947,7 +19976,6 @@ autoclicker(){
 		sleep %ClickDelay%
 	}
 }
-toggle := 0
 return
 ;TIMERS
 timers:
