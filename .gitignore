@@ -1,0 +1,46 @@
+# Git ignore
+# https://git-scm.com/docs/gitignore
+
+# Settings
+settings/*
+
+# Miscellaneous
+*~
+*#
+.DS_STORE
+Thumbs.db
+.netbeans
+nbproject
+.node_history
+
+# IDEs & Text Editors
+.idea
+.sublime-*
+.vscode
+.netbeans
+nbproject
+
+# Temporary files
+.tmp
+.temp
+*.temp.*
+.grunt
+.lock-wscript
+*-monitor-layout.txt
+
+# Logs
+/logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Dependencies
+node_modules
+
+# Test output
+lib-cov
+/coverage
+/test/test-apps/*/dist
