@@ -1,6 +1,6 @@
-﻿paths["pine tree"] := "
-(LTrim Join`r`n
-if (" HiveBees " < 25) {
+﻿If ((HiveBees < 25) || (MoveMethod = "Walk")) {
+	paths["pine tree"] := "
+	(LTrim Join`r`n
 	" nm_Walk(31, FwdKey) "
 	" nm_Walk(75, RightKey) "
 	send {" RotLeft " 4}
@@ -14,8 +14,20 @@ if (" HiveBees " < 25) {
 	send {" SC_Space " up}
 	Walk(108)
 	send {" FwdKey " up}
-}
+	switch % " HiveSlot "
+		{
+		case 3:
+		" nm_Walk(4.2, BackKey) "
+
+		default:
+		" nm_Walk(23, RightKey) "
+		" nm_Walk(2, FwdKey) "
+		}
+	)"
+	}
 else {
+	paths["pine tree"] := "
+	(LTrim Join`r`n
 	" nm_Walk(31, FwdKey) "
 	" nm_Walk(75, RightKey) "
 	send {" RotLeft " 4}
@@ -35,17 +47,18 @@ else {
 	send {" FwdKey " up}
 	HyperSleep(2600)
 	" nm_Walk(13, FwdKey) "
-}
+	switch % " HiveSlot "
+		{
+		case 3:
+		" nm_Walk(4.2, BackKey) "
 
-switch % " HiveSlot "
-{
-case 3:
-" nm_Walk(4.2, BackKey) "
+		default:
+		" nm_Walk(23, RightKey) "
+		" nm_Walk(2, FwdKey) "
+		}
+	)"
+	}
 
-default:
-" nm_Walk(23, RightKey) "
-" nm_Walk(2, FwdKey) "
-}
-)"
+;added MoveMethod condition to no-glider option misc 181123
 ;slightly altered tile measurements and optimised glider deployment SP 230405
 ;path with and without glider zaappiix 230212

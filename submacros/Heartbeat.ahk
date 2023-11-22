@@ -23,8 +23,7 @@ OnMessage(0x5556, "nm_SetHeartbeat")
 
 LastRobloxWindow := LastStatusHeartbeat := LastMainHeartbeat := LastBackgroundHeartbeat := nowUnix()
 MacroState := 0
-SplitPath, A_AhkPath, exe
-path := ("""" A_AhkPath """ """ A_ScriptDir "\..\natro_macro.ahk""")
+path := ("""" A_AhkPath """ """ A_ScriptDir "\natro_macro.ahk""")
 
 Loop
 {

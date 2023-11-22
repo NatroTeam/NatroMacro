@@ -16,6 +16,10 @@ You should have received a copy of the license along with Natro Macro. If not, p
 #SingleInstance force
 #MaxThreads 255
 
+#Include %A_ScriptDir%\..\lib
+#Include Gdip_All.ahk
+#Include Gdip_ImageSearch.ahk
+
 SetBatchLines -1
 SetWorkingDir %A_ScriptDir%
 
@@ -41,6 +45,10 @@ ReconnectMin := A_Args[8]
 EmergencyBalloonPingCheck := A_Args[9]
 ConvertBalloon := A_Args[10]
 
+pToken := Gdip_Startup()
+bitmaps := {}
+bitmaps["toppollen"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAACoAAAALBAMAAAD7HQL7AAAAGFBMVEUAAAASFRcTFhgUFxkUFxgWGRsXGhwXGhsckMZRAAAAAXRSTlMAQObYZgAAABd0RVh0U29mdHdhcmUAUGhvdG9EZW1vbiA5LjDNHNgxAAADKGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSfvu78nIGlkPSdXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQnPz4KPHg6eG1wbWV0YSB4bWxuczp4PSdhZG9iZTpuczptZXRhLycgeDp4bXB0az0nSW1hZ2U6OkV4aWZUb29sIDEyLjQ0Jz4KPHJkZjpSREYgeG1sbnM6cmRmPSdodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjJz4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOmV4aWY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vZXhpZi8xLjAvJz4KICA8ZXhpZjpQaXhlbFhEaW1lbnNpb24+NDI8L2V4aWY6UGl4ZWxYRGltZW5zaW9uPgogIDxleGlmOlBpeGVsWURpbWVuc2lvbj4xMTwvZXhpZjpQaXhlbFlEaW1lbnNpb24+CiA8L3JkZjpEZXNjcmlwdGlvbj4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOnRpZmY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvJz4KICA8dGlmZjpJbWFnZUxlbmd0aD4xMTwvdGlmZjpJbWFnZUxlbmd0aD4KICA8dGlmZjpJbWFnZVdpZHRoPjQyPC90aWZmOkltYWdlV2lkdGg+CiAgPHRpZmY6T3JpZW50YXRpb24+MTwvdGlmZjpPcmllbnRhdGlvbj4KICA8dGlmZjpSZXNvbHV0aW9uVW5pdD4yPC90aWZmOlJlc29sdXRpb25Vbml0PgogIDx0aWZmOlhSZXNvbHV0aW9uPjk2LzE8L3RpZmY6WFJlc29sdXRpb24+CiAgPHRpZmY6WVJlc29sdXRpb24+OTYvMTwvdGlmZjpZUmVzb2x1dGlvbj4KIDwvcmRmOkRlc2NyaXB0aW9uPgo8L3JkZjpSREY+CjwveDp4bXBtZXRhPgo8P3hwYWNrZXQgZW5kPSdyJz8+kVOYmAAAAFdJREFUeNp1zMENg0AUA9HZKFGuHtEAdEIJlED/VSC0u/+C8M1PsjH0hEZF5alVnvovPWEdpelQBQ26IK3rF0IQw62Zo67hTbf58DmgtOkY6F7Kj5kDghc2CgW76l3tzQAAAABJRU5ErkJggg==")
+
 CoordMode, Pixel, Screen
 DetectHiddenWindows On
 SetTitleMatchMode 2
@@ -54,7 +62,8 @@ OnMessage(0x5555, "nm_setState", 255)
 OnMessage(0x5556, "nm_sendHeartbeat")
 
 loop {
-	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
+	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " (hwnd := GetRobloxHWND()))
+	offsetY := GetYOffset(hwnd)
 	nm_deathCheck()
 	nm_guidCheck()
 	nm_popStarCheck()
@@ -98,9 +107,9 @@ nm_deathCheck(){
 }
 
 nm_guidCheck(){
-	global windowX, windowY, windowWidth, windowHeight, state
+	global windowX, windowY, windowWidth, windowHeight, offsetY, state
 	static LastFieldGuidDetected:=1, FieldGuidDetected:=0, confirm:=0
-	ImageSearch, , , windowX, windowY+30, windowX+windowWidth, windowY+90, *50 %imgfolder%\boostguidingstar.png
+	ImageSearch, , , windowX, windowY+offsetY+30, windowX+windowWidth, windowY+offsetY+90, *50 %imgfolder%\boostguidingstar.png
 	if(ErrorLevel=0){ ;Guid Detected
 		confirm:=0
 		if ((FieldGuidDetected = 0) && (state = 1)) {
@@ -212,7 +221,7 @@ nm_dayOrNight(){
 }
 
 nm_backpackPercent(){
-	global windowX, windowY, windowWidth, windowHeight
+	global windowX, windowY, windowWidth, windowHeight, offsetY
 	static LastBackpackPercent:=""
 	;WinGetPos , windowX, windowY, windowWidth, windowHeight, Roblox
 	;UpperLeft X1 = windowWidth/2+59
@@ -221,7 +230,7 @@ nm_backpackPercent(){
 	;LowerRight Y2 = 3+5
 	;Bar = 220 pixels wide = 11 pixels per 5%
 	X1:=windowX+windowWidth//2+59+3
-	Y1:=windowY+6
+	Y1:=windowY+offsetY+6
 	PixelGetColor, backpackColor, %X1%, %Y1%, RGB fast
 	BackpackPercent:=0
 
@@ -505,6 +514,43 @@ GetRobloxHWND()
 	}
 	else
 		return 0
+}
+GetYOffset(hwnd)
+{
+	global bitmaps
+	static hRoblox, offset := 0
+
+	if (hwnd = hRoblox)
+		return offset
+	else
+	{
+		WinActivate, Roblox
+		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
+		pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2 "|" windowY "|60|100")
+
+		Loop, 40 ; for red vignette effect
+		{ 
+			if (Gdip_ImageSearch(pBMScreen, bitmaps["toppollen"], pos, , , , , 2) = 1)
+			{
+				hRoblox := hwnd
+				return (offset := SubStr(pos, InStr(pos, ",") + 1) - 13)
+			}
+			else
+			{
+				if (A_Index = 40)
+				{
+					Gdip_DisposeImage(pBMScreen)
+					return 0 ; default offset, change this if needed
+				}
+				else
+				{
+					Sleep, 50
+					Gdip_DisposeImage(pBMScreen)
+					pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2 "|" windowY "|60|100")
+				}				
+			}
+		}
+	}
 }
 
 ExitFunc()

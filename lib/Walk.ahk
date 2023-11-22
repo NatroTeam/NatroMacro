@@ -31,6 +31,8 @@ bitmaps["pBMBearGummy"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAA4AAA
 bitmaps["pBMBearScience"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAA4AAAABBAMAAAAcMII3AAAAFVBMVEUwLi1TTD+zjUy0jky8l1W5oXHevny+g95vAAAAE0lEQVR4AQEIAPf/ACNGUQAVZDIFbwFmjB55HwAAAABJRU5ErkJggg==")
 bitmaps["pBMBearMother"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAABAAAAABBAMAAAAlVzNsAAAAJFBMVEVBNRlDNxtTRid8b0avoG69r22+sG7Qw4PRw4Te0Jbk153m2Z5VNHxxAAAAFElEQVR4AQEJAPb/AFVouTECSnZVDPsCv+2QpmwAAAAASUVORK5CYII=")
 
+offsetY := 0
+
 Walk(n, hasteCap:=0)
 {
 	;hasteCap values > 0 will cause all haste values lower than it to be treated as no haste but haste values above it will be treated as the cap value.
@@ -48,7 +50,7 @@ DetectMovespeed(ByRef s, ByRef f, hasteCap:=0)
 {
 	DllCall("QueryPerformanceCounter", "Int64*", s)
 	
-	global hasty_guard, gifted_hasty, base_movespeed, buff_characters, bitmaps
+	global hasty_guard, gifted_hasty, base_movespeed, buff_characters, bitmaps, offsetY
 	
 	; check roblox window exists
 	WinGetClientPos(_x, _y, _w, _h, "ahk_id " GetRobloxHWND())
@@ -57,7 +59,7 @@ DetectMovespeed(ByRef s, ByRef f, hasteCap:=0)
 	
 	; get screen bitmap of buff area from client window
 	chdc := CreateCompatibleDC(), hbm := CreateDIBSection(_w, 30, chdc), obm := SelectObject(chdc, hbm), hhdc := GetDC()
-	BitBlt(chdc, 0, 0, _w, 30, hhdc, _x, _y+48)
+	BitBlt(chdc, 0, 0, _w, 30, hhdc, _x, _y+offsetY+48)
 	ReleaseDC(hhdc)
 	pBMArea := Gdip_CreateBitmapFromHBITMAP(hbm)
 	SelectObject(chdc, obm), DeleteObject(hbm), DeleteDC(hhdc), DeleteDC(chdc)

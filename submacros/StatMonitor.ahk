@@ -97,6 +97,7 @@ bitmaps["pBMSatisfying"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAEAAA
 
 ; other
 bitmaps["pBMNatroLogo"] := Gdip_BitmapFromBase64("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")
+bitmaps["toppollen"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAACoAAAALBAMAAAD7HQL7AAAAGFBMVEUAAAASFRcTFhgUFxkUFxgWGRsXGhwXGhsckMZRAAAAAXRSTlMAQObYZgAAABd0RVh0U29mdHdhcmUAUGhvdG9EZW1vbiA5LjDNHNgxAAADKGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSfvu78nIGlkPSdXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQnPz4KPHg6eG1wbWV0YSB4bWxuczp4PSdhZG9iZTpuczptZXRhLycgeDp4bXB0az0nSW1hZ2U6OkV4aWZUb29sIDEyLjQ0Jz4KPHJkZjpSREYgeG1sbnM6cmRmPSdodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjJz4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOmV4aWY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vZXhpZi8xLjAvJz4KICA8ZXhpZjpQaXhlbFhEaW1lbnNpb24+NDI8L2V4aWY6UGl4ZWxYRGltZW5zaW9uPgogIDxleGlmOlBpeGVsWURpbWVuc2lvbj4xMTwvZXhpZjpQaXhlbFlEaW1lbnNpb24+CiA8L3JkZjpEZXNjcmlwdGlvbj4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOnRpZmY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvJz4KICA8dGlmZjpJbWFnZUxlbmd0aD4xMTwvdGlmZjpJbWFnZUxlbmd0aD4KICA8dGlmZjpJbWFnZVdpZHRoPjQyPC90aWZmOkltYWdlV2lkdGg+CiAgPHRpZmY6T3JpZW50YXRpb24+MTwvdGlmZjpPcmllbnRhdGlvbj4KICA8dGlmZjpSZXNvbHV0aW9uVW5pdD4yPC90aWZmOlJlc29sdXRpb25Vbml0PgogIDx0aWZmOlhSZXNvbHV0aW9uPjk2LzE8L3RpZmY6WFJlc29sdXRpb24+CiAgPHRpZmY6WVJlc29sdXRpb24+OTYvMTwvdGlmZjpZUmVzb2x1dGlvbj4KIDwvcmRmOkRlc2NyaXB0aW9uPgo8L3JkZjpSREY+CjwveDp4bXBtZXRhPgo8P3hwYWNrZXQgZW5kPSdyJz8+kVOYmAAAAFdJREFUeNp1zMENg0AUA9HZKFGuHtEAdEIJlED/VSC0u/+C8M1PsjH0hEZF5alVnvovPWEdpelQBQ26IK3rF0IQw62Zo67hTbf58DmgtOkY6F7Kj5kDghc2CgW76l3tzQAAAABJRU5ErkJggg==")
 
 
 
@@ -544,8 +545,9 @@ DetectBuffs()
 	i := (time_value = 0) ? 600 : time_value
 	
 	; check roblox window exists
-	WinGetClientPos(_x, _y, _w, _h, "ahk_id " GetRobloxHWND())
-	if (_w = 0)
+	if (hwnd := GetRobloxHWND())
+		_yo := GetYOffset(hwnd), WinGetClientPos(_x, _y, _w, _h, "ahk_id " hwnd)
+	else
 	{
 		for k,v in buff_values
 		{
@@ -556,7 +558,7 @@ DetectBuffs()
 	}
 	
 	; create bitmap for buffs
-	pBMArea := Gdip_BitmapFromScreen(_x "|" _y+30 "|" _w "|50")
+	pBMArea := Gdip_BitmapFromScreen(_x "|" _y+_yo+30 "|" _w "|50")
 	
 	; basic on/off
 	for k,v in ["jbshare","babylove","festivemark","guiding"]
@@ -800,13 +802,14 @@ DetectHoney()
 	global honey_values, start_honey, start_time, ocr_language
 	
 	; check roblox window exists
-	WinGetClientPos(_x, _y, _w, _h, "ahk_id " GetRobloxHWND())
-	if (_w = 0)
+	if (hwnd := GetRobloxHWND())
+		_yo := GetYOffset(hwnd), WinGetClientPos(_x, _y, _w, _h, "ahk_id " hwnd)
+	else
 		return 0
 	
 	; initialise array to store detected values and get bitmap and effect ready
 	detected := []
-	pBM := Gdip_BitmapFromScreen(_x+_w//2-241 "|" _y "|140|36")
+	pBM := Gdip_BitmapFromScreen(_x+_w//2-241 "|" _y+_yo "|140|36")
 	pEffect := Gdip_CreateEffect(5,-80,30)
 	
 	; detect honey, enlarge image if necessary
@@ -1996,6 +1999,44 @@ GetRobloxHWND()
 	}
 	else
 		return 0
+}
+
+GetYOffset(hwnd)
+{
+	global bitmaps
+	static hRoblox, offset := 0
+
+	if (hwnd = hRoblox)
+		return offset
+	else
+	{
+		WinActivate, Roblox
+		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
+		pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2 "|" windowY "|60|100")
+
+		Loop, 40 ; for red vignette effect
+		{ 
+			if (Gdip_ImageSearch(pBMScreen, bitmaps["toppollen"], pos, , , , , 2) = 1)
+			{
+				hRoblox := hwnd
+				return (offset := SubStr(pos, InStr(pos, ",") + 1) - 13)
+			}
+			else
+			{
+				if (A_Index = 40)
+				{
+					Gdip_DisposeImage(pBMScreen)
+					return 0 ; default offset, change this if needed
+				}
+				else
+				{
+					Sleep, 50
+					Gdip_DisposeImage(pBMScreen)
+					pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2 "|" windowY "|60|100")
+				}				
+			}
+		}
+	}
 }
 
 Send_WM_COPYDATA(ByRef StringToSend, ByRef TargetScriptTitle, wParam:=0)

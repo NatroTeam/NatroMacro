@@ -136,16 +136,16 @@ Loop, Files, patterns\*.ahk
 patternlist .= "|Stationary"
 
 settings := {}
-settings["webhook"] := {"enum": 1, "type": "str", "section": "Status", "regex":"i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$"}
+settings["webhook"] := {"enum": 1, "type": "str", "section": "Status", "regex": "i)^(https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)|<blank>)$"}
 ;settings["bottoken"] := {"enum": 2, "type": "str", "section": "Status", "regex": "i)^[\w-.]{50,83}$"} dangerous
 ;settings["MainChannelID"] := {"enum": 3, "type": "str", "section": "Status", "regex": "i)^\d{17,20}$"} dangerous
 settings["ReportChannelID"] := {"enum": 4, "type": "str", "section": "Status", "regex": "i)^\d{17,20}$"}
 settings["discordUID"] := {"enum": 5, "type": "str", "section": "Status", "regex": "i)^&?\d{17,20}$"}
 settings["commandPrefix"] := {"enum": 6, "type": "str", "section": "Status", "regex": "i)^\S{1,3}$"}
 settings["MoveMethod"] := {"enum": 7, "type": "str", "section": "Settings", "regex": "i)^(cannon|walk)$"}
-settings["SprinklerType"] := {"enum": 8, "type": "str", "section": "Settings", "regex": "i)^(none|basic|silver|gold|diamond|supreme)$"}
+settings["SprinklerType"] := {"enum": 8, "type": "str", "section": "Settings", "regex": "i)^(none|basic|silver|golden|diamond|supreme)$"}
 settings["ConvertBalloon"] := {"enum": 9, "type": "str", "section": "Settings", "regex": "i)^(always|never|every)$"}
-settings["PrivServer"] := {"enum": 10, "type": "str", "section": "Settings", "regex": "i)^((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*$"}
+settings["PrivServer"] := {"enum": 10, "type": "str", "section": "Settings", "regex": "i)^(((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*|<blank>)$"}
 settings["FieldName1"] := {"enum": 11, "type": "str", "section": "Gather", "regex": "i)^(Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower)$"}
 settings["FieldName2"] := {"enum": 12, "type": "str", "section": "Gather", "regex": "i)^(None|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower)$"}
 settings["FieldName3"] := {"enum": 13, "type": "str", "section": "Gather", "regex": "i)^(None|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower)$"}
@@ -155,9 +155,9 @@ settings["FieldPattern3"] := {"enum": 16, "type": "str", "section": "Gather", "r
 settings["FieldPatternSize1"] := {"enum": 17, "type": "str", "section": "Gather", "regex": "i)^(XS|S|M|L|XL)$"}
 settings["FieldPatternSize2"] := {"enum": 18, "type": "str", "section": "Gather", "regex": "i)^(XS|S|M|L|XL)$"}
 settings["FieldPatternSize3"] := {"enum": 19, "type": "str", "section": "Gather", "regex": "i)^(XS|S|M|L|XL)$"}
-settings["FieldReturnType1"] := {"enum": 20, "type": "str", "section": "Gather", "regex": "i)^(Walk|Reset|Rejoin)$"}
-settings["FieldReturnType2"] := {"enum": 21, "type": "str", "section": "Gather", "regex": "i)^(Walk|Reset|Rejoin)$"}
-settings["FieldReturnType3"] := {"enum": 22, "type": "str", "section": "Gather", "regex": "i)^(Walk|Reset|Rejoin)$"}
+settings["FieldReturnType1"] := {"enum": 20, "type": "str", "section": "Gather", "regex": "i)^(Walk|Reset)$"}
+settings["FieldReturnType2"] := {"enum": 21, "type": "str", "section": "Gather", "regex": "i)^(Walk|Reset)$"}
+settings["FieldReturnType3"] := {"enum": 22, "type": "str", "section": "Gather", "regex": "i)^(Walk|Reset)$"}
 settings["FieldSprinklerLoc1"] := {"enum": 23, "type": "str", "section": "Gather", "regex": "i)^(Center|Upper Left|Upper|Upper Right|Right|Lower Right|Lower|Lower Left|Left)$"}
 settings["FieldSprinklerLoc2"] := {"enum": 24, "type": "str", "section": "Gather", "regex": "i)^(Center|Upper Left|Upper|Upper Right|Right|Lower Right|Lower|Lower Left|Left)$"}
 settings["FieldSprinklerLoc3"] := {"enum": 25, "type": "str", "section": "Gather", "regex": "i)^(Center|Upper Left|Upper|Upper Right|Right|Lower Right|Lower|Lower Left|Left)$"}
@@ -177,15 +177,15 @@ settings["HotbarWhile6"] := {"enum": 38, "type": "str", "section": "Boost", "reg
 settings["HotbarWhile7"] := {"enum": 39, "type": "str", "section": "Boost", "regex": "i)^(Never|Always|At Hive|Gathering|Attacking|Microconverter|Whirligig|Enzymes|GatherStart|Snowflake|Glitter)$"}
 settings["QuestGatherReturnBy"] := {"enum": 40, "type": "str", "section": "Quests", "regex": "i)^(Walk|Reset)$"}
 settings["MoveSpeedNum"] := {"enum": 41, "type": "str", "section": "Settings", "regex": "i)^[1-9]\d(\.\d{1,3})?$"}
-settings["ReconnectInterval"] := {"enum": 42, "type": "str", "section": "Settings", "regex": "i)^(1|2|3|4|6|8|12|24)?$"}
-settings["ReconnectHour"] := {"enum": 43, "type": "str", "section": "Settings", "regex": "i)^([0-1]?[0-9]|2[0-3])$"}
-settings["ReconnectMin"] := {"enum": 44, "type": "str", "section": "Settings", "regex": "i)^([0-5]?[0-9])?$"}
-settings["FallbackServer1"] := {"enum": 45, "type": "str", "section": "Settings", "regex": "i)^((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/(1537690962|4189852503)\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*$"}
-settings["FallbackServer2"] := {"enum": 46, "type": "str", "section": "Settings", "regex": "i)^((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/(1537690962|4189852503)\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*$"}
-settings["FallbackServer3"] := {"enum": 47, "type": "str", "section": "Settings", "regex": "i)^((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/(1537690962|4189852503)\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*$"}
+settings["ReconnectInterval"] := {"enum": 42, "type": "str", "section": "Settings", "regex": "i)^(1|2|3|4|6|8|12|24|<blank>)$"}
+settings["ReconnectHour"] := {"enum": 43, "type": "str", "section": "Settings", "regex": "i)^(([0-1]?[0-9]|2[0-3])|<blank>)$"}
+settings["ReconnectMin"] := {"enum": 44, "type": "str", "section": "Settings", "regex": "i)^(([0-5]?[0-9])?|<blank>)$"}
+settings["FallbackServer1"] := {"enum": 45, "type": "str", "section": "Settings", "regex": "i)^(((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*|<blank>)$"}
+settings["FallbackServer2"] := {"enum": 46, "type": "str", "section": "Settings", "regex": "i)^(((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*|<blank>)$"}
+settings["FallbackServer3"] := {"enum": 47, "type": "str", "section": "Settings", "regex": "i)^(((http(s)?):\/\/)?((www|web)\.)?roblox\.com\/games\/1537690962\/?([^\/]*)\?privateServerLinkCode=.{32}(\&[^\/]*)*|<blank>)$"}
 settings["NightAnnouncementName"] := {"enum": 48, "type": "str", "section": "Status", "regex": "i)^[^\\]$"}
-settings["NightAnnouncementPingID"] := {"enum": 49, "type": "str", "section": "Status", "regex": "i)^&?[0-9]*$"}
-settings["NightAnnouncementWebhook"] := {"enum": 50, "type": "str", "section": "Status", "regex": "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$"}
+settings["NightAnnouncementPingID"] := {"enum": 49, "type": "str", "section": "Status", "regex": "i)^((&?[0-9]*)|<blank>)$"}
+settings["NightAnnouncementWebhook"] := {"enum": 50, "type": "str", "section": "Status", "regex": "i)^(https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)|<blank>)$"}
 settings["SnailTime"] := {"enum": 51, "type": "str", "section": "Collect", "regex": "i)^(5|10|15|Kill)$"}
 settings["ChickTime"] := {"enum": 52, "type": "str", "section": "Collect", "regex": "i)^(5|10|15|Kill)$"}
 settings["InputSnailHealth"] := {"enum": 53, "type": "str", "section": "Collect", "regex": "i)^(?:100(?:\.00?)?|\d?\d(?:\.\d\d?)?)$"}
@@ -477,7 +477,7 @@ nm_status(status)
 		; ping
 		content := ((criticalCheck = 1) && discordUID 
 			&& (((CriticalErrorPingCheck = 1) && (state = "Error"))
-			|| ((DisconnectPingCheck = 1) && (state = "Disconnected"))
+			|| ((DisconnectPingCheck = 1) && InStr(stateString, "Disconnected"))
 			|| ((GameFrozenPingCheck = 1) && (InStr(stateString, "Resetting: Character") && (Mod(SubStr(objective, InStr(objective, " ")+1), 10) = 5)))
 			|| ((PhantomPingCheck = 1) && InStr(stateString, "Phantom"))
 			|| ((UnexpectedDeathPingCheck = 1) && (state = "You Died"))
@@ -511,7 +511,7 @@ nm_status(status)
 		buffer.RemoveAt(1)
 		
 	; extra: night detection announcement
-	if ((NightAnnouncementCheck = 1) && (PublicJoined = 0) && (stateString  = "Detected: Night") && !InStr(PrivServer, "/4189852503?") && (StrLen(NightAnnouncementWebhook) > 0))
+	if ((NightAnnouncementCheck = 1) && (PublicJoined = 0) && (stateString  = "Detected: Night") && (StrLen(NightAnnouncementWebhook) > 0))
 	{
 		FormatTime, timestamp, %A_NowUTC%, yyyy-MM-ddTHH:mm:ssZ
 		payload_json := "
@@ -1411,7 +1411,7 @@ nm_command(command)
 						value := Trim(SubStr(command.content, InStr(command.content, params[2])+StrLen(params[2])))
 						if (value ~= v.regex)
 						{
-							(v.type = "str") ? UpdateStr(k, value, v.section) : UpdateInt(k, value, v.section)
+							(v.type = "str") ? UpdateStr(k, (value = "<blank>") ? "" : value, v.section) : UpdateInt(k, value, v.section)
 							discord.SendEmbed("Set ``" k "`` to ``" value "``!", 5066239, , , , id)
 						}
 						else
