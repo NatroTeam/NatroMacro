@@ -316,7 +316,7 @@ SetStretchBltMode(hdc, iStretchMode:=4) {
 SetImage(hwnd, hBitmap) {
 ; STM_SETIMAGE = 0x172
 ; Example: Gui, Add, Text, 0xE w500 h300 hwndhPic          ; SS_Bitmap    = 0xE
-   If (!hBitmap || !hwnd)
+   If (!hwnd)
       Return
 
    E := DllCall("SendMessage", "UPtr", hwnd, "UInt", 0x172, "UInt", 0x0, "UPtr", hBitmap)

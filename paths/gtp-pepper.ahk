@@ -48,5 +48,6 @@ send {" RotRight " 2}
 Send {" RightKey " up}
 " nm_Walk(10, FwdKey) "
 " nm_Walk(10, BackKey, LeftKey) "
+" nm_Walk(4, BackKey) " 
 )"
 ;path 230212 zaappiix

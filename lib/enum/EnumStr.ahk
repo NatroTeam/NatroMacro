@@ -51,4 +51,14 @@
 	, "SnailTime"
 	, "ChickTime"
 	, "InputSnailHealth"
-	, "InputChickHealth"]
+	, "InputChickHealth"
+	, "ShrineItem1"
+	, "ShrineItem2"
+	, "ShrineIndex1"
+	, "ShrineIndex2"
+	, "BlenderIndex1"
+	, "BlenderIndex2"
+	, "BlenderIndex3"
+	, "BlenderItem1"
+	, "BlenderItem2"
+	, "BlenderItem3"]

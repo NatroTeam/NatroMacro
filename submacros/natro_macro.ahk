@@ -27,6 +27,9 @@ You should have received a copy of the license along with Natro Macro. If not, p
 #Include Gdip_All.ahk
 #Include Gdip_ImageSearch.ahk
 #Include JSON.ahk
+#Include WinGetClientPos.ahk
+#Include GetRobloxHWND.ahk
+#Include GetYOffset.ahk
 
 SetBatchLines -1
 SetWorkingDir %A_ScriptDir%\..
@@ -109,7 +112,7 @@ If (!FileExist("settings")) ; make sure the settings folder exists
 	}
 }
 
-VersionID := "0.9.7"
+VersionID := "0.9.8"
 currentWalk := {"pid":"", "name":""} ; stores "pid" (script process ID) and "name" (pattern/movement name)
 
 ;initial load warnings
@@ -582,7 +585,40 @@ config["Collect"] := {"ClockCheck":1
 	, "StingerCloverCheck":1
 	, "StingerDailyBonusCheck":0
 	, "NightLastDetected":1
-	, "VBLastKilled":1}
+	, "VBLastKilled":1
+	, "MondoSecs":30}
+
+config["Shrine"] := {"ShrineCheck":0
+	, "LastShrine":1
+	, "ShrineAmount1":0
+	, "ShrineAmount2":0
+	, "ShrineItem1":"None"
+	, "ShrineItem2":"None"
+	, "ShrineIndex1":1
+	, "ShrineIndex2":1
+	, "ShrineRot":1}
+
+config["Blender"] := {"BlenderRot":1
+	, "BlenderCheck":1
+	, "TimerInterval":0
+	, "BlenderItem1":"None"
+	, "BlenderItem2":"None"
+	, "BlenderItem3":"None"
+	, "BlenderAmount1":0
+	, "BlenderAmount2":0
+	, "BlenderAmount3":0
+	, "BlenderIndex1":1
+	, "BlenderIndex2":1
+	, "BlenderIndex3":1
+	, "BlenderTime1":0
+	, "BlenderTime2":0
+	, "BlenderTime3":0
+	, "BlenderEnd": 0
+	, "LastBlenderRot":1
+	, "BlenderCount1": 0
+	, "BlenderCount2": 0
+	, "BlenderCount3": 0}
+	
 
 config["Boost"] := {"FieldBoostStacks":0
 	, "FieldBooster1":"None"
@@ -618,7 +654,6 @@ config["Boost"] := {"FieldBoostStacks":0
 	, "LastEnzymes":1
 	, "LastGlitter":1
 	, "LastSnowflake":1
-	, "LastWindShrine":1
 	, "LastMicroConverter":1
 	, "LastGuid":1
 	, "AutoFieldBoostActive":0
@@ -666,6 +701,24 @@ config["Planters"] := {"LastComfortingField":"None"
 	, "LastSatisfyingField":"None"
 	, "LastMotivatingField":"None"
 	, "LastInvigoratingField":"None"
+	, "MPlanterGatherA":0
+	, "MPlanterGather1":0
+	, "MPlanterGather2":0
+	, "MPlanterGather3":0
+	, "MPlanterHold1":0
+	, "MPlanterHold2":0
+	, "MPlanterHold3":0
+	, "MPlanterRelease1":0
+	, "MPlanterRelease2":0
+	, "MPlanterRelease3":0
+	, "MPlanterSmoking1":0
+	, "MPlanterSmoking2":0
+	, "MPlanterSmoking3":0
+	, "MPuffModeA":0
+	, "MPuffMode1":0
+	, "MPuffMode2":0
+	, "MPuffMode3":0
+	, "LastPlanterGatherSlot":3
 	, "PlanterName1":"None"
 	, "PlanterName2":"None"
 	, "PlanterName3":"None"
@@ -1504,7 +1557,7 @@ FileAppend, %ini%, %A_WorkingDir%\settings\field_config.ini
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ManualPlanters := {}
 
-ManualPlanters["General"] := {"MHarvestInterval":"Every 2 Hours"}
+ManualPlanters["General"] := {"MHarvestInterval":"2 hours"}
 
 ManualPlanters["Slot 1"] := {"MSlot1Cycle1Planter":""
 	, "MSlot1Cycle2Planter":""
@@ -1621,8 +1674,25 @@ for k,v in ManualPlanters ; load the default values as globals, will be overwrit
 	for i,j in v
 		%i% := j
 
-if FileExist(A_WorkingDir "\settings\manual_planters.ini") ; update default values with new ones read from any existing .ini
+if FileExist(A_WorkingDir "\settings\manual_planters.ini") { ; update default values with new ones read from any existing .ini
 	nm_ReadIni(A_WorkingDir "\settings\manual_planters.ini")
+	; replace if imported settings from previous version
+	; Every 30 Minutes|Every Hour|Every 2 Hours|Every 3 Hours|Every 4 Hours|Every 5 Hours|Every 6 Hours
+	if (MHarvestInterval = "Every 30 Minutes") 
+		MHarvestInterval := "30 mins"
+	if (MHarvestInterval = "Every Hour") 
+		MHarvestInterval := "1 hour"
+	if (MHarvestInterval = "Every 2 Hours") 
+		MHarvestInterval := "2 hours"
+	if (MHarvestInterval = "Every 3 Hours" )
+		MHarvestInterval := "3 hours"
+	if (MHarvestInterval = "Every 4 Hours") 
+		MHarvestInterval := "4 hours"
+	if (MHarvestInterval = "Every 5 Hours") 
+		MHarvestInterval := "5 hours"
+	if (MHarvestInterval = "Every 6 Hours") 
+		MHarvestInterval := "6 hours"
+	}
 
 ini := ""
 for k,v in ManualPlanters ; overwrite any existing .ini with updated one with all new keys and old values
@@ -1659,10 +1729,6 @@ sprinklerImages := ["saturator"]
 state:="Startup"
 objective:="UI"
 DailyReconnect:=0
-for k,v in ["PWindShrine","PWindShrineDonate","PWindShrineDonateNum","PWindShrineBooster","PWindShineBoostedField","PMondoGuid","PFieldBoosted","PFieldGuidExtend","PFieldGuidExtendMins","PFieldBoostExtend","PFieldBoostBypass","PPopStarExtend"]
-	%v%:=0
-PFieldDriftSteps:=15
-#include *i %A_ScriptDir%\..\settings\personal.ahk
 
 ;ensure Gui will be visible
 if (GuiX && GuiY)
@@ -1690,7 +1756,7 @@ run, "%exe_path64%" /script "submacros\Status.ahk" "%discordMode%" "%discordChec
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; GDIP BITMAPS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-bitmaps := {}
+bitmaps := {}, shrine := {}, hBitmapsSBT := {}
 #Include %A_ScriptDir%\..\nm_image_assets
 #Include general\bitmaps.ahk
 #Include gui\bitmaps.ahk
@@ -1700,6 +1766,15 @@ bitmaps := {}
 #Include collect\bitmaps.ahk
 #Include inventory\bitmaps.ahk
 #Include reconnect\bitmaps.ahk
+#Include fdc\bitmaps.ahk
+#Include offset\bitmaps.ahk
+#Include perfstats\bitmaps.ahk
+#Include gui\blendershrine_bitmaps.ahk
+
+hBitmapsSB := {}
+for x,y in hBitmapsSBT
+	hBitmapsSB[x] := Gdip_CreateHBITMAPFromBitmap(y), Gdip_DisposeImage(y)
+hBitmapsSB["None"] := 0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; SYSTEM TRAY
@@ -1758,6 +1833,7 @@ nm_AutoUpdateHandler(req)
 			GuiControl, MoveDraw, % hVersionText, % "x" 494-VersionWidth
 			GuiControl, MoveDraw, ImageGitHubLink, % "x" 494-VersionWidth-23
 			GuiControl, MoveDraw, ImageDiscordLink, % "x" 494-VersionWidth-48
+			try GuiControl, MoveDraw, SecretButton, % "x" 494-VersionWidth-104
 			
 			if (LatestVer != IgnoreUpdateVersion)
 				nm_AutoUpdateGUI()
@@ -1915,19 +1991,27 @@ DllCall("DeleteObject", "ptr", hBM)
 hBM := Gdip_CreateHBITMAPFromBitmap(bitmaps["githubgui"])
 Gui, Add, Picture, % "+BackgroundTrans x" 494-VersionWidth-23 " y262 w18 h18 vImageGitHubLink", HBITMAP:*%hBM%
 DllCall("DeleteObject", "ptr", hBM)
+Gui, Font, s8 w700
+w := 255-posW-12
 pBM := Gdip_BitmapConvertGray(bitmaps["discordgui"]), hBM := Gdip_CreateHBITMAPFromBitmap(pBM)
 Gui, Add, Picture, % "+BackgroundTrans x" 494-VersionWidth-48 " y263 w21 h16 vImageDiscordLink", HBITMAP:*%hBM%
 Gdip_DisposeImage(pBM), DllCall("DeleteObject", "ptr", hBM)
 ;control buttons
 Gui, Font, s8 cDefault Norm, Tahoma
-Gui, Add, Button, x5 y260 w65 h20 -Wrap vStartButton gstart Disabled, % " Start (" StartHotkey ")"
-Gui, Add, Button, x75 y260 w65 h20 -Wrap vPauseButton gpause Disabled, % " Pause (" PauseHotkey ")"
-Gui, Add, Button, x145 y260 w65 h20 -Wrap vStopButton gstop Disabled, % " Stop (" StopHotkey ")"
+Gui, Add, Button, x5 y260 w65 h20 -Wrap vStartButton gnm_StartButton Disabled, % " Start (" StartHotkey ")"
+Gui, Add, Button, x75 y260 w65 h20 -Wrap vPauseButton gnm_PauseButton Disabled, % " Pause (" PauseHotkey ")"
+Gui, Add, Button, x145 y260 w65 h20 -Wrap vStopButton gnm_StopButton Disabled, % " Stop (" StopHotkey ")"
 ;add tabs
 Gui, Add, Tab, x0 y-1 w500 h240 -Wrap hwndhTab vTab gnm_TabSelect, % "Gather|Collect/Kill|Boost|Quest|Planters|Status|Settings|Misc|Credits" ((BuffDetectReset = 1) ? "|Advanced" : "")
 SendMessage, 0x1331, 0, 20, , ahk_id %hTab% ; set minimum tab width
+for k,v in ["PMondoGuid","PFieldBoosted","PFieldGuidExtend","PFieldGuidExtendMins","PFieldBoostExtend","PFieldBoostBypass","PPopStarExtend"]
+	%v%:=0
+#include *i %A_ScriptDir%\..\settings\personal.ahk
 ;check for update
 try AsyncHttpRequest("GET", "https://api.github.com/repos/NatroTeam/NatroMacro/releases/latest", "nm_AutoUpdateHandler", {"accept": "application/vnd.github+json"})
+;open Timers
+if(TimersOpen)
+    run, "%exe_path32%" /script "submacros\PlanterTimers.ahk" "%hwndstate%"
 
 ;GATHER TAB
 ;------------------------
@@ -2260,52 +2344,90 @@ Gui, Add, Button, x4 y21 w246 h18 hwndhcollect gnm_CollectKillButton Disabled, C
 Gui, Add, Button, x250 y21 w246 h18 hwndhkill gnm_CollectKillButton, Kill
 ;collect
 Gui, Font, w700
-Gui, Add, GroupBox, x10 y42 w115 h109 vCollectGroupBox, Collect
+Gui, Add, GroupBox, x5 y42 w125 h194 vCollectGroupBox, Collect
 Gui, Font, s8 cDefault Norm, Tahoma
-Gui, Add, Checkbox, x15 y57 +BackgroundTrans vClockCheck gnm_saveCollect Checked%ClockCheck% Disabled, Clock (tickets)
-Gui, Add, Checkbox, x15 y76 w52 +BackgroundTrans vMondoBuffCheck gnm_saveCollect Checked%MondoBuffCheck% Disabled, Mondo
-MondoActionList := ["Buff", "Kill"], PMondoGuid ? MondoActionList.Push("Tag", "Guid")
-Gui, Add, Text, xp+66 yp w30 vMondoAction +Center +BackgroundTrans,%MondoAction%
+Gui, Add, Checkbox, x10 y57 +BackgroundTrans vClockCheck gnm_saveCollect Checked%ClockCheck% Disabled, Clock (tickets)
+Gui, Add, Checkbox, x10 yp+18 w50 +BackgroundTrans vMondoBuffCheck gnm_saveCollect Checked%MondoBuffCheck% Disabled, Mondo
+MondoActionList := ["Buff", "Kill", "Manual"], PMondoGuid ? MondoActionList.Push("Tag", "Guid")
+Gui, Add, Text, x75 yp w40 vMondoAction +Center +BackgroundTrans,%MondoAction%
 Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_MondoAction hwndhMALeft Disabled, <
-Gui, Add, Button, xp+41 yp w12 h16 gnm_MondoAction hwndhMARight Disabled, >
-Gui, Add, Checkbox, x15 y95 w35 +BackgroundTrans vAntPassCheck gnm_saveCollect Checked%AntPassCheck% Disabled, Ant
-Gui, Add, Text, xp+47 yp w49 vAntPassAction +Center +BackgroundTrans,%AntPassAction%
+Gui, Add, Button, xp+51 yp w12 h16 gnm_MondoAction hwndhMARight Disabled, >
+Gui, Add, Text, x40 yp+15 w110 vMondoPointText +left +BackgroundTrans, \___
+Gui, Add, Edit, x63 yp+3 w28 h18 number Limit3 +BackgroundTrans vMondoSecs gnm_saveCollect Disabled, %MondoSecs%
+Gui, Add, Text, x95 yp+2 vMondoSecsText, Secs
+Gui, Add, Checkbox, x10 yp+20 w35 +BackgroundTrans vAntPassCheck gnm_saveCollect Checked%AntPassCheck% Disabled, Ant
+Gui, Add, Text,x66 yp w49 vAntPassAction +Center +BackgroundTrans,%AntPassAction%
 Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_AntPassAction hwndhAPALeft Disabled, <
 Gui, Add, Button, xp+60 yp w12 h16 gnm_AntPassAction hwndhAPARight Disabled, >
-Gui, Add, Checkbox, x15 y114 +BackgroundTrans vRoboPassCheck gnm_saveCollect Checked%RoboPassCheck% Disabled, Robo Pass
-Gui, Add, Checkbox, x15 y133 +BackgroundTrans vHoneystormCheck gnm_saveCollect Checked%HoneystormCheck% Disabled, Honeystorm
+Gui, Add, Checkbox, x10 yp+19 +BackgroundTrans vRoboPassCheck gnm_saveCollect Checked%RoboPassCheck% Disabled, Robo Pass
+Gui, Add, Checkbox, x10 yp+18 +BackgroundTrans vHoneystormCheck gnm_saveCollect Checked%HoneystormCheck% Disabled, Honeystorm
 ;dispensers
 Gui, Font, w700
-Gui, Add, GroupBox, x130 y42 w170 h109 vDispensersGroupBox, Dispensers
+Gui, Add, GroupBox, x135 y42 w165 h105 vDispensersGroupBox, Dispensers
 Gui, Font, s8 cDefault Norm, Tahoma
-Gui, Add, Checkbox, x135 y57 +BackgroundTrans vHoneyDisCheck gnm_saveCollect Checked%HoneyDisCheck% Disabled, Honey
-Gui, Add, Checkbox, x135 yp+19 +BackgroundTrans vTreatDisCheck gnm_saveCollect Checked%TreatDisCheck% Disabled, Treat
-Gui, Add, Checkbox, x135 yp+19 +BackgroundTrans vBlueberryDisCheck gnm_saveCollect Checked%BlueberryDisCheck% Disabled, Blueberry
-Gui, Add, Checkbox, x135 yp+19 +BackgroundTrans vStrawberryDisCheck gnm_saveCollect Checked%StrawberryDisCheck% Disabled, Strawberry
-Gui, Add, Checkbox, x135 yp+19 +BackgroundTrans vCoconutDisCheck gnm_saveCollect Checked%CoconutDisCheck% Disabled, Coconut
-Gui, Add, Checkbox, x225 y57 +BackgroundTrans vRoyalJellyDisCheck gnm_saveCollect Checked%RoyalJellyDisCheck% Disabled, Royal Jelly
-Gui, Add, Checkbox, x225 yp+19 +BackgroundTrans vGlueDisCheck gnm_saveCollect Checked%GlueDisCheck% Disabled, Glue
+Gui, Add, Checkbox, x140 y57 +BackgroundTrans vHoneyDisCheck gnm_saveCollect Checked%HoneyDisCheck% Disabled, Honey
+Gui, Add, Checkbox, xp yp+18 +BackgroundTrans vTreatDisCheck gnm_saveCollect Checked%TreatDisCheck% Disabled, Treat
+Gui, Add, Checkbox, xp yp+18 +BackgroundTrans vBlueberryDisCheck gnm_saveCollect Checked%BlueberryDisCheck% Disabled, Blueberry
+Gui, Add, Checkbox, xp yp+18 +BackgroundTrans vStrawberryDisCheck gnm_saveCollect Checked%StrawberryDisCheck% Disabled, Strawberry
+Gui, Add, Checkbox, xp yp+18 +BackgroundTrans vCoconutDisCheck gnm_saveCollect Checked%CoconutDisCheck% Disabled, Coconut
+Gui, Add, Checkbox, xp+85 y57 +BackgroundTrans vRoyalJellyDisCheck gnm_saveCollect Checked%RoyalJellyDisCheck% Disabled, Royal Jelly
+Gui, Add, Checkbox, xp yp+18 +BackgroundTrans vGlueDisCheck gnm_saveCollect Checked%GlueDisCheck% Disabled, Glue
 ;beesmas
 beesmasActive := 0
 Gui, Font, w700
-Gui, Add, GroupBox, x10 y153 w290 h84 vBeesmasGroupBox, Beesmas (Inactive)
+Gui, Add, GroupBox, x135 y149 w360 h87 vBeesmasGroupBox, Beesmas (Inactive)
 Gui, Font, s8 cDefault Norm, Tahoma
 hBM := Gdip_CreateHBITMAPFromBitmap(bitmaps["warninggui"])
-Gui, Add, Picture, +BackgroundTrans x136 y153 w14 h14 gBeesmasActiveFail vBeesmasFailImage, HBITMAP:*%hBM%
+Gui, Add, Picture, +BackgroundTrans  x261 yp w14 h14 gBeesmasActiveFail vBeesmasFailImage, HBITMAP:*%hBM%
 DllCall("DeleteObject", "ptr", hBM)
-Gui, Add, Picture, +BackgroundTrans x122 y150 w20 h20 vBeesmasImage
-Gui, Add, Checkbox, x156 y153 +BackgroundTrans gnm_saveCollect hwndhBeesmas1 Disabled, Allow Gather Interrupt
-Gui, Add, Checkbox, x15 y170 +BackgroundTrans gnm_saveCollect hwndhBeesmas2 Disabled, Stockings
-Gui, Add, Checkbox, x15 yp+17 +BackgroundTrans gnm_saveCollect hwndhBeesmas3 Disabled, Honey Wreath
-Gui, Add, Checkbox, x15 yp+17 +BackgroundTrans gnm_saveCollect hwndhBeesmas4 Disabled, Feast
-Gui, Add, Checkbox, x15 yp+17 +BackgroundTrans gnm_saveCollect hwndhBeesmas5 Disabled, Robo Party De-level
-Gui, Add, Checkbox, x108 y170 +BackgroundTrans gnm_saveCollect hwndhBeesmas6 Disabled, Gingerbread
-Gui, Add, Checkbox, x108 yp+17 +BackgroundTrans gnm_saveCollect hwndhBeesmas7 Disabled, Snow Machine
-Gui, Add, Checkbox, x108 yp+17 +BackgroundTrans gnm_saveCollect hwndhBeesmas8 Disabled, Candles
-Gui, Add, Checkbox, x201 y170 +BackgroundTrans gnm_saveCollect hwndhBeesmas9 Disabled, Samovar
-Gui, Add, Checkbox, x201 yp+17 +BackgroundTrans gnm_saveCollect hwndhBeesmas10 Disabled, Lid Art
-Gui, Add, Checkbox, x201 yp+17 +BackgroundTrans gnm_saveCollect hwndhBeesmas11 Disabled, Gummy Beacon
+Gui, Add, Picture, +BackgroundTrans x247 yp-3 w20 h20 vBeesmasImage
+Gui, Add, Checkbox, x335 yp+4 +BackgroundTrans gnm_saveCollect hwndhBeesmas1 Disabled, Allow Gather Interrupt
+Gui, Add, Checkbox, x140 yp+14 Section +BackgroundTrans gnm_saveCollect hwndhBeesmas2 Disabled, Stockings
+Gui, Add, Checkbox, xp yp+18 +BackgroundTrans gnm_saveCollect hwndhBeesmas3 Disabled, Honey Wreath
+Gui, Add, Checkbox, xp yp+18 +BackgroundTrans gnm_saveCollect hwndhBeesmas4 Disabled, Feast
+Gui, Add, Checkbox, xp yp+18 +BackgroundTrans gnm_saveCollect hwndhBeesmas5 Disabled, Robo Party De-level
+Gui, Add, Checkbox, xp+125 ys+6 +BackgroundTrans gnm_saveCollect hwndhBeesmas6 Disabled, Gingerbread
+Gui, Add, Checkbox, xp yp+18 +BackgroundTrans gnm_saveCollect hwndhBeesmas7 Disabled, Snow Machine
+Gui, Add, Checkbox, xp yp+18 +BackgroundTrans gnm_saveCollect hwndhBeesmas8 Disabled, Candles
+Gui, Add, Checkbox, xp+125 ys+6 +BackgroundTrans gnm_saveCollect hwndhBeesmas9 Disabled, Samovar
+Gui, Add, Checkbox, xp yp+18 +BackgroundTrans gnm_saveCollect hwndhBeesmas10 Disabled, Lid Art
+Gui, Add, Checkbox, xp yp+18 +BackgroundTrans gnm_saveCollect hwndhBeesmas11 Disabled, Gummy Beacon
 try AsyncHttpRequest("GET", "https://raw.githubusercontent.com/NatroTeam/.github/main/data/beesmas.txt", "nm_BeesmasHandler", {"accept": "application/vnd.github.v3.raw"})
+;Blender
+Gui, Font, w700
+Gui, Add, GroupBox, x305 y42 w190 h105 vBlenderGroupBox, Blender
+Gui, Font, s8 cDefault Norm, Tahoma
+loop 3 {
+	xCoords := 256 + (62 * A_index)
+	Gui, Add, Button, x%xCoords% y124 w40 h15 vBlenderAdd%A_index% hwndhBlenderClear%A_index% gnm_setBlenderData Disabled, % (BlenderItem%A_index% = "None") ? "Add" : "Clear"
+	Gui, add, picture, x%xCoords% y78 h40 w40 hwndhBlenderItem%A_index%Picture vBlenderItem%A_index%Picture +BackgroundTrans +0xE
+	if (BlenderItem%A_index% != "None")
+		GuiControl, , % hBlenderItem%A_Index%Picture, % hBitmapsSB[BlenderItem%A_index%] ? ("HBITMAP:*" hBitmapsSB[BlenderItem%A_index%]) : ""
+	xCoords := 247 + (62 * A_index)
+	Gui, Add, Text, x%xCoords% y58 w60 +Center vBlenderData%A_index%, % "(" BlenderAmount%A_Index% ") [" ((BlenderIndex%A_index% = "Infinite") ? "∞" : BlenderIndex%A_index%) "]"
+}
+BlenderAdd := 0 ;setup BlenderAdd for later use in the GUI
+
+Gui, Add, Text, x431 y125 w41 h16 +Center +0x200 vBlenderAmountNum Hidden
+Gui, Add, UpDown, vBlenderAmount Range1-999 Hidden, 1
+Gui, Add, Text, x435 y106 vBlenderAmountText Hidden, Amount
+Gui, Add, Text, x435 y50 h13 vBlenderRepeatText Hidden, Repeat
+Gui, Font, w700 underline
+Gui, Add, Text, x332 y58 w80 vblendertitle1 Hidden, Add Item
+Gui, Font, s8 cDefault Norm, Tahoma
+Gui, Add, Text, x307 y74 w103 h1 vblenderline1 Hidden 0x7
+Gui, Add, Text, x409 y49 w1 h97 vblenderline2 Hidden 0x7
+Gui, Add, Text, x410 y64 w83 h1 vblenderline3 Hidden 0x7
+Gui, Add, Text, x410 y121 w83 h1 vblenderline4 Hidden 0x7
+Gui, Add, Text, x431 y86 w41 h16 +Center +0x200 vBlenderIndexNum Hidden
+Gui, Add, UpDown, vBlenderIndex Range1-999 Hidden, 1
+Gui, Add, checkbox, x427 y69 w60 vBlenderIndexOption gnm_BlenderIndexOption Hidden, Infinite
+Gui, Add, Picture, x336 y80 w40 h40 hwndhAddBlenderItem vBlenderItem Hidden +0xE
+Gui, Font, s8 cDefault Bold, Tahoma
+Gui, Add, Button, x312 y95 w18 h18 vBlenderLeft hwndhfblenderleft gba_AddBlenderItemButton Hidden, <
+Gui, Add, Button, x385 y95 w18 h18 vBlenderRight hwndhfblenderright gba_AddBlenderItemButton Hidden, >
+Gui, Font, s8 cDefault Norm, Tahoma
+Gui, Add, Button, x318 y125 w80 h16 +Center gba_AddBlenderItem vBlenderAddSlot Hidden, 
 
 ;KILL
 ;bugrun
@@ -2407,7 +2529,7 @@ Gui, Tab, Boost
 ;boosters
 Gui, Font, W700
 Gui, Add, GroupBox, x10 y25 w480 h70, Field Boost
-Gui, Add, GroupBox, x10 y97 w260 h138, Hotbar Slots
+Gui, Add, GroupBox, x10 y97 w285 h138, Hotbar Slots
 Gui, Font, s8 cDefault Norm, Tahoma
 ;field booster
 Gui, Add, Text, x20 y41 +BackgroundTrans, Free Booster Order:
@@ -2428,6 +2550,40 @@ Gui, Add, Text, xp+3 y+0 w12 vFieldBoosterMins +Center, %FieldBoosterMins%
 Gui, Add, UpDown, xp+14 yp-1 h16 -16 Range0-12 vFieldBoosterMinsUpDown gnm_FieldBoosterMins Disabled, % FieldBoosterMins//5
 Gui, Add, Text, xp+20 yp+1 w100 left +BackgroundTrans, Mins
 Gui, Add, CheckBox, x20 y62 +center vBoostChaserCheck gnm_BoostChaserCheck Checked%BoostChaserCheck% Disabled, Gather in`nBoosted Field
+Gui, Font, w700
+;shrine
+Gui, Add, GroupBox, x300 y97 w190 h138, Shrine
+Gui, Font, s8 cDefault Norm, Tahoma
+loop 2 {
+	xCoords := 246 + (86 * A_Index)
+	Gui, add, picture, x%xcoords% y153 h40 w40 hwndhShrineItem%A_Index%Picture vShrineItem%A_Index%Picture +BackgroundTrans +0xE
+	Gui, Add, Button, x%xCoords% y203 w40 h13 vShrineAdd%A_Index% hwndhShrineClear%A_Index% gba_setShrineData Disabled, % (ShrineItem%A_Index% = "None") ? "Add" : "Clear"
+	if (ShrineItem%A_Index% != "None")
+		GuiControl, , % hShrineItem%A_Index%Picture, % hBitmapsSB[ShrineItem%A_index%] ? ("HBITMAP:*" hBitmapsSB[ShrineItem%A_index%]) : ""
+	xCoords := 237 + (86 * A_index)
+	Gui, Add, Text, x%xCoords% y130 w60 +Center vShrineData%A_index%, % "(" ShrineAmount%A_Index% ") [" ((ShrineIndex%A_index% = "Infinite") ? "∞" : ShrineIndex%A_index%) "]"
+}
+ShrineAdd := 0
+
+Gui, Add, Text, x426 y197 w41 h16 +Center +0x200 vShrineAmountNum Hidden
+Gui, Add, UpDown, vShrineAmount Range1-999 Hidden, 1
+Gui, Add, Text, x430 y178 vShrineAmountText Hidden, Amount
+Gui, Add, Text, x430 y122 vShrineRepeatText Hidden, Repeat
+Gui, Font, w700 underline
+Gui, Add, Text, x327 y130 w80 vshrinetitle1 Hidden, Add Item
+Gui, Font, s8 cDefault Norm, Tahoma
+Gui, Add, Text, x302 y146 w103 h1 vShrineline1 Hidden 0x7
+Gui, Add, Text, x404 y104 w1 h130 vShrineline2 Hidden 0x7
+Gui, Add, Text, x405 y136 w83 h1 vShrineline3 Hidden 0x7
+Gui, Add, Text, x405 y193 w83 h1 vShrineline4 Hidden 0x7
+Gui, Add, Text, x426 y158 w41 h16 +Center +0x200 vShrineIndexNum Hidden
+Gui, Add, UpDown, vShrineIndex Range1-999 Hidden, 1
+Gui, Add, Checkbox, x422 y141 w60 vShrineIndexOption gnm_ShrineIndexOption Hidden, Infinite
+Gui, Add, Picture, x331 y152 w40 h40 hwndhAddShrineItem vShrineItem Hidden +0xE
+Gui, Add, Button, x307 y167 w18 h18 vShrineLeft hwndhfShrineleft gba_AddShrineItemButton Hidden, <
+Gui, Add, Button, x380 y167 w18 h18 vShrineRight hwndhfShrineright gba_AddShrineItemButton Hidden, >
+Gui, Add, Button, x313 y197 w80 h16 +Center gba_AddShrineItem vShrineAddSlot Hidden
+
 ;hotbar
 Loop, 6
 {
@@ -2489,7 +2645,7 @@ Gui, Font, s8 cDefault Norm, Tahoma
 ;------------------------
 Gui, Tab, Planters
 ;GuiControl,focus, Tab
-Gui, Add, Slider, x364 y24 w130 h19 vPlanterMode gba_PlanterSwitch Range0-2 Thick16 TickInterval1 Page1 +BackgroundTrans Disabled, %PlanterMode%
+Gui, Add, Slider, x364 y24 w130 h19 vPlanterMode gba_PlanterSwitch Range0-2 AltSubmit Thick16 TickInterval1 Page1 +BackgroundTrans Disabled, %PlanterMode%
 Gui, Add, Text, x366 y43 h20 cRed +Center +BackgroundTrans, OFF
 Gui, Add, Text, x410 y43 h20 c0xFF9200 +Center +BackgroundTrans, MANUAL
 Gui, Add, Text, x478 y43 h20 cGreen +Center +BackgroundTrans, +
@@ -2593,6 +2749,7 @@ Gui, Add, Text, % "x354 y196 w144 h36 0x7 vTextBox1" ((PlanterMode = 2) ? "" : "
 Gui, Add, Checkbox, % "x358 y200 w138 h13 vConvertFullBagHarvest gba_saveConfig_ Disabled Checked" ConvertFullBagHarvest ((PlanterMode = 2) ? "" : " Hidden"), Convert Full Bag Harvest
 Gui, Add, Checkbox, % "x358 y216 w138 h13 vGatherPlanterLoot gba_saveConfig_ Disabled Checked" GatherPlanterLoot ((PlanterMode = 2) ? "" : " Hidden"), Gather Planter Loot
 SetLoadingProgress(38)
+
 ;Manual Planters Start
 
 MPlanterListText := "|Plastic|Candy|Blue Clay|Red Clay|Tacky|Pesticide|Heat Treated|Hydroponic|Petal|Planter of Plenty|Paper|Ticket|"
@@ -2616,28 +2773,51 @@ Loop, 3 {
     Gui, Add, Text, % "xs ys+20 +Center Section vMSlot" i "FieldText" (PlanterMode == 1 ? "" : " Hidden"), S%i% Fields:
     Gui, Add, Text, % "xs ys+20 +Center Section vMSlot" i "SettingsText" (PlanterMode == 1 ? "" : " Hidden"), S%i% Settings:
     if (i < 3)
-        Gui, Add, Text, % "xs ys+22 w" ((i = 1) ? "350" : "500") " h1 0x7 vMSlot" i "SeparatorLine" (PlanterMode == 1 ? "" : " Hidden")
+        Gui, Add, Text, % "xs ys+22 w350 h1 0x7 vMSlot" i "SeparatorLine" (PlanterMode == 1 ? "" : " Hidden")
 }
 
+Gui, Add, Text, % "x378 y62 +BackgroundTrans Section vMCurrentCycle" (PlanterMode == 1 ? "" : " Hidden"), Current Planter Cycle
 Loop, 3 {
-	Gui, Add, Text, % ((A_Index = 1) ? "x360 y63" : "xs ys+35") "w200 +BackgroundTrans Section vMSlot" A_Index "CycleText" (PlanterMode == 1 ? "" : " Hidden"), % "Slot " A_Index " currently at cycle #" PlanterManualCycle%A_Index%
-	Gui, Add, Button, % "xs+25 ys+17 w20 h16 vMSlot" A_Index "Left gmp_Slot" A_Index "ChangeLeft Disabled" (PlanterMode == 1 ? "" : " Hidden"), <
-	Gui, Add, Text, % "x+4 yp+1 h16 vMSlot" A_Index "ChangeText" (PlanterMode == 1 ? "" : " Hidden"), Change
-	Gui, Add, Button, % "x+4 yp-1 w20 h16 vMSlot" A_Index "Right gmp_Slot" A_Index "ChangeRight Disabled" (PlanterMode == 1 ? "" : " Hidden"), >
+	Gui, Add, Text, % ((A_Index = 1) ? "x361 y78" : "xs ys+16") "w200 +BackgroundTrans Section vMSlot" A_Index "CycleText" (PlanterMode == 1 ? "" : " Hidden"), % "Slot " A_Index ": Cycle " PlanterManualCycle%A_Index%
+	Gui, Add, Button, % "x461 ys-2 w15 h16 +Center vMSlot" A_Index "Left gmp_Slot" A_Index "ChangeLeft Disabled" (PlanterMode == 1 ? "" : " Hidden"), —
+	Gui, Add, Button, % "x+2 ys-2 w15 h16 +Center vMSlot" A_Index "Right gmp_Slot" A_Index "ChangeRight Disabled" (PlanterMode == 1 ? "" : " Hidden"), +
 }
 
 Gui, Add, Text, % "x355 y23 h215 w1 0x7 vMSectionSeparatorLine" (PlanterMode == 1 ? "" : " Hidden")
 Gui, Add, Text, % "x355 y58 h1 w150 0x7 vMSliderSeparatorLine" (PlanterMode == 1 ? "" : " Hidden")
 
-;; check plants button
-Gui, Add, Text, % "xs ys+50 +Center vMHarvestText Section" (PlanterMode == 1 ? "" : " Hidden"), Harvest
-Gui, Add, DropdownList, % "xp+41 yp-3 w94 vMHarvestInterval gmp_SaveConfig Disabled" (PlanterMode == 1 ? "" : " Hidden"), % StrReplace("Every 30 Minutes|Every Hour|Every 2 Hours|Every 3 Hours|Every 4 Hours|Every 5 Hours|Every 6 Hours|", MHarvestInterval, MHarvestInterval "|")
+; disable automatic harvest
+Gui, Add, Text, % "x355 y128 h1 w150 0x7 Section vMPuffModeSeparatorLine" (PlanterMode == 1 ? "" : " Hidden")
+Gui, Add, Checkbox, % "xs+5 ys+4 w150 h16 +BackgroundTrans vMPuffModeA gmp_MPuffMode Section Disabled Checked" MPuffModeA ((PlanterMode = 1) ? "" : " Hidden"), Disable Auto-Harvest
+Gui, Add, Text, % "xs+16 ys+16 vMPuffModeText " (PlanterMode == 1 ? "" : " Hidden"), Slots:
+Gui, Add, Checkbox, % "xs+46 yp-1 w24 h16 +BackgroundTrans vMPuffMode1 gmp_SaveConfig Disabled Checked" MPuffMode1 ((PlanterMode = 1) ? "" : " Hidden"), 1
+Gui, Add, Checkbox, % "xs+70 yp w24 h16 +BackgroundTrans vMPuffMode2 gmp_SaveConfig Disabled Checked" MPuffMode2 ((PlanterMode = 1) ? "" : " Hidden"), 2
+Gui, Add, Checkbox, % "xs+95 yp w24 h16 +BackgroundTrans vMPuffMode3 gmp_SaveConfig Disabled Checked" MPuffMode3 ((PlanterMode = 1) ? "" : " Hidden"), 3
+Gui, Add, Button, % "x481 yp+1 w12 h14 gnm_MPuffModeHelp vMPuffModeHelp Disabled" ((PlanterMode = 1) ? "" : " Hidden"), ?
+
+; gather in planter field and slots
+Gui, Add, Text, % "x355 y165 h1 w156 0x7 Section vMGatherSeparatorLine" (PlanterMode == 1 ? "" : " Hidden")
+Gui, Add, Checkbox, % "xs+5 ys+4 w150 h16 +BackgroundTrans vMPlanterGatherA gmp_MPlanterGatherSwitch_ Section Disabled Checked" MPlanterGatherA ((PlanterMode = 1) ? "" : " Hidden"), Gather in Planter Fields
+Gui, Add, Text, % "xs+16 ys+16 vMPlanterGatherText " (PlanterMode == 1 ? "" : " Hidden"), Slots:
+Gui, Add, Checkbox, % "xs+46 yp-1 w24 h16 +BackgroundTrans vMPlanterGather1 gmp_SaveConfig Disabled Checked" MPlanterGather1 ((PlanterMode = 1) ? "" : " Hidden"), 1
+Gui, Add, Checkbox, % "xs+70 yp w24 h16 +BackgroundTrans vMPlanterGather2 gmp_SaveConfig Disabled Checked" MPlanterGather2 ((PlanterMode = 1) ? "" : " Hidden"), 2
+Gui, Add, Checkbox, % "xs+95 yp w24 h16 +BackgroundTrans vMPlanterGather3 gmp_SaveConfig Disabled Checked" MPlanterGather3 ((PlanterMode = 1) ? "" : " Hidden"), 3
+Gui, Add, Button, % "x481 yp+1 w12 h14 gnm_MPlanterGatherHelp vMPlanterGatherHelp Disabled" ((PlanterMode = 1) ? "" : " Hidden"), ?
+
+; harvest every interval
+Gui, Add, Text, % "x355 y202 h1 w150 0x7 Section vMPageSeparatorLine" (PlanterMode == 1 ? "" : " Hidden")
+Gui, Add, Text, % "xs+9 ys+3 vMHarvestText Section" (PlanterMode == 1 ? "" : " Hidden"), Harvest every
+Gui, Add, Text, % "x374 ys+15 w48 vMHarvestInterval +Center +BackgroundTrans " ((PlanterMode = 1) ? "" : " Hidden"),%MHarvestInterval%
+Gui, Add, Button, % "x361 ys+15 w15 h16 gnm_MHarvestInterval hwndhMHILeft Disabled" ((PlanterMode = 1) ? "" : " Hidden"), <
+Gui, Add, Button, % "x420 ys+15 w15 h16 gnm_MHarvestInterval hwndhMHIRight Disabled" ((PlanterMode = 1) ? "" : " Hidden"), >
+;Gui, Add, DropdownList, % "x374 ys+12 w60 vMHarvestInterval gmp_SaveConfig Disabled" (PlanterMode == 1 ? "" : " Hidden"), % StrReplace("30 min|Hour|2 hours|3 hours|4 hours|5 hours|6 hours|", MHarvestInterval, MHarvestInterval "|")
+
 SetLoadingProgress(99)
 
 ; page movement
-Gui, Add, Button, % "xs+25 ys+24 w20 h20 hwndMPageLeftHWND vMPageLeft gmp_UpdatePage Disabled" (PlanterMode == 1 ? "" : " Hidden"), <
-Gui, Add, Text, % "x+4 yp+3 +Center vMPageNumberText" (PlanterMode == 1 ? "" : " Hidden"), % "Page: " (MPageIndex := 1)
-Gui, Add, Button, % "x+4 yp-3 w20 h20 hwndMPageRightHWND vMPageRight gmp_UpdatePage Disabled" (PlanterMode == 1 ? "" : " Hidden"), >
+Gui, Add, Text, % "x460 ys vMPageNumberText" (PlanterMode == 1 ? "" : " Hidden"), % "Page " (MPageIndex := 1) ;
+Gui, Add, Button, % "x461 ys+15 w15 h16 hwndMPageLeftHWND vMPageLeft gmp_UpdatePage Disabled" (PlanterMode == 1 ? "" : " Hidden"), <
+Gui, Add, Button, % "x+2 ys+15 w15 h16 hwndMPageRightHWND vMPageRight gmp_UpdatePage Disabled" (PlanterMode == 1 ? "" : " Hidden"), >
 
 mp_UpdatePage(hwnd:=0)
 {
@@ -2650,7 +2830,7 @@ mp_UpdatePage(hwnd:=0)
 	GuiControl, % ((MPageIndex == 3) ? "Disable" : "Enable"), % MPageRightHWND
 
 	If hwnd {
-		GuiControl, Text, MPageNumberText, Page: %MPageIndex%
+		GuiControl, Text, MPageNumberText, Page %MPageIndex%
 
 		Loop, 3 {
 			GuiControl, Text, MHeader%A_Index%Text, % "Cycle #" ((MPageIndex - 1) * 3 + A_Index)
@@ -2696,7 +2876,16 @@ mp_UpdateControls() {
 			GuiControl, % (MSlot%j%Cycle1Field ? "Enable" : "Disable"), MSlot%i%Cycle1Planter
 	}
 
+	GuiControl, % (MPlanterGatherA ? "Enable" : "Disable"), MPlanterGather1
+	GuiControl, % (MPlanterGatherA ? "Enable" : "Disable"), MPlanterGather2
+	GuiControl, % (MPlanterGatherA ? "Enable" : "Disable"), MPlanterGather3
+
+	GuiControl, % (MPuffModeA ? "Enable" : "Disable"), MPuffMode1
+	GuiControl, % (MPuffModeA ? "Enable" : "Disable"), MPuffMode2
+	GuiControl, % (MPuffModeA ? "Enable" : "Disable"), MPuffMode3
+
 	mp_UpdateCycles()
+
 }
 
 mp_SaveConfig() {
@@ -2713,7 +2902,15 @@ mp_SaveConfig() {
 		}
 	}
 
-	GuiControlGet, MHarvestInterval
+	GuiControlGet, MPuffMode1
+	GuiControlGet, MPuffMode2
+	GuiControlGet, MPuffMode3
+
+	GuiControlGet, MPuffModeA
+	GuiControlGet, MPlanterGatherA
+	GuiControlGet, MPlanterGather1
+	GuiControlGet, MPlanterGather2
+	GuiControlGet, MPlanterGather3
 
 	Loop, 3 {
 		i := A_Index
@@ -2733,16 +2930,24 @@ mp_SaveConfig() {
 	Loop, 3 {
 		i := A_Index
 		Loop, 9 {
-			IniWrite, % MSlot%i%Cycle%A_Index%Planter, Settings\manual_planters.ini, % "Slot " i, MSlot%i%Cycle%A_Index%Planter
-			IniWrite, % MSlot%i%Cycle%A_Index%Field, Settings\manual_planters.ini, % "Slot " i, MSlot%i%Cycle%A_Index%Field
-			IniWrite, % MSlot%i%Cycle%A_Index%Glitter, Settings\manual_planters.ini, % "Slot " i, MSlot%i%Cycle%A_Index%Glitter
-			IniWrite, % MSlot%i%Cycle%A_Index%AutoFull, Settings\manual_planters.ini, % "Slot " i, MSlot%i%Cycle%A_Index%AutoFull
+			IniWrite, % MSlot%i%Cycle%A_Index%Planter, settings\manual_planters.ini, % "Slot " i, MSlot%i%Cycle%A_Index%Planter
+			IniWrite, % MSlot%i%Cycle%A_Index%Field, settings\manual_planters.ini, % "Slot " i, MSlot%i%Cycle%A_Index%Field
+			IniWrite, % MSlot%i%Cycle%A_Index%Glitter, settings\manual_planters.ini, % "Slot " i, MSlot%i%Cycle%A_Index%Glitter
+			IniWrite, % MSlot%i%Cycle%A_Index%AutoFull, settings\manual_planters.ini, % "Slot " i, MSlot%i%Cycle%A_Index%AutoFull
 		}
 	}
 
-	IniWrite, % MHarvestInterval, Settings\manual_planters.ini, General, MHarvestInterval
-
+	IniWrite, %MPuffModeA%, settings\nm_config.ini, Planters, MPuffModeA
+	IniWrite, %MPuffMode1%, settings\nm_config.ini, Planters, MPuffMode1
+	IniWrite, %MPuffMode2%, settings\nm_config.ini, Planters, MPuffMode2
+	IniWrite, %MPuffMode3%, settings\nm_config.ini, Planters, MPuffMode3
+	IniWrite, %MPlanterGatherA%, settings\nm_config.ini, Planters, MPlanterGatherA
+	IniWrite, %MPlanterGather1%, settings\nm_config.ini, Planters, MPlanterGather1
+	IniWrite, %MPlanterGather2%, settings\nm_config.ini, Planters, MPlanterGather2
+	IniWrite, %MPlanterGather3%, settings\nm_config.ini, Planters, MPlanterGather3
+	
 	mp_UpdateControls()
+
 }
 
 mp_UpdateCycles() {
@@ -2759,11 +2964,11 @@ mp_UpdateCycles() {
 		}
 
 		PlanterManualCycle%i% := Min(MSlot%i%MaxCycle, PlanterManualCycle%i%)
-		IniWrite, % PlanterManualCycle%i%, Settings\nm_config.ini, Planters, PlanterManualCycle%i%
+		IniWrite, % PlanterManualCycle%i%, settings\nm_config.ini, Planters, PlanterManualCycle%i%
 
 		GuiControl, % (PlanterManualCycle%i% != 1 ? "Enable" : "Disable"), MSlot%i%Left
 		GuiControl, % (PlanterManualCycle%i% < MSlot%i%MaxCycle ? "Enable" : "Disable"), MSlot%i%Right
-		GuiControl,, MSlot%i%CycleText, % "Slot " i " currently at cycle #" PlanterManualCycle%i%
+		GuiControl,, MSlot%i%CycleText, % "Slot " i ": Cycle " PlanterManualCycle%i%
 	}
 }
 
@@ -2823,9 +3028,24 @@ mp_Planter() {
 		Loop, 3 {
 			If (!MSlot%A_Index%Cycle1Field)
 				Continue
+			IniRead, PlanterField%A_Index%, settings\nm_config.ini, planters, PlanterField%A_Index%
+			IniRead, MPlanterRelease%A_Index%, settings\nm_config.ini, planters, MPlanterRelease%A_Index%
+			IniRead, MPlanterSmoking%A_Index%, settings\nm_config.ini, planters, MPlanterSmoking%A_Index%
+			; reset Release variable to 0 if planter slot empty
+			If (PlanterField%A_Index% = "None") {
+				MPlanterRelease%A_Index% := 0
+				IniWrite, % MPlanterRelease%A_Index%, settings\nm_config.ini, Planters, MPlanterRelease%A_Index%
+			}
+			; reset Hold and Smoking variables to 0 if planter slot empty, disable auto harvest no longer selected, or user has set to Release with remote control
+			If ((!MPuffModeA) || (!MPuffMode%A_Index%) || (PlanterField%A_Index% = "None")  || (MPlanterRelease%A_Index%)) {
+				MPlanterHold%A_Index% := 0
+				IniWrite, % MPlanterHold%A_Index%, settings\nm_config.ini, Planters, MPlanterHold%A_Index%
+				MPlanterSmoking%A_Index% := 0
+				IniWrite, % MPlanterSmoking%A_Index%, settings\nm_config.ini, Planters, MPlanterSmoking%A_Index%
+			}
 			If (PlanterHarvestTime%A_Index% > 2**31) {
 				mp_PlantPlanter(A_Index)
-			} Else {
+			} Else if (!MPlanterHold%A_Index%) {
 				If (nowUnix() >= PlanterHarvestTime%A_Index%)
 					mp_HarvestPlanter(A_Index)
 				If (PlanterHarvestFull%A_Index% == "Full" && (nowUnix() - LastGlitter >= 900) && PlanterGlitterC%A_Index% && !PlanterGlitter%A_Index%) {
@@ -2848,13 +3068,13 @@ mp_Planter() {
 mp_PlantPlanter(PlanterIndex) {
 	Global
 	Local CycleIndex, MFieldName, MPlanterName, planterPos, pBMScreen, imgPos, field, k, v, hwnd, windowX, windowY, windowWidth, windowHeight, offsetY
-	Static MHarvestIntervalValue := {"Every 30 Minutes":0.5
-		, "Every Hour":1
-		, "Every 2 Hours":2
-		, "Every 3 Hours":3
-		, "Every 4 Hours":4
-		, "Every 5 Hours":5
-		, "Every 6 Hours":6}
+	Static MHarvestIntervalValue := {"30 mins":0.5
+		, "1 hour":1
+		, "2 hours":2
+		, "3 hours":3
+		, "4 hours":4
+		, "5 hours":5
+		, "6 hours":6}
 	, MFieldNectars := {"Dandelion":"Comforting"
 		, "Bamboo":"Comforting"
 		, "Pine Tree":"Comforting"
@@ -2941,7 +3161,7 @@ mp_PlantPlanter(PlanterIndex) {
 					{
 						Sleep, 50
 						Gdip_DisposeImage(pBMScreen)
-						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" Max(480, windowHeight-offsetY-120))
+						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" Max(480, windowHeight-offsetY-150))
 					}
 				}
 			}
@@ -2971,6 +3191,7 @@ mp_PlantPlanter(PlanterIndex) {
 				break 2
 			}
 			Gdip_DisposeImage(pBMScreen)
+			sleep, 50 ; delay in case of lag
 		}
 
 		if (A_Index = 50) {
@@ -3020,13 +3241,13 @@ mp_PlantPlanter(PlanterIndex) {
 				PlanterHarvestTime%PlanterIndex% := PlanterHarvestTime%A_Index%
 	}
 
-	IniWrite, % PlanterName%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterName%PlanterIndex%
-	IniWrite, % PlanterField%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterField%PlanterIndex%
-	IniWrite, % PlanterNectar%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterNectar%PlanterIndex%
-	IniWrite, % PlanterGlitter%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterGlitter%PlanterIndex%
-	IniWrite, % PlanterGlitterC%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterGlitterC%PlanterIndex%
-	IniWrite, % PlanterHarvestFull%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterHarvestFull%PlanterIndex%
-	IniWrite, % PlanterHarvestTime%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterHarvestTime%PlanterIndex%
+	IniWrite, % PlanterName%PlanterIndex%, settings\nm_config.ini, Planters, PlanterName%PlanterIndex%
+	IniWrite, % PlanterField%PlanterIndex%, settings\nm_config.ini, Planters, PlanterField%PlanterIndex%
+	IniWrite, % PlanterNectar%PlanterIndex%, settings\nm_config.ini, Planters, PlanterNectar%PlanterIndex%
+	IniWrite, % PlanterGlitter%PlanterIndex%, settings\nm_config.ini, Planters, PlanterGlitter%PlanterIndex%
+	IniWrite, % PlanterGlitterC%PlanterIndex%, settings\nm_config.ini, Planters, PlanterGlitterC%PlanterIndex%
+	IniWrite, % PlanterHarvestFull%PlanterIndex%, settings\nm_config.ini, Planters, PlanterHarvestFull%PlanterIndex%
+	IniWrite, % PlanterHarvestTime%PlanterIndex%, settings\nm_config.ini, Planters, PlanterHarvestTime%PlanterIndex%
 
 	If (nowUnix() - LastGlitter >= 900 && PlanterGlitterC%PlanterIndex% && !PlanterGlitter%PlanterIndex%)
 		mp_UseGlitter(PlanterIndex, 1)
@@ -3068,7 +3289,7 @@ mp_UseGlitter(PlanterIndex, atField:=0) {
 	Loop, 10
 	{
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
-		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|" windowWidth//2 "|" Max(480, windowHeight-offsetY-120))
+		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|" windowWidth//2 "|" Max(480, windowHeight-offsetY-150))
 
 		if (A_Index = 1)
 		{
@@ -3089,13 +3310,13 @@ mp_UseGlitter(PlanterIndex, atField:=0) {
 					{
 						Sleep, 50
 						Gdip_DisposeImage(pBMScreen)
-						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" Max(480, windowHeight-offsetY-120))
+						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" Max(480, windowHeight-offsetY-150))
 					}
 				}
 			}
 		}
 
-		if ((Gdip_ImageSearch(pBMScreen, bitmaps["glitter"], glitterPos, 0, 0, 306, Max(480, windowHeight-120), 10, , 5) = 0)) {
+		if ((Gdip_ImageSearch(pBMScreen, bitmaps["glitter"], glitterPos, , , 306, , 10, , 5) = 0)) {
 			Gdip_DisposeImage(pBMScreen)
 			break
 		}
@@ -3111,7 +3332,7 @@ mp_UseGlitter(PlanterIndex, atField:=0) {
 	PlanterGlitter%PlanterIndex% := LastGlitter
 	PlanterHarvestTime%PlanterIndex% := nowUnix() + (PlanterHarvestTime%PlanterIndex% - nowUnix()) * 0.75
 	IniWrite, % PlanterGlitter%PlanterIndex%, settings\nm_config.ini, Planters, PlanterGlitter%PlanterIndex%
-	IniWrite, % PlanterHarvestTime%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterHarvestTime%PlanterIndex%
+	IniWrite, % PlanterHarvestTime%PlanterIndex%, settings\nm_config.ini, Planters, PlanterHarvestTime%PlanterIndex%
 }
 
 mp_HarvestPlanter(PlanterIndex) {
@@ -3131,8 +3352,10 @@ mp_HarvestPlanter(PlanterIndex) {
 
 	nm_setStatus("Traveling", MPlanterName . " (" . MFieldName . ")")
 	nm_gotoPlanter(MFieldName)
-	nm_setStatus("Collecting", (MPlanterName . " (" . MFieldName . ")"))
-
+	if ((!MPuffModeA) || (!MPuffMode%PlanterIndex%) || (MPlanterRelease%PlanterIndex%))
+		nm_setStatus("Collecting", (MPlanterName . " (" . MFieldName . ")"))
+	else
+		nm_setStatus("Checking", (MPlanterName . " (" . MFieldName . ")"))
 	while ((A_Index <= 5) && !(findPlanter := (nm_imgSearch("e_button.png",10)[1] = 0)))
 		Sleep, 200
 	if (findPlanter = 0) {
@@ -3149,6 +3372,12 @@ mp_HarvestPlanter(PlanterIndex) {
 		if (planterPos != 0) { ; found planter in inventory planter is a phantom
 			nm_setStatus("Found", MPlanterName . ". Clearing Data.")
 
+			;reset disable auto harvest values if phantom planter
+			MPlanterRelease%PlanterIndex% := 0
+			IniWrite, % MPlanterRelease%PlanterIndex%, settings\nm_config.ini, Planters, MPlanterRelease%PlanterIndex%
+			MPlanterSmoking%PlanterIndex% := 0
+			IniWrite, % MPlanterSmoking%PlanterIndex%, settings\nm_config.ini, Planters, MPlanterSmoking%PlanterIndex%
+
 			;reset values
 			CycleIndex := PlanterManualCycle%PlanterIndex%
 			if ((MPlanterName = (StrReplace(MSlot%PlanterIndex%Cycle%CycleIndex%Planter, " ") (MSlot%PlanterIndex%Cycle%CycleIndex%Planter = "Planter Of Plenty" ? "" : "Planter"))) && (MFieldName = MSlot%PlanterIndex%Cycle%CycleIndex%Field)) {
@@ -3164,15 +3393,24 @@ mp_HarvestPlanter(PlanterIndex) {
 			PlanterHarvestFull%PlanterIndex% := ""
 			PlanterHarvestTime%PlanterIndex% := 20211106000000
 
-			IniWrite, % PlanterName%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterName%PlanterIndex%
-			IniWrite, % PlanterField%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterField%PlanterIndex%
-			IniWrite, % PlanterNectar%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterNectar%PlanterIndex%
-			IniWrite, % PlanterGlitter%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterGlitter%PlanterIndex%
-			IniWrite, % PlanterGlitterC%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterGlitterC%PlanterIndex%
-			IniWrite, % PlanterHarvestFull%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterHarvestFull%PlanterIndex%
-			IniWrite, % PlanterHarvestTime%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterHarvestTime%PlanterIndex%
+			IniWrite, % PlanterName%PlanterIndex%, settings\nm_config.ini, Planters, PlanterName%PlanterIndex%
+			IniWrite, % PlanterField%PlanterIndex%, settings\nm_config.ini, Planters, PlanterField%PlanterIndex%
+			IniWrite, % PlanterNectar%PlanterIndex%, settings\nm_config.ini, Planters, PlanterNectar%PlanterIndex%
+			IniWrite, % PlanterGlitter%PlanterIndex%, settings\nm_config.ini, Planters, PlanterGlitter%PlanterIndex%
+			IniWrite, % PlanterGlitterC%PlanterIndex%, settings\nm_config.ini, Planters, PlanterGlitterC%PlanterIndex%
+			IniWrite, % PlanterHarvestFull%PlanterIndex%, settings\nm_config.ini, Planters, PlanterHarvestFull%PlanterIndex%
+			IniWrite, % PlanterHarvestTime%PlanterIndex%, settings\nm_config.ini, Planters, PlanterHarvestTime%PlanterIndex%
 		}
 
+		return 1
+	}
+	else if ((MPuffModeA = 1) && (MPuffMode%PlanterIndex% = 1) && (MPlanterRelease%PlanterIndex% != 1)) {
+		; screenshot and set to hold instead of harvest, if auto harvest is disabled for the slot, and the user hasn't selected to release it by remote control
+		Sleep, 200 ; wait for game to update frame
+		nm_setStatus("Holding", (MPlanterName . " (" . MFieldName . ")"))
+		Sleep, 2000
+		MPlanterHold%PlanterIndex% := 1
+		IniWrite, % MPlanterHold%PlanterIndex%, settings\nm_config.ini, Planters, MPlanterHold%PlanterIndex%
 		return 1
 	}
 	else {
@@ -3210,10 +3448,11 @@ mp_HarvestPlanter(PlanterIndex) {
 					sleep 100
 					MouseMove, windowX+350, windowY+offsetY+100
 					Gdip_DisposeImage(pBMScreen)
-					nm_PlanterTimeUpdate(FieldName)
+					nm_PlanterTimeUpdate(MFieldName)
 					return 2
 				}
 				Gdip_DisposeImage(pBMScreen)
+				sleep, 50 ; delay in case of lag
 			}
 		}
 		else {
@@ -3229,8 +3468,14 @@ mp_HarvestPlanter(PlanterIndex) {
 					break
 				}
 				Gdip_DisposeImage(pBMScreen)
+				sleep, 50 ; delay in case of lag
 			}
 		}
+		
+		MPlanterRelease%PlanterIndex% := 0
+		IniWrite, % MPlanterRelease%PlanterIndex%, settings\nm_config.ini, Planters, MPlanterRelease%PlanterIndex%
+		MPlanterSmoking%PlanterIndex% := 0
+		IniWrite, % MPlanterSmoking%PlanterIndex%, settings\nm_config.ini, Planters, MPlanterSmoking%PlanterIndex%
 
 		;reset values
 		CycleIndex := PlanterManualCycle%PlanterIndex%
@@ -3247,13 +3492,13 @@ mp_HarvestPlanter(PlanterIndex) {
 		PlanterHarvestFull%PlanterIndex% := ""
 		PlanterHarvestTime%PlanterIndex% := 20211106000000
 
-		IniWrite, % PlanterName%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterName%PlanterIndex%
-		IniWrite, % PlanterField%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterField%PlanterIndex%
-		IniWrite, % PlanterNectar%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterNectar%PlanterIndex%
-		IniWrite, % PlanterGlitter%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterGlitter%PlanterIndex%
-		IniWrite, % PlanterGlitterC%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterGlitterC%PlanterIndex%
-		IniWrite, % PlanterHarvestFull%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterHarvestFull%PlanterIndex%
-		IniWrite, % PlanterHarvestTime%PlanterIndex%, Settings/nm_config.ini, Planters, PlanterHarvestTime%PlanterIndex%
+		IniWrite, % PlanterName%PlanterIndex%, settings\nm_config.ini, Planters, PlanterName%PlanterIndex%
+		IniWrite, % PlanterField%PlanterIndex%, settings\nm_config.ini, Planters, PlanterField%PlanterIndex%
+		IniWrite, % PlanterNectar%PlanterIndex%, settings\nm_config.ini, Planters, PlanterNectar%PlanterIndex%
+		IniWrite, % PlanterGlitter%PlanterIndex%, settings\nm_config.ini, Planters, PlanterGlitter%PlanterIndex%
+		IniWrite, % PlanterGlitterC%PlanterIndex%, settings\nm_config.ini, Planters, PlanterGlitterC%PlanterIndex%
+		IniWrite, % PlanterHarvestFull%PlanterIndex%, settings\nm_config.ini, Planters, PlanterHarvestFull%PlanterIndex%
+		IniWrite, % PlanterHarvestTime%PlanterIndex%, settings\nm_config.ini, Planters, PlanterHarvestTime%PlanterIndex%
 
 		TotalPlantersCollected:=TotalPlantersCollected+1
 		SessionPlantersCollected:=SessionPlantersCollected+1
@@ -3298,9 +3543,6 @@ Hotkey, %PauseHotkey%, pause, UseErrorLevel On
 Hotkey, %AutoClickerHotkey%, autoclicker, UseErrorLevel On T2
 Hotkey, %TimersHotkey%, timers, UseErrorLevel On
 
-if(TimersOpen && (PlanterMode != 0))
-    run, "%exe_path32%" /script "submacros\PlanterTimers.ahk" "%hwndstate%"
-
 settimer, Background, 2000
 if (A_Args[1] = 1)
 	settimer, start, -1000
@@ -3330,6 +3572,8 @@ nm_Start(){
 		nm_Collect()
 		;quests
 		nm_QuestRotate()
+		;shrine
+		nm_Shrine()
 		;booster
 		nm_ToAnyBooster()
 		;gather
@@ -3343,6 +3587,21 @@ nm_Start(){
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; GUI FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+nm_StartButton(hButton){
+	MouseGetPos, , , , hCtrl, 2
+	if (hCtrl = hButton)
+		Gosub, start
+}
+nm_PauseButton(hButton){
+	MouseGetPos, , , , hCtrl, 2
+	if (hCtrl = hButton)
+		Gosub, pause
+}
+nm_StopButton(hButton){
+	MouseGetPos, , , , hCtrl, 2
+	if (hCtrl = hButton)
+		Gosub, stop
+}
 nm_LockTabs(lock:=1){
 	static tabs := ["Gather","Collect","Boost","Quest","Planters","Status","Settings","Misc"]
 	global bitmaps
@@ -3352,6 +3611,7 @@ nm_LockTabs(lock:=1){
 	{
 		GuiControl, Disable, CurrentFieldUp
 		GuiControl, Disable, CurrentFieldDown
+		GuiControl, Disable, SecretButton
 
 		pBM := Gdip_BitmapConvertGray(bitmaps["discordgui"]), hBM := Gdip_CreateHBITMAPFromBitmap(pBM)
 		GuiControl, , ImageDiscordLink, HBITMAP:*%hBM%
@@ -3366,6 +3626,7 @@ nm_LockTabs(lock:=1){
 	{
 		GuiControl, Enable, CurrentFieldUp
 		GuiControl, Enable, CurrentFieldDown
+		GuiControl, Enable, SecretButton
 
 		hBM := Gdip_CreateHBITMAPFromBitmap(bitmaps["discordgui"])
 		GuiControl, , ImageDiscordLink, HBITMAP:*%hBM%
@@ -3379,6 +3640,168 @@ nm_LockTabs(lock:=1){
 
 	for i,tab in tabs
 		nm_Tab%tab%%c%()
+}
+nm_ShrineIndexOption() {
+	global ShrineIndexOption, ShrineIndex
+	GuiControlGet, ShrineIndexOption
+	if(ShrineIndexOption)
+		GuiControl, disable, ShrineIndex
+	else
+		GuiControl, enable, ShrineIndex
+}
+ba_setShrineData(hCtrl){
+    global
+    Loop, 2 {
+        if (hCtrl = hShrineClear%A_Index%) {
+            if (ShrineItem%A_Index% = "None") {
+				ShrineaddIndex := A_Index, ShrineAdd := A_Index
+				loop 2 {
+					GuiControl, Hide, ShrineAdd%A_Index%
+					GuiControl, Hide, ShrineData%A_Index%
+					GuiControl, Hide, ShrineItem%A_Index%Picture
+				}
+				
+				GuiControl,, ShrineAmount, % ShrineAmount%A_Index%
+				GuiControl,, ShrineIndex, % ((ShrineIndex%A_Index% != "Infinite" && ShrineIndex%A_Index% != "∞") ? ShrineIndex%A_Index% : 1) 
+				ba_AddShrineItemButton()
+				GuiControl,, ShrineIndexOption, 0
+				GuiControl, Enable, ShrineIndex
+				GuiControl,, ShrineAddSlot, Add to Slot %shrineaddIndex%
+
+				For z, ui in ["ShrineItem", "ShrineLeft", "ShrineRight", "ShrineAddSlot", "ShrineAmountText", "ShrineAmount", "ShrineAmountNum", "ShrineRepeatText", "ShrineIndexOption", "ShrineIndexNum", "ShrineIndex","shrineline1","shrinetitle1","shrineline2","shrineline3","shrineline4","shrineline5"]
+					GuiControl, Show, %ui%
+			} else {
+				ShrineItem%A_Index% := "None", ShrineAmount%A_Index% := 0, ShrineIndex%A_Index% := 1, ShrineTime%A_Index% := 0
+
+				IniWrite, None, settings\nm_config.ini, Shrine, ShrineItem%A_Index%
+                IniWrite, 0, settings\nm_config.ini, Shrine, ShrineAmount%A_Index%
+                Iniwrite, 1, settings\nm_config.ini, Shrine, ShrineIndex%A_Index%
+                Iniwrite, 0, settings\nm_config.ini, Shrine, ShrineTime%A_Index%
+
+				GuiControl,, % hShrineClear%A_Index%, % ((ShrineItem%A_Index% = "None" || ShrineItem%A_Index% = "") ? "Add" : "Clear")
+				GuiControl,, ShrineData%A_Index%, % "(" ShrineAmount%A_Index% ") [" ((ShrineIndex%A_Index% = "Infinite") ? "∞" : ShrineIndex%A_Index%) "]"
+
+				GuiControl,, % hShrineItem%A_Index%Picture, % ""
+            }
+            break
+        }
+    }
+}
+ba_AddShrineItemButton(hCtrl:=0){
+    global hfShrineleft, hfShrineright, hAddShrineItem, AddShrineItem, ShrineAdd, hBitmapsSB
+    static items := ["RedExtract", "BlueExtract", "BlueBerry", "Pineapple", "StrawBerry", "Sunflower", "Enzymes", "Oil", "Glue", "TropicalDrink", "Gumdrops", "MoonCharms", "Glitter", "StarJelly", "PurplePotion", "SoftWax", "HardWax", "SwirledWax", "CausticWax", "FieldDice", "SmoothDice", "LoadedDice", "SuperSmoothie", "Turpentine"], i := 0, h := 0
+    if (h != ShrineAdd)
+        i := 0, h := ShrineAdd
+	i := Mod(items.Length() + i + ((hCtrl = hfShrineleft) ? -1 : (hCtrl = hfShrineright) ? 1 : 0), items.Length()), AddShrineItem := items[i+1]
+    SetImage(hAddShrineItem, hBitmapsSB[AddShrineItem])
+}
+ba_AddShrineItem(){
+    global
+	local ShrineIndex, ShrineAmount, ShrineIndexOption, ShrineIndex
+	GuiControlGet, ShrineIndex
+	GuiControlGet, ShrineAmount
+	GuiControlGet, ShrineIndexOption
+	ShrineIndex := ((ShrineIndexOption) ? "Infinite" : ShrineIndex)
+
+    IniWrite, % ShrineItem%ShrineaddIndex% := AddShrineItem, settings\nm_config.ini, Shrine, ShrineItem%ShrineaddIndex%
+    IniWrite, % ShrineIndex%ShrineaddIndex% := ShrineIndex, settings\nm_config.ini, Shrine, ShrineIndex%ShrineaddIndex%
+	IniWrite, % ShrineAmount%ShrineaddIndex% := ShrineAmount, settings\nm_config.ini, Shrine, ShrineAmount%ShrineaddIndex%
+	
+	GuiControl, , % hShrineItem%ShrineaddIndex%Picture, % hBitmapsSB[ShrineItem%ShrineaddIndex%] ? ("HBITMAP:*" hBitmapsSB[ShrineItem%ShrineaddIndex%]) : ""
+	
+	GuiControl,, ShrineData%ShrineaddIndex%, % "(" ShrineAmount%ShrineaddIndex% ") [" ((ShrineIndex%ShrineaddIndex% = "Infinite") ? "∞" : ShrineIndex%ShrineaddIndex%) "]"
+	GuiControl,, % hShrineClear%ShrineaddIndex%, % ((AddShrineItem = "None" || AddShrineItem = "") ? "Add" : "Clear")
+
+	For z, ui in ["ShrineItem", "ShrineLeft", "ShrineRight", "ShrineAddSlot", "ShrineAmountText", "ShrineAmount",, "ShrineAmountNum", "ShrineRepeatText", "ShrineIndex", "ShrineIndexOption", "ShrineIndexNum", "ShrineIndex","shrineline1","shrinetitle1","shrineline2","shrineline3","shrineline4","shrineline5"]
+		GuiControl, Hide, %ui%
+	loop 2 {
+		GuiControl, Show, ShrineAdd%A_Index%
+		GuiControl, Show, ShrineData%A_Index%
+		GuiControl, Show, ShrineItem%A_Index%Picture
+	}
+	ShrineAdd := 0
+}
+nm_BlenderIndexOption() {
+	global BlenderIndexOption, BlenderIndex
+	GuiControlGet, BlenderIndexOption
+	if (BlenderIndexOption)
+		GuiControl, disable, BlenderIndex
+	else
+		GuiControl, enable, BlenderIndex
+}
+nm_setBlenderData(hCtrl){
+    global
+    Loop, 3 {
+        if (hCtrl = hBlenderClear%A_Index%) {
+            if (BlenderItem%A_Index% = "None") {	
+				BlenderaddIndex := A_Index, BlenderAdd := A_Index
+
+				loop 3 {
+					GuiControl, Hide, BlenderAdd%A_Index%
+					GuiControl, Hide, BlenderData%A_Index%
+					GuiControl, Hide, BlenderItem%A_Index%Picture
+				}
+				
+				GuiControl,, BlenderAmount, % BlenderAmount%A_Index%
+				GuiControl,, BlenderIndex, % ((BlenderIndex%A_Index% != "Infinite" && BlenderIndex%A_Index% != "∞") ? BlenderIndex%A_Index% : 1) 
+				ba_AddBlenderItemButton()
+				GuiControl,, BlenderIndexOption, 0
+				GuiControl, Enable, BlenderIndex
+				GuiControl,, BlenderAddSlot, Add to Slot %BlenderaddIndex%
+
+				For z, ui in ["BlenderItem", "BlenderLeft", "BlenderRight", "BlenderAddSlot", "BlenderAmountText", "BlenderAmount", "BlenderAmountNum", "BlenderRepeatText", "BlenderIndexOption", "BlenderIndexNum", "BlenderIndex","blenderline1","blendertitle1","blenderline2","blenderline3","blenderline4","blenderline5"]
+					GuiControl, Show, %ui%
+			} else {
+				BlenderItem%A_Index% := "None", BlenderAmount%A_Index% := 0, BlenderIndex%A_Index% := 1, BlenderTime%A_Index% := 0
+
+                IniWrite, None, settings\nm_config.ini, Blender, BlenderItem%A_Index%
+                IniWrite, 0, settings\nm_config.ini, Blender, BlenderAmount%A_Index%
+                Iniwrite, 1, settings\nm_config.ini, Blender, BlenderIndex%A_Index%
+                Iniwrite, 0, settings\nm_config.ini, Blender, BlenderTime%A_Index%
+
+				GuiControl,, % hBlenderClear%A_Index%, % ((BlenderItem%A_Index% = "None" || BlenderItem%A_Index% = "") ? "Add" : "Clear")
+				GuiControl,, BlenderData%A_Index%, % "(" BlenderAmount%A_Index% ") [" ((BlenderIndex%A_Index% = "Infinite") ? "∞" : BlenderIndex%A_Index%) "]"
+
+				GuiControl, , % hBlenderItem%A_Index%Picture, % ""
+            }
+            break
+        }
+    }
+}
+ba_AddBlenderItemButton(hCtrl:=0){
+    global hfblenderleft, hfblenderright, hAddBlenderItem, AddBlenderItem, BlenderAdd, hBitmapsSB
+    static items := ["RedExtract", "BlueExtract", "Enzymes", "Oil", "Glue", "TropicalDrink", "Gumdrops", "MoonCharms", "Glitter", "StarJelly", "PurplePotion", "SoftWax", "HardWax", "SwirledWax", "CausticWax", "FieldDice", "SmoothDice", "LoadedDice", "SuperSmoothie", "Turpentine"], i := 0, h := 0
+    if (h != BlenderAdd)
+        i := 0, h := BlenderAdd
+    i := Mod(items.Length() + i + ((hCtrl = hfblenderleft) ? -1 : (hCtrl = hfblenderright) ? 1 : 0), items.Length()), AddBlenderItem := items[i+1]
+	SetImage(hAddBlenderItem, hBitmapsSB[AddBlenderItem])
+}
+ba_AddBlenderItem(){
+    global
+	local BlenderIndex, BlenderAmount, BlenderIndexOption, BlenderIndex
+	GuiControlGet, BlenderIndex
+	GuiControlGet, BlenderAmount
+	GuiControlGet, BlenderIndexOption
+	BlenderIndex := ((BlenderIndexOption) ? "Infinite" : BlenderIndex)
+
+	IniWrite, % BlenderItem%BlenderaddIndex% := AddBlenderItem, settings\nm_config.ini, Blender, BlenderItem%BlenderaddIndex%
+	IniWrite, % BlenderIndex%BlenderaddIndex% := BlenderIndex, settings\nm_config.ini, Blender, BlenderIndex%BlenderaddIndex%
+	IniWrite, % BlenderAmount%BlenderaddIndex% := BlenderAmount, settings\nm_config.ini, Blender, BlenderAmount%BlenderaddIndex%
+	
+	GuiControl, , % hBlenderItem%BlenderaddIndex%Picture, % hBitmapsSB[BlenderItem%BlenderaddIndex%] ? ("HBITMAP:*" hBitmapsSB[BlenderItem%BlenderaddIndex%]) : ""
+	
+	GuiControl,, BlenderData%BlenderaddIndex%, % "(" BlenderAmount%BlenderaddIndex% ") [" ((BlenderIndex%BlenderaddIndex% = "Infinite") ? "∞" : BlenderIndex%BlenderaddIndex%) "]"
+	GuiControl,, % hBlenderClear%BlenderaddIndex%, % ((AddBlenderItem = "None" || AddBlenderItem = "") ? "Add" : "Clear")
+
+	For z, ui in ["BlenderItem", "BlenderLeft", "BlenderRight", "BlenderAddSlot", "BlenderAmountText", "BlenderAmount", "BlenderAmountNum", "BlenderRepeatText", "BlenderIndexOption", "BlenderIndex", "BlenderIndexNum","blenderline1","blenderline2","blenderline3","blenderline4","blendertitle1"]
+		GuiControl, Hide, %ui%
+	loop 3 {
+		i := A_Index
+		GuiControl, Show, BlenderAdd%i%
+		GuiControl, Show, BlenderData%i%
+		GuiControl, Show, BlenderItem%i%Picture
+	}
+	BlenderAdd := 0
 }
 AsyncHttpRequest(method, url, func:="", headers:="")
 {
@@ -3745,7 +4168,10 @@ nm_testButton(){ ;~~ lines 3464 and 3465 have the same change as 14156
 	#Include Gdip_All.ahk
 	#Include Gdip_ImageSearch.ahk
 	#Include HyperSleep.ahk
+	#Include WinGetClientPos.ahk
 	#Include Walk.ahk
+	#Include GetRobloxHWND.ahk
+	#Include GetYOffset.ahk
 
 	movespeed := " MoveSpeedNum "
 	hasty_guard := (Mod(movespeed*10, 11) = 0) ? 1 : 0
@@ -3856,7 +4282,7 @@ nm_testButton(){ ;~~ lines 3464 and 3465 have the same change as 14156
 		pBMH1 := Gdip_CreateBitmap(240,3), G := Gdip_GraphicsFromImage(pBMH1), Gdip_GraphicsClear(G,0xff867018), Gdip_DeleteGraphics(G)
 		pBMH2 := Gdip_CreateBitmap(240,3), G := Gdip_GraphicsFromImage(pBMH2), Gdip_GraphicsClear(G,0xff937d2d), Gdip_DeleteGraphics(G)
 		pBMH3 := Gdip_CreateBitmap(240,3), G := Gdip_GraphicsFromImage(pBMH3), Gdip_GraphicsClear(G,0xff8e7d4d), Gdip_DeleteGraphics(G)
-		pBMR := Gdip_CreateBitmap(20,1), G := Gdip_GraphicsFromImage(pBMR), Gdip_GraphicsClear(G,0xffa7a7a7), Gdip_DeleteGraphics(G)
+		pBMR := Gdip_BitmapFromBase64(""""iVBORw0KGgoAAAANSUhEUgAAACgAAAAGCAAAAACUM4P3AAAAAnRSTlMAAHaTzTgAAAAXdEVYdFNvZnR3YXJlAFBob3RvRGVtb24gOS4wzRzYMQAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0n77u/JyBpZD0nVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkJz8+Cjx4OnhtcG1ldGEgeG1sbnM6eD0nYWRvYmU6bnM6bWV0YS8nIHg6eG1wdGs9J0ltYWdlOjpFeGlmVG9vbCAxMi40NCc+CjxyZGY6UkRGIHhtbG5zOnJkZj0naHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyc+CgogPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9JycKICB4bWxuczpleGlmPSdodHRwOi8vbnMuYWRvYmUuY29tL2V4aWYvMS4wLyc+CiAgPGV4aWY6UGl4ZWxYRGltZW5zaW9uPjQwPC9leGlmOlBpeGVsWERpbWVuc2lvbj4KICA8ZXhpZjpQaXhlbFlEaW1lbnNpb24+NjwvZXhpZjpQaXhlbFlEaW1lbnNpb24+CiA8L3JkZjpEZXNjcmlwdGlvbj4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOnRpZmY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvJz4KICA8dGlmZjpJbWFnZUxlbmd0aD42PC90aWZmOkltYWdlTGVuZ3RoPgogIDx0aWZmOkltYWdlV2lkdGg+NDA8L3RpZmY6SW1hZ2VXaWR0aD4KICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogIDx0aWZmOlJlc29sdXRpb25Vbml0PjI8L3RpZmY6UmVzb2x1dGlvblVuaXQ+CiAgPHRpZmY6WFJlc29sdXRpb24+OTYvMTwvdGlmZjpYUmVzb2x1dGlvbj4KICA8dGlmZjpZUmVzb2x1dGlvbj45Ni8xPC90aWZmOllSZXNvbHV0aW9uPgogPC9yZGY6RGVzY3JpcHRpb24+CjwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9J3InPz77yGiWAAAAI0lEQVR42mNUYyAOMDJggOUMDAyRmAqXMxAHmBiobjWxngEAj7gC+wwAe1AAAAAASUVORK5CYII="""")
 		success := 0
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, """"ahk_id """" GetRobloxHWND())
 		MouseMove, windowX+350, windowY+offsetY+100
@@ -3867,9 +4293,9 @@ nm_testButton(){ ;~~ lines 3464 and 3465 have the same change as 14156
 			SendEvent {"" SC_Esc ""}{"" SC_R ""}{"" SC_Enter ""}
 			SetKeyDelay, 100+"" KeyDelay ""
 			n := 0
-			while ((n < 2) && (A_Index <= 80))
+			while ((n < 2) && (A_Index <= 200))
 			{
-				Sleep, 250
+				Sleep, 100
 				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, """"ahk_id """" GetRobloxHWND())
 				pBMScreen := Gdip_BitmapFromScreen(windowX """"|"""" windowY """"|"""" windowWidth """"|50"""")
 				n += (Gdip_ImageSearch(pBMScreen, pBMR, , , , , , 10) = (n = 0))
@@ -4680,8 +5106,18 @@ nm_BugrunCheck(){
 nm_TabCollectLock(){
 	global
 	;collect
+	GuiControl, disable, BlenderAddSlot
+	GuiControl, disable, BlenderAdd1
+	GuiControl, disable, BlenderAdd2
+	GuiControl, disable, BlenderAdd3
+	GuiControl, disable, BlenderAmount
+	GuiControl, disable, BlenderIndex
+	GuiControl, disable, BlenderIndexOption
+	GuiControl, disable, BlenderLeft
+	GuiControl, disable, BlenderRight
 	GuiControl, disable, ClockCheck
 	GuiControl, disable, MondoBuffCheck
+	GuiControl, disable, MondoSecs
 	GuiControl, disable, % hMALeft
 	GuiControl, disable, % hMARight
 	GuiControl, disable, RoboPassCheck
@@ -4751,8 +5187,20 @@ nm_TabCollectLock(){
 nm_TabCollectUnLock(){
 	global
 	;collect
+	GuiControl, enable, BlenderAddSlot
+	GuiControl, enable, BlenderAdd1
+	GuiControl, enable, BlenderAdd2
+	GuiControl, enable, BlenderAdd3
+	GuiControl, enable, BlenderAmount
+	GuiControl, enable, BlenderIndexOption
+	if (BlenderIndexOption = 0)
+		GuiControl, enable, BlenderIndex
+	GuiControl, enable, BlenderLeft
+	GuiControl, enable, BlenderRight
 	GuiControl, enable, ClockCheck
 	GuiControl, enable, MondoBuffCheck
+	if (MondoAction="Manual")
+		GuiControl, enable, MondoSecs
 	GuiControl, enable, % hMALeft
 	GuiControl, enable, % hMARight
 	GuiControl, enable, RoboPassCheck
@@ -4857,6 +5305,14 @@ nm_BoostChaserCheck(){
 }
 nm_TabBoostLock(){
 	global
+	GuiControl, disable, ShrineAddSlot
+	GuiControl, disable, ShrineAdd1
+	GuiControl, disable, ShrineAdd2
+	GuiControl, disable, ShrineAmount
+	GuiControl, disable, ShrineIndex
+	GuiControl, disable, ShrineIndexOption
+	GuiControl, disable, ShrineLeft
+	GuiControl, disable, ShrineRight
 	GuiControl, disable, % hFB1Left
 	GuiControl, disable, % hFB1Right
 	GuiControl, disable, % hFB2Left
@@ -4887,6 +5343,15 @@ nm_TabBoostLock(){
 }
 nm_TabBoostUnLock(){
 	global
+	GuiControl, enable, ShrineAddSlot
+	GuiControl, enable, ShrineAdd1
+	GuiControl, enable, ShrineAdd2
+	GuiControl, enable, ShrineAmount
+	GuiControl, enable, ShrineIndexOption
+	if (ShrineIndexOption = 0)
+		GuiControl, enable, ShrineIndex
+	GuiControl, enable, ShrineLeft
+	GuiControl, enable, ShrineRight
 	GuiControl, enable, % hFB1Left
 	GuiControl, enable, % hFB1Right
 	nm_FieldBooster()
@@ -6583,11 +7048,14 @@ nm_MondoAction(hCtrl){
 		i := 2
 		case % MondoActionList[3]:
 		i := 3
-		default:
+		case % MondoActionList[4]:
 		i := 4
+		default:
+		i := 5
 	}
 
 	GuiControl, , MondoAction, % (MondoAction := MondoActionList[(hCtrl = hMARight) ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)])
+	GuiControl, % (MondoAction = "Manual") ? "Enable" : "Disable", MondoSecs
 	IniWrite, %MondoAction%, settings\nm_config.ini, Collect, MondoAction
 }
 nm_AntPassAction(hCtrl){
@@ -7610,6 +8078,12 @@ nm_MonsterRespawnTimeHelp(){ ; monster respawn time information
 nm_BossConfigHelp(){ ; monster respawn time information
 	msgbox, 0x40000, Boss configuration, DESCRIPTION:`nThe Bosses menu allows for you to customize whether to wait for baby love, to keep your old amulet or keep it on the screen for manual input and to configure the health and time interval for Snail and chick.`n`nBaby Love`n- The baby love option will allow for the macro to wait a certain amount of time to try to get a baby love token to increase loot luck. This option is only for king beetle and tunnel bear.`n`nBoss Amulet options`n- Enabling the checkbox will allow for the macro to automatically keep your old amulet so that you don't lose your perfect amulet. Unchecking this box will allow for the amulet prompt to stay on screen for manual input whether to keep or replace. The only bosses with this feature are Stump Snail and King beetle`n`nBoss health/time settings`n- Enter the boss's health in the text box. The health needs to be written in wihtout commas seperating the health and it will automatically be converted into a percentage. As for the time, the time options are in 5,10,15 minutes with another option being the kill option. The Kill option will basically attack the boss until the boss dies or if you die. The only bosses with this feature are Stump Snail and Commando Chick.
 }
+nm_MPlanterGatherHelp(){ ; gather in planter field information for manual planters
+	msgbox, 0x40000, Gather in planter field, DESCRIPTION:`n`nGather in planter field will enable you to gather only in the fields where planters are placed, instead of the fields selected in your gather tab. You can choose which planter slots you wish to gather in. If you choose more than one planter slot to gather in, the macro will rotate between each selected slot. If there are no slots available for planter gather (none selected, none with planters, or all 'holding' if 'disable auto harvest' mode is also selected), the macro will revert to gathering in the fields specified in the gather tab.
+}
+nm_MPuffModeHelp(){ ; disable auto harvest information for manual planters
+	msgbox, 0x40000, Disable auto harvest, DESCRIPTION:`n`nThis option is designed for users trying to grow smoking planters for puffshrooms. Enabling it for a planter slot will cause the macro NOT to harvest the planter. Instead, it will 'hold' the planter until you harvest and clear it either manually or through remote control. This allows you to check whether it is smoking before harvesting.`n`nTo use this feature:`n- Choose which slots to disable auto harvest for, depending on how many planters you wish to use for puffshrooms versus loot or nectar. `n- If you have set up a Discord webhook and would like a ping and screenshot of the planter when full grown, select Planter Progress in Natro Status tab > Change Discord Settings.`n- When ready, either: harvest manually in game, clear the planter in the Planter Timers pop-up (F5), and move to next cycle by pressing + in the planter tab, or do nothing if the planter is smoking and you wish to keep holding it.`n- If you turn off 'Disable Auto Harvest' or switch to Planters Plus mode, the macro will harvest any planters marked holding or smoking.`n`nAdvanced options:`nIf you have set up remote control, after receiving a ping you can also optionally set your planter to smoking to help you keep track, or release from hold and plant next using these commands:`n?planter smoking [1][2][3]`n?planter release [1][2][3]`nSee these planter commands and your planter status using ?planter`n`nSee our Discord server for more details on how to set up and use webhook or remote control!
+}
 nm_ReconnectTimeHelp(){
 	global ReconnectHour, ReconnectMin, ReconnectInterval
 	Gui +OwnDialogs
@@ -7830,10 +8304,15 @@ nm_ContributorsPageButton(hwnd){
 }
 nm_CollectKillButton(hCtrl){
 	global
-	static CollectControls := ["CollectGroupBox","DispensersGroupBox","BeesmasGroupBox","BeesmasFailImage","BeesmasImage","ClockCheck","MondoBuffCheck","MondoAction","AntPassCheck","AntPassAction","RoboPassCheck","HoneystormCheck","HoneyDisCheck","TreatDisCheck","BlueberryDisCheck","StrawberryDisCheck","CoconutDisCheck","RoyalJellyDisCheck","GlueDisCheck"]
+	static CollectControls := ["CollectGroupBox","DispensersGroupBox","BeesmasGroupBox","BlenderGroupBox","BeesmasFailImage","BeesmasImage"
+		,"ClockCheck","MondoBuffCheck","MondoAction","MondoPointText","MondoSecs","MondoSecsText","AntPassCheck","AntPassAction","RoboPassCheck","HoneystormCheck"
+		,"HoneyDisCheck","TreatDisCheck","BlueberryDisCheck","StrawberryDisCheck","CoconutDisCheck","RoyalJellyDisCheck","GlueDisCheck"]
 	, CollectControlsH := ["hMALeft","hMARight","hAPALeft","hAPARight","hBeesmas1","hBeesmas2","hBeesmas3","hBeesmas4","hBeesmas5","hBeesmas6","hBeesmas7","hBeesmas8","hBeesmas9","hBeesmas10","hBeesmas11"]
 	, KillControls := ["BugRunGroupBox","BugRunCheck","MonsterRespawnTime","TextMonsterRespawnPercent","TextMonsterRespawn","MonsterRespawnTimeHelp","BugrunInterruptCheck","TextLoot","TextKill","TextLineBugRun1","TextLineBugRun2","BugrunLadybugsLoot","BugrunRhinoBeetlesLoot","BugrunSpiderLoot","BugrunMantisLoot","BugrunScorpionsLoot","BugrunWerewolfLoot","BugrunLadybugsCheck","BugrunRhinoBeetlesCheck","BugrunSpiderCheck","BugrunMantisCheck","BugrunScorpionsCheck","BugrunWerewolfCheck","StingersGroupBox","StingerCheck","StingerDailyBonusCheck","TextFields","StingerCloverCheck","StingerSpiderCheck","StingerCactusCheck","StingerRoseCheck","StingerMountainTopCheck","StingerPepperCheck","BossesGroupBox","TunnelBearCheck","KingBeetleCheck","CocoCrabCheck","StumpSnailCheck","CommandoCheck","TunnelBearBabyCheck","KingBeetleBabyCheck","BabyLovePicture1","BabyLovePicture2","KingBeetleAmuletMode","ShellAmuletMode","KingBeetleAmuPicture","ShellAmuPicture","KingBeetleAmuletModeText","ShellAmuletModeText","ChickLevelTextLabel","ChickLevelText","ChickLevel","SnailHPText","SnailHealthEdit","SnailHealthText","ChickHPText","ChickHealthEdit","ChickHealthText","SnailTimeText","SnailTimeUpDown","ChickTimeText","ChickTimeUpDown","BossConfigHelp","TextLineBosses1","TextLineBosses2","TextLineBosses3","TextBosses1","TextBosses2","TextBosses3"]
-	local p, i, c, k, v
+	, BlenderMain := ["BlenderItem1Picture", "BlenderItem2Picture", "BlenderItem3Picture", "BlenderAdd1", "BlenderAdd2", "BlenderAdd3", "BlenderData1", "BlenderData2", "BlenderData3"]
+	, BlenderSide := ["BlenderAmount", "BlenderAmountNum", "BlenderAmountText", "BlenderRepeatText", "BlenderIndex", "BlenderIndexNum", "BlenderItem", "BlenderLeft", "BlenderRight", "BlenderAddSlot", "BlenderIndexOption","blenderline1","blenderline2","blenderline3","blenderline4","blendertitle1"]
+
+	local p, i, c, k, v, arr
 
 	p := (hCtrl = hKill)
 	GuiControl, % (p ? "Enable" : "Disable"), % hCollect
@@ -7848,6 +8327,9 @@ nm_CollectKillButton(hCtrl){
 				GuiControl, %c%, %v%
 			for k,v in CollectControlsH
 				GuiControl, %c%, % %v%
+			arr := (BlenderAdd > 0) ? "BlenderSide" : "BlenderMain"
+			for k,v in %arr%
+				GuiControl, %c%, %v%
 		}
 
 		if (((i = 1) && (p = 0)) || ((i = 2) && (p = 1))) ; hide/show all kill controls
@@ -7991,7 +8473,10 @@ nm_TabPlantersLock(){
 	GuiControl, disable, CoconutFieldCheck
 	GuiControl, disable, PepperFieldCheck
 	;manual
-	Static ManualPlantersControls := ["MHarvestInterval", "MPageLeft", "MPageRight", "MSlot1Left", "MSlot1Right", "MSlot2Left", "MSlot2Right", "MSlot3Left", "MSlot3Right"
+	GuiControl, disable, % hMHILeft
+	GuiControl, disable, % hMHIRight
+	Static ManualPlantersControls := ["MPageLeft", "MPageRight", "MSlot1Left", "MSlot1Right", "MSlot2Left", "MSlot2Right", "MSlot3Left", "MSlot3Right"
+	, "MPuffModeA", "MPuffMode1", "MPuffMode2", "MPuffMode3", "MPuffModeHelp", "MPlanterGatherA", "MPlanterGather1", "MPlanterGather2", "MPlanterGather3", "MPlanterGatherHelp"
 	, "MSlot1Cycle1Planter", "MSlot1Cycle2Planter", "MSlot1Cycle3Planter", "MSlot1Cycle4Planter", "MSlot1Cycle5Planter", "MSlot1Cycle6Planter", "MSlot1Cycle7Planter", "MSlot1Cycle8Planter", "MSlot1Cycle9Planter"
 	, "MSlot1Cycle1Field", "MSlot1Cycle2Field", "MSlot1Cycle3Field", "MSlot1Cycle4Field", "MSlot1Cycle5Field", "MSlot1Cycle6Field", "MSlot1Cycle7Field", "MSlot1Cycle8Field", "MSlot1Cycle9Field"
 	, "MSlot1Cycle1Glitter", "MSlot1Cycle2Glitter", "MSlot1Cycle3Glitter", "MSlot1Cycle4Glitter", "MSlot1Cycle5Glitter", "MSlot1Cycle6Glitter", "MSlot1Cycle7Glitter", "MSlot1Cycle8Glitter", "MSlot1Cycle9Glitter"
@@ -8061,8 +8546,13 @@ nm_TabPlantersUnLock(){
 	GuiControl, enable, CoconutFieldCheck
 	GuiControl, enable, PepperFieldCheck
 	;manual
-	GuiControl, enable, MHarvestInterval
+	GuiControl, enable, % hMHILeft
+	GuiControl, enable, % hMHIRight
 	GuiControl, enable, MSlot1Cycle1Planter
+	GuiControl, enable, MPuffModeA
+	GuiControl, enable, MPuffModeHelp
+	GuiControl, enable, MPlanterGatherA
+	GuiControl, enable, MPlanterGatherHelp
 	mp_UpdatePage()
 	mp_UpdateControls()
 }
@@ -8192,6 +8682,9 @@ nm_TabMiscUnLock(){
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#Include %A_ScriptDir%\..\lib
+#Include nm_OpenMenu.ahk
+#Include nm_InventorySearch.ahk
 nm_PlanterDetection()
 {
 	static pBMProgressStart, pBMProgressEnd, pBMRemain
@@ -8228,10 +8721,10 @@ nm_PlanterDetection()
 	else
 		return 0
 }
-nm_PlanterTimeUpdate(FieldName)
+nm_PlanterTimeUpdate(FieldName, SetStatus := 1)
 {
 	global
-	local i, field, k, v, r, PlanterGrowTime, PlanterBarProgress
+	local i, field, k, v, r, PlanterGrowTime, PlanterBarProgress, CurrentPlanterBarProgress, NewPlanterBarProgress, VerifiedPlanterBarProgress
 
 	Loop, 3
 	{
@@ -8250,15 +8743,51 @@ nm_PlanterTimeUpdate(FieldName)
 
 			sendinput {%RotUp% 4}
 			Sleep, 200
+
+			; get prior PlanterBarProgress bounds for comparison
+			CurrentPlanterBarProgress := 1 - ((PlanterHarvestTime%i% - nowUnix()) / 3600 / PlanterGrowTime)  ; PlanterBarProgress0
+
 			Loop, 20
 			{
-				if ((PlanterBarProgress := nm_PlanterDetection()) > 0)
+				if (((PlanterBarProgress := nm_PlanterDetection()) > 0) && PlanterBarProgress <= 1)
 				{
-					PlanterHarvestTime%i% := nowUnix() + Round((1 - PlanterBarProgress) * PlanterGrowTime * 3600)
-					IniWrite, % PlanterHarvestTime%i%, settings\nm_config.ini, Planters, PlanterHarvestTime%i%
-					nm_setStatus("Detected", PlanterName%i% "`nField: " FieldName " - Est. Progress: " Round(PlanterBarProgress*100) "%")
-					break
+					; if new estimate within +/-10%, update
+					if (Abs(PlanterBarProgress - CurrentPlanterBarProgress) <= 0.10)
+					{
+						PlanterHarvestTime%i% := nowUnix() + Round((1 - PlanterBarProgress) * PlanterGrowTime * 3600)
+						IniWrite, % PlanterHarvestTime%i%, settings\nm_config.ini, Planters, PlanterHarvestTime%i%
+						SetStatus ? nm_setStatus("Detected", PlanterName%i% "`nField: " FieldName " - Est. Progress: " Round(PlanterBarProgress*100) "%")
+						;NewPlanterBarProgress := PlanterBarProgress  ; variable only needed here for testing status update
+						;SetStatus ? nm_setStatus("Detected", PlanterName%i% " Attempt 1 `nCurrentPlanterBarProgress: " CurrentPlanterBarProgress "`nNewPlanterBarProgress: " NewPlanterBarProgress "`nVerifiedPlanterBarProgress: " VerifiedPlanterBarProgress "`nField: " FieldName " - Est. Progress: " Round(PlanterBarProgress*100) "%")
+						break
+					}
+					else ; if new estimate not within +/-10%, screenshot again
+					{
+						NewPlanterBarProgress := PlanterBarProgress  ; PlanterBarProgress1
+
+						sleep 2000	
+
+						sendinput {%RotRight% 2}
+						sleep 100
+						PlanterBarProgress := nm_PlanterDetection()
+						sendinput {%RotLeft% 2}
+						sleep 100
+
+						; if second screenshot within +/-10% of first, update
+						if ((PlanterBarProgress > 0) && (PlanterBarProgress <= 1) && (Abs(PlanterBarProgress - NewPlanterBarProgress) <= 0.10))
+						{
+							VerifiedPlanterBarProgress := PlanterBarProgress  ; PlanterBarProgress2, variable only needed for testing status update
+							PlanterBarProgress := (NewPlanterBarProgress + PlanterBarProgress) / 2
+
+							PlanterHarvestTime%i% := nowUnix() + Round((1 - PlanterBarProgress) * PlanterGrowTime * 3600)
+							IniWrite, % PlanterHarvestTime%i%, settings\nm_config.ini, Planters, PlanterHarvestTime%i%
+							SetStatus ? nm_setStatus("Detected", PlanterName%i% "`nField: " FieldName " - Est. Progress: " Round(PlanterBarProgress*100) "%")
+							;SetStatus ? nm_setStatus("Detected", PlanterName%i% " Attempt 2 `nCurrentPlanterBarProgress: " CurrentPlanterBarProgress "`nNewPlanterBarProgress: " NewPlanterBarProgress "`nVerifiedPlanterBarProgress: " VerifiedPlanterBarProgress "`nField: " FieldName " - Est. Progress: " Round(PlanterBarProgress*100) "%")
+							break
+						}						
+					}
 				}
+
 				Sleep, 100
 				sendinput {%ZoomOut%}
 				if (A_Index = 10)
@@ -8424,16 +8953,6 @@ nm_imgSearch(fileName,v,aim := "full", trans:="none"){
 		return 3, 0, 0
 	}
 }
-WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", WinTitle:="", WinText:="", ExcludeTitle:="", ExcludeText:="")
-{
-    local hWnd, RECT
-    hWnd := WinExist(WinTitle, WinText, ExcludeTitle, ExcludeText)
-    VarSetCapacity(RECT, 16, 0)
-    DllCall("GetClientRect", "UPtr",hWnd, "Ptr",&RECT)
-    DllCall("ClientToScreen", "UPtr",hWnd, "Ptr",&RECT)
-    X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
-    Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
-}
 nowUnix(){
     Time := A_NowUTC
     EnvSub, Time, 19700101000000, Seconds
@@ -8485,9 +9004,23 @@ nm_Reset(checkAll:=1, wait:=2000, convert:=1, force:=0){
 		}
 		DisconnectCheck()
 		WinActivate, Roblox
-		;check to make sure you are not in dialog before reset
 		hwnd := GetRobloxHWND()
 		offsetY := GetYOffset(hwnd)
+		;check that performance stats is disabled
+		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
+		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+36 "|" windowWidth "|24")
+		if ((Gdip_ImageSearch(pBMScreen, bitmaps["perfmem"], pos, , , , , 2, , 5) = 1)
+		&& (Gdip_ImageSearch(pBMScreen, bitmaps["perfwhitefill"], , x := SubStr(pos, 1, (comma := InStr(pos, ",")) - 1), y := SubStr(pos, comma + 1), x + 17, y + 7, 2) = 0)) {
+			if ((Gdip_ImageSearch(pBMScreen, bitmaps["perfcpu"], pos, x + 17, y, , y + 7, 2) = 1)
+			&& (Gdip_ImageSearch(pBMScreen, bitmaps["perfwhitefill"], , x := SubStr(pos, 1, (comma := InStr(pos, ",")) - 1), y := SubStr(pos, comma + 1), x + 17, y + 7, 2) = 0)) {
+				if ((Gdip_ImageSearch(pBMScreen, bitmaps["perfgpu"], pos, x + 17, y, , y + 7, 2) = 1)
+				&& (Gdip_ImageSearch(pBMScreen, bitmaps["perfwhitefill"], , x := SubStr(pos, 1, (comma := InStr(pos, ",")) - 1), y := SubStr(pos, comma + 1), x + 17, y + 7, 2) = 0)) {
+					Send ^{F7}
+				}
+			}
+		}
+		Gdip_DisposeImage(pBMScreen)
+		;check to make sure you are not in dialog before reset
 		Loop, 500
 		{
 			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
@@ -8517,6 +9050,28 @@ nm_Reset(checkAll:=1, wait:=2000, convert:=1, force:=0){
 			MouseMove, windowX+(imgPos[2]), windowY+(imgPos[3])
 			Click
 			MouseMove, windowX+350, windowY+offsetY+100
+		}
+		;check to make sure you are not in blender screen
+		BlenderSS := Gdip_BitmapFromScreen(WindowX+Windowwidth//2 - 277 "|" windowY+WindowHeight//2 - 243 "|553|400")
+		if (Gdip_ImageSearch(BlenderSS, bitmaps["CloseGUI"], , , , , , 5) > 0) {
+			MouseMove, WindowX+Windowwidth//2 - 250, windowY+WindowHeight//2 - 210
+			sleep, 150 
+			click
+		}
+		Gdip_DisposeImage(BlenderSS)
+		;check to make sure theres no memory match tiles on screen
+		loop 18 {
+			PBmScreen := Gdip_BitmapFromScreen(WindowX "|" windowY "|" WindowWidth "|" WindowHeight)
+			if (Gdip_ImageSearch(PBmScreen, bitmaps["MemoryMatchNTile"], , , , , , 5) > 0) {
+				MouseMove, windowX+SubStr(pos, 1, InStr(pos, ",")-1), windowY+SubStr(pos, InStr(pos, ",")+1)
+				sleep, 150 
+				click
+				sleep, 200
+			} else {
+				Gdip_DisposeImage(PBmScreen)
+				break
+			}
+			Gdip_DisposeImage(PBmScreen)
 		}
 		;check to make sure you are not in shop before reset
 		searchRet := nm_imgSearch("e_button.png",30,"high")
@@ -8560,9 +9115,9 @@ nm_Reset(checkAll:=1, wait:=2000, convert:=1, force:=0){
 			WinActivate, Roblox
 			send {%SC_Esc%}{%SC_R%}{%SC_Enter%}
 			n := 0
-			while ((n < 2) && (A_Index <= 80))
+			while ((n < 2) && (A_Index <= 200))
 			{
-				Sleep, 250
+				Sleep, 100
 				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY "|" windowWidth "|50")
 				n += (Gdip_ImageSearch(pBMScreen, bitmaps["emptyhealth"], , , , , , 10) = (n = 0))
@@ -8794,9 +9349,11 @@ nm_findHiveSlot(){
 
 	pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-200 "|" windowY+offsetY "|400|125")
 	if ((Gdip_ImageSearch(pBMScreen, bitmaps["makehoney"], , , , , , 2, , 2) = 1) || (Gdip_ImageSearch(pBMScreen, bitmaps["collectpollen"], , , , , , 2, , 2) = 1))
-		HiveConfirmed := 1
+		HiveConfirmed := 1, Gdip_DisposeImage(pBMScreen)
 	else
 	{
+		Gdip_DisposeImage(pBMScreen)
+
 		; find hive slot
 		movement := "
 		(LTrim Join`r`n
@@ -8916,7 +9473,7 @@ nm_toAnyBooster(){
 	global MoveMethod
 	global LastBlueBoost, QuestBlueBoost
 	global LastRedBoost
-	global LastMountainBoost, QuestRedBoost, QuestGatherField, LastWindShrine
+	global LastMountainBoost, QuestRedBoost, QuestGatherField
 	global FieldBooster1
 	global FieldBooster2
 	global FieldBooster3
@@ -8932,9 +9489,7 @@ nm_toAnyBooster(){
 		return
 	if (QuestGatherField!="None" && QuestGatherField)
 		return
-	MyFunc := "nm_WindShrine"
-	%MyFunc%()
-	loop 3 {
+		loop 3 {
 		if(FieldBooster%A_Index%="none" && QuestBlueBoost=0 && QuestRedBoost=0)
 			break
 		LastBooster:=max(LastBlueBoost, LastRedBoost, LastMountainBoost)
@@ -8964,8 +9519,138 @@ nm_toAnyBooster(){
 		}
 	}
 }
+nm_shrine(){
+    global FwdKey, BackKey, LeftKey, RightKey, RotLeft, RotRight, KeyDelay, objective, CurrentAction, PreviousAction, MoveSpeedNum, GatherFieldBoostedStart, LastGlitter, MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff, VBState, LastShrine, ShrineCheck, ShrineItem1, ShrineItem2, ShrineAmount1, ShrineAmount2, ShrineRot, resetTime, Shrine, SC_E, SC_Space, SC_1
+    if(VBState=1)
+        return
+    FormatTime, utc_min, %A_NowUTC%, m
+    if((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag"))
+        return
+    if ((nowUnix()-GatherFieldBoostedStart<900) || (nowUnix()-LastGlitter<900) || nm_boostBypassCheck())
+        return
+
+	hwnd := GetRobloxHWND()
+	offsetY := GetYOffset(hwnd)
+	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
+
+    if(CurrentAction!="Shrine") {
+        PreviousAction:=CurrentAction
+        CurrentAction:="Shrine"
+    }
+    nm_ShrineRotation() ; make sure ShrineRot hasnt changed
+    if (ShrineCheck && (nowUnix()-LastShrine)>3600) { ;1 hour
+        loop, 2 {
+            z := A_Index
+            nm_Reset()
+            nm_setStatus("Traveling", "Wind Shrine" ((A_Index > 1) ? " (Attempt 2)" : ""))
+
+            nm_gotoCollect("WindShrine")
+
+            searchRet := nm_imgSearch("e_button.png",30,"high")
+            If (searchRet[1] = 0) {
+                sendinput {%SC_E% down}
+                Sleep, 100
+                sendinput {%SC_E% up}
+                Sleep, 2000
+
+                MouseMove, WindowX+Windowwidth//2, WindowY+WindowHeight//1.35 - 5
+                sleep, 150
+                Click
+                sleep, 300
+                SearchX := WindowX+Windowwidth//2 + 20, SearchY := WindowY+WindowHeight//2 - 100
+                Loop
+                {
+                    sleep, 150
+					ShrineSS := Gdip_BitmapFromScreen(SearchX "|" SearchY "|170|245")
+                    Donation := % "ShrineItem" ShrineRot
+					DonationIMG := % %Donation%
+					
+                    if (Gdip_ImageSearch(ShrineSS, Shrine[DonationIMG], , , , , , 2, , 4) > 0) {
+						Gdip_DisposeImage(ShrineSS)
+						sleep, 200
+                        MouseMove, WindowX+WindowWidth//2 + 165, WindowY+WindowHeight//2 + 65 ; Add more items
+                        sleep, 150
+                        While (A_index < ShrineAmount%ShrineRot%) {
+                            Click
+                            sleep, 30
+                        }
+                        sleep, 300
+						MouseMove, WindowX+WindowWidth//2 - 70, WindowY+WindowHeight//2 + 130 ; click donate/confirm
+						sleep, 150
+						Click
+						sleep, 150
+						MouseMove, WindowX+WindowWidth//2, WindowY+WindowHeight//1.35 - 5 ; move mouse onto gui box
+						loop, 10 {
+							sleep, 200
+							Click
+						}
+						sleep, 500
+						gatherloot := "
+						    (LTrim Join`r`n
+						    " nm_Walk(7, RightKey, FwdKey) "
+						    " nm_Walk(10, FwdKey) "
+						    " nm_Walk(10, FwdKey, RightKey) "
+						    " nm_Walk(7, BackKey) "
+						    " nm_Walk(2, RightKey) "
+						    " nm_Walk(3.75, BackKey) "
+						    " nm_Walk(3, LeftKey)"
+						    loop, 4 {
+						        " nm_Walk(5, LeftKey) "
+						        " nm_Walk(1.5, BackKey) "
+						        " nm_Walk(5, RightKey)"
+						        " nm_Walk(1.5, BackKey) "
+						    }
+						    loop, 2 {
+						        " nm_Walk(15, LeftKey) "
+						        " nm_Walk(1, FwdKey) "
+						        " nm_Walk(15, RightKey) "
+						        " nm_Walk(1, FwdKey) "
+						    }
+						    " nm_Walk(15, LeftKey) "
+						    loop, 4 {
+						        " nm_Walk(1.5, FwdKey) "
+						        " nm_Walk(5, RightKey) "
+						        " nm_Walk(1.5, FwdKey) "
+						        " nm_Walk(5, LeftKey)"
+						    }
+						)"
+						nm_createWalk(gatherloot)
+						KeyWait, F14, D T5 L
+						KeyWait, F14, T60 L
+						nm_endWalk()
+						nm_SetStatus("Collected", "Wind Shrine")
+						
+						if (ShrineIndex%ShrineRot% != "Infinite")  {
+							ShrineIndex%shrineRot%-- ;subtract from shrineindex for looping only if its a number
+							GuiControl,, ShrineData%ShrineRot%, % "(" ShrineAmount%ShrineRot% ") [" ((ShrineIndex%ShrineRot% = "Infinite") ? "∞" : ShrineIndex%ShrineRot%) "]"
+							IniWrite, % ShrineIndex%ShrineRot%, settings\nm_config.ini, Shrine, ShrineIndex%ShrineRot%
+						}
+						ShrineRot := Mod(ShrineRot, 2) + 1 ; determine Shrinerot
+						nm_ShrineRotation()
+
+						break 2
+                    } else {
+						Gdip_DisposeImage(ShrineSS)
+                        MouseMove, WindowX+WindowWidth//2 + 165, WindowY+WindowHeight//2 - 20 ; go to next item
+                        sleep, 50
+                        Click
+                        if (A_Index = 60) {
+                            if (z = 2)
+                                nm_setStatus("Failed", "Wind shrine")	
+                            break
+                        }
+						sleep, 100
+                    }
+                }
+            }
+        }
+        LastShrine := nowUnix()
+        IniWrite, %LastShrine%, settings\nm_config.ini, collect, LastShrine
+        IniWrite, %ShrineRot%, settings\nm_config.ini, collect, ShrineRot
+    }
+}
 nm_Collect(){
-	global FwdKey, BackKey, LeftKey, RightKey, RotLeft, RotRight, KeyDelay, objective, CurrentAction, PreviousAction, MoveSpeedNum, GatherFieldBoostedStart, LastGlitter, MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff, VBState, ClockCheck, LastClock, AntPassCheck, AntPassAction, QuestAnt, LastAntPass, HoneyDisCheck, LastHoneyDis, TreatDisCheck, LastTreatDis, BlueberryDisCheck, LastBlueberryDis, StrawberryDisCheck, LastStrawberryDis, CoconutDisCheck, LastCoconutDis, GlueDisCheck, LastGlueDis, RoboPassCheck, LastRoboPass, HoneystormCheck, LastHoneystorm, RoyalJellyDisCheck, LastRoyalJellyDis, StockingsCheck, LastStockings, FeastCheck, RBPDelevelCheck, LastRBPDelevel, LastFeast, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon, beesmasActive, HoneySSCheck, resetTime, bitmaps, SC_E, SC_Space, SC_1
+	global FwdKey, BackKey, LeftKey, RightKey, RotLeft, RotRight, KeyDelay, objective, CurrentAction, PreviousAction, MoveSpeedNum, GatherFieldBoostedStart, LastGlitter, MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff, VBState, ClockCheck, LastClock, AntPassCheck, AntPassAction, QuestAnt, LastAntPass, HoneyDisCheck, LastHoneyDis, TreatDisCheck, LastTreatDis, BlueberryDisCheck, LastBlueberryDis, StrawberryDisCheck, LastStrawberryDis, CoconutDisCheck, LastCoconutDis, GlueDisCheck, LastGlueDis, RoboPassCheck, LastRoboPass, HoneystormCheck, LastHoneystorm, RoyalJellyDisCheck, LastRoyalJellyDis, StockingsCheck, LastStockings, FeastCheck, RBPDelevelCheck, LastRBPDelevel, LastFeast, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon, beesmasActive, HoneySSCheck, resetTime, bitmaps, SC_E, SC_Space, SC_1, BlenderRot, LastBlenderRot, BlenderEnd, TimerInterval, BlenderIndex1, BlenderIndex2, BlenderIndex3, BlenderItem1, BlenderItem2, BlenderItem3, BlenderTime1, BlenderTime2, BlenderTime3, BlenderAmount1, BlenderAmount2, BlenderAmount3, Blendercheck
 	static AntPassNum:=2, RoboPassNum:=1, LastHoneyLB:=1
 
 	if(VBState=1)
@@ -9066,6 +9751,179 @@ nm_Collect(){
 				IniWrite, %LastStockings%, settings\nm_config.ini, Collect, LastStockings
 			}
 		}
+	}
+	;Blender	
+	nm_BlenderRotation()
+	TimeForBlender := BlenderTime%LastBlenderRot% - TimerInterval ; due to BlenderTime being calcuted with TimerInterval integrated to fix that we simply subtract it before
+
+	if (BlenderCheck && (nowUnix() - TimeForBlender) > TimerInterval) {
+		loop, 2 {
+			z := A_Index ;Set variable for fail safe
+			nm_Reset()
+			nm_setStatus("Traveling", "Blender" ((A_Index > 1) ? " (Attempt 2)" : ""))
+			nm_gotoCollect("Blender")
+
+			searchRet := nm_imgSearch("e_button.png", 30, "high")
+			If (searchRet[1] = 0) {
+				sendinput {%SC_E% down}
+				Sleep, 100
+				sendinput {%SC_E% up}
+				Sleep, 500
+
+				SearchX := windowX+Windowwidth//2 - 277, SearchY := windowY+WindowHeight//2 - 243, BlenderSS := Gdip_BitmapFromScreen(SearchX "|" SearchY "|553|400")
+
+				if (Gdip_ImageSearch(BlenderSS, bitmaps["CancelCraft"], , , , , , 2, , 7) > 0) {
+					MouseMove, windowX+WindowWidth//2 + 230, windowY+WindowHeight//2 + 90 ; click cancel button
+					sleep, 150
+					Click
+				}
+
+				if (!BlenderEnd && Gdip_ImageSearch(BlenderSS, bitmaps["EndCraftR"], , , , , , 3, , 6) > 0)
+				{
+					nm_setStatus("Confirmed", "Blender is already in use")
+					MouseMove, windowX+Windowwidth//2 - 250, windowY+WindowHeight//2 - 210, Gdip_disposeimage(BlenderSS) ;Close GUI and dispose of bitmap
+					sleep, 150
+					Click
+					break
+				} else if (BlenderEnd && Gdip_ImageSearch(BlenderSS, bitmaps["EndCraftR"], , , , , , 3, , 6) > 0) {
+					Iniwrite, 0, settings\nm_config.ini, Blender, BlenderEnd
+					BlenderEnd := 0
+					MouseMove, windowX+WindowWidth//2 - 60, windowY+WindowHeight//2 + 120 ; close red craft button
+					sleep, 150
+					Click
+				}
+
+				if (Gdip_ImageSearch(BlenderSS, bitmaps["EndCraftG"], , , , , , 4, , 6) > 0) {
+					MouseMove, windowX+WindowWidth//2 - 60, windowY+WindowHeight//2 + 120 ; close green craft button
+					sleep, 150
+					Click
+				}
+				gdip_disposeimage(BlenderSS)
+				sleep, 800
+				loop 
+				{
+					BlenderSS := Gdip_BitmapFromScreen(SearchX "|" SearchY "|170|245")
+
+					Blender := % "BlenderItem" BlenderRot
+					BlenderIMG := % %Blender% "B"
+
+					if (Gdip_ImageSearch(BlenderSS, bitmaps[BlenderIMG], , , , , , 2, , 4) > 0) 
+					{
+						gdip_disposeimage(BlenderSS)  ; Dispose of the bitmap
+						sleep, 200
+						BlenderSS := Gdip_BitmapFromScreen(SearchX "|" SearchY "|553|400")
+						if (Gdip_ImageSearch(BlenderSS, bitmaps["NoItems"], , , , , , 2) > 0) {
+							BlenderItem%BlenderRot% := "None", BlenderAmount%BlenderRot% := 0, BlenderIndex%BlenderRot% := 1, BlenderTime%BlenderRot% := 0
+
+							IniWrite, None, settings\nm_config.ini, Blender, BlenderItem%BlenderRot%
+							IniWrite, 0, settings\nm_config.ini, Blender, BlenderAmount%BlenderRot%
+							Iniwrite, 1, settings\nm_config.ini, Blender, BlenderIndex%BlenderRot%
+							Iniwrite, 0, settings\nm_config.ini, Blender, BlenderTime%BlenderRot%
+
+							GuiControl,, % hBlenderClear%BlenderRot%, % ((BlenderItem%BlenderRot% = "None" || BlenderItem%BlenderRot% = "") ? "Add" : "Clear")
+							GuiControl,, BlenderData%BlenderRot%, % "(" BlenderAmount%BlenderRot% ") [" ((BlenderIndex%BlenderRot% = "Infinite") ? "∞" : BlenderIndex%BlenderRot%) "]"
+
+							GuiControl, , % hBlenderItem%BlenderRot%Picture, % ""
+							gdip_disposeimage(BlenderSS)
+							nm_BlenderRotation()
+							break
+						}
+						gdip_disposeimage(BlenderSS)
+						MouseMove, windowX+Windowwidth//2 + 80, windowY+WindowHeight//2 + 100 ;Open item menu
+						sleep, 150
+						click
+						sleep, 150
+						MouseMove, windowX+WindowWidth//2 - 60, windowY+WindowHeight//2 + 120 ;Add more of x item
+						sleep, 150
+						While (A_Index < BlenderAmount%BlenderRot%) {
+							Click
+							sleep, 30
+						}
+						sleep, 200
+						IniWrite, 0, settings\nm_config.ini, blender, BlenderCount%LastBlenderRot% ; reset GUI counter
+
+						nm_setStatus("Collected", "Blender")
+
+						BlenderTime%BlenderRot% := BlenderAmount%BlenderRot% * 300 ;calculate first time variable
+						BlenderTimeTemp := % BlenderTime%BlenderRot% ;set up a temporary varible to hold time
+						TempBlenderRot := BlenderRot ; save a temporary rotation holder
+
+						BlenderTime%TempBlenderRot% := BlenderTime%TempBlenderRot% + nowUnix() ;add nowunix for time after temporoary varible has been created
+						IniWrite, % BlenderTime%TempBlenderRot%, settings\nm_config.ini, blender, BlenderTime%TempBlenderRot% ; save timer to config
+
+						loop {
+							TempBlenderRot := Mod(TempBlenderRot, 3) + 1
+							if (TempBlenderRot = BlenderRot) ;makes sure it doesnt do the already calculated time again
+								break
+
+							if ((BlenderIndex%TempBlenderRot% = "Infinite" || BlenderIndex%TempBlenderRot% > 0) && (BlenderItem%TempBlenderRot% != "None" && BlenderItem%TempBlenderRot% != "")) { ;start time calculation process
+								BlenderTime%TempBlenderRot% := (BlenderAmount%TempBlenderRot% * 300) + BlenderTimeTemp ;add previous time to this one after to show time until its done
+								BlenderTimeTemp := % BlenderTime%TempBlenderRot% ;create a new temp for next
+								BlenderTime%TempBlenderRot% := % BlenderTime%TempBlenderRot% + nowUnix() ;add now unix to it for the counter
+								IniWrite, % BlenderTime%TempBlenderRot%, settings\nm_config.ini, blender, BlenderTime%TempBlenderRot% ;save the value to the config for GUI use and Remote control
+							}
+						}
+						TimerInterval := BlenderAmount%BlenderRot% * 300 ;set up time
+						IniWrite, %BlenderRot%, settings\nm_config.ini, blender, LastBlenderRot ; define this for GUI and to reset counter as used above 
+
+						BlenderRot := Mod(BlenderRot, 3) + 1
+						nm_BlenderRotation()
+						if (BlenderIndex%BlenderRot% != "Infinite") {
+							BlenderIndex%BlenderRot%-- ;subtract from blenderindex for looping only if its a number
+							GuiControl,, BlenderData%BlenderRot%, % "(" BlenderAmount%BlenderRot% ") [" ((BlenderIndex%BlenderRot% = "Infinite") ? "∞" : BlenderIndex%BlenderRot%) "]"
+							IniWrite, % BlenderIndex%BlenderRot%, settings\nm_config.ini, blender, BlenderIndex%BlenderRot%
+						}
+						sleep, 100
+						MouseMove, windowX+Windowwidth//2 + 80, windowY+WindowHeight//2 + 100 ;Click Confirm
+						sleep, 150
+						Click
+						sleep, 100
+						MouseMove, windowX+Windowwidth//2 - 250, windowY+WindowHeight//2 - 210 ;Close GUI
+						sleep, 150
+						Click
+						break 2
+					} else {
+						sleep, 50
+						MouseMove, windowX+WindowWidth//2 + 230, windowY+WindowHeight//2 + 140 ;not found go next item
+						sleep, 150
+						Click
+						sleep, 100
+						if (A_Index = 60) {
+							if (z = 2) {
+								nm_setStatus("Failed", "Blender")
+								MouseMove, windowX+Windowwidth//2 - 250, windowY+WindowHeight//2 - 210 ;Close GUI
+								sleep, 150
+								Click
+
+								BlenderTime%BlenderRot% := BlenderAmount%BlenderRot% * 300 ;calculate first time variable
+								BlenderTimeTemp := % BlenderTime%BlenderRot% ;set up a temporary varible to hold time
+								TempBlenderRot := BlenderRot ; save a temporary rotation holder
+
+								BlenderTime%TempBlenderRot% := BlenderTime%TempBlenderRot% + nowUnix() ;add nowunix for time after temporoary varible has been created
+								IniWrite, % BlenderTime%TempBlenderRot%, settings\nm_config.ini, blender, BlenderTime%TempBlenderRot% ; save timer to config
+
+								loop {
+									TempBlenderRot := Mod(TempBlenderRot, 3) + 1
+									if (TempBlenderRot = BlenderRot) ;makes sure it doesnt do the already calculated time again
+										break
+
+									if ((BlenderIndex%TempBlenderRot% = "Infinite" || BlenderIndex%TempBlenderRot% > 0) && (BlenderItem%TempBlenderRot% != "None" && BlenderItem%TempBlenderRot% != "")) { ;start time calculation process
+										BlenderTime%TempBlenderRot% := (BlenderAmount%TempBlenderRot% * 300) + BlenderTimeTemp ;add previous time to this one after to show time until its done
+										BlenderTimeTemp := % BlenderTime%TempBlenderRot% ;create a new temp for next
+										BlenderTime%TempBlenderRot% := % BlenderTime%TempBlenderRot% + nowUnix() ;add now unix to it for the counter
+										IniWrite, % BlenderTime%TempBlenderRot%, settings\nm_config.ini, blender, BlenderTime%TempBlenderRot% ;save the value to the config for GUI use and Remote control
+									}
+								}
+							}
+							break
+						}
+					}	
+				}
+			}
+		}
+		IniWrite, %TimerInterval%, settings\nm_config.ini, blender, TimerInterval
+		IniWrite, %BlenderRot%, settings\nm_config.ini, blender, BlenderRot
+		IniWrite, % BlenderIndex%BlenderRot%, settings\nm_config.ini, blender, BlenderIndex%BlenderRot%
 	}
 	;ant pass
 	if(((AntPassCheck && ((AntPassNum<10) || (AntPassAction="challenge"))) && (nowUnix()-LastAntPass>7200)) || (QuestAnt && (AntPassNum>0))){ ;2 hours OR ant quest
@@ -12159,7 +13017,7 @@ nm_Mondo(){
 	if(VBState=1)
 		return
 	FormatTime, utc_min, %A_NowUTC%, m
-	if((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck  && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag")){
+	if((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill" || MondoAction="Manual")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck  && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag")){
 		mondobuff := nm_imgSearch("mondobuff.png",50,"buff")
 		If (mondobuff[1] = 0) {
 			LastMondoBuff:=nowUnix()
@@ -12175,6 +13033,7 @@ nm_Mondo(){
 		global AFBuseGlitter
 		global AFBuseBooster
 		global CurrentField, CurrentAction, PreviousAction
+		global MondoSecs
 		PreviousAction:=CurrentAction
 		CurrentAction:="Mondo"
 		MoveSpeedFactor:=round(18/MoveSpeedNum, 2)
@@ -12239,6 +13098,15 @@ nm_Mondo(){
 			        if(MondoAction="Buff"){
 			            repeat:=0
 			            loop 120 { ;2 mins
+			                nm_autoFieldBoost(CurrentField)
+			                if(youDied || AFBrollingDice || AFBuseGlitter || AFBuseBooster)
+			                    break
+			                sleep, 1000
+			            }
+					}
+					else if (MondoAction="Manual") {
+						repeat:=0
+			            loop %MondoSecs% { ; inputted user time
 			                nm_autoFieldBoost(CurrentField)
 			                if(youDied || AFBrollingDice || AFBuseGlitter || AFBuseBooster)
 			                    break
@@ -12344,7 +13212,7 @@ nm_GoGather(){
 	global FieldName2, FieldPattern2, FieldPatternSize2, FieldPatternReps2, FieldPatternShift2, FieldPatternInvertFB2, FieldPatternInvertLR2, FieldUntilMins2, FieldUntilPack2, FieldReturnType2, FieldSprinklerLoc2, FieldSprinklerDist2, FieldRotateDirection2, FieldRotateTimes2, FieldDriftCheck2
 	global FieldName3, FieldPattern3, FieldPatternSize3, FieldPatternReps3, FieldPatternShift3, FieldPatternInvertFB3, FieldPatternInvertLR3, FieldUntilMins3, FieldUntilPack3, FieldReturnType3, FieldSprinklerLoc3, FieldSprinklerDist3, FieldRotateDirection3, FieldRotateTimes3, FieldDriftCheck3
 	global MondoBuffCheck, MondoAction, LastMondoBuff
-	global PlanterMode, gotoPlanterField
+	global PlanterMode, gotoPlanterField, MPlanterGatherA, MPlanterGather1, MPlanterGather2, MPlanterGather3, LastPlanterGatherSlot, MPlanterHold1, MPlanterHold2, MPlanterHold3, PlanterField1, PlanterField2, PlanterField3, PlanterHarvestTime1, PlanterHarvestTime2, PlanterHarvestTime3
 	global QuestLadybugs, QuestRhinoBeetles, QuestSpider, QuestMantis, QuestScorpions, QuestWerewolf
 	global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, BugrunInterruptCheck, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BlackQuestCheck, BlackQuestComplete, QuestGatherField, BuckoQuestCheck, BuckoQuestComplete, RileyQuestCheck, RileyQuestComplete, PolarQuestCheck, PolarQuestComplete, RotateQuest, QuestGatherMins, QuestGatherReturnBy, BuckoRhinoBeetles, BuckoMantis, RileyLadybugs, RileyScorpions, RileyAll, GameFrozenCounter, HiveSlot, BugrunLadybugsCheck, BugrunRhinoBeetlesCheck, BugrunSpiderCheck, BugrunMantisCheck, BugrunScorpionsCheck, BugrunWerewolfCheck, MonsterRespawnTime
 	global beesmasActive, BeesmasGatherInterruptCheck, StockingsCheck, LastStockings, FeastCheck, LastFeast, RBPDelevelCheck, LastRBPDelevel, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon
@@ -12478,8 +13346,93 @@ nm_GoGather(){
 			}
 			break
 		}
-		;Gather in planter field override
-		if(gotoPlanterField && (PlanterMode = 2)){
+		;Gather in manual planters field override
+
+		if((MPlanterGatherA) && (PlanterMode = 1)) {
+
+			Loop 3 { 
+				IniRead, PlanterField%A_Index%, settings\nm_config.ini, planters, PlanterField%A_Index%
+				IniRead, MPlanterHold%A_Index%, settings\nm_config.ini, planters, MPlanterHold%A_Index%
+			}			
+			IniRead, LastPlanterGatherSlot, settings\nm_config.ini, Planters, LastPlanterGatherSlot
+							
+			; define available planter gather slots/fields: selected by user for planter gather, with planter in field, and not 'holding at full grown' 
+			eligible := []
+			Loop 3 {
+				if((MPlanterGather%A_Index%) && (PlanterField%A_Index% != "None") && (!MPlanterHold%A_Index%)) 
+					eligible[A_Index] := planterField%A_Index%
+			}
+
+			if LastPlanterGatherSlot not in 1,2,3
+				LastPlanterGatherSlot := 3
+
+			; if at least one slot is available for planter gather, proceed, else revert to gather tab
+			if ((eligible.1) || (eligible.2) || (eligible.3)) {
+
+				; find next eligible field and slot
+				if 		((eligible.1) && (((LastPlanterGatherSlot=1) && (!eligible.2) && (!eligible.3)) || ((LastPlanterGatherSlot=2) && (!eligible.3)) || (LastPlanterGatherSlot=3)))
+						{
+						slot:= 1
+						field := PlanterField1
+						}
+				else if ((eligible.2) && (((LastPlanterGatherSlot=2) && (!eligible.3) && (!eligible.1)) || ((LastPlanterGatherSlot=3) && (!eligible.1)) || (LastPlanterGatherSlot=1)))
+						{
+						slot:= 2
+						field := PlanterField2
+						}
+				else if ((eligible.3) && (((LastPlanterGatherSlot=3) && (!eligible.1) && (!eligible.2)) || ((LastPlanterGatherSlot=1) && (!eligible.2)) || (LastPlanterGatherSlot=2)))
+						{
+						slot:= 3
+						field := PlanterField3
+						}
+
+				; set gather field and settings
+				fieldOverrideReason:="Manual Planter"
+				FieldName:=field
+				FieldPattern:=FieldDefault[FieldName]["pattern"]
+				FieldPatternSize:=FieldDefault[FieldName]["size"]
+				FieldPatternReps:=FieldDefault[FieldName]["width"]
+				FieldPatternShift:=FieldDefault[FieldName]["shiftlock"]
+				FieldPatternInvertFB:=FieldDefault[FieldName]["invertFB"]
+				FieldPatternInvertLR:=FieldDefault[FieldName]["invertLR"]
+				FieldUntilMins:=FieldDefault[FieldName]["gathertime"]
+				FieldUntilPack:=FieldDefault[FieldName]["percent"]
+				FieldReturnType:=FieldDefault[FieldName]["convert"]
+				FieldSprinklerLoc:=FieldDefault[FieldName]["sprinkler"]
+				FieldSprinklerDist:=FieldDefault[FieldName]["distance"]
+				FieldRotateDirection:=FieldDefault[FieldName]["camera"]
+				FieldRotateTimes:=FieldDefault[FieldName]["turns"]
+				FieldDriftCheck:=FieldDefault[FieldName]["drift"]
+				MPlanterGatherDetectionTime:=0
+
+				; write currentfield to file as LastPlanterGatherSlot, to read on next loop
+				IniWrite, % slot, settings\nm_config.ini, Planters, LastPlanterGatherSlot
+
+			} else  {
+				FieldName:=FieldName%CurrentFieldNum%
+				FieldPattern:=FieldPattern%CurrentFieldNum%
+				FieldPatternSize:=FieldPatternSize%CurrentFieldNum%
+				FieldPatternReps:=FieldPatternReps%CurrentFieldNum%
+				FieldPatternShift:=FieldPatternShift%CurrentFieldNum%
+				FieldPatternInvertFB:=FieldPatternInvertFB%CurrentFieldNum%
+				FieldPatternInvertLR:=FieldPatternInvertLR%CurrentFieldNum%
+				FieldUntilMins:=FieldUntilMins%CurrentFieldNum%
+				FieldUntilPack:=FieldUntilPack%CurrentFieldNum%
+				FieldReturnType:=FieldReturnType%CurrentFieldNum%
+				FieldSprinklerLoc:=FieldSprinklerLoc%CurrentFieldNum%
+				FieldSprinklerDist:=FieldSprinklerDist%CurrentFieldNum%
+				FieldRotateDirection:=FieldRotateDirection%CurrentFieldNum%
+				FieldRotateTimes:=FieldRotateTimes%CurrentFieldNum%
+				FieldDriftCheck:=FieldDriftCheck%CurrentFieldNum%
+				
+			}
+
+			break 
+
+		}
+
+		;Gather in planters+ field override
+		if((gotoPlanterField) && (PlanterMode = 2)){
 			loop, 3{
 				inverseIndex:=(4-A_Index)
 				IniRead, PlanterField%inverseIndex%, settings\nm_config.ini, planters, PlanterField%inverseIndex%
@@ -12721,6 +13674,23 @@ nm_GoGather(){
 			if (PMondoGuidComplete)
 				PMondoGuidComplete:=0
 			break
+		}
+		;Manual planter gather interrupt
+		if ((fieldOverrideReason="Manual Planter") && (PlanterMode = 1) && (MPlanterGatherA)) {
+			;update current field planter progress every 2 minutes during planter gather
+			If ((nowUnix()-MPlanterGatherDetectionTime)>120) {
+				nm_PlanterTimeUpdate(FieldName, 0)
+				MPlanterGatherDetectionTime := nowUnix()
+			}
+			;check all planter timers
+			IniRead, PlanterHarvestTime1, settings\nm_config.ini, Planters, PlanterHarvestTime1
+			IniRead, PlanterHarvestTime2, settings\nm_config.ini, Planters, PlanterHarvestTime2
+			IniRead, PlanterHarvestTime3, settings\nm_config.ini, Planters, PlanterHarvestTime3
+			;interrupt if
+			if (((nowUnix() >= PlanterHarvestTime1) && (eligible.1)) || ((nowUnix() >= PlanterHarvestTime2) && (eligible.2)) || ((nowUnix() >= PlanterHarvestTime3) && (eligible.3))) {
+				interruptReason := "Planter Harvest"
+				break
+			}
 		}
 		;GatherInterruptCheck
 		if ((((BugrunInterruptCheck && BugrunLadybugsCheck) || (PolarQuestCheck && PolarQuestGatherInterruptCheck && QuestLadybugs) || (RileyQuestCheck && RileyQuestGatherInterruptCheck && (RileyLadybugs || RileyAll))) && ((nowUnix()-LastBugrunLadybugs)>floor(330*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01)))) || (((BugrunInterruptCheck && BugrunRhinoBeetlesCheck) || (PolarQuestCheck && PolarQuestGatherInterruptCheck && QuestRhinoBeetles) || (RileyQuestCheck && RileyQuestGatherInterruptCheck && RileyAll) || (BuckoQuestCheck && BuckoQuestGatherInterruptCheck && BuckoRhinoBeetles)) && ((nowUnix()-LastBugrunRhinoBeetles)>floor(330*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01)))) || (((BugrunInterruptCheck && BugrunSpiderCheck) || (PolarQuestCheck && PolarQuestGatherInterruptCheck && QuestSpider) || (RileyQuestCheck && RileyQuestGatherInterruptCheck && RileyAll)) && ((nowUnix()-LastBugrunSpider)>floor(1830*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01)))) || (((BugrunInterruptCheck && BugrunMantisCheck) || (PolarQuestCheck && PolarQuestGatherInterruptCheck && QuestMantis) || (RileyQuestCheck && RileyQuestGatherInterruptCheck && RileyAll) || (BuckoQuestCheck && BuckoQuestGatherInterruptCheck && BuckoMantis)) && ((nowUnix()-LastBugrunMantis)>floor(1230*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01)))) || (((BugrunInterruptCheck && BugrunScorpionsCheck) || (PolarQuestCheck && PolarQuestGatherInterruptCheck && QuestScorpions) || (RileyQuestCheck && RileyQuestGatherInterruptCheck && (RileyScorpions || RileyAll))) && ((nowUnix()-LastBugrunScorpions)>floor(1230*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01)))) || (((BugrunInterruptCheck && BugrunWerewolfCheck) || (PolarQuestCheck && PolarQuestGatherInterruptCheck && QuestWerewolf) || (RileyQuestCheck && RileyQuestGatherInterruptCheck && RileyAll)) && ((nowUnix()-)>floor(3600*(1-(MonsterRespawnTime?MonsterRespawnTime:0)*0.01))))){
@@ -13093,196 +14063,6 @@ nm_loot(length, reps, direction, tokenlink:=0){ ; length in tiles instead of ms 
 	}
 	nm_endWalk()
 }
-nm_OpenMenu(menu:="", refresh:=0){
-	global bitmaps
-	static x := {"itemmenu":30, "questlog":85, "beemenu":140}, open:=""
-
-	if (hwnd := GetRobloxHWND())
-		WinActivate, Roblox
-	else
-		return 0
-	offsetY := GetYOffset(hwnd)
-
-	if ((menu = "") || (refresh = 1)) ; close
-	{
-		if open ; close the open menu
-		{
-			Loop, 10
-			{
-				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
-				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+72 "|350|80")
-				if (Gdip_ImageSearch(pBMScreen, bitmaps[open], , , , , , 2) != 1) {
-					Gdip_DisposeImage(pBMScreen)
-					open := ""
-					break
-				}
-				Gdip_DisposeImage(pBMScreen)
-				MouseMove, windowX+x[open], windowY+offsetY+120
-				Click
-				MouseMove, windowX+350, windowY+offsetY+100
-				sleep, 500
-			}
-		}
-		else ; close any open menu
-		{
-			for k,v in x
-			{
-				Loop, 10
-				{
-					WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
-					pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+72 "|350|80")
-					if (Gdip_ImageSearch(pBMScreen, bitmaps[k], , , , , , 2) != 1) {
-						Gdip_DisposeImage(pBMScreen)
-						break
-					}
-					Gdip_DisposeImage(pBMScreen)
-					MouseMove, windowX+v, windowY+offsetY+120
-					Click
-					MouseMove, windowX+350, windowY+offsetY+100
-					sleep, 500
-				}
-			}
-			open := ""
-		}
-	}
-	else
-	{
-		if ((menu != open) && open) ; close the open menu
-		{
-			Loop, 10
-			{
-				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
-				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+72 "|350|80")
-				if (Gdip_ImageSearch(pBMScreen, bitmaps[open], , , , , , 2) != 1) {
-					Gdip_DisposeImage(pBMScreen)
-					open := ""
-					break
-				}
-				Gdip_DisposeImage(pBMScreen)
-				MouseMove, windowX+x[open], windowY+offsetY+120
-				Click
-				MouseMove, windowX+350, windowY+offsetY+100
-				sleep, 500
-			}
-		}
-		; open the desired menu
-		Loop, 10
-		{
-			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
-			pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+72 "|350|80")
-			if (Gdip_ImageSearch(pBMScreen, bitmaps[menu], , , , , , 2) = 1) {
-				Gdip_DisposeImage(pBMScreen)
-				open := menu
-				break
-			}
-			Gdip_DisposeImage(pBMScreen)
-			MouseMove, windowX+x[menu], windowY+offsetY+120
-			Click
-			MouseMove, windowX+350, windowY+offsetY+100
-			sleep, 500
-		}
-	}
-}
-nm_InventorySearch(item, direction:="down", prescroll:=0, prescrolldir:="", scrolltoend:=1, max:=70){ ;~ item: string of item; direction: down or up; prescroll: number of scrolls before direction switch; prescrolldir: direction to prescroll, set blank for same as direction; scrolltoend: set 0 to omit scrolling to top/bottom after prescrolls; max: number of scrolls in total
-	global bitmaps
-	static hRoblox, l:=0
-
-	nm_OpenMenu("itemmenu")
-
-	; detect inventory end for current hwnd
-	if (hwnd := GetRobloxHWND())
-	{
-		if (hwnd != hRoblox)
-		{
-			WinActivate, Roblox
-			offsetY := GetYOffset(hwnd)
-			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
-			pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" windowHeight-offsetY-150)
-
-			Loop, 40
-			{
-				if (Gdip_ImageSearch(pBMScreen, bitmaps["item"], lpos, , , 6, , 2, , 2) = 1)
-				{
-					l := SubStr(lpos, InStr(lpos, ",")+1)-60 ; image 20px, item 80px => y+20-80 = y-60
-					hRoblox := hwnd
-					break
-				}
-				else
-				{
-					if (A_Index = 40)
-					{
-						Gdip_DisposeImage(pBMScreen)
-						return 0
-					}
-					else
-					{
-						Sleep, 50
-						Gdip_DisposeImage(pBMScreen)
-						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" windowHeight-offsetY-150)
-					}
-				}
-			}
-		}
-	}
-	else
-		return 0 ; no roblox
-	offsetY := GetYOffset(hwnd)
-
-	; search inventory
-	Loop %max%
-	{
-		WinActivate, Roblox
-		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
-		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" l)
-
-		; wait for red vignette effect to disappear
-		Loop, 40
-		{
-			if (Gdip_ImageSearch(pBMScreen, bitmaps["item"], , , , 6, , 2) = 1)
-				break
-			else
-			{
-				if (A_Index = 40)
-				{
-					Gdip_DisposeImage(pBMScreen)
-					return 0
-				}
-				else
-				{
-					Sleep, 50
-					Gdip_DisposeImage(pBMScreen)
-					pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" l)
-				}
-			}
-		}
-
-		if (Gdip_ImageSearch(pBMScreen, bitmaps[item], pos, , , , , 10, , 5) = 1) {
-			Gdip_DisposeImage(pBMScreen)
-			break ; item found
-		}
-		Gdip_DisposeImage(pBMScreen)
-
-		switch A_Index
-		{
-			case (prescroll+1): ; scroll entire inventory on (prescroll+1)th search
-			if (scrolltoend = 1)
-			{
-				Loop, 100
-				{
-					MouseMove, windowX+30, windowY+offsetY+200, 5
-					sendinput % "{Wheel" ((direction = "down") ? "Up" : "Down") "}"
-					Sleep, 50
-				}
-			}
-			default: ; scroll once
-			MouseMove, windowX+30, windowY+offsetY+200, 5
-			sendinput % "{Wheel" ((A_Index <= prescroll) ? (prescrolldir ? ((prescrolldir = "Down") ? "Down" : "Up") : ((direction = "down") ? "Down" : "Up")) : ((direction = "down") ? "Down" : "Up")) "}"
-			Sleep, 50
-		}
-		Sleep, 500 ; wait for scroll to finish
-	}
-	return (pos ? [30, SubStr(pos, InStr(pos, ",")+1)+190] : 0) ; return list of coordinates for dragging
-}
 nm_BitterberryFeeder()
 {
 	if !GetRobloxHWND()
@@ -13300,7 +14080,11 @@ nm_BitterberryFeeder()
 	#Include %A_ScriptDir%\lib
 	#Include Gdip_All.ahk
 	#Include Gdip_ImageSearch.ahk
-	#Include %A_ScriptDir%\submacros\shared\nm_misc.ahk
+	#Include WinGetClientPos.ahk
+	#Include GetYOffset.ahk
+	#Include GetRobloxHWND.ahk
+	#Include nm_OpenMenu.ahk
+	#Include nm_InventorySearch.ahk
 
 	CoordMode, Mouse, Screen
 	SetBatchLines -1
@@ -13315,7 +14099,7 @@ nm_BitterberryFeeder()
 	bitmaps[""bitterberry""] := Gdip_BitmapFromBase64(""iVBORw0KGgoAAAANSUhEUgAAAG8AAAAbCAMAAABFqCGFAAAB11BMVEUbKjUcKzYdLDceLDceLTgfLjkgLzohMDoiMDsjMTwkMj0kMz0lND4mND8oNkApN0EqOEMrOUMsOkQtO0UuPEYvPUcwPkgyQEkzQUo0QUs1Q0w3RU44RU85Rk86SFE8SVM9SlM+S1Q/TFVATVZCT1hDUFlEUVlFUVpGU1xHVFxJVV5KVl9LV19NWWJPW2NRXWVSXmZUYGhVYWhWYWlXYmpXY2tbZm5cZ29daG9eanFibXRibnVkb3ZlcHdoc3ptd35ueX9veoBweoFzfYN0foR1f4V2gIZ4god6hIp7hYt+h41/iY6Aio+FjpSGj5SHkJWKk5iLlJmMlZqNlpqOl5uQmJ2QmZ2Rmp6Sm5+UnKCVnaGZoaWbo6ecpKigp6uhqKyjq66mrbCnrrGnr7Kor7OrsrWss7avtrmwt7myuLu2vL+4v8G5wMK6wMO8wsS+xMa/xcfAxsjBx8nDyMrEyszGzM3HzM7Izc/Jzs/Jz9DK0NHN0tPP1NXQ1dbR1tfS19jV2drX3NzY3N3Z3d7b4ODc4OHe4uLf4+Pg5OTg5eXi5ubj5+fm6urn6+vo7Ovp7ezq7e3r7u7r7+7s8O/t8fDu8fHv8vHw8/Lx9PPx9fTy9fTz9vX09/ZX5XClAAACKElEQVR42u3W61NMYQDH8W9iu7uEhAhJURIphYRci0QiFXKJXAttQnIPXdVWK/3+WHvK6dnZfaY3O443fm9+L34zz2fmzDPnHORt+O/9BS8HJ6mlL2Xys6XJlCVTLbUxepDQJaln9b5ZSXs4J7dsKeZIzB45kvzpRY6XHYLcsiU/Ju+YpOHD8NEdPPDUD8+kL52dwcW9K2kF3cazzqYX8d5Ar9QMQ7qMk/o/JU3WZfnWnx2RVEpWPLSFvJ1FKekVvZIss9v10C9JfXAy0hsswTdu937tx0nepHMgkDCifHPFLLPbn5dQI0k18NpyX05r3ot8nq2sejz+dCVNcwfeDAwq5CW1TzzPZLttNl3CmqA0k0G+or3kd7J7uTRIqqNw7oFJcrwKSbfhvWU2fRfuSw+h1eKxdsjqBeKYT6pz0G4Z7yt0WGbTkys4IFWSPKpwr1rSjzPQbPW+4SYY4U1Dm3V2WyeIHxhOpEpRnoJJnLJ6E3BJ84nwQlS7bTaeHxquwwuLN5XIeRmvVgu1iTJJ09FeB7wys83TNjYXslXR3mg1+Be8XeTe8bt1gbgbga6Msu5wL+lWoG8L62ZkZpt3FeCa/f15VAteLfDJrYkdOFn+NtybS9w9ycw27/tS8A1ZvGXZjTPGGzuYvNfUaM0GX2bVB5mDqgoOFaWkFT+SrLPxVA6VXn5vG+GJl14eG2c99Hrgojz0jhM/4KE3lkK5PPRa4cG/+x/8DdlCsT+3EwaSAAAAAElFTkSuQmCC"")
 	bitmaps[""feed""] := Gdip_BitmapFromBase64(""iVBORw0KGgoAAAANSUhEUgAAADwAAAAUAQMAAADrzcxqAAAABlBMVEUAAAD3//lCqWtQAAAAAXRSTlMAQObYZgAAAE1JREFUeNqNzbENwCAMRNHfpYxLSo/ACB4pG8SjMkImIAiwRIe46lX3+QtzAcE5wQ1cHeKQHhw10EwFwISK6YAvvCVg7LBamuM5fRGFBk/MFx8u1mbtAAAAAElFTkSuQmCC"")
 	bitmaps[""greensuccess""] := Gdip_BitmapFromBase64(""iVBORw0KGgoAAAANSUhEUgAAAA4AAAALCAYAAABPhbxiAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAhdEVYdENyZWF0aW9uIFRpbWUAMjAyMzowMzowOCAxNToyMzo1N/c+ABwAAAAdSURBVChTY3T+H/6fgQzABKVJBqMa8YDhr5GBAQBwxAKu5PiUjAAAAA5lWElmTU0AKgAAAAgAAAAAAAAA0lOTAAAAAElFTkSuQmCC"")
-	bitmaps[""toppollen""] := Gdip_BitmapFromBase64(""iVBORw0KGgoAAAANSUhEUgAAACoAAAALBAMAAAD7HQL7AAAAGFBMVEUAAAASFRcTFhgUFxkUFxgWGRsXGhwXGhsckMZRAAAAAXRSTlMAQObYZgAAABd0RVh0U29mdHdhcmUAUGhvdG9EZW1vbiA5LjDNHNgxAAADKGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSfvu78nIGlkPSdXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQnPz4KPHg6eG1wbWV0YSB4bWxuczp4PSdhZG9iZTpuczptZXRhLycgeDp4bXB0az0nSW1hZ2U6OkV4aWZUb29sIDEyLjQ0Jz4KPHJkZjpSREYgeG1sbnM6cmRmPSdodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjJz4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOmV4aWY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vZXhpZi8xLjAvJz4KICA8ZXhpZjpQaXhlbFhEaW1lbnNpb24+NDI8L2V4aWY6UGl4ZWxYRGltZW5zaW9uPgogIDxleGlmOlBpeGVsWURpbWVuc2lvbj4xMTwvZXhpZjpQaXhlbFlEaW1lbnNpb24+CiA8L3JkZjpEZXNjcmlwdGlvbj4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOnRpZmY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvJz4KICA8dGlmZjpJbWFnZUxlbmd0aD4xMTwvdGlmZjpJbWFnZUxlbmd0aD4KICA8dGlmZjpJbWFnZVdpZHRoPjQyPC90aWZmOkltYWdlV2lkdGg+CiAgPHRpZmY6T3JpZW50YXRpb24+MTwvdGlmZjpPcmllbnRhdGlvbj4KICA8dGlmZjpSZXNvbHV0aW9uVW5pdD4yPC90aWZmOlJlc29sdXRpb25Vbml0PgogIDx0aWZmOlhSZXNvbHV0aW9uPjk2LzE8L3RpZmY6WFJlc29sdXRpb24+CiAgPHRpZmY6WVJlc29sdXRpb24+OTYvMTwvdGlmZjpZUmVzb2x1dGlvbj4KIDwvcmRmOkRlc2NyaXB0aW9uPgo8L3JkZjpSREY+CjwveDp4bXBtZXRhPgo8P3hwYWNrZXQgZW5kPSdyJz8+kVOYmAAAAFdJREFUeNp1zMENg0AUA9HZKFGuHtEAdEIJlED/VSC0u/+C8M1PsjH0hEZF5alVnvovPWEdpelQBQ26IK3rF0IQw62Zo67hTbf58DmgtOkY6F7Kj5kDghc2CgW76l3tzQAAAABJRU5ErkJggg=="")
+	#Include %A_ScriptDir%\nm_image_assets\offset\bitmaps.ahk
 
 	MsgBox, 0x40001, Bitterberry Auto-Feeder v0.2, BITTERBERRY AUTO FEEDER v0.2 by anniespony#8135``nMake sure BEE SLOT TO MUTATE is always visible``nDO NOT MOVE THE SCREEN OR RESIZE WINDOW FROM NOW ON.``nMAKE SURE BEE IS RADIOACTIVE AT ALL TIMES!
 	IfMsgBox, Cancel
@@ -13345,8 +14129,14 @@ nm_BitterberryFeeder()
 	IfMsgBox, Cancel
 		ExitApp
 
-	WinGetClientPos(x, y, w, h, ""ahk_id "" GetRobloxHWND())
+	hwnd := GetRobloxHWND()
 	WinActivate, Roblox
+	WinGetClientPos(x, y, w, h, ""ahk_id "" hwnd)
+	offsetY := GetYOffset(hwnd, offsetfail)
+	if (offsetfail = 1) {
+		msgbox, 0x40030, WARNING!!, % ""Unable to detect in-game GUI offset!``nStopping Feeder!``n``nThere are a few reasons why this can happen:``n - Incorrect graphics settings (check Troubleshooting Guide!)``n - Your 'Experience Language' is not set to English``n - Something is covering the top of your Roblox window``n``nJoin our Discord server for support!""
+		ExitApp
+	}
 	Gui, -Caption +E0x80000 +hwndhOverlay +AlwaysOnTop +ToolWindow -DPIScale
 	Gui, Show, NA
 	hbm := CreateDIBSection(w, h), hdc := CreateCompatibleDC(), obm := SelectObject(hdc, hbm)
@@ -13372,8 +14162,6 @@ nm_BitterberryFeeder()
 			MsgBox, 0x40010, Bitterberry Auto-Feeder v0.2, You ran out of Bitterberries!
 			break
 		}
-		hwnd := GetRobloxHWND()
-		offsetY := GetYOffset(hwnd)
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, ""ahk_id "" hwnd)
 		MouseMove, windowX+pos[1], windowY+pos[2]
 		SendInput {Click Down}
@@ -13452,7 +14240,11 @@ nm_BasicEggHatcher()
 	#Include %A_ScriptDir%\lib
 	#Include Gdip_All.ahk
 	#Include Gdip_ImageSearch.ahk
-	#Include %A_ScriptDir%\submacros\shared\nm_misc.ahk
+	#Include WinGetClientPos.ahk
+	#Include GetYOffset.ahk
+	#Include GetRobloxHWND.ahk
+	#Include nm_OpenMenu.ahk
+	#Include nm_InventorySearch.ahk
 
 	CoordMode, Mouse, Screen
 	SetBatchLines -1
@@ -13468,7 +14260,7 @@ nm_BasicEggHatcher()
 	bitmaps[""royaljelly""] := Gdip_BitmapFromBase64(""iVBORw0KGgoAAAANSUhEUgAAAGwAAAAcCAMAAACzmqo+AAAB+FBMVEUbKjUcKzYdLDceLDceLTgfLjkgLzohMDoiMDsjMTwkMj0kMz0lND4mND8nNUAoNkApN0EpOEIqOEMrOUMsOkQtO0UuPEYvPEYvPUcwPkgyQEkzQUo0QUs1Qkw1Q0w3RU44RU85Rk86SFE7SVI8SVM+S1Q/TFVDUFlEUVlFUVpGUltGU1xIVV1KVl9LV19MWWFPW2NWYWlXYmpXY2tbZm5cZ29daG9daXBga3JibXRibnVlcHdpdHttd35weoFxe4FyfIJzfYN0foR1f4V2gIZ3gYd4god5goh6hIp7hYt8hot+h41/iI6Aio+BipCCi5GFjpSFjpOGj5SHkJWIkZaJkpeKk5iKk5eLlJmMlZqNlpqPl5yQmJ2QmZ2Rmp6Sm5+UnKCVnaGaoqabo6ecpKigp6ujq66kq6+lrLCor7Ots7avtrmwt7mxt7qyuLu1vL62vL+3vcC5wMK6wMO8wsS9w8W/xcfAxsjDyMrDycvEyszGzM3HzM7Jzs/K0NHL0NLN0tPO09TP1NXQ1dbR1tfS19jT2NjV2drV2tvW29zX3NzY3N3a39/b4ODc4OHd4eLe4uLf4+Pg5OTg5eXi5ubj5+fk6Ojm6enm6urn6+vo7Ovp7ezq7e3r7u7r7+7s8O/t8fDu8fHv8vHw8/Lx9fTy9fTz9vX09/a7z3nGAAACf0lEQVR42u3W+VOMcQDH8Y9KVkUUkXQqJEqH0OWokHLlzplyRSgJFZWjnEmOtqhWx77/TbNPzHeenbZtZk3GjPcPO7O73/m8dvZ5fnjEPKb/2L+IpcqTI+sBc6s9d2RuR8xBb0wKaWEuXZe+Y69Beul9ZPrVJ6Z1bvBf7eyYOVI7M7YHGMiROucLo0tqwmdtRfEL4/YN/insmfQC+FyW4EiqGIRT1nvr81LeBk//0c5ZMFd1UujaiiEbZlsx2NBOpQMD8fKU8pX3QaoEqJSeQlni0frt0knf2FSOPKW7bJhtReYGWfwEKFdks6txsY5AtmImYDJWGcDYBEwlKds3Vqfo5pGWKF2yYbYVgwV1A1NLdBo4qFVwU7oF96Q64HXB8pA1S5XpG9ugGqBamXbMrJhr1ig1Ax+kx1jfDeNapm1QqLBh6IuR1Raf2NgCTRdhx8yKwcajVAR0Sr1Ah/QK9iq43+lQMVCu5K4fvSm+sZ4B/W7ChpkVg7Fb4SPwUWoDmqxz7VJNvfQI2KR6IMMbw9kHcE3qH5XOznjrmxWDtUo3wB3965rFA6xXSqbSsJhzM2CTu8K2TgIlWuEmWXnAuB2zrRjMHa9s4LAi7rpuO6Z/5UVJugxQqpUPnVcWeWHsl3b0OOtCVAXHteDqWGtsXpsXZlYMxiEF9YMzTZ7SRwA+hUihXwDezXyDuApktXkURjfKU+Rzb8ysGKxbugAMVyU7Uo+NYpUvFYKlFa92ZJXkHrBjuBuyYxelnrCOD1cmhMYVv8EbMytits5L9wkks+IfS1eimwAyK/6xDukMgWRW/GMlCu4ngMyKf+xbuPIJJLPiH6uT7hBAZuVvPMr9BDBOM9MqS26gAAAAAElFTkSuQmCC"")
 	bitmaps[""giftedstar""] := Gdip_BitmapFromBase64(""iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAgMAAAC5YVYYAAAACVBMVEX9rDT+rDT/rDOj6H2ZAAAAFElEQVR42mNYtYoBgVYyrFoBYQMAf4AKnlh184sAAAAASUVORK5CYII="")
 	bitmaps[""yes""] := Gdip_BitmapFromBase64(""iVBORw0KGgoAAAANSUhEUgAAAB0AAAAPAQMAAAAiQ1bcAAAABlBMVEUAAAD3//lCqWtQAAAAAXRSTlMAQObYZgAAAFZJREFUeAEBSwC0/wDDAAfAAEIACGAAfgAQMAA8ABAQABgAIAgAGAAgCAAYACAYABgAP/gAGAAgAAAYAAAAABgAIAAAGAAwAAAYADAAABgAGDAAGAAP4FGfB+0KKAbEAAAAAElFTkSuQmCC"")
-	bitmaps[""toppollen""] := Gdip_BitmapFromBase64(""iVBORw0KGgoAAAANSUhEUgAAACoAAAALBAMAAAD7HQL7AAAAGFBMVEUAAAASFRcTFhgUFxkUFxgWGRsXGhwXGhsckMZRAAAAAXRSTlMAQObYZgAAABd0RVh0U29mdHdhcmUAUGhvdG9EZW1vbiA5LjDNHNgxAAADKGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSfvu78nIGlkPSdXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQnPz4KPHg6eG1wbWV0YSB4bWxuczp4PSdhZG9iZTpuczptZXRhLycgeDp4bXB0az0nSW1hZ2U6OkV4aWZUb29sIDEyLjQ0Jz4KPHJkZjpSREYgeG1sbnM6cmRmPSdodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjJz4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOmV4aWY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vZXhpZi8xLjAvJz4KICA8ZXhpZjpQaXhlbFhEaW1lbnNpb24+NDI8L2V4aWY6UGl4ZWxYRGltZW5zaW9uPgogIDxleGlmOlBpeGVsWURpbWVuc2lvbj4xMTwvZXhpZjpQaXhlbFlEaW1lbnNpb24+CiA8L3JkZjpEZXNjcmlwdGlvbj4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOnRpZmY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvJz4KICA8dGlmZjpJbWFnZUxlbmd0aD4xMTwvdGlmZjpJbWFnZUxlbmd0aD4KICA8dGlmZjpJbWFnZVdpZHRoPjQyPC90aWZmOkltYWdlV2lkdGg+CiAgPHRpZmY6T3JpZW50YXRpb24+MTwvdGlmZjpPcmllbnRhdGlvbj4KICA8dGlmZjpSZXNvbHV0aW9uVW5pdD4yPC90aWZmOlJlc29sdXRpb25Vbml0PgogIDx0aWZmOlhSZXNvbHV0aW9uPjk2LzE8L3RpZmY6WFJlc29sdXRpb24+CiAgPHRpZmY6WVJlc29sdXRpb24+OTYvMTwvdGlmZjpZUmVzb2x1dGlvbj4KIDwvcmRmOkRlc2NyaXB0aW9uPgo8L3JkZjpSREY+CjwveDp4bXBtZXRhPgo8P3hwYWNrZXQgZW5kPSdyJz8+kVOYmAAAAFdJREFUeNp1zMENg0AUA9HZKFGuHtEAdEIJlED/VSC0u/+C8M1PsjH0hEZF5alVnvovPWEdpelQBQ26IK3rF0IQw62Zo67hTbf58DmgtOkY6F7Kj5kDghc2CgW76l3tzQAAAABJRU5ErkJggg=="")
+	#Include %A_ScriptDir%\nm_image_assets\offset\bitmaps.ahk
 
 	MsgBox, 0x40001, Basic Bee Replacement Program, WELCOME TO THE BASIC BEE REPLACEMENT PROGRAM!!!!!``nMade by anniespony#8135``n``nMake sure BEE SLOT TO CHANGE is always visible``nDO NOT MOVE THE SCREEN OR RESIZE WINDOW FROM NOW ON.``nMAKE SURE AUTO-JELLY IS DISABLED!!
 	IfMsgBox, Cancel
@@ -13478,8 +14270,14 @@ nm_BasicEggHatcher()
 	IfMsgBox, Cancel
 		ExitApp
 
+	hwnd := GetRobloxHWND()
 	WinActivate, Roblox
-	WinGetClientPos(x, y, w, h, ""ahk_id "" GetRobloxHWND())
+	WinGetClientPos(x, y, w, h, ""ahk_id "" hwnd)
+	offsetY := GetYOffset(hwnd, offsetfail)
+	if (offsetfail = 1) {
+		msgbox, 0x40030, WARNING!!, % ""Unable to detect in-game GUI offset!``nStopping Feeder!``n``nThere are a few reasons why this can happen:``n - Incorrect graphics settings (check Troubleshooting Guide!)``n - Your 'Experience Language' is not set to English``n - Something is covering the top of your Roblox window``n``nJoin our Discord server for support!""
+		ExitApp
+	}
 	Gui, -Caption +E0x80000 +hwndhOverlay +AlwaysOnTop +ToolWindow -DPIScale
 	Gui, Show, NA
 	hbm := CreateDIBSection(w, h), hdc := CreateCompatibleDC(), obm := SelectObject(hdc, hbm)
@@ -13509,8 +14307,6 @@ nm_BasicEggHatcher()
 			MsgBox, 0x40010, Basic Bee Replacement Program, % ""You ran out of "" ((rj = 1) ? ""Royal Jellies!"" : ""Basic Eggs!"")
 			break
 		}
-		hwnd := GetRobloxHWND()
-		offsetY := GetYOffset(hwnd)
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, ""ahk_id "" hwnd)
 		MouseMove, windowX+pos[1], windowY+pos[2]
 		SendInput {Click Down}
@@ -14205,6 +15001,8 @@ nm_createWalk(movement, name:="") ; this function generates the 'walk' code and 
 		#Include Gdip_All.ahk
 		#Include Gdip_ImageSearch.ahk
 		#Include HyperSleep.ahk
+		#Include WinGetClientPos.ahk
+		#Include GetRobloxHWND.ahk
 
 		#Include Walk.ahk
 
@@ -14268,6 +15066,10 @@ nm_createWalk(movement, name:="") ; this function generates the 'walk' code and 
 		#Include Gdip_All.ahk
 		#Include Gdip_ImageSearch.ahk
 		#Include HyperSleep.ahk
+		#Include WinGetClientPos.ahk
+		#Include GetRobloxHWND.ahk
+
+		offsetY := " GetYOffset(GetRobloxHWND()) "
 
 		Gosub, F13
 		return
@@ -14629,28 +15431,48 @@ nm_setSprinkler(field, loc, dist){
 	}
 }
 nm_fieldDriftCompensation(){
-	global FwdKey, LeftKey, BackKey, RightKey, DisableToolUse, PFieldDriftSteps, MoveSpeedNum
+	global FwdKey, LeftKey, BackKey, RightKey, DisableToolUse
 
 	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 	winUp := windowHeight // 2.14, winDown := windowHeight // 1.88
 	winLeft := windowWidth // 2.14, winRight := windowWidth // 1.88
 
-	if (nm_LocateSprinkler(x, y) = 1) {
+	if ((nm_LocateSprinkler(x, y) = 1) && !(x >= winLeft && x <= winRight && y >= winUp && y <= winDown)) {
 		if (!DisableToolUse)
 			click down
-		while (nm_LocateSprinkler(x, y) = 1 && A_Index <= PFieldDriftSteps) {
-			if (x >= winLeft && x <= winRight && y >= winUp && y <= winDown)
+		if ((x < winleft) && (hmove := LeftKey))
+			sendinput {%LeftKey% down}
+		else if ((x > winRight) && (hmove := RightKey))
+			sendinput {%RightKey% down}
+		if ((y < winUp) && (vmove := FwdKey))
+			sendinput {%FwdKey% down}
+		else if ((y > winDown) && (vmove := BackKey))
+			sendinput {%BackKey% down}
+		while (hmove || vmove) {
+			if (((hmove = LeftKey) && (x >= winLeft)) || ((hmove = RightKey) && (x <= winRight))) {
+				sendinput {%hmove% up}
+				hmove := ""
+			}
+			if (((vmove = FwdKey) && (y >= winUp)) || ((vmove = BackKey) && (y <= winDown))) {
+				sendinput {%vmove% up}
+				vmove := ""
+			}
+			Sleep, 20
+			if ((A_Index >= 300)) {
+				sendinput {%LeftKey% up}{%RightKey% up}{%FwdKey% up}{%BackKey% up}
 				break
-			if (x < winleft)
-				sendinput {%LeftKey% down}
-			else if (x > winRight)
-				sendinput {%RightKey% down}
-			if (y < winUp)
-				sendinput {%FwdKey% down}
-			else if (y > winDown)
-				sendinput {%BackKey% down}
-			sleep, 100*round(18/MoveSpeedNum, 2)
-			sendinput {%LeftKey% up}{%RightKey% up}{%FwdKey% up}{%BackKey% up}
+			}
+			if (nm_LocateSprinkler(x, y) = 0) {
+				sendinput {%LeftKey% up}{%RightKey% up}{%FwdKey% up}{%BackKey% up}
+				Loop, 25 {
+					Sleep, 20
+					if (nm_LocateSprinkler(x, y) = 1) {
+						sendinput % (hmove ? "{" hmove " down} " : "") (vmove ? "{" vmove " down} " : "") 
+						continue 2
+					}
+				}
+				break
+			}
 		}
 		click up
 	}
@@ -14762,18 +15584,6 @@ nm_Move(MoveTime, MoveKey1, MoveKey2:="None"){
 		send, {%MoveKey2% up}
 	SetKeyDelay, PrevKeyDelay
 }
-GetRobloxHWND()
-{
-	if (hwnd := WinExist("Roblox ahk_exe RobloxPlayerBeta.exe"))
-		return hwnd
-	else if (WinExist("Roblox ahk_exe ApplicationFrameHost.exe"))
-	{
-		ControlGet, hwnd, Hwnd, , ApplicationFrameInputSinkWindow1
-		return hwnd
-	}
-	else
-		return 0
-}
 CloseRoblox()
 {
 	local PrevKeyDelay, p
@@ -14791,43 +15601,6 @@ CloseRoblox()
 	; kill any remnant processes
 	for p in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process WHERE Name LIKE '%Roblox%' OR CommandLine LIKE '%ROBLOXCORPORATION%'")
 		Process, Close, % p.ProcessID
-}
-GetYOffset(hwnd)
-{
-	global bitmaps
-	static hRoblox, offset := 0
-
-	if (hwnd = hRoblox)
-		return offset
-	else
-	{
-		WinActivate, Roblox
-		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
-		pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2 "|" windowY "|60|100")
-
-		Loop, 40 ; for red vignette effect
-		{ 
-			if (Gdip_ImageSearch(pBMScreen, bitmaps["toppollen"], pos, , , , , 2) = 1)
-			{
-				hRoblox := hwnd
-				return (offset := SubStr(pos, InStr(pos, ",") + 1) - 13)
-			}
-			else
-			{
-				if (A_Index = 40)
-				{
-					Gdip_DisposeImage(pBMScreen)
-					return 0 ; default offset, change this if needed
-				}
-				else
-				{
-					Sleep, 50
-					Gdip_DisposeImage(pBMScreen)
-					pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2 "|" windowY "|60|100")
-				}				
-			}
-		}
-	}
 }
 DisconnectCheck(testCheck := 0)
 {
@@ -15243,9 +16016,9 @@ nm_claimHiveSlot(){
 			send {%SC_Esc%}{%SC_R%}{%SC_Enter%}
 			SetKeyDelay, PrevKeyDelay
 			n := 0
-			while ((n < 2) && (A_Index <= 80))
+			while ((n < 2) && (A_Index <= 200))
 			{
-				Sleep, 250
+				Sleep, 100
 				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
 				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY "|" windowWidth "|50")
 				n += (Gdip_ImageSearch(pBMScreen, bitmaps["emptyhealth"], , , , , , 10) = (n = 0))
@@ -15622,6 +16395,8 @@ nm_locateVB(){
 			nm_setStatus("Defeated", "Vicious Bee`nTime: " duration)
 		}
 		VBState:=0 ;0=no VB, 1=searching for VB, 2=VB found
+		click, up
+
 		if WinExist("background.ahk ahk_class AutoHotkey")
 			PostMessage, 0x5554, 3, VBState
 		DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
@@ -15674,7 +16449,6 @@ nm_locateVB(){
 
 		Loop, 10 ; attempt each field a maximum of n (10) times
 		{
-			click, up
 			if(VBState=0) {
 				nm_setStatus("Aborting", "No Vicious Bee")
 				break 2
@@ -15760,8 +16534,10 @@ nm_locateVB(){
 						KeyWait, F14, D T5 L
 						KeyWait, F14, T60 L
 						nm_endWalk()
-						if(not nm_activeHoney())
+						if(not nm_activeHoney()) {
+							click, up
 							continue 2
+						}
 						movement := "
 						(LTrim Join`r`n
 						" nm_Walk(leftOrRightDist*9/2000, RightKey) "
@@ -15771,8 +16547,10 @@ nm_locateVB(){
 						KeyWait, F14, D T5 L
 						KeyWait, F14, T60 L
 						nm_endWalk()
-						if(not nm_activeHoney())
+						if(not nm_activeHoney()) {
+							click, up
 							continue 2
+						}
 						nm_ViciousCheck()
 					}
 					if(VBState=2){
@@ -15800,8 +16578,10 @@ nm_locateVB(){
 						KeyWait, F14, D T5 L
 						KeyWait, F14, T60 L
 						nm_endWalk()
-						if(not nm_activeHoney())
+						if(not nm_activeHoney()) {
+							click, up
 							continue 2
+						}
 						movement := "
 						(LTrim Join`r`n
 						" nm_Walk(forwardOrBackDist*9/2000, BackKey) "
@@ -15811,8 +16591,10 @@ nm_locateVB(){
 						KeyWait, F14, D T5 L
 						KeyWait, F14, T60 L
 						nm_endWalk()
-						if(not nm_activeHoney())
+						if(not nm_activeHoney()) {
+							click, up
 							continue 2
+						}
 						nm_ViciousCheck()
 					}
 					if(VBState=2){
@@ -15841,8 +16623,10 @@ nm_locateVB(){
 						nm_endWalk()
 						if (A_Index < reps)
 						{
-							if(not nm_activeHoney())
+							if(not nm_activeHoney()) {
+								click, up
 								continue 2
+							}
 							movement := "
 							(LTrim Join`r`n
 							" nm_Walk(leftOrRightDist*9/2000, LeftKey) "
@@ -15853,8 +16637,10 @@ nm_locateVB(){
 							KeyWait, F14, T60 L
 							nm_endWalk()
 						}
-						if(not nm_activeHoney())
+						if(not nm_activeHoney()) {
+							click, up
 							continue 2
+						}
 						nm_ViciousCheck()
 					}
 					if(VBState=2){
@@ -15893,8 +16679,10 @@ nm_locateVB(){
 						KeyWait, F14, D T5 L
 						KeyWait, F14, T60 L
 						nm_endWalk()
-						if(not nm_activeHoney())
+						if(not nm_activeHoney()) {
+							click, up
 							continue 3
+						}
 						movement := "
 						(LTrim Join`r`n
 						" nm_Walk(leftOrRightDist*9/2000, (v = "Spider") ? LeftKey : RightKey) "
@@ -15904,8 +16692,10 @@ nm_locateVB(){
 						KeyWait, F14, D T5 L
 						KeyWait, F14, T60 L
 						nm_endWalk()
-						if(not nm_activeHoney())
+						if(not nm_activeHoney()) {
+							click, up
 							continue 3
+						}
 						killed := nm_ViciousCheck()
 					}
 					movement := "
@@ -15925,6 +16715,7 @@ nm_locateVB(){
 				}
 				break 2
 			}
+			click, up
 			break
 		}
 	}
@@ -16550,7 +17341,7 @@ nm_Feed(food){
 	Loop, 10
 	{
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
-		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" Max(480, windowHeight-offsetY-120))
+		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" Max(480, windowHeight-offsetY-150))
 
 		if (A_Index = 1)
 		{
@@ -16571,13 +17362,13 @@ nm_Feed(food){
 					{
 						Sleep, 50
 						Gdip_DisposeImage(pBMScreen)
-						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" Max(480, windowHeight-offsetY-120))
+						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" Max(480, windowHeight-offsetY-150))
 					}
 				}
 			}
 		}
 
-		if ((Gdip_ImageSearch(pBMScreen, bitmaps[food], pos, 0, 0, 306, Max(480, windowHeight-120), 10, , 5) = 0) || (nm_imgSearch("feeder.png",30)[1] = 0)) {
+		if ((Gdip_ImageSearch(pBMScreen, bitmaps[food], pos, , , 306, , 10, , 5) = 0) || (nm_imgSearch("feeder.png",30)[1] = 0)) {
 			Gdip_DisposeImage(pBMScreen)
 			break
 		}
@@ -17913,6 +18704,46 @@ nm_cannonTo(location){
 	KeyWait, F14, T60 L
 	nm_endWalk()
 }
+nm_BlenderRotation() {
+	global BlenderRot, BlenderItem1, BlenderItem2, BlenderItem3, BlenderIndex1, BlenderIndex2, BlenderIndex3, BlenderCheck
+	loop {
+		if ((BlenderIndex%BlenderRot% = "Infinite" || BlenderIndex%BlenderRot% > 0) && (BlenderItem%BlenderRot% != "None" && BlenderItem%BlenderRot% != "")) {
+			BlenderCheck := 1
+			IniWrite, %BlenderCheck%, settings\nm_config.ini, blender, BlenderCheck
+			break
+		} else {
+			BlenderRot := Mod(BlenderRot, 3) + 1
+			if (A_Index = 4) {
+				if (BlenderCheck) {
+					BlenderCheck := 0
+					IniWrite, %BlenderCheck%, settings\nm_config.ini, blender, BlenderCheck
+					nm_setStatus("Confirmed", "No more items to rotate through. Turning blender off")
+				}
+				break
+			}
+		}
+	}
+}
+nm_ShrineRotation() {
+    global ShrineRot, ShrineItem1, ShrineItem2, ShrineCheck, ShrineIndex1, ShrineIndex2
+	loop {
+		if ((ShrineItem%ShrineRot% != "None" && ShrineItem%ShrineRot% != "") && (ShrineIndex%ShrineRot% = "Infinite" || ShrineIndex%ShrineRot% > 0)) {
+			ShrineCheck := 1
+			IniWrite, 1, settings\nm_config.ini, Shrine, ShrineCheck
+			break
+		} else {
+			ShrineRot := Mod(ShrineRot, 2) + 1
+			if (A_Index = 3) {
+				if (ShrineCheck) {
+					ShrineCheck := 0
+					IniWrite, 0, settings\nm_config.ini, Shrine, ShrineCheck
+					nm_setStatus("Confirmed", "No more items to rotate through. Turning shrine off")
+				}
+				break
+			}
+		}
+	}
+}
 nm_walkFrom(field:="none")
 {
 	global
@@ -18003,6 +18834,8 @@ nm_gotoCollect(location, waitEnd := 1){
 
 	if ((paths.Count() = 0) || (SetMoveMethod != MoveMethod) || (SetHiveSlot != HiveSlot) || (SetHiveBees != HiveBees))
 	{
+		#Include gtc-WindShrine.ahk
+		#Include gtc-Blender.ahk
 		#Include gtc-clock.ahk
 		#Include gtc-antpass.ahk
 		#Include gtc-robopass.ahk
@@ -18142,7 +18975,8 @@ ba_planterSwitch(){
 	global
 	static PlantersPlusControls := ["N1Priority","N2Priority","N3Priority","N4Priority","N5Priority","N1MinPercent","N2MinPercent","N3MinPercent","N4MinPercent","N5MinPercent","N1MinPercentUpDown","N2MinPercentUpDown","N3MinPercentUpDown","N4MinPercentUpDown","N5MinPercentUpDown","DandelionFieldCheck","SunflowerFieldCheck","MushroomFieldCheck","BlueFlowerFieldCheck","CloverFieldCheck","SpiderFieldCheck","StrawberryFieldCheck","BambooFieldCheck","PineappleFieldCheck","StumpFieldCheck","PumpkinFieldCheck","PineTreeFieldCheck","RoseFieldCheck","MountainTopFieldCheck","CactusFieldCheck","CoconutFieldCheck","PepperFieldCheck","Text1","Text2","Text3","Text4","Text5","TextLine1","TextLine2","TextLine3","TextLine4","TextLine5","TextLine6","TextLine7","TextZone1","TextZone2","TextZone3","TextZone4","TextZone5","TextZone6","NPreset","TextPresets","TextNp","TextMin","PlasticPlanterCheck","CandyPlanterCheck","BlueClayPlanterCheck","RedClayPlanterCheck","TackyPlanterCheck","PesticidePlanterCheck","HeatTreatedPlanterCheck","HydroponicPlanterCheck","PetalPlanterCheck","PlanterOfPlentyCheck","PaperPlanterCheck","TicketPlanterCheck","TextHarvest","HarvestFullGrown","gotoPlanterField","gatherFieldSipping","TextHours","TextMax","MaxAllowedPlanters","MaxAllowedPlantersEdit","TextAllowedPlanters","TextAllowedFields","TimersButton","AutomaticHarvestInterval","ConvertFullBagHarvest","GatherPlanterLoot","TextBox1"]
 	, PlantersPlusControlsH := ["hNPLeft","hNPRight","hNP1Left","hNP1Right","hNP2Left","hNP2Right","hNP3Left","hNP3Right","hNP4Left","hNP4Right","hNP5Left","hNP5Right"]
-	, ManualPlantersControls := ["MHeader1Text","MHeader2Text","MHeader3Text","MSlot1PlanterText","MSlot1FieldText","MSlot1SettingsText","MSlot1SeparatorLine","MSlot2PlanterText","MSlot2FieldText","MSlot2SettingsText","MSlot2SeparatorLine","MSlot3PlanterText","MSlot3FieldText","MSlot3SettingsText","MSectionSeparatorLine","MSliderSeparatorLine","MSlot1CycleText","MSlot1LocationText","MSlot1Left","MSlot1ChangeText","MSlot1Right","MSlot2CycleText","MSlot2LocationText","MSlot2Left","MSlot2ChangeText","MSlot2Right","MSlot3CycleText","MSlot3LocationText","MSlot3Left","MSlot3ChangeText","MSlot3Right","MHarvestText","MHarvestInterval","MPageLeft","MPageNumberText","MPageRight"]
+	, ManualPlantersControls := ["MHeader1Text","MHeader2Text","MHeader3Text","MSlot1PlanterText","MSlot1FieldText","MSlot1SettingsText","MSlot1SeparatorLine","MSlot2PlanterText","MSlot2FieldText","MSlot2SettingsText","MSlot2SeparatorLine","MSlot3PlanterText","MSlot3FieldText","MSlot3SettingsText","MSectionSeparatorLine","MSliderSeparatorLine","MSlot1CycleText","MSlot1LocationText","MSlot1Left","MSlot1ChangeText","MSlot1Right","MSlot2CycleText","MSlot2LocationText","MSlot2Left","MSlot2ChangeText","MSlot2Right","MSlot3CycleText","MSlot3LocationText","MSlot3Left","MSlot3ChangeText","MSlot3Right","MCurrentCycle","MHarvestText","MHarvestInterval","MPageSeparatorLine","MPageLeft","MPageNumberText","MPageRight", "MPuffModeSeparatorLine", "MPuffModeHelp", "MPuffModeText", "MPuffModeA", "MPuffMode1", "MPuffMode2", "MPuffMode3", "MGatherSeparatorLine", "MPlanterGatherHelp", "MPlanterGatherText", "MPlanterGatherA", "MPlanterGather1", "MPlanterGather2", "MPlanterGather3"]
+	, ManualPlantersControlsH := ["hMHILeft","hMHIRight"]
 	, ManualPlantersOptions := ["Planter","Field","Glitter","AutoFull"]
 	local i, c, k, v, Prev_DetectHiddenWindows, Prev_TitleMatchMode
 
@@ -18164,6 +18998,8 @@ ba_planterSwitch(){
 		{
 			for k,v in ManualPlantersControls
 				GuiControl, %c%, %v%
+			for k,v in ManualPlantersControlsH
+				GuiControl, %c%, % %v%
 			Loop, 3
 			{
 				i := A_Index
@@ -18252,6 +19088,61 @@ ba_gotoPlanterFieldSwitch_(){
 		}
 	}
 	ba_saveConfig_()
+}
+mp_MPlanterGatherSwitch_(){
+	global MPlanterGatherA
+	GuiControlGet, MPlanterGatherA
+	if(MPlanterGatherA) {
+		Guicontrol,,MPlanterGatherA,0
+		msgbox, 1, WARNING!,You have selected to "Gather only in planter field".`n`nSeleting this option will cause the macro to IGNORE the gathering fields specified in the Gather tab, and gather ONLY in planter fields for the slots you select using this option instead.`n`nThis option can result in faster planter growth depending on your polar power, but will also result in less pollen/honey collection overall. More information on how to use this feature is available in the 'Gather in planter field' ? Help button.`n`nDo you wish to proceed with gathering in planter field?
+		IfMsgBox Ok
+			{
+				Guicontrol,,MPlanterGatherA,1
+			} else {
+				Guicontrol,,MPlanterGatherA,0
+			}
+		}
+	mp_SaveConfig()
+}
+mp_MPuffMode(){
+	global  
+	GuiControlGet, MPuffModeA
+	if(MPuffModeA) {
+		Guicontrol,,MPuffModeA,0
+		msgbox, 1, WARNING!,Enabling 'Disable auto harvest' will cause the macro NOT to harvest the planter when ready.`n`nInstead, it will 'hold' the full-grown planter until you harvest it either manually or through remote control. This option is designed for users trying to grow smoking planters for puffshroom runs, and allows you to check before harvesting. More information on how to use this feature is available in the 'Disable auto harvest' ? Help button.`n`nDo you wish to proceed with disabling auto harvest?
+		IfMsgBox Ok
+			{
+				Guicontrol,,MPuffModeA,1
+			} else {
+				Guicontrol,,MPuffModeA,0
+			}
+			}	
+	mp_SaveConfig()
+}
+nm_MHarvestInterval(hCtrl){
+	global MHarvestInterval, hMHILeft, hMHIRight
+	static val := ["30 mins", "1 hour", "2 hours", "3 hours", "4 hours", "5 hours", "6 hours"], l := val.Length()
+
+	switch % MHarvestInterval
+	{
+		case "30 mins":
+		i := 1
+		case "1 hour":
+		i := 2
+		default:
+		i := 3
+		case "3 hours":
+		i := 4
+		case "4 hours":
+		i := 5
+		case "5 hours":
+		i := 6
+		case "6 hours":
+		i := 7
+	}
+	
+	GuiControl, , MHarvestInterval, % (MHarvestInterval := val[(hCtrl = hMHIRight) ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)])
+	IniWrite, % MHarvestInterval, settings\manual_planters.ini, General, MHarvestInterval
 }
 ba_gatherFieldSippingSwitch_(){
 	global GatherFieldSipping
@@ -18455,12 +19346,24 @@ ba_planter(){
 	global SunflowerFieldCheck
 	global VBState
 	global MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff
+	global MPlanterRelease1, MPlanterRelease2, MPlanterRelease3
+	global MPlanterHold1, MPlanterHold2, MPlanterHold3
+	global MPlanterSmoking1, MPlanterSmoking2, MPlanterSmoking3
 	loop, 3 {
 	IniRead, PlanterName%A_Index%, settings\nm_config.ini, Planters, PlanterName%A_Index%
 	IniRead, PlanterField%A_Index%, settings\nm_config.ini, Planters, PlanterField%A_Index%
 	IniRead, PlanterHarvestTime%A_Index%, settings\nm_config.ini, Planters, PlanterHarvestTime%A_Index%
 	IniRead, PlanterNectar%A_Index%, settings\nm_config.ini, Planters, PlanterNectar%A_Index%
 	IniRead, PlanterEstPercent%A_Index%, settings\nm_config.ini, Planters, PlanterEstPercent%A_Index%
+	;reset manual planter disable auto harvest variables to 0
+	if (PlanterMode = 2) {
+	MPlanterRelease%A_Index% := 0
+	IniWrite, % MPlanterRelease%A_Index%, settings\nm_config.ini, Planters, MPlanterRelease%A_Index%
+	MPlanterHold%A_Index% := 0
+	IniWrite, % MPlanterHold%A_Index%, settings\nm_config.ini, Planters, MPlanterHold%A_Index%
+	MPlanterSmoking%A_Index% := 0
+	IniWrite, % MPlanterSmoking%A_Index%, settings\nm_config.ini, Planters, MPlanterSmoking%A_Index%
+	}
 	}
 	;skip over planters in this critical timeframe if AFB is active.  It helps avoid the loss of 4x field boost.
 	global AFBrollingDice, AFBuseGlitter, AFBuseBooster, AutoFieldBoostActive, FieldLastBoosted, FieldLastBoostedBy, FieldBoostStacks, AutoFieldBoostRefresh, AFBFieldEnable, AFBDiceEnable, AFBGlitterEnable
@@ -19383,7 +20286,7 @@ ba_placePlanter(fieldName, planter, planterNum, atField:=0){
 					{
 						Sleep, 50
 						Gdip_DisposeImage(pBMScreen)
-						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" Max(480, windowHeight-offsetY-120))
+						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" Max(480, windowHeight-offsetY-150))
 					}
 				}
 			}
@@ -19413,6 +20316,7 @@ ba_placePlanter(fieldName, planter, planterNum, atField:=0){
 				break 2
 			}
 			Gdip_DisposeImage(pBMScreen)
+			sleep, 50 ; delay in case of lag
 		}
 
 		if (A_Index = 50) {
@@ -19551,6 +20455,7 @@ ba_harvestPlanter(planterNum){
 					break
 				}
 				Gdip_DisposeImage(pBMScreen)
+				sleep, 50 ; delay in case of lag
 			}
 		}
 
@@ -19859,14 +20764,17 @@ if !GetRobloxHWND()
 	disconnectCheck()
 WinActivate, Roblox
 ;check UIPI
-PostMessage, 0x100, 0x7, 0, , % "ahk_id " GetRobloxHWND()
+PostMessage, 0x100, 0x7, 0, , % "ahk_id " (hRoblox := GetRobloxHWND())
 if (ErrorLevel = 1)
 	msgbox, 0x1030, WARNING!!, % "Your Roblox window is run as admin, but the macro is not!`nThis means the macro will be unable to send any inputs to Roblox.`nYou must either reinstall Roblox without administrative rights, or run Natro Macro as admin!`n`nNOTE: It is recommended to stop the macro now, as this issue also causes hotkeys to not work while Roblox is active.", 60
-PostMessage, 0x101, 0x7, 0xC0000000, , % "ahk_id " GetRobloxHWND()
+PostMessage, 0x101, 0x7, 0xC0000000, , % "ahk_id " hRoblox
 nm_setShiftLock(0)
 nm_OpenMenu()
-WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
-MouseMove, windowX+350, windowY+GetYOffset(GetRobloxHWND())+100
+WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hRoblox)
+offsetY := GetYOffset(hRoblox, offsetfail)
+if (offsetfail = 1)
+	msgbox, 0x1030, WARNING!!, % "Unable to detect in-game GUI offset!`nThis means the macro will NOT work correctly!`n`nThere are a few reasons why this can happen:`n - Incorrect graphics settings (check Troubleshooting Guide!)`n - Your 'Experience Language' is not set to English`n - Something is covering the top of your Roblox window`n`nJoin our Discord server for support!", 60
+MouseMove, windowX+350, windowY+offsetY+100
 Prev_DetectHiddenWindows := A_DetectHiddenWindows
 Prev_TitleMatchMode := A_TitleMatchMode
 DetectHiddenWindows, On
@@ -20116,7 +21024,7 @@ if(A_IsPaused) {
 	IniWrite, %TotalRuntime%, settings\nm_config.ini, Status, TotalRuntime
 	DetectHiddenWindows, %Prev_DetectHiddenWindows%
 	SetTitleMatchMode, %Prev_TitleMatchMode%
-	nm_setStatus("Paused", "Press F2 to Continue")
+	nm_setStatus("Paused", "Press " PauseHotkey " to Continue")
 	nm_LockTabs(0)
 }
 Pause, Toggle, 1
@@ -20247,8 +21155,8 @@ nm_setGlobalStr(wParam, lParam)
 	Critical
 	local var
 	; enumeration
-	#Include %A_ScriptDir%\shared\EnumStr.ahk
-	static sections := ["Boost","Collect","Gather","Gui","Planters","Quests","Settings","Status"]
+	#Include %A_ScriptDir%\..\lib\enum\EnumStr.ahk
+	static sections := ["Boost","Collect","Gather","Gui","Planters","Quests","Settings","Status","Blender","Shrine"]
 
 	var := arr[wParam], section := sections[lParam]
 	IniRead, %var%, settings\nm_config.ini, %section%, %var%
@@ -20261,7 +21169,7 @@ nm_setGlobalInt(wParam, lParam)
 	Critical
 	local var
 	; enumeration
-	#Include %A_ScriptDir%\shared\EnumInt.ahk
+	#Include %A_ScriptDir%\..\lib\enum\EnumInt.ahk
 
 	var := arr[wParam], %var% := lParam
 	nm_UpdateGUIVar(var)
@@ -20335,6 +21243,43 @@ nm_UpdateGUIVar(var)
 		GuiControl, , ChickHealthText, % InputChickHealth "%"
 
 		case "":
+		k := var
+		switch % k
+		{
+			case "BlenderItem1", "BlenderItem2", "BlenderItem3":
+			GuiControl, , % h%k%Picture, % hBitmapsSB[%k%] ? ("HBITMAP:*" hBitmapsSB[%k%]) : ""
+			z := SubStr(k, 0)
+			GuiControl, , BlenderAdd%z%, % (BlenderItem%z% = "None") ? "Add" : "Clear"
+
+			case "BlenderIndex1", "BlenderIndex2", "BlenderIndex3":
+			Num := SubStr(k, 0)
+			local BlenderData1, BlenderData2, BlenderData3, pos
+			GuiControlGet, BlenderData%Num%
+			GuiControl,, BlenderData%Num%, % StrReplace(BlenderData%Num%, SubStr(BlenderData%Num%, InStr(BlenderData%Num%, " ") + 1), "[" ((%k% = "Infinite") ? "∞" : %k%) "]")
+
+			case "BlenderAmount1", "BlenderAmount2", "BlenderAmount3":
+			Num := SubStr(k, 0)
+			local BlenderData1, BlenderData2, BlenderData3, pos
+			GuiControlGet, BlenderData%Num%
+			GuiControl,, BlenderData%Num%, % StrReplace(BlenderData%Num%, SubStr(BlenderData%Num%, 1, InStr(BlenderData%Num%, " ") - 1), "(" %k% ")")
+
+			case "ShrineItem1", "ShrineItem2":
+			GuiControl, , % h%k%Picture, % hBitmapsSB[%k%] ? ("HBITMAP:*" hBitmapsSB[%k%]) : ""
+			z := SubStr(k, 0)
+			GuiControl, , ShrineAdd%z%, % (ShrineItem%z% = "None") ? "Add" : "Clear"
+
+			case "ShrineIndex1", "ShrineIndex2":
+			Num := SubStr(k, 0)
+			local ShrineData1, ShrineData2, ShrineData3, pos
+			GuiControlGet, ShrineData%Num%
+			GuiControl,, ShrineData%Num%, % StrReplace(ShrineData%Num%, SubStr(ShrineData%Num%, InStr(ShrineData%Num%, " ") + 1), "[" ((%k% = "Infinite") ? "∞" : %k%) "]")
+
+			case "ShrineAmount1", "ShrineAmount2":
+			Num := SubStr(k, 0)
+			local ShrineData1, ShrineData2, ShrineData3, pos
+			GuiControlGet, ShrineData%Num%
+			GuiControl,, ShrineData%Num%, % StrReplace(ShrineData%Num%, SubStr(ShrineData%Num%, 1, InStr(ShrineData%Num%, " ") - 1), "(" %k% ")")
+		}
 
 		default:
 		GuiControl, , %k%, % %k%

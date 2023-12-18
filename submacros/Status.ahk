@@ -15,8 +15,10 @@ You should have received a copy of the license along with Natro Macro. If not, p
 #NoTrayIcon
 #SingleInstance Force
 #MaxThreads 255
-#Include %A_ScriptDir%\..\lib\Gdip_All.ahk
-#Include %A_ScriptDir%\..\lib\Gdip_ImageSearch.ahk
+#Include %A_ScriptDir%\..\lib
+#Include Gdip_All.ahk
+#Include Gdip_ImageSearch.ahk
+#Include WinGetClientPos.ahk
 
 SetBatchLines -1
 SetWorkingDir %A_ScriptDir%\..
@@ -90,6 +92,7 @@ planters["candyplanter"] := {"bitmap": Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSU
 planters["festiveplanter"] := {"bitmap": Gdip_BitmapFromBase64("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"), "name": "Festive Planter", "color": 12368237}
 planters["heattreatedplanter"] := {"bitmap": Gdip_BitmapFromBase64("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"), "name": "Heat-Treated Planter", "color": 10172428}
 planters["hydroponicplanter"] := {"bitmap": Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAMAAAC7IEhfAAAC91BMVEUAAAA7PDw3NzZwdndMTk43ODkoKChqb29VVlU/QUFQU1U6OjkvLy8jIyM4SWFJS0s0NDQxMTIyMjI5OTk5OTk2NjYgICIrKysjIyNERUY4ODg0NDQwMDE1NjY4ODg4OTkyMjIjIyMcHByDi4tjZ2hfYmFFR0c0MzI4OTk5OTk1NTU5OTksLCwxMTItLi4XFxgsLCwnJycjIyMYGBhnbGwyNTgsLS8rKipCX4k8ZJ47YZY5Wos1NTU4ODgxMDA7Ozs2NjctLS02NjU3NzczMzMwMDAjIyMgICAsLCxThctPcJs0Pk1Fa6BVaIBbZXE7V385Tm43RFczMjI2NjYsKyssLCwyMjItLi4sLCwcHBwzMzMrKysnJyeyvr6DsLMyMTGzv7+xvb61wL00MzMvLi4xMDA1NTW3w8O1wMCxvr+xvLySnJw3ODiFsrWCrrE2Njc4NTEtLS27yMi5xcba4+We19icpqWOlpZBg9yvurmrtbWlr6+hqqrY4eKe1deh0tW1wcKzwcGxwMCvu7uEsbSgqKieqKiIkJF0e3tXWls4OTnY4+RCh+PW3+DR29ywvL+4wr6uu76psrObpKSWnp6RmJmMlJTd5ufAy8uCo8u9ysqTxsmqt763wL2KuLt5pah4oaSAh4drcnJkaWpaXl42My87ftrK1tjN19eb1dea0tTI0tKk0NK+zc2QrMebscWqusKMvMCpvb+mtL2eubuctremrq6kra1wnaBolJhkkZVkj5KGjo59hIQ0Mi5KjeQ7hOTP2uMveN1ekdPG0dJjlNKWz9FoltCczM/Czs5vms6Xy82qv82oycuIp8q2w8ecxMaftMSvwcOrv8Cks7yrurutuLiHtbiNra9+q66Gq618qKt4oqaYn6BijZF4fn5jmuFVjdx6ptug1dhIhdhpmNevzc+Sy82xwc3Dy8yaxcizxMW9xsOitMOmt8KescCptLiXtbeUtLeOsbSDmrFCb65ohKl4n6JsmZx+jJZRaYk4RVknJiZm3tO+AAAAXXRSTlMA/v7+/vxE/v7+/f39NP7+/f3878u/fzsY/vfhsamSgWkiDf7+/vzy2dW4tLSelWdYTB8K/v7+/v38/Pzt6+bi1MiaiodyZl4r/v7+/f39/Pz8+PXRzcOminVfXy6sN1Q3AAAEZklEQVQ4y33UZVTbUBiA4aQyfPgYOpi7u7u7W3qThqQKpS1rqcBgSFvcYQyHuRvO3N3d3d23H7vrYYWNbk978us9381NTi5Sz8/Xdfacof4m7ea6Iea0GEzRqDvL0lBa2qbEoneJAWV0NtfZxaLFSl2mKC0mGv4UMcKcVg4jzIXdHFvHJTzlqsu00dHR5fz1Cav1wGzYg2GlW58YGgxlZWWFrpHHtCW7mAt7uZJ9dTyMJ5fJhOrUS5hGaTaEmg+T3pZFEkIisqw8NRJXpVk40j5mdz0TTYsgMAzDI8L5OIZfUhex6VFmOtIm80A21kCEiukY26RRB9zT1wSH8lIEGJYC5+amYElvNJagQ/M/uyYSm4wDoXGhpy8QeNL2FFywPRfPvSD/2hd4evVs+GzaU1NOJwbHhfK2C3BBbhKBwT+Xuznkm6WY7OBm2m8nILX68GRvcHAinszFMIHxip/a9Orwa26mFeWxsK5z8TcoY/IO3t2blZ2y6SXc8JblZ3Hu2VX7k7kKoVxrTXksNoadpBYJq3n8Yw9XH+Uu37cfI/KW7zvIhfXmclGpiMfTuANX4z6crBPXp2VECvh4ZN6mB8dwgrv58Cm4drLqJlPKruXLdU7iHjDsAqLj0lmogifEMLhqEo5h3DzY4QJFjRVNU3p+cht/OHL8UNYagmVr21uOEbCEBUTATqjIMAC2C02KTnzqw+iOdJQyE4uoWAmtD8cJzARXpadbOIm9e3UkJ+9eNSOoGdJu0oQ7/XcN95FQJSp+fcnX3rzNoIf3RMYGDYoPaQrDXU1D9gwI8kJGiaWtcayBWgntDN90t6Bp8SHTVzZDVjYNiR8QBL+O0RK2Ntw0Uii36BfrjfwKB5omxg/8FY4B1sL6tYkIjbUt2xdBxgX13/2RLYYTv6/aM2ilF2LnIU6LyxZipjJcVerv7IZ4S5knrCl4E4P7TLw31X+Y3zzATEjgEZhgmZEAE/LVLODlA1BNKkqPQRBvyvKFApW2s7XSbDx55syzI0uNNmzYcFLWCthQqDKn2NbGDkF6ekpEsow29mjr58cfHzq0LmyJ0dq169Y+Ukopd9HRGgdJJwTqCqxVsnC1Rn3uSFjY/SVLwsLC1h1fAW3doS0uSs1Wog5D7IxHhA0wKARyGe9iwOX8/K1b8/MvB3A4nKjrV3fwNm6M1LPJ2O6Ika+YQi0tihURhQVRgUYcKLDyWqqyhmlvSzv7InW6d2CQ4IdeVlgZFcWpE1BQtVNr2Q+QNi5uDU6JcQu6AgN/Z1VFgCms/Hwxw5707Dq25V/nxCxUG37tS+DvrrBqZ1kRA37WjbhSJXLB+0BOVAAUdaP6ilrJcvJs2ThcJHbQC3lvOYEFNyoKrlZckYnsncSjETNG0o4sHX9H4a3qW9XX30XorIC4Ixxoho+YchTlbNu27fz5czkiB+AxEnZmNXEB9q3SRaLMzFpmW7K9HfJPfkMAoEkSAH8p2X488h9uLgyJRMJgMJzn+yF/+glPTdzCQOvpHAAAAABJRU5ErkJggg=="), "name": "Hydroponic Planter", "color": 9812161}
+planters["paperplanter"] := {"bitmap": Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAMAAAC7IEhfAAAB+1BMVEUAAAA2NTUhISElJSUkJCQ1NTU1NTUcHBw2NjY0NDQwMDAzMzMwMTEvLy81NTU0NDQyMjI0NDQzMzMYGBg2NjY0NDQzMzM0NDQzMzMxMTEvLy8yMjIvLy81NTU1NTU1NTU0NDMxMjIwMDAuLi4uLi4mJiYkJCQ1NTU1NzYwMC8wMDDRqmO6m13PqWPMqGK6m143NjbDoF+4mlw8OTbFoV/Cn126m1y2mFusj1bOqWPOqGK7m1y1lluafknJpWC4mVypjFSnilOliFFAPDaukVl0uyjLp2Gxk1mojFaOdUU5ODbHomDBnl+7nF6+nFylild3ZUaMc0WUbT6Tajw1NjTBnly3llyylVqqjVerjVShg1CHcUt7aUmNdUeeeUZzYkNlWD5jVT2PaDtWSztKRDh8XTdxtyhqpydopibVr2nSq2TRq2TLp2K3mmG/nWDIo1+iiFSfhVKfgUyMdEyDcEuddUSGb0RuXkJqXEGCXziBzTJjmS1rridpqiasjVScgVKWflGafEiYdESDbUOPdD2SaDxeUjtRRztNRThHQThEPziBmTeLfzeH1TV5pTJTezBqpi12wCpwtSamjl62kFWNeU6gfUqNa0KGhT+FhTY7RTZ7qjROcjFLaTFoozBYhzBIZzB3lS98qy54nC5Zhi55xC14ni10uClnpiiaiWq0AAAAK3RSTlMA+xIhCf3zBffIdW9kP+O7tqWVDOqtoaB9aF47M+bZzsFXUTcrGRbr0IRzNB0GUAAAA0xJREFUOMuF1HdTGkEYBnAOETGiRo0ajek9LFwHjl4FFBAEe+8l9hZj7z229N7Lx8zdrsAZx/D8czPcb95375kdJP8kLSUXi8pzZZIkkRVg0Y+zX7CbyVwOcfB5du7wXX4SeBs7mPnZPdfz4WqS3ZnRT89m3Me9P7CHykyZVJp23uZC4pCH3T2zdBmtuK5QZF+5VVx85zTKk94qSCc23h8d8XDfN9W05WxtLcMIJ30pU+yU9xUYTbf5dt1u91zvvtlsnmoym1dbxgcrdq7L4uXJihRbbR1TTU3hN7/d3fO9u8vLZj5jC3V+ozaUmhJzhXKsM+zz+cLh8Nq34/k/PXuRyvaVV2NDRi0AoDEOM7HG54MLvvqVykgksvZ1vvd7ZfvT1wFrtRHwwVuu5Z3AImKwr089zL3g3z/t6nr7a299fbJaqwVCdPaO9NgRS1JH+/tVKpWmqo9pnmyOtHd11Q8hRukd+u3cGLyHjfc/VsGoOTXZXDnZPCQoq8fucFm99IV4hVenObUqFo61WEAABx6Hw6WjKGqEeBQvsZB2kSTJlMasBsdr7HpXDdy+lJoovARr4F8bLCRLlnIC1Nn0VlxvgrABtoMixSbQKIYpZ/1+MqjXaQFeR0E4LobyEDpjFXyoSQHE4BJRnLj/N6YN8GwsGuyH0IZgBfpqlItP4ChLOXQGI4JWCF3Os5AZEEEAP0YLvGVi2AIhqUHtQId7PGi1COZlNUJBok8qRdBhh8/FqFJUTwMUrBiavEhOiOq5g43AlUbxapuOqvcEAAjJ78ahktAL9fktbALq7IGAacwKqNZ0STxFdDXvWI2qSgOhloe1JqGhUauuUwTznQx0j8uHUT3CQC3cX+915iRgducAxwrDuKD6BNaZAEztKqEUwQ4La4BXt5wRVgsDAYqrVZ4i6nunmju54VUWCPU1iDVsY5fTEjAD21zUIGkIGgTowIUjjmwSWTeRQ0nLuEaETCdtB9UWoPPiAHganZcypJLTkRbI6SdehhOOSQ7DzaMdqelXJGdTkiOPdoZspSp1kAEOinrJjzvnTzIl44acaKsdYIymWusE/QCNO8deziprqzDZKlqIbKnkv7nH0+kNpyKHd0lyN59Q5N4+8/NfEj3vSXiPm+wAAAAASUVORK5CYII="), "name": "Paper Planter", "color": 15844367}
 planters["pesticideplanter"] := {"bitmap": Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAMAAAC7IEhfAAACqVBMVEUAAAA2NjY2NjY1NTU2NjYnJyc1NTU1NTUxMTEuLi4pKSk1NTU1NTUzMzMyMjIzMzMiIiI1NTU0NDQ0NDQzMzM0NDQzMzMxMTExMTEwMDAuLi4sLCwqKio2NjY1NTUzMzMwMDAxMTExMTEuLi4vLy8gICA1NTU1NTU2NjY1NTU0MzQ0NDQ6mERLyVg9pUc2NjY3NzY8pUZLyFhKx1dLw1dIrVE/rEo2NzZLxVg8o0Y6nEQ1NjWOjSzi3hdKvVU+qUk8n0Y6lUM8jUM6jkE2Xjo1QTc1OTajoinGwyFIv1RKuFRGvVNItVNHpE9FlEo9p0dDikc7nkU6mkRBh0Q7kUI3bDw2RDaBgDCNii7g3BlJ31hK0VhKy1hFuFJIsVJEzFFCs01CsE1GoExArUtAokk8oUY7n0U7j0I5gkA5fj83UDlISjdZWzRgXzKTkiytqimyryfCviLJxh/e2xpLx1lLwVhG0lVJxVVDyFBDuE5ApkpFmEo7l0Q8j0NFgUM6cT5DUDk1SDdDRjU1OzVOTjNoajJjZjJeXDJ1djFnZzGGhC2wrie6tiXa1hxH2VhI1ldBwE5ErE4/n0lMnklBk0lEj0dAjUY9k0U6ikFSeT86dT87aT5DYjxPbzs3Zzs7WTpWdDk2VDk2TDg8QDY7OjRiYzNpbTJUUjJ7gjFxcTF6fS92di+Ihy6KjC2amiuXliqopimjoCjOyh/RzR7X0x3d2BtK2llH21dFyFRJuVRCxVBGp1BCxk9Cqk49nEZQlkZMkUZMiUZGiEY/g0VDe0VglEJYjEFQgkFEdkBciD9Ibz9Cbj5DZz0/Wj1LdTxlgjtCXDtnfThJXDg1PzZZXzVUVDWDhTRzfDNGRTKMjjB9eTCPlC+opiyopii6uCa/uiO9uiLNyyHBwSELCBftAAAALHRSTlMA/frt9Qng00EtEM7BjWVYBbSrooeEcWFNSCYWDubHkjo2MikdB9i8uZx8dTrQsVEAAAOOSURBVDjLdZR1d9pQGIcJMNi6rbOuNnfLbVKgQHHXAqV4XVZ3d3ebu7u7u7u7+yfZbXfODiH0OScn948nvzfvzXtDIRAQFsREMKFQiDCXTqOMyMQJDKGzeU1GbSpXsZvHmDuSN38cdXdd1cWqlJqaK5dSFMKxo0YQx2vWrVyVKVcqshVKpWylClk2QiBta0U8197YmJ3daJetin/QQQ/3H4htu50QvyLlWk1K1Yr4C4n33fgkf8Xn0fbrPnISExISqteyExMBuCnah0zwI07BT5T2xACIueQxH96i+ovxGXNIXgCt2/X9aBQU+K/Pl9xiAyD52t/GY0wjB/YWlZ9OH0rqLREdMsEHXup6nHgQKXCv65SnxAwA6+GAtvjcIQMAaw/YTGr6GKIYhthiu9wuGwtIPnvcXYNlTSzAkfCNd7EQohgq3JK22pQuASBdWyoSaY/cqWDxk+oEW7BAohhO0+REclOTjPrk2FhzvcnA0adaslB5KzKbQmQ0rX1TBCTSYuFyM7hSC1zHoc0Yk7TnE6h7rBH/iYSXFVWokRDyjI1HHJneYjSKqrBJEykkAsbiOf81SBaao6HNofhhKr5B6lVcIGvG/I7kbHqeRM+NhMo/0Wrc3I2E+jkHk/GdlYCtT0qTRkRDL8PI3qzdN4N8HkZTj36IAUOwY7bviqlmAdCkfY9P8vVGjdurOxk1LPIfFf95UQkXsYf7PtEDfcRA5HBRwbDIWn+s3HPCBhPT3WcLfQctYCGvY3/+sHi1q0wsLu2Ea8O73yd78SWEwpOxgoFSVzL0OM/c3bpzhQe2c0DF0x9F9/Koo707QToODopFQ2K9q69NJOrpPLWeBeoLmio3YLMIe318wCM+BruWvCk7W6btO19efiQKcAz82o2ayV4ic6dp1/Hizsuw0yKPeLDw4BmxWPeEDdipAgchkZF3PSl5nZkDOK++6c78Kijs/3n6S4vBKI1TqgnvGIQ4Iri1+mo2y7ytJT8/v63l+VbbGimcSAc+boGXOJ3Zboff1yLNSEtbXbccAscsS4CiMDDUZ2zzblgFAoFMlhkNycyyxqGQhh0YDCQwBdkhQ0nkaqhhRA8W5+XG+XpKJzKV4ssYmjPbx5OrsMXTKSSCEVUDQctV8eB/gsyoRZjTkbNJYbfL5Q0bc1VqHKMHU/wRPpOO83iat+rWPa3tmJA6NhDm+Wde8HgG9o+ZIT7WXxDxHf2Zsge9AAAAAElFTkSuQmCC"), "name": "Pesticide Planter", "color": 1757484}
 planters["petalplanter"] := {"bitmap": Gdip_BitmapFromBase64("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"), "name": "Petal Planter", "color": 15856111}
 planters["planterofplenty"] := {"bitmap": Gdip_BitmapFromBase64("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"), "name": "The Planter Of Plenty", "color": 15770372}
@@ -130,6 +133,31 @@ timers.beesmas.values[6] := {"varname": "Candles", "name": "Candles", "cooldown"
 timers.beesmas.values[7] := {"varname": "Samovar", "name": "Samovar", "cooldown": 21600, "regex": "i)^samovar"}
 timers.beesmas.values[8] := {"varname": "LidArt", "name": "Lid Art", "cooldown": 28800, "regex": "i)^lid(art)?"}
 timers.beesmas.values[9] := {"varname": "GummyBeacon", "name": "Gummy Beacon", "cooldown": 28800, "regex": "i)^(gummy)?beacon"}
+
+hBitmapsSBT := {}
+#Include %A_ScriptDir%\..\nm_image_assets\gui\blendershrine_bitmaps.ahk
+
+blender := {}
+blender["BlueExtract"] := {"bitmap": hBitmapsSBT["BlueExtract"], "name": "Blue Extract", "color": 2703225}
+blender["RedExtract"] := {"bitmap": hBitmapsSBT["RedExtract"], "name": "Red Extract", "color": 12660528}
+blender["Enzymes"] := {"bitmap": hBitmapsSBT["Enzymes"], "name": "Enzymes", "color": 16777128}
+blender["Oil"] := {"bitmap": hBitmapsSBT["Oil"], "name": "Oil", "color": 16772734}
+blender["Glue"] := {"bitmap": hBitmapsSBT["Glue"], "name": "Glue", "color": 14781168}
+blender["TropicalDrink"] := {"bitmap": hBitmapsSBT["TropicalDrink"], "name": "Tropical Drink", "color": 127214241} 
+blender["Gumdrops"] := {"bitmap": hBitmapsSBT["Gumdrops"], "name": "Gumdrops", "color": 75221165}
+blender["MoonCharms"] := {"bitmap": hBitmapsSBT["MoonCharms"], "name": "Moon Charms", "color": 239233142}
+blender["Glitter"] := {"bitmap": hBitmapsSBT["Glitter"], "name": "Glitter", "color": 203228226}
+blender["StarJelly"] := {"bitmap": hBitmapsSBT["StarJelly"], "name": "Star Jelly", "color": 167246235}
+blender["PurplePotion"] := {"bitmap": hBitmapsSBT["PurplePotion"], "name": "Purple Potion", "color": 150127201}
+blender["SoftWax"] := {"bitmap": hBitmapsSBT["SoftWax"], "name": "Soft Wax", "color": 252238184}
+blender["HardWax"] := {"bitmap": hBitmapsSBT["HardWax"], "name": "Hard Wax", "color": 23811572}
+blender["SwirledWax"] := {"bitmap": hBitmapsSBT["SwirledWax"], "name": "Swirled Wax", "color": 21221964}
+blender["CausticWax"] := {"bitmap": hBitmapsSBT["CausticWax"], "name": "Caustic Wax", "color": 87210100}
+blender["FieldDice"] := {"bitmap": hBitmapsSBT["FieldDice"], "name": "Field Dice", "color": 70106149}
+blender["SmoothDice"] := {"bitmap": hBitmapsSBT["SmoothDice"], "name": "Smooth Dice", "color": 164215218}
+blender["LoadedDice"] := {"bitmap": hBitmapsSBT["LoadedDice"], "name": "Loaded Dice", "color": 19910024}
+blender["SuperSmoothie"] := {"bitmap": hBitmapsSBT["SuperSmoothie"], "name": "Super Smoothie", "color": 147212145}
+blender["Turpentine"] := {"bitmap": hBitmapsSBT["Turpentine"], "name": "Turpentine", "color": 17112561}
 
 Loop, Files, patterns\*.ahk
 	patternlist .= ((A_Index = 1) ? "" : "|") StrReplace(A_LoopFileName, ".ahk")
@@ -190,6 +218,16 @@ settings["SnailTime"] := {"enum": 51, "type": "str", "section": "Collect", "rege
 settings["ChickTime"] := {"enum": 52, "type": "str", "section": "Collect", "regex": "i)^(5|10|15|Kill)$"}
 settings["InputSnailHealth"] := {"enum": 53, "type": "str", "section": "Collect", "regex": "i)^(?:100(?:\.00?)?|\d?\d(?:\.\d\d?)?)$"}
 settings["InputChickHealth"] := {"enum": 54, "type": "str", "section": "Collect", "regex": "i)^(?:100(?:\.00?)?|\d?\d(?:\.\d\d?)?)$"}
+settings["ShrineItem1"] := {"enum": 55, "type": "str", "section": "Shrine", "regex": "i)^(strawberries|sunflowers|pineapples|Blueberries|blueextract|redextract|glue|oil|enzymes|gumdrops|tropicaldrink|mooncharms|glitter|starjelly|purplepotion|softwax|hardwax|swirledwax|causticwax|fielddice|smoothdice|loadeddice|supersmoothie|Turpentine)$"}
+settings["ShrineItem2"] := {"enum": 56, "type": "str", "section": "Shrine", "regex": "i)^(strawberries|sunflowers|pineapples|Blueberries|blueextract|redextract|glue|oil|enzymes|gumdrops|tropicaldrink|mooncharms|glitter|starjelly|purplepotion|softwax|hardwax|swirledwax|causticwax|fielddice|smoothdice|loadeddice|supersmoothie|Turpentine)$"}
+settings["ShrineIndex1"] := {"enum": 57, "type": "str", "section": "Blender", "regex": "i)^(Infinite|\d{1,3})$"}
+settings["ShrineIndex2"] := {"enum": 58, "type": "str", "section": "Blender", "regex": "i)^(Infinite|\d{1,3})$"}
+settings["BlenderIndex1"] := {"enum": 59, "type": "str", "section": "Blender", "regex": "i)^(Infinite|\d{1,3})$"}
+settings["BlenderIndex2"] := {"enum": 60, "type": "str", "section": "Blender", "regex": "i)^(Infinite|\d{1,3})$"}
+settings["BlenderIndex3"] := {"enum": 61, "type": "str", "section": "Blender", "regex": "i)^(Infinite|\d{1,3})$"}
+settings["BlenderItem1"] := {"enum": 62, "type": "str", "section": "Blender", "regex": "i)^(blueextract|redextract|glue|Oil|enzymes|gumdrops|tropicaldrink|mooncharms|glitter|starjelly|purplepotion|softwax|hardwax|swirledwax|causticwax|fielddice|smoothdice|loadeddice|supersmoothie|Turpentine|None)$"}
+settings["BlenderItem2"] := {"enum": 63, "type": "str", "section": "Blender", "regex": "i)^(blueextract|redextract|glue|oil|enzymes|gumdrops|tropicaldrink|mooncharms|glitter|starjelly|purplepotion|softwax|hardwax|swirledwax|causticwax|fielddice|smoothdice|loadeddice|supersmoothie|Turpentine|None)$"}
+settings["BlenderItem3"] := {"enum": 64, "type": "str", "section": "Blender", "regex": "i)^(blueextract|redextract|glue|oil|enzymes|gumdrops|tropicaldrink|mooncharms|glitter|starjelly|purplepotion|softwax|hardwax|swirledwax|causticwax|fielddice|smoothdice|loadeddice|supersmoothie|Turpentine|None)$"}
 
 ;settings["discordMode"] := {"enum": 1, "type": "int", "section": "Status", "regex": "i)^(0|1|2)$"} dangerous
 ;settings["discordCheck"] := {"enum": 2, "type": "int", "section": "Status", "regex": "i)^(0|1)$"} dangerous
@@ -396,7 +434,7 @@ settings["LastWhirligig"] := {"enum": 202, "type": "int", "section": "Boost", "r
 settings["LastEnzymes"] := {"enum": 203, "type": "int", "section": "Boost", "regex": "i)^\d{1,10}$"}
 settings["LastGlitter"] := {"enum": 204, "type": "int", "section": "Boost", "regex": "i)^\d{1,10}$"}
 settings["LastSnowflake"] := {"enum": 205, "type": "int", "section": "Boost", "regex": "i)^\d{1,10}$"}
-settings["LastWindShrine"] := {"enum": 206, "type": "int", "section": "Boost", "regex": "i)^\d{1,10}$"}
+;settings["LastWindShrine"] := {"enum": 206, "type": "int", "section": "Boost", "regex": "i)^\d{1,10}$"} obsolete
 settings["LastMicroConverter"] := {"enum": 207, "type": "int", "section": "Boost", "regex": "i)^\d{1,10}$"}
 settings["QuestGatherMins"] := {"enum": 208, "type": "int", "section": "Quests", "regex": "i)^(100|[1-9][0-9]?)$"}
 settings["PolarQuestCheck"] := {"enum": 209, "type": "int", "section": "Quests", "regex": "i)^(0|1)$"}
@@ -419,6 +457,34 @@ settings["HoneystormCheck"] := {"enum": 225, "type": "int", "section": "Collect"
 settings["LastHoneystorm"] := {"enum": 226, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
 settings["RBPDelevelCheck"] := {"enum": 227, "type": "int", "section": "Collect", "regex": "i)^(0|1)$"}
 settings["LastRBPDeLevel"] := {"enum": 228, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
+settings["ShrineCheck"] := {"enum": 229, "type": "int", "section": "Shrine", "regex": "i)^(0|1)$"}
+settings["BlenderCheck"] := {"enum": 230, "type": "int", "section": "Blender", "regex": "i)^(0|1)$"}
+settings["ShrineAmount1"] := {"enum": 231, "type": "int", "section": "Shrine", "regex": "i)^\d{1,3}$"}
+settings["ShrineAmount2"] := {"enum": 232, "type": "int", "section": "Shrine", "regex": "i)^\d{1,3}$"}
+settings["BlenderAmount1"] := {"enum": 233, "type": "int", "section": "Blender", "regex": "i)^\d{1,3}$"}
+settings["BlenderAmount2"] := {"enum": 234, "type": "int", "section": "Blender", "regex": "i)^\d{1,3}$"}
+settings["BlenderAmount3"] := {"enum": 235, "type": "int", "section": "Blender", "regex": "i)^\d{1,3}$"}
+settings["BlenderRot"] := {"enum": 236, "type": "int", "section": "Blender", "regex": "i)^\d{1,3}$"}
+settings["TimerInterval"] := {"enum": 237, "type": "int", "section": "Blender", "regex": "i)^\d{1,8}$"}
+settings["LastBlenderRot"] := {"enum": 238, "type": "int", "section": "Blender", "regex": "i)^(1|2|3)$"}
+settings["BlenderTime1"] := {"enum": 239, "type": "int", "section": "Blender", "regex": "i)^\d{1,10}$"}
+settings["BlenderTime2"] := {"enum": 240, "type": "int", "section": "Blender", "regex": "i)^\d{1,10}$"}
+settings["BlenderTime3"] := {"enum": 241, "type": "int", "section": "Blender", "regex": "i)^\d{1,10}$"}
+settings["MondoSecs"] := {"enum": 242, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
+settings["MemoryMatchNormalCheck"] := {"enum": 243, "type": "int", "section": "Collect", "regex": "i)^(0|1)$"}
+settings["MemoryMatchMegaCheck"] := {"enum": 244, "type": "int", "section": "Collect", "regex": "i)^(0|1)$"}
+settings["MemoryMatchExtremeCheck"] := {"enum": 245, "type": "int", "section": "Collect", "regex": "i)^(0|1)$"}
+settings["LastMemoryMatchNormal"] := {"enum": 246, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
+settings["LastMemoryMatchMega"] := {"enum": 247, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
+settings["LastMemoryMatchExtreme"] := {"enum": 248, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
+settings["MPlanterGatherA"] := {"enum": 249, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPlanterGather1"] := {"enum": 250, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPlanterGather2"] := {"enum": 251, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPlanterGather3"] := {"enum": 252, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPuffModeA"] := {"enum": 253, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPuffMode1"] := {"enum": 254, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPuffMode2"] := {"enum": 255, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPuffMode3"] := {"enum": 256, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
 
 bitmaps := {}
 bitmaps["moon"] := Gdip_BitmapFromBase64("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")
@@ -464,7 +530,7 @@ nm_status(status)
 		{
 			color := ((state = "Disconnected") || (state = "You Died") || (state = "Failed") || (state = "Error") || (state = "Aborting") || (state = "Missing") || (state = "Canceling") || InStr(objective, "Phantom") || InStr(objective, "No Balloon Convert")) ? 15085139 ; red - error
 			: (InStr(objective, "Tunnel Bear") || InStr(objective, "King Beetle") || InStr(objective, "Vicious Bee") || InStr(objective, "Snail") || InStr(objective, "Crab") || InStr(objective, "Mondo") || InStr(objective, "Commando")) ? 7036559 ; purple - boss / attacking
-			: (InStr(objective, "Planter") || (state = "Placing") || (state = "Collecting")) ? 48355 ; blue - planters
+			: (InStr(objective, "Planter") || (state = "Placing") || (state = "Collecting") || (state = "Holding")) ? 48355 ; blue - planters
 			: ((state = "Interupted") || (state = "Reporting") || (state = "Warning")) ? 14408468 ; yellow - alert 
 			: ((state = "Gathering")) ? 9755247 ; light green - gathering
 			: ((state = "Converting")) ? 8871681 ; yellow-brown - converting
@@ -482,6 +548,7 @@ nm_status(status)
 			|| ((PhantomPingCheck = 1) && InStr(stateString, "Phantom"))
 			|| ((UnexpectedDeathPingCheck = 1) && (state = "You Died"))
 			|| ((EmergencyBalloonPingCheck = 1) && InStr(stateString, "No Balloon Convert"))
+			|| ((PlanterSSCheck = 1) && ((state = "Holding") && InStr(stateString, "Planter")))
 			|| ((state = "Obtained") && InStr(stateString, "Amulet"))))
 			? ("<@" discordUID ">") : ""
 		
@@ -497,6 +564,7 @@ nm_status(status)
 			|| ((ViciousSSCheck = 1) && InStr(stateString, "Completed: Vicious Bee"))
 			|| ((DeathSSCheck = 1) && (state = "You Died"))
 			|| ((PlanterSSCheck = 1) && ((state = "Detected") && InStr(stateString, "Planter")))
+			|| ((PlanterSSCheck = 1) && ((state = "Holding") && InStr(stateString, "Planter")))
 			|| ((HoneySSCheck = 1) && InStr(stateString, "Reporting: Daily Honey LB") && ((discordMode = 0) || (channel := (StrLen(ReportChannelID) < 17) ? MainChannelID : ReportChannelID)))
 			|| ((ssDebugging = 1) && ((state = "Placing") || (state = "Collecting") || (state = "Failed") || InStr(stateString, "Next Quest Step")))))
 		{
@@ -538,7 +606,8 @@ nm_status(status)
 
 nm_command(command)
 {
-	global commandPrefix, MacroState, planters, timers, settings
+	global commandPrefix, MacroState, planters, timers, settings, blender, shrine
+	static ssmode := "All"
 	
 	id := command.id, params := []
 	Loop, Parse, % SubStr(command.content, StrLen(commandPrefix)+1), %A_Space%
@@ -551,7 +620,7 @@ nm_command(command)
 		switch % params[2]
 		{
 			case "s","set":
-			sections := {"Boost":"","Collect":"","Gather":"","Gui":"","Planters":"","Quests":"","Settings":"","Status":""}
+			sections := {"Boost":"","Collect":"","Gather":"","Gui":"","Planters":"","Quests":"","Settings":"","Status":"","Blender":"","Shrine":""}
 			for k,v in settings
 				sections[v.section] .= "\n" k
 			postdata := "
@@ -564,7 +633,7 @@ nm_command(command)
 				},
 				{
 					""color"": ""5066239"",
-					""description"": """ ("**__Planters__**" sections.gui "\n\n**__Quests__**" sections.quests "\n\n**__Settings__**" sections.settings "\n\n**__Status__**" sections.status) """
+					""description"": """ ("**__Planters__**" sections.gui "\n\n**__Quests__**" sections.quests "\n\n**__Settings__**" sections.settings "\n\n**__Status__**" sections.status "\n\n**__Blender__**" sections.blender "\n\n**__Shrine__**" sections.shrine) """
 				}],
 				""allowed_mentions"": {
 					""parse"": []
@@ -723,12 +792,40 @@ nm_command(command)
 			)"
 		}
 		discord.SendMessageAPI(postdata)
-		
-		
+
+
 		case "ss","screenshot":
-		pBM := Gdip_BitmapFromScreen()
-		discord.SendImage(pBM, "ss.png", id)
-		Gdip_DisposeImage(pBM)
+		switch % params[2]
+		{
+			case "mode":
+			if ((params[3] = "all") || (params[3] = "window") || (params[3] = "screen"))
+			{
+				ssmode := RegExReplace(params[3], "(?:^|\.|\R)[- 0-9\*\(]*\K(.)([^\.\r\n]*)", "$U1$L2")
+				discord.SendEmbed("Set screenshot mode to " ssmode "!", 5066239, , , , id)
+			}
+			else
+				discord.SendEmbed("Invalid ``Mode``!\nMust be either ``All``, ``Window``, or ``Screen``", 16711731, , , , id)
+			
+			default:
+			switch % ssmode
+			{
+				case "all":
+				pBM := Gdip_BitmapFromScreen()
+				
+				case "window":
+				WinGetClientPos(x, y, w, h, "A")
+				pBM := Gdip_BitmapFromScreen((w > 0) ? (x "|" y "|" w "|" h) : 0)
+
+				case "screen":
+				pBM := Gdip_BitmapFromScreen(1)
+
+				default:
+				discord.SendEmbed("Error: Invalid screenshot mode!", 16711731, , , , id)
+				pBM := Gdip_BitmapFromScreen()
+			}
+			discord.SendImage(pBM, "ss.png", id)
+			Gdip_DisposeImage(pBM)
+		}
 		
 		
 		case "stop":
@@ -846,8 +943,8 @@ nm_command(command)
 		
 		case "log":
 		discord.SendFile("settings\debug_log.txt", id)
-		
-		
+
+
 		case "keep":
 		DetectHiddenWindows, On
 		SetTitleMatchMode, 2
@@ -907,13 +1004,45 @@ nm_command(command)
 				if (PlanterName%n% && (PlanterName%n% != "None"))
 				{
 					IniWrite, % (PlanterHarvestTime%n% := nowUnix()-1), settings\nm_config.ini, Planters, PlanterHarvestTime%n%
-					discord.SendEmbed("Set planter in Slot " n " to harvest!", 5066239, , , , id)
+					discord.SendEmbed("Set remaining planter time in Slot " n " to 0!", 5066239, , , , id)
 				}
 				else
 					discord.SendEmbed("There is no planter in Slot " n "!", 16711731, , , , id)
 			}
 			else
 				discord.SendEmbed((StrLen(params[3]) = 0) ? "You must specify a Planter Slot to harvest!" : ("Planter Slot must be 1, 2, or 3!\nYou entered " params[3] "."), 16711731, , , , id)
+
+			case "release":
+			if ((params[3] = 1) || (params[3] = 2) || (params[3] = 3))
+			{
+				IniRead, PlanterMode, Settings/nm_config.ini, Gui, PlanterMode
+				n := params[3]
+				if (PlanterName%n% && (PlanterName%n% != "None")&& (MPlanterHold%n% = 1) && (PlanterMode = 1)) 
+				{
+					IniWrite, % 1, settings\nm_config.ini, Planters, MPlanterRelease%n%
+					discord.SendEmbed("Release held planter in Slot " n "!", 5066239, , , , id)
+				}
+				else
+					discord.SendEmbed("There is no held planter in Slot " n "!", 16711731, , , , id)
+			}
+			else
+				discord.SendEmbed((StrLen(params[3]) = 0) ? "You must specify a Planter Slot to release!" : ("Planter Slot must be 1, 2, or 3!\nYou entered " params[3] "."), 16711731, , , , id)
+			
+			case "smoking":
+			if ((params[3] = 1) || (params[3] = 2) || (params[3] = 3))
+			{
+				IniRead, PlanterMode, Settings/nm_config.ini, Gui, PlanterMode
+				n := params[3]
+				if (PlanterName%n% && (PlanterName%n% != "None") && (MPlanterHold%n% = 1) && (PlanterMode = 1)) 
+				{
+					IniWrite, % 1, settings\nm_config.ini, Planters, MPlanterSmoking%n%
+					discord.SendEmbed("Set held planter in Slot " n " to smoking!", 5066239, , , , id)
+				}
+				else
+					discord.SendEmbed("There is no held planter in Slot " n "!", 16711731, , , , id)
+			}
+			else
+				discord.SendEmbed((StrLen(params[3]) = 0) ? "You must specify a Planter Slot to release!" : ("Planter Slot must be 1, 2, or 3!\nYou entered " params[3] "."), 16711731, , , , id)
 			
 			case "add":
 			if ((params[4] = 1) || (params[4] = 2) || (params[4] = 3))
@@ -1030,7 +1159,7 @@ nm_command(command)
 					""description"": ""The macro's currently placed planters are shown below.\nYou can use these commands to edit the timers:"",
 					""fields"": [{
 						""name"": """ commandPrefix "planter harvest [``n``]"",
-						""value"": ""Sets planter in Slot ``n`` to be harvested"",
+						""value"": ""Sets remaining time for planter in Slot ``n`` to 0"",
 						""inline"": true
 					},
 					{
@@ -1042,17 +1171,28 @@ nm_command(command)
 						""name"": """ commandPrefix "planter sub [``h:m:s``] [``n``]"",
 						""value"": ""Subtracts ``h:m:s`` from planter timer in Slot ``n``"",
 						""inline"": true
+					},
+					{
+						""name"": """ commandPrefix "planter smoking [``n``]"",
+						""value"": ""Sets held planter in Slot ``n`` to smoking (Manual planters 'disable auto harvest' option)"",
+						""inline"": true
+					},
+					{
+						""name"": """ commandPrefix "planter release [``n``]"",
+						""value"": ""Releases held planter in Slot ``n`` (Manual planters 'disable auto harvest' option)"",
+						""inline"": true
 					}]
 				}
 			)"
 			
 			t := nowUnix()
+			IniRead, PlanterMode, Settings/nm_config.ini, Gui, PlanterMode
 			Loop, 3
 			{
 				if (PlanterName%A_Index% && (PlanterName%A_Index% != "None") && planters.HasKey(PlanterName%A_Index%))
 				{
 					objParam.Push({"name":("files[" A_Index-1 "]"),"filename":(PlanterName%A_Index% ".png"),"content-type":"image/png","pBitmap":planters[PlanterName%A_Index%].bitmap})
-					VarSetCapacity(duration,256), DllCall("GetDurationFormatEx","Ptr",0,"UInt",0,"Ptr",0,"Int64",(ptimer := (PlanterHarvestTime%A_Index% - t))*10000000,"WStr",(ptimer > 0) ? (((ptimer >= 3600) ? "h'h' m" : "") ((ptimer >= 60) ? "m'm' s" : "") "s's'") : "'Ready'","Str",duration,"Int",256)
+					VarSetCapacity(duration,256), DllCall("GetDurationFormatEx","Ptr",0,"UInt",0,"Ptr",0,"Int64",(ptimer := (PlanterHarvestTime%A_Index% - t))*10000000,"WStr",(ptimer > 0) ? (((ptimer >= 3600) ? "h'h' m" : "") ((ptimer >= 60) ? "m'm' s" : "") "s's'") : ((MPlanterSmoking%A_Index%) && (PlanterMode = 1)) ? "'Smoking'" : ((MPlanterHold%A_Index%) && (PlanterMode = 1)) ? "'Holding'" : "'Ready'","Str",duration,"Int",256)
 					payload_json .= "
 					(LTrim Join
 					,{
@@ -1579,6 +1719,194 @@ nm_command(command)
 		Shutdown, 6
 		
 		
+		case "shrine":
+		IniRead, str, settings\nm_config.ini, Shrine
+		Loop, Parse, str, `n, `r%A_Space%%A_Tab%
+			if (p := InStr(A_LoopField, "="))
+			k := SubStr(A_LoopField, 1, p-1), %k% := SubStr(A_LoopField, p+1)
+
+		ShrineRotTemp := (ShrineRot + 1 = 3) ? 1 : ShrineRot + 1
+
+		switch % params[2]
+		{
+			case "ready":
+			if ((params[3] = 1) || (params[3] = 2) || (params[3] = 3))
+			{
+				n := params[3]
+				Iniwrite, 0, settings\nm_config.ini, Shrine, LastShrine
+				IniWrite, %n%, settings\nm_config.ini, Shrine, ShrineRot
+				discord.SendEmbed("Readied Slot " n "!", 5066239, , , , id)
+			}
+			else 
+				discord.SendEmbed((StrLen(params[3]) = 0) ? "You must specify a slot to make ready!" : ("Slot must be 1, 2, or 3!\nYou entered " params[3] "."), 16711731, , , , id)			
+
+			case "clear":
+			if ((params[3] = 1) || (params[3] = 2) || (params[3] = 3))
+			{
+				n := params[3]
+				IniWrite, None, settings\nm_config.ini, Shrine, ShrineItem%n%
+                IniWrite, 0, settings\nm_config.ini, Shrine, ShrineAmount%n%
+                Iniwrite, 1, settings\nm_config.ini, Shrine, ShrineIndex%n%
+				Iniwrite, 0, settings\nm_config.ini, Shrine, LastShrine
+				DetectHiddenWindows, On
+				SetTitleMatchMode, 2
+				if WinExist("natro_macro ahk_class AutoHotkey") {
+                    PostMessage, 0x5552, 230+n, 0 ; ShrineAmount
+                    PostMessage, 0x5553, 56+n, 10 ; ShrineIndex
+                    PostMessage, 0x5553, 54+n, 10 ; ShrineItem
+                }
+				discord.SendEmbed("Cleared Slot " n "!", 5066239, , , , id)
+			}
+			else	
+				discord.SendEmbed((StrLen(params[3]) = 0) ? "You must specify a slot to clear!" : ("Slot must be 1, 2, or 3!\nYou entered " params[3] "."), 16711731, , , , id)			
+
+			case default:
+			t := nowUnix(), VarSetCapacity(duration,256), DllCall("GetDurationFormatEx","Ptr",0,"UInt",0,"Ptr",0,"Int64",(time := (LastShrine + 3600 - t))*10000000,"WStr",(time > 0) ? (((time >= 86400) ? "d'd' h" : "") ((time >= 3600) ? "h'h' m" : "") ((time >= 60) ? "m'm' s" : "") "s's'") : "'Ready'","Str",duration,"Int",256)
+			postdata := "
+			(LTrim Join
+			{
+				""allowed_mentions"": {
+					""parse"": []
+				},
+				""message_reference"": {
+					""message_id"": """ id """,
+					""fail_if_not_exists"": false
+				},
+				""embeds"": [{
+					""title"": ""Wind Shrine"",
+					""color"": ""5066239"",
+					""fields"": [{
+						""name"": ""Current Donation"",
+						""value"": """ ShrineItem%ShrineRot% """,
+						""inline"": true
+					},
+					{
+						""name"": ""Next Donation"",
+						""value"": """ ShrineItem%ShrineRot2% """,
+						""inline"": true
+					},
+					{
+						""name"": ""Time Until Next Donation"",
+						""value"": """ duration """,
+						""inline"": true
+					}]
+				}]
+			}
+			)"
+		}
+		discord.SendMessageAPI(postdata)
+		
+		
+		case "Blender":
+		IniRead, str, settings\nm_config.ini, Blender
+		Loop, Parse, str, `n, `r%A_Space%%A_Tab%
+			if (p := InStr(A_LoopField, "="))
+			k := SubStr(A_LoopField, 1, p-1), %k% := SubStr(A_LoopField, p+1)
+
+		switch % params[2]
+		{
+		case "ready":
+			if ((params[3] = 1) || (params[3] = 2) || (params[3] = 3))
+			{
+				n := params[3]
+				IniWrite, 0, settings\nm_config.ini, Blender, BlenderCount%n%
+                Iniwrite, 0, settings\nm_config.ini, Blender, BlenderTime%n%
+                IniWrite, %n%, settings\nm_config.ini, Blender, BlenderRot
+                IniWrite, 1, settings\nm_config.ini, Blender, BlenderEnd
+				discord.SendEmbed("Readied Slot " n "!", 5066239, , , , id)
+			}
+			else 
+				discord.SendEmbed((StrLen(params[3]) = 0) ? "You must specify a slot to make ready!" : ("Slot must be 1, 2, or 3!\nYou entered " params[3] "."), 16711731, , , , id)			
+
+		case "clear":
+			if ((params[3] = 1) || (params[3] = 2) || (params[3] = 3))
+			{
+				n := params[3]
+				IniWrite, None, settings\nm_config.ini, Blender, BlenderItem%n%
+                IniWrite, 0, settings\nm_config.ini, Blender, BlenderAmount%n%
+                IniWrite, 0, settings\nm_config.ini, Blender, BlenderCount%n%
+                Iniwrite, 1, settings\nm_config.ini, Blender, BlenderIndex%n%
+                Iniwrite, 0, settings\nm_config.ini, Blender, BlenderTime%n%
+                IniWrite, %n%, settings\nm_config.ini, Blender, BlenderRot
+				DetectHiddenWindows, On
+				SetTitleMatchMode, 2
+				if WinExist("natro_macro ahk_class AutoHotkey") {
+					msgbox 
+                    PostMessage, 0x5552, 232+n, 0 ; BlenderAmount
+                    PostMessage, 0x5552, 238+n, 0 ; BlenderTime
+                    PostMessage, 0x5553, 58+n, 9 ; BlenderIndex
+                    PostMessage, 0x5553, 61+n, 9 ; BlenderItem
+                }
+				discord.SendEmbed("Cleared Slot " n "!", 5066239, , , , id)
+
+			}
+			else
+				discord.SendEmbed((StrLen(params[3]) = 0) ? "You must specify a slot to clear!" : ("Slot must be 1, 2, or 3!\nYou entered " params[3] "."), 16711731, , , , id)			
+
+		case default:
+			objParam := []
+			payload_json := "
+			(LTrim Join
+			{
+			""allowed_mentions"": {
+				""parse"": []
+			},
+			""message_reference"": {
+				""message_id"": """ id """,
+				""fail_if_not_exists"": false
+			},
+			""embeds"": [{
+				""color"": ""5066239"",
+				""title"": ""Blender"",
+				""description"": ""The macro's currently rotating between the items shown below."",
+				""fields"": []
+			}
+			)"
+
+			Loop, 3
+			{
+				if ((BlenderIndex%A_Index% > 0) && (BlenderItem%A_Index% != "None") && blender.HasKey(BlenderItem%A_Index%))
+				{
+					VarSetCapacity(duration,256), DllCall("GetDurationFormatEx","Ptr",0,"UInt",0,"Ptr",0,"Int64",(btimer := (BlenderTime%A_Index% - nowUnix()))*10000000,"WStr",(btimer > 0) ? (((btimer >= 3600) ? "h'h' m" : "") ((btimer >= 60) ? "m'm' s" : "") "s's'") : "'Ready'","Str",duration,"Int",256)
+
+					objParam.Push({"name":("files[" A_Index-1 "]"),"filename":(BlenderItem%A_Index% ".png"),"content-type":"image/png","pBitmap":Blender[BlenderItem%A_Index%].bitmap})
+					payload_json .= "
+					(LTrim Join
+					,{
+						""title"": ""Slot " A_Index """,
+						""author"": {
+							""name"": """ blender[BlenderItem%A_Index%].name """,
+							""icon_url"": ""attachment://" BlenderItem%A_Index% ".png""
+						},
+						""color"": """ blender[BlenderItem%A_Index%].color """,
+						""fields"": [{
+							""name"": ""Item Amount"",
+							""value"": """ BlenderAmount%A_Index% """,
+							""inline"": true
+						},
+						{
+							""name"": ""Times to loop"",
+								""value"": """ BlenderIndex%A_Index% """,
+							""inline"": true
+						},
+						{
+							""name"": ""Time Left"",
+							""value"": """ duration """,
+							""inline"": true
+						}]					
+					}
+					)"
+				}
+			}
+
+			payload_json .= "]}"
+
+			objParam.InsertAt(1, {"name":"payload_json","content-type":"application/json","content":payload_json})
+			discord.CreateFormData(postdata, contentType, objParam)
+			discord.SendMessageAPI(postdata, contentType)
+		}
+		
+		
 		#Include *i %A_ScriptDir%\..\settings\personal_commands.ahk
 		
 		default:
@@ -1980,21 +2308,10 @@ nowUnix()
 	return Time
 }
 
-WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", WinTitle:="", WinText:="", ExcludeTitle:="", ExcludeText:="")
-{
-	local hWnd, RECT
-	hWnd := WinExist(WinTitle, WinText, ExcludeTitle, ExcludeText)
-	VarSetCapacity(RECT, 16, 0)
-	DllCall("GetClientRect", "UPtr",hWnd, "Ptr",&RECT)
-	DllCall("ClientToScreen", "UPtr",hWnd, "Ptr",&RECT)
-	X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
-	Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
-}
-
 UpdateStr(var, value, section)
 {
 	global
-	static sections := {"Boost":1,"Collect":2,"Gather":3,"Gui":4,"Planters":5,"Quests":6,"Settings":7,"Status":8}
+	static sections := {"Boost":1,"Collect":2,"Gather":3,"Gui":4,"Planters":5,"Quests":6,"Settings":7,"Status":8,"Blender":9,"Shrine":10}
 	IniWrite, % (%var% := value), settings\nm_config.ini, %section%, %var%
 	DetectHiddenWindows, On
 	SetTitleMatchMode, 2
@@ -2022,7 +2339,7 @@ nm_setGlobalInt(wParam, lParam)
 	Critical
 	local var
 	; enumeration
-	#Include %A_ScriptDir%\shared\EnumInt.ahk
+	#Include %A_ScriptDir%\..\lib\enum\EnumInt.ahk
 	
 	var := arr[wParam], %var% := lParam
 	return 0
@@ -2034,8 +2351,8 @@ nm_setGlobalStr(wParam, lParam)
 	Critical
 	local var
 	; enumeration
-	#Include %A_ScriptDir%\shared\EnumStr.ahk
-	static sections := ["Boost","Collect","Gather","Gui","Planters","Quests","Settings","Status"]
+	#Include %A_ScriptDir%\..\lib\enum\EnumStr.ahk
+	static sections := ["Boost","Collect","Gather","Gui","Planters","Quests","Settings","Status","Blender","Shrine"]
 	
 	var := arr[wParam], section := sections[lParam]
 	IniRead, %var%, %A_ScriptDir%\..\settings\nm_config.ini, %section%, %var%

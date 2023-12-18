@@ -19,6 +19,9 @@ You should have received a copy of the license along with Natro Macro. If not, p
 #Include %A_ScriptDir%\..\lib
 #Include Gdip_All.ahk
 #Include Gdip_ImageSearch.ahk
+#Include WinGetClientPos.ahk
+#Include GetRobloxHWND.ahk
+#Include GetYOffset.ahk
 
 SetBatchLines -1
 SetWorkingDir %A_ScriptDir%
@@ -47,7 +50,7 @@ ConvertBalloon := A_Args[10]
 
 pToken := Gdip_Startup()
 bitmaps := {}
-bitmaps["toppollen"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAACoAAAALBAMAAAD7HQL7AAAAGFBMVEUAAAASFRcTFhgUFxkUFxgWGRsXGhwXGhsckMZRAAAAAXRSTlMAQObYZgAAABd0RVh0U29mdHdhcmUAUGhvdG9EZW1vbiA5LjDNHNgxAAADKGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSfvu78nIGlkPSdXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQnPz4KPHg6eG1wbWV0YSB4bWxuczp4PSdhZG9iZTpuczptZXRhLycgeDp4bXB0az0nSW1hZ2U6OkV4aWZUb29sIDEyLjQ0Jz4KPHJkZjpSREYgeG1sbnM6cmRmPSdodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjJz4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOmV4aWY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vZXhpZi8xLjAvJz4KICA8ZXhpZjpQaXhlbFhEaW1lbnNpb24+NDI8L2V4aWY6UGl4ZWxYRGltZW5zaW9uPgogIDxleGlmOlBpeGVsWURpbWVuc2lvbj4xMTwvZXhpZjpQaXhlbFlEaW1lbnNpb24+CiA8L3JkZjpEZXNjcmlwdGlvbj4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOnRpZmY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvJz4KICA8dGlmZjpJbWFnZUxlbmd0aD4xMTwvdGlmZjpJbWFnZUxlbmd0aD4KICA8dGlmZjpJbWFnZVdpZHRoPjQyPC90aWZmOkltYWdlV2lkdGg+CiAgPHRpZmY6T3JpZW50YXRpb24+MTwvdGlmZjpPcmllbnRhdGlvbj4KICA8dGlmZjpSZXNvbHV0aW9uVW5pdD4yPC90aWZmOlJlc29sdXRpb25Vbml0PgogIDx0aWZmOlhSZXNvbHV0aW9uPjk2LzE8L3RpZmY6WFJlc29sdXRpb24+CiAgPHRpZmY6WVJlc29sdXRpb24+OTYvMTwvdGlmZjpZUmVzb2x1dGlvbj4KIDwvcmRmOkRlc2NyaXB0aW9uPgo8L3JkZjpSREY+CjwveDp4bXBtZXRhPgo8P3hwYWNrZXQgZW5kPSdyJz8+kVOYmAAAAFdJREFUeNp1zMENg0AUA9HZKFGuHtEAdEIJlED/VSC0u/+C8M1PsjH0hEZF5alVnvovPWEdpelQBQ26IK3rF0IQw62Zo67hTbf58DmgtOkY6F7Kj5kDghc2CgW76l3tzQAAAABJRU5ErkJggg==")
+#Include %A_ScriptDir%\..\nm_image_assets\offset\bitmaps.ahk
 
 CoordMode, Pixel, Screen
 DetectHiddenWindows On
@@ -455,30 +458,33 @@ nm_sendHeartbeat(){
 	SetTitleMatchMode %Prev_TitleMatchMode%
 	return 0
 }
+
 nm_setGlobalInt(wParam, lParam)
 {
 	global
 	Critical
 	local var
 	; enumeration
-	#Include %A_ScriptDir%\shared\EnumInt.ahk
+	#Include %A_ScriptDir%\..\lib\enum\EnumInt.ahk
 	
 	var := arr[wParam], %var% := lParam
 	return 0
 }
+
 nm_setGlobalStr(wParam, lParam)
 {
 	global
 	Critical
 	local var
 	; enumeration
-	#Include %A_ScriptDir%\shared\EnumStr.ahk
+	#Include %A_ScriptDir%\..\lib\enum\EnumStr.ahk
 	static sections := ["Boost","Collect","Gather","Gui","Planters","Quests","Settings","Status"]
 	
 	var := arr[wParam], section := sections[lParam]
 	IniRead, %var%, %A_ScriptDir%\..\settings\nm_config.ini, %section%, %var%
 	return 0
 }
+
 Send_WM_COPYDATA(ByRef StringToSend, ByRef TargetScriptTitle, wParam:=0)
 {
     VarSetCapacity(CopyDataStruct, 3*A_PtrSize, 0)
@@ -488,69 +494,11 @@ Send_WM_COPYDATA(ByRef StringToSend, ByRef TargetScriptTitle, wParam:=0)
     SendMessage, 0x004A, wParam, &CopyDataStruct,, %TargetScriptTitle%
     return ErrorLevel
 }
+
 nowUnix(){
     Time := A_NowUTC
     EnvSub, Time, 19700101000000, Seconds
     return Time
-}
-WinGetClientPos(ByRef X:="", ByRef Y:="", ByRef Width:="", ByRef Height:="", WinTitle:="", WinText:="", ExcludeTitle:="", ExcludeText:="")
-{
-    local hWnd, RECT
-    hWnd := WinExist(WinTitle, WinText, ExcludeTitle, ExcludeText)
-    VarSetCapacity(RECT, 16, 0)
-    DllCall("GetClientRect", "UPtr",hWnd, "Ptr",&RECT)
-    DllCall("ClientToScreen", "UPtr",hWnd, "Ptr",&RECT)
-    X := NumGet(&RECT, 0, "Int"), Y := NumGet(&RECT, 4, "Int")
-    Width := NumGet(&RECT, 8, "Int"), Height := NumGet(&RECT, 12, "Int")
-}
-GetRobloxHWND()
-{
-	if (hwnd := WinExist("Roblox ahk_exe RobloxPlayerBeta.exe"))
-		return hwnd
-	else if (WinExist("Roblox ahk_exe ApplicationFrameHost.exe"))
-	{
-		ControlGet, hwnd, Hwnd, , ApplicationFrameInputSinkWindow1
-		return hwnd
-	}
-	else
-		return 0
-}
-GetYOffset(hwnd)
-{
-	global bitmaps
-	static hRoblox, offset := 0
-
-	if (hwnd = hRoblox)
-		return offset
-	else
-	{
-		WinActivate, Roblox
-		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
-		pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2 "|" windowY "|60|100")
-
-		Loop, 40 ; for red vignette effect
-		{ 
-			if (Gdip_ImageSearch(pBMScreen, bitmaps["toppollen"], pos, , , , , 2) = 1)
-			{
-				hRoblox := hwnd
-				return (offset := SubStr(pos, InStr(pos, ",") + 1) - 13)
-			}
-			else
-			{
-				if (A_Index = 40)
-				{
-					Gdip_DisposeImage(pBMScreen)
-					return 0 ; default offset, change this if needed
-				}
-				else
-				{
-					Sleep, 50
-					Gdip_DisposeImage(pBMScreen)
-					pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2 "|" windowY "|60|100")
-				}				
-			}
-		}
-	}
 }
 
 ExitFunc()
