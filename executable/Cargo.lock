@@ -812,7 +812,7 @@ dependencies = [
 
 [[package]]
 name = "natro-macro"
-version = "0.9.8"
+version = "0.9.7"
 dependencies = [
  "anyhow",
  "bytes",

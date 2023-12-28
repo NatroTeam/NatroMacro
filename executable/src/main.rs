@@ -102,6 +102,13 @@ async fn cli() -> anyhow::Result<()> {
     let submacros = cd.join("submacros");
     let natro_macro = submacros.join("natro_macro.ahk");
     let ahk32 = submacros.join("AutoHotkeyU32.exe");
+    let old = &cd.join("natro_macro.old");
+    if old.exists() {
+        //To prevent attempting to delete the file before it is closed
+        println!("Deleting old Natro Macro...");
+        tokio::time::sleep(Duration::from_secs(1)).await;
+        fs::remove_file(old)?;
+    }
 
     let release_data = get_latest().await?;
     let latest = release_data.tag_name;
@@ -160,20 +167,11 @@ async fn cli() -> anyhow::Result<()> {
 
             if let Some(exe) = release_data.exe {
                 println!("Downloading NatroMacro Starter {}...", latest);
+                let exe_path = &std::env::current_exe()?;
                 let exe_bytes = download(exe).await?;
-                let exe_path = cd.join("new_natro.exe");
-                fs::write(&exe_path, exe_bytes)?;
-                let exe_os_str = exe_path.into_os_string();
-                let exe_os = exe_os_str.to_string_lossy();
-                //Waits 5 seconds copies the new exe over the old one, deletes the old one, starts the new one, and then deletes itself
-                fs::write(cd.join("update.bat"), format!(
-                    "Powershell.exe -Command  \"timeout /t 5 /nobreak; xcopy /y \\\"{}\\\" \\\"{}\\\"; del \\\"{}\\\"; start \\\"{}\\\"; (goto) 2>nul & del \"%~f0\"\";",
-                    &exe_os,
-                    std::env::current_exe()?.to_string_lossy(),
-                    exe_os,
-                    std::env::current_exe()?.to_string_lossy()
-                ))?;
-                Command::new("update.bat").spawn()?;
+                fs::rename(exe_path, old)?;
+                fs::write(exe_path, exe_bytes)?;
+                Command::new(exe_path).spawn()?;
             }
             exit(0);
         }
