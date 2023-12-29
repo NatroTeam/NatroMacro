@@ -1,0 +1,21 @@
+[package]
+name = "natro-macro"
+version = "0.9.8"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "4.4.11", features = ["derive"] }
+crossterm = "0.27.0"
+anyhow = "1.0.77"
+reqwest = { version = "0.11.23", features = ["blocking", "json", "stream"] }
+serde = { version = "1.0.193", features = ["derive"] }
+serde_json = "1.0.108"
+bytes = "1.5.0"
+once_cell = "1.19.0"
+zip-extract = "0.1.2"
+copy_dir = "0.1.3"
+tokio = { version = "1.35.1", features = ["full"] }
+indicatif = "0.17.7"
+futures-util = "0.3.30"
