@@ -1,6 +1,7 @@
 <!-- : Begin batch script
 @echo off
 setlocal EnableDelayedExpansion
+chcp 65001 > nul
 cd %temp%
 
 :: ANSI color codes
@@ -30,13 +31,14 @@ echo:
 :: extract from %temp%/zip to Natro Macro directory
 for %%a in ("%~2") do set "a2=%%~dpa"
 echo %purple%Extracting %~nx1...%reset%
-for /f delims^=^ EOL^= %%g in ('cscript //nologo "%~f0?.wsf" "%a2%" "%temp%\%~nx1" "%5" "%~7"') do set "folder=%%g"
+for /f delims^=^ EOL^= %%g in ('cscript //nologo "%~f0?.wsf" "%a2%" "%temp%\%~nx1"') do set "f=%%g"
+call set folder=%%a2%%!f!
 echo %purple%Extract complete^^!%reset%
 echo:
 
 :: delete temp .zip
 echo %yellow%Deleting %~nx1...%reset%
-del /f /s /q "%temp%\%~nx1" >nul
+del /f /q "%temp%\%~nx1" >nul
 echo %yellow%Deleted successfully^^!%reset%
 echo:
 
@@ -59,7 +61,7 @@ echo:
     :: copy paths
     if %~5 == 1 (
         echo %blue%Copying paths...%reset%
-        robocopy "%~2\paths" "!folder!\paths" /E /XC /XN /XO > nul
+        robocopy "%~2\paths" "!folder!\paths" /E /XF %~7 > nul
         echo %blue%Copy complete^^!%reset%
         echo:
     )
@@ -108,33 +110,10 @@ exit)
 set fso = CreateObject("Scripting.FileSystemObject")
 set objShell = CreateObject("Shell.Application")
 set FilesInZip = objShell.NameSpace(WScript.Arguments(1)).items
-for each i in FilesInZip
-	folder = WScript.Arguments(0) + i
-    if WScript.Arguments(2) = "1" then
-        if not fso.FolderExists(folder) then
-            fso.CreateFolder(folder)
-        end if
-        for each j in i.GetFolder.Items
-            if j.Name = "paths" then
-                paths = folder + "\paths"
-                if not fso.FolderExists(paths) then
-                    fso.CreateFolder(paths)
-                end if
-                for each k in j.GetFolder.Items
-                    if InStr(WScript.Arguments(3), k.Name + ",") > 0 then
-                        objShell.NameSpace(paths).CopyHere k, 20
-                    end if
-                next
-            else
-                objShell.NameSpace(folder).CopyHere j, 20
-            end if
-        next
-    else
-        objShell.NameSpace(WScript.Arguments(0)).CopyHere FilesInZip, 20
-    end if
-    exit for
+for each folder in FilesInZip
+	WScript.Echo folder
 next
-WScript.Echo folder
+objShell.NameSpace(WScript.Arguments(0)).CopyHere FilesInZip, 20
 set fso = nothing
 set objShell = nothing
 </script></job>

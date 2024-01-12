@@ -11,8 +11,8 @@ send {" RotLeft " 2}
 " nm_Walk(8, LeftKey) "
 " nm_Walk(6, FwdKey, LeftKey) "
 " nm_Walk(6, FwdKey) "
-" nm_Walk(2.25, BackKey) "
+" nm_Walk(3, BackKey) " ; 2.25
 " nm_Walk(10, RightKey) "
-" nm_Walk(4.5, FwdKey) "
+" nm_Walk(3.5, FwdKey) "
 )"
 ;path 230212 zaappiix

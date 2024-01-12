@@ -1,6 +1,6 @@
 ﻿/*
 Natro Macro (https://github.com/NatroTeam/NatroMacro)
-Copyright © 2022-2023 Natro Team (https://github.com/NatroTeam)
+Copyright © Natro Team (https://github.com/NatroTeam)
 
 This file is part of Natro Macro. Our source code will always be open and available.
 
@@ -63,38 +63,6 @@ if(fileexist("settings\nm_config.ini")){
 }
 
 pToken := Gdip_Startup() ;not ure if this should go somewhere else
-BlenderShineItems := {"BlueExtract": 1 ;setup enumeration array
-    , "RedExtract": 2
-    , "Enzymes": 3
-    , "Oil": 4
-    , "Glue": 5
-    , "TropicalDrink": 6
-    , "Gumdrops": 7
-    , "MoonCharms": 8
-    , "Glitter": 9
-    ,"StarJelly": 10
-    ,"PurplePotion": 11
-    ,"SoftWax": 12
-    ,"HardWax": 13
-    ,"SwirledWax": 14
-    ,"CausticWax": 15
-    ,"FieldDice": 16
-    ,"SmoothDice": 17
-    ,"LoadedDice": 18
-    ,"SuperSmoothie": 19
-    ,"Turpentine": 20
-    , "None":21}
-
-BlenderShrineEnum := {"BlenderIndex1":59
-    , "BlenderIndex2":60
-    , "BlenderIndex3":61
-    , "BlenderAmount1":233
-    , "BlenderAmount2":234
-    , "BlenderAmount3":235
-    , "ShrineIndex1":57
-    , "ShrineIndex2":58
-    , "ShrineAmount1":231
-    , "ShrineAmount2":232}
 
 ;Blender/shrine GUI
 hBitmapsSBT := {}
@@ -731,7 +699,7 @@ ba_ShrineIndexOption(){
 }
 ba_AddShrineItemButton(hCtrl){
     global hAdd, hfleft, hfright, hAddShrineItem, AddShrineItem, hBitmapsSB
-    static items :=  ["RedExtract", "BlueExtract", "BlueBerry", "Pineapple", "StrawBerry", "Sunflower", "Enzymes", "Oil", "Glue", "TropicalDrink", "Gumdrops", "MoonCharms", "Glitter", "StarJelly", "PurplePotion", "SoftWax", "HardWax", "SwirledWax", "CausticWax", "FieldDice", "SmoothDice", "LoadedDice", "SuperSmoothie", "Turpentine"], i := 0, h := 0
+    static items :=  ["RedExtract", "BlueExtract", "BlueBerry", "Pineapple", "StrawBerry", "Sunflower", "Enzymes", "Oil", "Glue", "TropicalDrink", "Gumdrops", "MoonCharms", "Glitter", "StarJelly", "PurplePotion", "SoftWax", "HardWax", "SwirledWax", "CausticWax", "FieldDice", "SmoothDice", "LoadedDice", "Turpentine"], i := 0, h := 0
     if (h != hAdd)
         i := 0, h := hAdd
     i := Mod(items.Length() + i + ((hCtrl = hfleft) ? -1 : 1), items.Length()), AddShrineItem := items[i+1]

@@ -3,17 +3,27 @@
 	paths["clock"] := "
 	(LTrim Join`r`n
 	;gotoramp
-	" nm_Walk(47.25, BackKey, LeftKey) "
-	" nm_Walk(40.5, LeftKey) "
+	" nm_Walk(44.75, BackKey, LeftKey) " ; 47.25
+	" nm_Walk(42.5, LeftKey) "
 	" nm_Walk(8.5, BackKey) "
 	" nm_Walk(22.5, LeftKey) "
 	send {" RotLeft " 2}
-	" nm_Walk(27, FwdKey) "
-	" nm_Walk(9, RightKey, FwdKey) "
-	" nm_Walk(2.25, RightKey) "
+	" nm_Walk(40, FwdKey) "
+	" nm_Walk(3, BackKey) "
+	" nm_Walk(7, RightKey) " ; 2.25
+	send, {" FwdKey " down}
+	Walk(3)
+	send, {space down}
+	HyperSleep(100)
+	send, {space up}
+	Walk(5)
+	send, {" FwdKey " up}
+	" nm_Walk(5, LeftKey) "
 	" nm_Walk(4, FwdKey) "
-	" nm_Walk(5.625, LeftKey) "
-	" nm_Walk(10.125, FwdKey) "
+	" nm_Walk(4, RightKey) "
+	" nm_Walk(10, FwdKey) "
+	" nm_Walk(4, BackKey) "
+	" nm_Walk(3, LeftKey) "	
 	send {" RotRight " 2}
 	)"
 }

@@ -12,16 +12,17 @@ Send {"RotLeft " 2}
 " nm_Walk(5, RightKey) "
 " nm_Walk(3, LeftKey) "
 " nm_Walk(46, FwdKey) "
+" nm_Walk(3, BackKey) "
 
 switch % " HiveSlot "
 {
 case 3:
-" nm_Walk(4.2, BackKey) "
+" nm_Walk(0.25, BackKey) " ; 4.2, BackKey
 HyperSleep(50)
 
 default:
 " nm_Walk(23, RightKey) "
-" nm_Walk(2, FwdKey) "
+" nm_Walk(3.5, FwdKey) "
 }
 )"
 ;zaappiix 230203

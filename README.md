@@ -95,7 +95,7 @@ You can do this by scrolling up and clicking the Star button at the top of the p
 
 
 <a name="license"><details><summary><h4>📝 License</h4></summary></a>
-Copyright © 2022-2023 [Natro Team][github-profile-link]<br>
+Copyright © 2022-2024 [Natro Team][github-profile-link]<br>
 This project is licensed under [GNU GPL v3.0](./LICENSE.md)
 
 </details>

@@ -7,11 +7,12 @@ HyperSleep(100)
 send {e up}{" LeftKey " down}
 HyperSleep(750)
 send {space 2}
-HyperSleep(1900)
+HyperSleep(2250) ; 1900
 send {" FwdKey " down}
 HyperSleep(1000)
 send {" LeftKey " up}
-HyperSleep(3000)
+Sleep, 1000
 send {" FwdKey " up}
-" nm_Walk(4, FwdKey) "
+Sleep, 2000
+" nm_Walk(13, FwdKey) "
 )"

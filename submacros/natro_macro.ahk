@@ -1,6 +1,6 @@
 ﻿/*
 Natro Macro (https://github.com/NatroTeam/NatroMacro)
-Copyright © 2022-2023 Natro Team (https://github.com/NatroTeam)
+Copyright © Natro Team (https://github.com/NatroTeam)
 
 This file is part of Natro Macro. Our source code will always be open and available.
 
@@ -15,7 +15,7 @@ You should have received a copy of the license along with Natro Macro. If not, p
 ;@Ahk2Exe-SetName Natro Macro
 ;@Ahk2Exe-SetDescription Natro Macro
 ;@Ahk2Exe-SetCompanyName Natro Team
-;@Ahk2Exe-SetCopyright Copyright © 2022-2023 Natro Team
+;@Ahk2Exe-SetCopyright Copyright © Natro Team
 ;@Ahk2Exe-SetOrigFilename natro_macro.exe
 
 #NoEnv
@@ -112,7 +112,7 @@ If (!FileExist("settings")) ; make sure the settings folder exists
 	}
 }
 
-VersionID := "0.9.8"
+VersionID := "0.9.9"
 currentWalk := {"pid":"", "name":""} ; stores "pid" (script process ID) and "name" (pattern/movement name)
 
 ;initial load warnings
@@ -673,27 +673,39 @@ config["Boost"] := {"FieldBoostStacks":0
 	, "FieldLastBoostedBy":"None"
 	, "FieldNextBoostedBy":"None"
 	, "AFBdiceUsed":0
-	, "AFBglitterUsed":0}
+	, "AFBglitterUsed":0
+	, "BlueFlowerBoosterCheck":1
+	, "BambooBoosterCheck":1
+	, "PineTreeBoosterCheck":1
+	, "DandelionBoosterCheck":1
+	, "SunflowerBoosterCheck":1
+	, "CloverBoosterCheck":1
+	, "SpiderBoosterCheck":1
+	, "PineappleBoosterCheck":1
+	, "CactusBoosterCheck":1
+	, "PumpkinBoosterCheck":1
+	, "MushroomBoosterCheck":1
+	, "StrawberryBoosterCheck":1
+	, "RoseBoosterCheck":1}
 
 config["Quests"] := {"QuestGatherMins":5
 	, "QuestGatherReturnBy":"Walk"
 	, "PolarQuestCheck":0
 	, "PolarQuestGatherInterruptCheck":1
-	, "PolarQuestName":"None"
 	, "PolarQuestProgress":"Unknown"
 	, "HoneyQuestCheck":0
 	, "HoneyQuestProgress":"Unknown"
 	, "BlackQuestCheck":0
-	, "BlackQuestName":"None"
 	, "BlackQuestProgress":"Unknown"
 	, "LastBlackQuest":1
+	, "BrownQuestCheck":0
+	, "BrownQuestProgress":"Unknown"
+	, "LastBrownQuest":1
 	, "BuckoQuestCheck":0
 	, "BuckoQuestGatherInterruptCheck":1
-	, "BuckoQuestName":"None"
 	, "BuckoQuestProgress":"Unknown"
 	, "RileyQuestCheck":0
 	, "RileyQuestGatherInterruptCheck":1
-	, "RileyQuestName":"None"
 	, "RileyQuestProgress":"Unknown"}
 
 config["Planters"] := {"LastComfortingField":"None"
@@ -1216,7 +1228,7 @@ global RileyBee:={"Abilities":[[1,"Collect","Any"]]
 	, "Picnic":[[4,"Get","Ant"]
 	,[3,"Feed","Strawberry"]
 	,[1,"Collect","Mushroom"]
-	,[2,"Collect","Red"]]
+	,[2,"Collect","Strawberry"]]
 
 	, "Pollen":[[1,"Collect","Red"]]
 
@@ -1227,7 +1239,7 @@ global RileyBee:={"Abilities":[[1,"Collect","Any"]]
 	, "Roses":[[1,"Collect","Rose"]]
 
 	, "Scavenge":[[1,"Collect","Red"]
-	,[3,"Collect","Red"]
+	,[3,"Collect","Strawberry"]
 	,[2,"Collect","Any"]]
 
 	, "Skirmish":[[2,"Kill","Ladybugs"]
@@ -1358,7 +1370,7 @@ FieldDefault["Spider"] := {"pattern":"CornerXSnake"
 	, "invertLR":1}
 
 FieldDefault["Strawberry"] := {"pattern":"CornerXSnake"
-	, "size":"S"
+	, "size":"M"
 	, "width":1
 	, "camera":"Right"
 	, "turns":2
@@ -1770,6 +1782,7 @@ bitmaps := {}, shrine := {}, hBitmapsSBT := {}
 #Include offset\bitmaps.ahk
 #Include perfstats\bitmaps.ahk
 #Include gui\blendershrine_bitmaps.ahk
+#Include quests\bitmaps.ahk
 
 hBitmapsSB := {}
 for x,y in hBitmapsSBT
@@ -1858,14 +1871,19 @@ nm_AutoUpdateGUI()
 	DllCall("DeleteObject", "ptr", hBM)
 	Gui, update:Add, Text, x+4 yp+1 c0046ee gGitHubReleaseLink +BackgroundTrans, Patch Notes && Updates
 	Gui, update:Font, w700 s8
-	Gui, update:Add, GroupBox, x50 y+4 w200 h50, Options
+
+	local MajorUpdate := (StrSplit(VersionID, ".")[1] < StrSplit(LatestVer, ".")[1])
+	Gui, update:Add, GroupBox, % "x50 y+4 w200 h" (MajorUpdate ? 74 : 50), Options
 	Gui, update:Font, Norm
 	Gui, update:Add, CheckBox, xp+8 yp+16 Checked vCopySettings, Copy Settings
-	Gui, update:Add, CheckBox, xp+92 yp Checked vCopyPatterns, Copy Patterns
-	Gui, update:Add, CheckBox, xp-92 yp+16 Checked vCopyPaths, Copy Paths
+	Gui, update:Add, CheckBox, % "xp+92 yp vCopyPatterns Checked" !MajorUpdate " Disabled" MajorUpdate, Copy Patterns
+	Gui, update:Add, CheckBox, % "xp-92 yp+16 vCopyPaths Checked" !MajorUpdate " Disabled" MajorUpdate, Copy Paths
 	Gui, update:Add, CheckBox, xp+92 yp vDeleteOld, Delete v%VersionID%
+	if MajorUpdate
+		Gui, update:Add, Button, x60 y+5 w180 h18 gnm_MajorUpdateHelp, Why are some options disabled?
+
 	Gui, update:Font, s9
-	Gui, update:Add, Button, x8 y144 w92 h26 gnm_NeverButton, Never
+	Gui, update:Add, Button, x8 y+12 w92 h26 gnm_NeverButton, Never
 	Gui, update:Add, Button, xp+96 yp wp hp vDismissButton gnm_DismissButton, Dismiss (120)
 	SetTimer, nm_DismissLabel, -1000
 	Gui, update:Font, Bold
@@ -1950,17 +1968,24 @@ nm_UpdateButton()
 			wr.WaitForResponse()
 			for k,v in (files := JSON.parse(wr.ResponseText)["files"])
 				if (SubStr(v["filename"], 1, 6) = "paths/")
-					changedpaths .= SubStr(v["filename"], 7) ","
+					changedpaths .= """" SubStr(v["filename"], 7) """ "
+			changedpaths := RTrim(changedpaths)
 		}
 		catch
 		{
-			msgbox, 0x1010, Error, Unable to fetch changed paths from GitHub!`nIf you still want to update, disable 'Copy Paths' (and copy them manually) or try again later.
+			msgbox, 0x1010, Error, % "Unable to fetch changed paths from GitHub!`nIf you still want to update, disable 'Copy Paths' (and copy them manually) or try again later.", 30
 			return
 		}
 	}
 	
 	Run, "%A_WorkingDir%\submacros\update.bat" "%url%" "%olddir%" "%CopySettings%" "%CopyPatterns%" "%CopyPaths%" "%DeleteOld%" "%changedpaths%"
 	ExitApp
+}
+nm_MajorUpdateHelp()
+{
+	global
+	Gui, update:+OwnDialogs
+	msgbox, 0x1040, Major Update, % "v" VersionID " to v" LatestVer " is a major version update.`n`nThis means that backward compatibility of Paths and Patterns cannot be guaranteed, so they cannot be automatically copied.`nHowever, in Natro Macro, your Settings are guaranteed to be transferable to any new version, so that option remains enabled.`n`nFor more information, you can review the convention at https://semver.org/"
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2599,7 +2624,8 @@ Loop, 6
 	SetLoadingProgress(31+A_Index)
 }
 nm_HotbarWhile()
-Gui, Add, Button, x120 y61 w90 h30 vAutoFieldBoostButton gnm_autoFieldBoostButton Disabled, % (AutoFieldBoostActive ? "Auto Field Boost`n[ON]" : "Auto Field Boost`n[OFF]")
+Gui, Add, Button, x120 y61 w90 h30 vBoostedFieldSelectButton gnm_BoostedFieldSelectButton Disabled, Select Boosted Gather Fields
+Gui, Add, Button, x225 y61 w90 h30 vAutoFieldBoostButton gnm_autoFieldBoostButton Disabled, % (AutoFieldBoostActive ? "Auto Field Boost`n[ON]" : "Auto Field Boost`n[OFF]")
 Gui, Font, w700
 Gui, Font, s8 cDefault Norm, Tahoma
 
@@ -2613,7 +2639,6 @@ Gui, Add, GroupBox, x5 y131 w150 h38, Honey Bee
 Gui, Add, GroupBox, x5 y170 w150 h68, Settings
 Gui, Add, GroupBox, x160 y23 w165 h108, Black Bear
 Gui, Add, GroupBox, x160 y131 w165 h108, Brown Bear
-Gui, Add, Text, x165 y145 cRED, Not Yet Implemented
 Gui, Add, GroupBox, x330 y23 w165 h108, Bucko Bee
 Gui, Add, GroupBox, x330 y131 w165 h108, Riley Bee
 Gui, Font, s8 cDefault Norm, Tahoma
@@ -2630,8 +2655,10 @@ Gui, Add, Text, x8 y201 +BackgroundTrans, Return to hive by:
 Gui, Add, Text, x110 yp w33 vQuestGatherReturnBy +Center +BackgroundTrans,%QuestGatherReturnBy%
 Gui, Add, Button, x98 yp-1 w12 h16 gnm_QuestGatherReturnBy hwndhQGRBLeft Disabled, <
 Gui, Add, Button, x142 yp w12 h16 gnm_QuestGatherReturnBy hwndhQGRBRight Disabled, >
-Gui, Add, Checkbox, x235 y23 vBlackQuestCheck gnm_BlackQuestCheck Checked%BlackQuestCheck% Disabled, Enable
+Gui, Add, Checkbox, x240 y23 vBlackQuestCheck gnm_BlackQuestCheck Checked%BlackQuestCheck% Disabled, Enable
 Gui, Add, Text, x163 y38 w158 h92 vBlackQuestProgress, % StrReplace(BlackQuestProgress, "|", "`n")
+Gui, Add, Checkbox, x240 y131 vBrownQuestCheck gnm_BrownQuestCheck Checked%BrownQuestCheck% Disabled, Enable
+Gui, Add, Text, x163 y146 w158 h92 vBrownQuestProgress, % StrReplace(BrownQuestProgress, "|", "`n")
 Gui, Add, Checkbox, x410 y23 vBuckoQuestCheck gnm_BuckoQuestCheck Checked%BuckoQuestCheck% Disabled, Enable
 Gui, Add, Checkbox, x340 y37 vBuckoQuestGatherInterruptCheck gnm_BuckoQuestCheck Checked%BuckoQuestGatherInterruptCheck% Disabled, Allow Gather Interrupt
 Gui, Add, Text, x333 y51 w158 h78 vBuckoQuestProgress, % StrReplace(BuckoQuestProgress, "|", "`n")
@@ -3112,7 +3139,6 @@ mp_PlantPlanter(PlanterIndex) {
 	}
 
 	nm_setShiftLock(0)
-	nm_OpenMenu("itemmenu")
 
 	nm_Reset()
 	nm_setStatus("Traveling", MPlanterName " (" MFieldName ")")
@@ -3161,7 +3187,7 @@ mp_PlantPlanter(PlanterIndex) {
 					{
 						Sleep, 50
 						Gdip_DisposeImage(pBMScreen)
-						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" Max(480, windowHeight-offsetY-150))
+						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|" windowWidth//2 "|" Max(480, windowHeight-offsetY-150))
 					}
 				}
 			}
@@ -3180,9 +3206,9 @@ mp_PlantPlanter(PlanterIndex) {
 	{
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
 		loop 3 {
-			pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+((6*windowHeight)//10 - 60) "|500|150")
+			pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+windowHeight//2-52 "|500|150")
 			if (Gdip_ImageSearch(pBMScreen, bitmaps["yes"], pos, , , , , 2, , 2) = 1) {
-				MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+((6*windowHeight)//10 - 60)+SubStr(pos, InStr(pos, ",")+1)
+				MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+windowHeight//2-52+SubStr(pos, InStr(pos, ",")+1)
 				sleep, 150
 				Click
 				sleep 100
@@ -3260,7 +3286,6 @@ mp_UseGlitter(PlanterIndex, atField:=0) {
 	Local pBMScreen, windowX, windowY, windowWidth, windowHeight, glitterPos
 
 	nm_setShiftLock(0)
-	nm_OpenMenu("itemmenu")
 
 	if (atField = 0) {
 		nm_Reset()
@@ -3366,7 +3391,6 @@ mp_HarvestPlanter(PlanterIndex) {
 		;check for phantom planter
 		nm_setStatus("Checking", "Phantom Planter: " . MPlanterName)
 
-		nm_OpenMenu("itemmenu")
 		planterPos := nm_InventorySearch(MPlanterName, "up", 4) ;~ new function
 
 		if (planterPos != 0) { ; found planter in inventory planter is a phantom
@@ -3440,9 +3464,9 @@ mp_HarvestPlanter(PlanterIndex) {
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
 		if (PlanterHarvestFull%PlanterIndex% == "Full") {
 			loop 3 {
-				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+((6*windowHeight)//10 - 60) "|500|150")
+				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+windowHeight//2-52 "|500|150")
 				if (Gdip_ImageSearch(pBMScreen, bitmaps["no"], pos, , , , , 2, , 3) = 1) {
-					MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+((6*windowHeight)//10 - 60)+SubStr(pos, InStr(pos, ",")+1)
+					MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+windowHeight//2-52+SubStr(pos, InStr(pos, ",")+1)
 					sleep, 150
 					Click
 					sleep 100
@@ -3457,9 +3481,9 @@ mp_HarvestPlanter(PlanterIndex) {
 		}
 		else {
 			loop 3 {
-				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+((6*windowHeight)//10 - 60) "|500|150")
+				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+windowHeight//2-52 "|500|150")
 				if (Gdip_ImageSearch(pBMScreen, bitmaps["yes"], pos, , , , , 2, , 2) = 1) {
-					MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+((6*windowHeight)//10 - 60)+SubStr(pos, InStr(pos, ",")+1)
+					MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+windowHeight//2-52+SubStr(pos, InStr(pos, ",")+1)
 					sleep, 150
 					Click
 					sleep 100
@@ -3572,8 +3596,6 @@ nm_Start(){
 		nm_Collect()
 		;quests
 		nm_QuestRotate()
-		;shrine
-		nm_Shrine()
 		;booster
 		nm_ToAnyBooster()
 		;gather
@@ -3689,7 +3711,7 @@ ba_setShrineData(hCtrl){
 }
 ba_AddShrineItemButton(hCtrl:=0){
     global hfShrineleft, hfShrineright, hAddShrineItem, AddShrineItem, ShrineAdd, hBitmapsSB
-    static items := ["RedExtract", "BlueExtract", "BlueBerry", "Pineapple", "StrawBerry", "Sunflower", "Enzymes", "Oil", "Glue", "TropicalDrink", "Gumdrops", "MoonCharms", "Glitter", "StarJelly", "PurplePotion", "SoftWax", "HardWax", "SwirledWax", "CausticWax", "FieldDice", "SmoothDice", "LoadedDice", "SuperSmoothie", "Turpentine"], i := 0, h := 0
+    static items := ["RedExtract", "BlueExtract", "BlueBerry", "Pineapple", "StrawBerry", "Sunflower", "Enzymes", "Oil", "Glue", "TropicalDrink", "Gumdrops", "MoonCharms", "Glitter", "StarJelly", "PurplePotion", "SoftWax", "HardWax", "SwirledWax", "CausticWax", "FieldDice", "SmoothDice", "LoadedDice", "Turpentine"], i := 0, h := 0
     if (h != ShrineAdd)
         i := 0, h := ShrineAdd
 	i := Mod(items.Length() + i + ((hCtrl = hfShrineleft) ? -1 : (hCtrl = hfShrineright) ? 1 : 0), items.Length()), AddShrineItem := items[i+1]
@@ -4214,8 +4236,8 @@ nm_testButton(){ ;~~ lines 3464 and 3465 have the same change as 14156
 
 	nm_gotoramp()
 	{
-		"" nm_Walk(6, FwdKey) ""
-		"" nm_Walk(8.35*HiveSlot+1, RightKey) ""
+		"" nm_Walk(5, FwdKey) ""
+		"" nm_Walk(9.2*HiveSlot-4, RightKey) ""
 	}
 	nm_gotocannon()
 	{
@@ -4225,12 +4247,15 @@ nm_testButton(){ ;~~ lines 3464 and 3465 have the same change as 14156
 		{
 			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, """"ahk_id """" GetRobloxHWND())
 			MouseMove, windowX+350, windowY+offsetY+100
-			Send {"" SC_Space "" down}
-			Sleep, 100
-			Send {"" SC_Space "" up}{"" RightKey "" down}
-
 			DllCall(""""GetSystemTimeAsFileTime"""",""""int64p"""",s)
-			n := s, f := s+100000000, success := 0
+			n := s, f := s+200000000, success := 0
+			Send {"" SC_Space "" down}{"" RightKey "" down}
+			Sleep, 100
+			Send {"" SC_Space "" up}
+			Walk(2)
+			Send {"" FwdKey "" down}
+			Walk(1.8)
+			Send {"" FwdKey "" up}
 			while (n < f)
 			{
 				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-200 """"|"""" windowY """"|400|125"""")
@@ -4279,9 +4304,11 @@ nm_testButton(){ ;~~ lines 3464 and 3465 have the same change as 14156
 	nm_reset()
 	{
 		global offsetY
-		pBMH1 := Gdip_CreateBitmap(240,3), G := Gdip_GraphicsFromImage(pBMH1), Gdip_GraphicsClear(G,0xff867018), Gdip_DeleteGraphics(G)
-		pBMH2 := Gdip_CreateBitmap(240,3), G := Gdip_GraphicsFromImage(pBMH2), Gdip_GraphicsClear(G,0xff937d2d), Gdip_DeleteGraphics(G)
-		pBMH3 := Gdip_CreateBitmap(240,3), G := Gdip_GraphicsFromImage(pBMH3), Gdip_GraphicsClear(G,0xff8e7d4d), Gdip_DeleteGraphics(G)
+		pBMHive := Gdip_CreateBitmap(25, 11), G := Gdip_GraphicsFromImage(pBMHive), Gdip_GraphicsClear(G,0xff50440A), Gdip_DeleteGraphics(G)
+		pBMHiveEH := Gdip_CreateBitmap(30, 30), G := Gdip_GraphicsFromImage(pBMHiveEH), Gdip_GraphicsClear(G,0xff7C6815), Gdip_DeleteGraphics(G)
+		pBMHiveDNT := Gdip_CreateBitmap(20, 200), G := Gdip_GraphicsFromImage(pBMHiveDNT), Gdip_GraphicsClear(G, 0xff9E831D), Gdip_DeleteGraphics(G) 
+		pBMHiveNNT := Gdip_CreateBitmap(20, 200), G := Gdip_GraphicsFromImage(pBMHiveNNT), Gdip_GraphicsClear(G, 0xff7A6615), Gdip_DeleteGraphics(G)
+
 		pBMR := Gdip_BitmapFromBase64(""""iVBORw0KGgoAAAANSUhEUgAAACgAAAAGCAAAAACUM4P3AAAAAnRSTlMAAHaTzTgAAAAXdEVYdFNvZnR3YXJlAFBob3RvRGVtb24gOS4wzRzYMQAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0n77u/JyBpZD0nVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkJz8+Cjx4OnhtcG1ldGEgeG1sbnM6eD0nYWRvYmU6bnM6bWV0YS8nIHg6eG1wdGs9J0ltYWdlOjpFeGlmVG9vbCAxMi40NCc+CjxyZGY6UkRGIHhtbG5zOnJkZj0naHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyc+CgogPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9JycKICB4bWxuczpleGlmPSdodHRwOi8vbnMuYWRvYmUuY29tL2V4aWYvMS4wLyc+CiAgPGV4aWY6UGl4ZWxYRGltZW5zaW9uPjQwPC9leGlmOlBpeGVsWERpbWVuc2lvbj4KICA8ZXhpZjpQaXhlbFlEaW1lbnNpb24+NjwvZXhpZjpQaXhlbFlEaW1lbnNpb24+CiA8L3JkZjpEZXNjcmlwdGlvbj4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOnRpZmY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvJz4KICA8dGlmZjpJbWFnZUxlbmd0aD42PC90aWZmOkltYWdlTGVuZ3RoPgogIDx0aWZmOkltYWdlV2lkdGg+NDA8L3RpZmY6SW1hZ2VXaWR0aD4KICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogIDx0aWZmOlJlc29sdXRpb25Vbml0PjI8L3RpZmY6UmVzb2x1dGlvblVuaXQ+CiAgPHRpZmY6WFJlc29sdXRpb24+OTYvMTwvdGlmZjpYUmVzb2x1dGlvbj4KICA8dGlmZjpZUmVzb2x1dGlvbj45Ni8xPC90aWZmOllSZXNvbHV0aW9uPgogPC9yZGY6RGVzY3JpcHRpb24+CjwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9J3InPz77yGiWAAAAI0lEQVR42mNUYyAOMDJggOUMDAyRmAqXMxAHmBiobjWxngEAj7gC+wwAe1AAAAAASUVORK5CYII="""")
 		success := 0
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, """"ahk_id """" GetRobloxHWND())
@@ -4289,6 +4316,7 @@ nm_testButton(){ ;~~ lines 3464 and 3465 have the same change as 14156
 		Loop, 10
 		{
 			WinActivate, Roblox
+			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, """"ahk_id """" GetRobloxHWND())
 			SetKeyDelay, 250+"" KeyDelay ""
 			SendEvent {"" SC_Esc ""}{"" SC_R ""}{"" SC_Enter ""}
 			SetKeyDelay, 100+"" KeyDelay ""
@@ -4296,31 +4324,30 @@ nm_testButton(){ ;~~ lines 3464 and 3465 have the same change as 14156
 			while ((n < 2) && (A_Index <= 200))
 			{
 				Sleep, 100
-				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, """"ahk_id """" GetRobloxHWND())
 				pBMScreen := Gdip_BitmapFromScreen(windowX """"|"""" windowY """"|"""" windowWidth """"|50"""")
 				n += (Gdip_ImageSearch(pBMScreen, pBMR, , , , , , 10) = (n = 0))
 				Gdip_DisposeImage(pBMScreen)
 			}
 			Sleep, 1000
-			Send {"" RotUp "" 4}
-			SendEvent {"" ZoomOut "" 8}
-			SetKeyDelay, 10
-			Sleep, 500
-			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, """"ahk_id """" GetRobloxHWND())
+			Send {"" RotRight "" 3}
+			SendEvent {"" ZoomOut "" 2}
 			Loop, 4
 			{
-				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//4 """"|"""" windowY+3*windowHeight//4 """"|"""" windowWidth//2 """"|"""" windowHeight//4)
-				if ((Gdip_ImageSearch(pBMScreen, pBMH1, , , , , , 20) = 1) || (Gdip_ImageSearch(pBMScreen, pBMH2, , , , , , 20) = 1) || (Gdip_ImageSearch(pBMScreen, pBMH3, , , , , , 20) = 1))
+				Sleep, 250
+				pBMScreen := Gdip_BitmapFromScreen(WindowX """"|"""" WindowY+windowHeight//2-50 """"|400|250"""")
+				if ((Gdip_ImageSearch(pBMScreen, pBMHive, , , , , , 5) = 1) || (Gdip_ImageSearch(pBMScreen, pBMHiveEH) = 1) || (Gdip_ImageSearch(pBMScreen, pBMHiveDNT, , , , , , 5) = 1) || (Gdip_ImageSearch(pBMScreen, pBMHiveNNT, , , , , , 5) = 1))
 				{
-					Send {"" RotRight "" 4}{"" RotDown "" 4}
-					success := 1
+					Gdip_DisposeImage(pBMScreen)
+					Send {"" RotLeft "" 3}
+					SendEvent {"" ZoomOut "" 3}
+					success:=1
 					break 2
 				}
+				Gdip_DisposeImage(pBMScreen)
 				Send {"" RotRight "" 4}
-				Sleep, 250
 			}
 		}
-		Gdip_DisposeImage(pBMH1), Gdip_DisposeImage(pBMH2), Gdip_DisposeImage(pBMH3)
+		Gdip_DisposeImage(pBMHive), Gdip_DisposeImage(pBMHiveEH), Gdip_DisposeImage(pBMHiveDNT), Gdip_DisposeImage(pBMHiveNNT)
 		if (success = 0)
 		{
 			msgbox, 0x40034, Test Paths/Patterns, Reset Failed!````r````nTest has been aborted.
@@ -5322,6 +5349,7 @@ nm_TabBoostLock(){
 	GuiControl, disable, FieldBoosterMinsUpDown
 	GuiControl, disable, BoostChaserCheck
 	GuiControl, disable, AutoFieldBoostButton
+	GuiControl, disable, BoostedFieldSelectButton
 	GuiControl, disable, HotbarWhile2
 	GuiControl, disable, HotbarWhile3
 	GuiControl, disable, HotbarWhile4
@@ -5357,6 +5385,7 @@ nm_TabBoostUnLock(){
 	nm_FieldBooster()
 	GuiControl, enable, FieldBoosterMinsUpDown
 	GuiControl, enable, BoostChaserCheck
+	GuiControl, enable, BoostedFieldSelectButton
 	GuiControl, enable, AutoFieldBoostButton
 	GuiControl, enable, HotbarWhile2
 	GuiControl, enable, HotbarWhile3
@@ -5585,6 +5614,11 @@ nm_BlackQuestCheck(){
 	if BlackQuestCheck
 		msgbox,0,Black Bear Quest, This option only works for the repeatable quests.  You must first complete the main questline before this option will work properly.
 }
+nm_BrownQuestCheck(){
+	global
+	GuiControlGet, BrownQuestCheck
+	IniWrite, %BrownQuestCheck%, settings\nm_config.ini, Quests, BrownQuestCheck
+}
 nm_BuckoQuestCheck(){
 	global
 	Gui +OwnDialogs
@@ -5631,6 +5665,7 @@ nm_TabQuestLock(){
 	GuiControl, disable, RileyQuestGatherInterruptCheck
 	GuiControl, disable, HoneyQuestCheck
 	GuiControl, disable, BlackQuestCheck
+	GuiControl, disable, BrownQuestCheck
 	GuiControl, disable, QuestGatherMins
 	GuiControl, disable, % hQGRBLeft
 	GuiControl, disable, % hQGRBRight
@@ -5645,6 +5680,7 @@ nm_TabQuestUnLock(){
 	GuiControl, enable, RileyQuestGatherInterruptCheck
 	GuiControl, enable, HoneyQuestCheck
 	GuiControl, enable, BlackQuestCheck
+	GuiControl, enable, BrownQuestCheck
 	GuiControl, enable, QuestGatherMins
 	GuiControl, enable, % hQGRBLeft
 	GuiControl, enable, % hQGRBRight
@@ -5821,6 +5857,46 @@ nm_ShowErrorBalloonTip(hEdit, Title, Text){
 	NumPut(3, EBT, A_PtrSize * 3, "UInt")
 	DllCall("SendMessage", "UPtr", hEdit, "UInt", 0x1503, "Ptr", 0, "Ptr", &EBT, "Ptr")
 }
+
+nm_BoostedFieldSelectButton(){
+	global
+	Gui, BoostedFieldSelect:Destroy
+	Gui, BoostedFieldSelect:+AlwaysOnTop +Border
+	Gui, BoostedFieldSelect:Add, text, x9 y10, This option allows you to select which fields to gather in, if boosted. `nIf the free field booster boosts a field that is not selected here, `nthe macro will ignore it and continue with other tasks.
+
+	Gui  BoostedFieldSelect:font, s8 cDefault Bold, Tahoma
+	Gui, BoostedFieldSelect:Add, text, x10 y54, Blue
+	Gui  BoostedFieldSelect:font, s8 cDefault Norm, Tahoma
+	Gui, BoostedFieldSelect:Add, Checkbox, % "xp-2 yp+18 vBlueFlowerBoosterCheck gnm_BoostedFieldSelectCheck Checked" BlueFlowerBoosterCheck, Blue Flower
+	Gui, BoostedFieldSelect:Add, Checkbox, % "xp yp+14 vBambooBoosterCheck gnm_BoostedFieldSelectCheck Checked" BambooBoosterCheck, Bamboo
+	Gui, BoostedFieldSelect:Add, Checkbox, % "xp yp+14 vPineTreeBoosterCheck gnm_BoostedFieldSelectCheck Checked" PineTreeBoosterCheck, Pine Tree	
+	
+	Gui  BoostedFieldSelect:font, s8 cDefault Bold, Tahoma
+	Gui, BoostedFieldSelect:Add, text, x134 y54, Mountain top
+	Gui  BoostedFieldSelect:font, s8 cDefault Norm, Tahoma
+	Gui, BoostedFieldSelect:Add, Checkbox, % "xp-2 yp+18 vDandelionBoosterCheck gnm_BoostedFieldSelectCheck Checked" DandelionBoosterCheck, Dandelion
+	Gui, BoostedFieldSelect:Add, Checkbox, % "xp yp+14 vSunflowerBoosterCheck gnm_BoostedFieldSelectCheck Checked" SunflowerBoosterCheck, Sunflower
+	Gui, BoostedFieldSelect:Add, Checkbox, % "xp yp+14 vCloverBoosterCheck gnm_BoostedFieldSelectCheck Checked" CloverBoosterCheck, Clover
+	Gui, BoostedFieldSelect:Add, Checkbox, % "xp yp+14 vSpiderBoosterCheck gnm_BoostedFieldSelectCheck Checked" SpiderBoosterCheck, Spider
+	Gui, BoostedFieldSelect:Add, Checkbox, % "xp yp+14 vPineappleBoosterCheck gnm_BoostedFieldSelectCheck Checked" PineappleBoosterCheck, Pineapple
+	Gui, BoostedFieldSelect:Add, Checkbox, % "xp yp+14 vCactusBoosterCheck gnm_BoostedFieldSelectCheck Checked" CactusBoosterCheck, Cactus
+	Gui, BoostedFieldSelect:Add, Checkbox, % "xp yp+14 vPumpkinBoosterCheck gnm_BoostedFieldSelectCheck Checked" PumpkinBoosterCheck, Pumpkin
+	
+	Gui  BoostedFieldSelect:font, s8 cDefault Bold, Tahoma
+	Gui, BoostedFieldSelect:Add, text, x256 y54, Red
+	Gui  BoostedFieldSelect:font, s8 cDefault Norm, Tahoma
+	Gui, BoostedFieldSelect:Add, Checkbox, % "xp-2 yp+18 vMushroomBoosterCheck gnm_BoostedFieldSelectCheck Checked" MushroomBoosterCheck, Mushroom
+	Gui, BoostedFieldSelect:Add, Checkbox, % "xp yp+14 vStrawberryBoosterCheck gnm_BoostedFieldSelectCheck Checked" StrawberryBoosterCheck, Strawberry
+	Gui, BoostedFieldSelect:Add, Checkbox, % "xp yp+14 vRoseBoosterCheck gnm_BoostedFieldSelectCheck Checked" RoseBoosterCheck, Rose
+	Gui, BoostedFieldSelect:Show, w335 h180, Select boosted gather fields
+}
+
+nm_BoostedFieldSelectCheck(){
+	global
+	GuiControlGet, %A_GuiControl%, BoostedFieldSelect:
+	IniWrite, % %A_GuiControl%, settings\nm_config.ini, Boost, %A_GuiControl%
+}
+
 ;;;;;;;;; START AFB
 nm_autoFieldBoostButton(){
 	nm_autoFieldBoostGui()
@@ -8932,10 +9008,10 @@ nm_imgSearch(fileName,v,aim := "full", trans:="none"){
     ;yi := 0
 	;ww := windowWidth
 	;wh := windowHeight
-	xi:=(aim="actionbar") ? windowWidth/4 : (aim="highright") ? windowWidth/2 : (aim="right") ? windowWidth/2 : (aim="center") ? windowWidth/4 : (aim="lowright") ? windowWidth/2 : 0
-	yi:=(aim="low") ? windowHeight/2 : (aim="actionbar") ? (windowHeight/4)*3 : (aim="center") ? windowHeight/4 : (aim="lowright") ? windowHeight/2 : (aim="quest") ? 150 : 0
-	ww:=(aim="actionbar") ? xi*3 : (aim="highleft") ? windowWidth/2 : (aim="left") ? windowWidth/2 : (aim="center") ? xi*3 : (aim="quest") ? 310 : windowWidth
-	wh:=(aim="high") ? windowHeight/2 : (aim="highright") ? windowHeight/2 : (aim="highleft") ? windowHeight/2 : (aim="buff") ? 150 : (aim="abovebuff") ? 30 : (aim="center") ? yi*3 : (aim="quest") ? Max(560, windowHeight-100) : windowHeight
+	xi:=(aim="actionbar") ? windowWidth//4 : (aim="highright") ? windowWidth//2 : (aim="right") ? windowWidth//2 : (aim="center") ? windowWidth//4 : (aim="lowright") ? windowWidth//2 : 0
+	yi:=(aim="low") ? windowHeight//2 : (aim="actionbar") ? (windowHeight//4)*3 : (aim="center") ? windowHeight//4 : (aim="lowright") ? windowHeight//2 : (aim="quest") ? 150 : 0
+	ww:=(aim="actionbar") ? xi*3 : (aim="highleft") ? windowWidth//2 : (aim="left") ? windowWidth//2 : (aim="center") ? xi*3 : (aim="quest") ? 310 : windowWidth
+	wh:=(aim="high") ? windowHeight//2 : (aim="highright") ? windowHeight//2 : (aim="highleft") ? windowHeight//2 : (aim="buff") ? 150 : (aim="abovebuff") ? 30 : (aim="center") ? yi*3 : (aim="quest") ? Max(560, windowHeight-100) : windowHeight
 	IfExist, %A_WorkingDir%\nm_image_assets\
 	{
 		if(trans!="none")
@@ -8963,14 +9039,13 @@ nm_Reset(checkAll:=1, wait:=2000, convert:=1, force:=0){
 	global youDied
 	global VBState
 	global KeyDelay
-	global SC_E, SC_Esc, SC_R, SC_Enter, RotRight, RotUp, RotDown, ZoomOut
+	global SC_E, SC_Esc, SC_R, SC_Enter, RotRight, RotLeft, ZoomOut
 	global objective
 	global AFBrollingDice
 	global AFBuseGlitter
 	global AFBuseBooster
 	global currentField
 	global HiveConfirmed, GameFrozenCounter, MultiReset, bitmaps
-	nm_setShiftLock(0)
 	;check for game frozen conditions
 	if (GameFrozenCounter>=3) { ;3 strikes
 		nm_setStatus("Detected", "Roblox Game Frozen, Restarting")
@@ -8978,6 +9053,8 @@ nm_Reset(checkAll:=1, wait:=2000, convert:=1, force:=0){
 		GameFrozenCounter:=0
 	}
 	DisconnectCheck()
+	nm_setShiftLock(0)
+	nm_OpenMenu()
 	if(youDied && not instr(objective, "mondo") && VBState=0){
 		wait:=max(wait, 20000)
 	}
@@ -9004,6 +9081,9 @@ nm_Reset(checkAll:=1, wait:=2000, convert:=1, force:=0){
 		}
 		DisconnectCheck()
 		WinActivate, Roblox
+		nm_setShiftLock(0)
+		nm_OpenMenu()
+
 		hwnd := GetRobloxHWND()
 		offsetY := GetYOffset(hwnd)
 		;check that performance stats is disabled
@@ -9037,9 +9117,9 @@ nm_Reset(checkAll:=1, wait:=2000, convert:=1, force:=0){
 		MouseMove, windowX+350, windowY+offsetY+100
 		;check to make sure you are not in a yes/no prompt
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
-		pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+((6*windowHeight)//10 - 60) "|500|150")
+		pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+windowHeight//2-52 "|500|150")
 		if (Gdip_ImageSearch(pBMScreen, bitmaps["no"], pos, , , , , 2, , 3) = 1) {
-			MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+((6*windowHeight)//10 - 60)+SubStr(pos, InStr(pos, ",")+1)
+			MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+windowHeight//2-52+SubStr(pos, InStr(pos, ",")+1)
 			Click
 			MouseMove, windowX+350, windowY+offsetY+100
 		}
@@ -9052,27 +9132,13 @@ nm_Reset(checkAll:=1, wait:=2000, convert:=1, force:=0){
 			MouseMove, windowX+350, windowY+offsetY+100
 		}
 		;check to make sure you are not in blender screen
-		BlenderSS := Gdip_BitmapFromScreen(WindowX+Windowwidth//2 - 277 "|" windowY+WindowHeight//2 - 243 "|553|400")
+		BlenderSS := Gdip_BitmapFromScreen(WindowX+Windowwidth//2 - 280 "|" windowY+WindowHeight//2 - 245 "|553|400")
 		if (Gdip_ImageSearch(BlenderSS, bitmaps["CloseGUI"], , , , , , 5) > 0) {
 			MouseMove, WindowX+Windowwidth//2 - 250, windowY+WindowHeight//2 - 210
 			sleep, 150 
 			click
 		}
 		Gdip_DisposeImage(BlenderSS)
-		;check to make sure theres no memory match tiles on screen
-		loop 18 {
-			PBmScreen := Gdip_BitmapFromScreen(WindowX "|" windowY "|" WindowWidth "|" WindowHeight)
-			if (Gdip_ImageSearch(PBmScreen, bitmaps["MemoryMatchNTile"], , , , , , 5) > 0) {
-				MouseMove, windowX+SubStr(pos, 1, InStr(pos, ",")-1), windowY+SubStr(pos, InStr(pos, ",")+1)
-				sleep, 150 
-				click
-				sleep, 200
-			} else {
-				Gdip_DisposeImage(PBmScreen)
-				break
-			}
-			Gdip_DisposeImage(PBmScreen)
-		}
 		;check to make sure you are not in shop before reset
 		searchRet := nm_imgSearch("e_button.png",30,"high")
 		If (searchRet[1] = 0) {
@@ -9113,12 +9179,12 @@ nm_Reset(checkAll:=1, wait:=2000, convert:=1, force:=0){
 			SetTitleMatchMode %Prev_TitleMatchMode%
 			;reset
 			WinActivate, Roblox
+			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
 			send {%SC_Esc%}{%SC_R%}{%SC_Enter%}
 			n := 0
 			while ((n < 2) && (A_Index <= 200))
 			{
 				Sleep, 100
-				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY "|" windowWidth "|50")
 				n += (Gdip_ImageSearch(pBMScreen, bitmaps["emptyhealth"], , , , , , 10) = (n = 0))
 				Gdip_DisposeImage(pBMScreen)
@@ -9126,17 +9192,20 @@ nm_Reset(checkAll:=1, wait:=2000, convert:=1, force:=0){
 			Sleep, 1000
 		}
 		SetKeyDelay, PrevKeyDelay
-		sendinput {%RotUp% 4}
-		send {%ZoomOut% 8}
-		sleep,500
-		loop, 4 { ;16
-			If ((nm_imgSearch("hive4.png",20,"actionbar")[1] = 0) || (nm_imgSearch("hive_honeystorm.png",20,"actionbar")[1] = 0) || (nm_imgSearch("hive_snowstorm.png",20,"actionbar")[1] = 0)){
-				sendinput {%RotRight% 4}{%RotDown% 4}
+		sendinput {%RotRight% 3}
+		send {%ZoomOut% 2}
+		loop, 4 {
+			sleep (250+KeyDelay)
+			pBMScreen := Gdip_BitmapFromScreen(windowX "|" WindowY+windowHeight//2-50 "|400|250")
+			if (Gdip_ImageSearch(pBMScreen, bitmaps["pBMHive"], , , , , , 5) = 1 || Gdip_ImageSearch(pBMScreen, bitmaps["pBMHiveEH"]) = 1 || Gdip_ImageSearch(pBMScreen, bitmaps["pBMHiveDNT"], , , , , , 5) = 1 || Gdip_ImageSearch(pBMScreen, bitmaps["pBMHiveNNT"], , , , , , 5) = 1) {
+				Gdip_DisposeImage(pBMScreen)
+				sendinput {%RotLeft% 3}
+				send {%ZoomOut% 3}
 				HiveConfirmed:=1
 				break
 			}
+			Gdip_DisposeImage(pBMScreen)
 			sendinput {%RotRight% 4}
-			sleep (250+KeyDelay)
 		}
 	}
 	;convert
@@ -9255,8 +9324,8 @@ nm_gotoRamp(){
 
 	movement := "
 	(LTrim Join`r`n
-	" nm_Walk(6, FwdKey) "
-	" nm_Walk(8.35*HiveSlot+1, RightKey) "
+	" nm_Walk(5, FwdKey) "
+	" nm_Walk(9.2*HiveSlot-4, RightKey) "
 	)"
 
 	nm_createWalk(movement)
@@ -9265,7 +9334,7 @@ nm_gotoRamp(){
     nm_endWalk()
 }
 nm_gotoCannon(){
-	global LeftKey, RightKey, currentWalk, objective, SC_Space, bitmaps
+	global LeftKey, RightKey, FwdKey, BackKey, currentWalk, objective, SC_Space, bitmaps
 
 	nm_setShiftLock(0)
 
@@ -9277,11 +9346,20 @@ nm_gotoCannon(){
 	success := 0
 	Loop, 10
 	{
-		SendInput {%SC_Space% down}
+		movement := "
+		(LTrim Join`r`n
+		Send {" SC_Space " down}{" RightKey " down}
 		Sleep, 100
-		SendInput {%SC_Space% up}{%RightKey% down}
+		Send {" SC_Space " up}
+		Walk(2)
+		Send {" FwdKey " down}
+		Walk(1.8)
+		Send {" FwdKey " up}
+		)"
+		nm_createWalk(movement)
+		KeyWait, F14, D T5 L
 		DllCall("GetSystemTimeAsFileTime","int64p",s)
-		n := s, f := s+100000000
+		n := s, f := s+200000000
 		while (n < f)
 		{
 			pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-200 "|" windowY+offsetY "|400|125")
@@ -9293,7 +9371,7 @@ nm_gotoCannon(){
 			Gdip_DisposeImage(pBMScreen)
 			DllCall("GetSystemTimeAsFileTime","int64p",n)
 		}
-		SendInput {%RightKey% up}
+		nm_endWalk()
 
 		if (success = 1) ; check that cannon was not overrun, at the expense of a small delay
 		{
@@ -9315,7 +9393,7 @@ nm_gotoCannon(){
 				{
 					movement := "
 					(LTrim Join`r`n
-					" nm_Walk(1.5, LeftKey) "
+					" nm_Walk(1.5, FwdKey) "
 					)"
 					nm_createWalk(movement)
 					KeyWait, F14, D T5 L
@@ -9358,7 +9436,7 @@ nm_findHiveSlot(){
 		movement := "
 		(LTrim Join`r`n
 		" nm_Walk(4, FwdKey) "
-		" nm_Walk(5.25, BackKey) "
+		" nm_Walk(4.25, BackKey) " ; 5.25
 		)"
 		nm_createWalk(movement)
 		KeyWait, F14, D T5 L
@@ -9481,6 +9559,7 @@ nm_toAnyBooster(){
 	global VBState
 	global objective, CurrentAction, PreviousAction
 	global MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff
+	global LastShrine, ShrineCheck, ShrineItem1, ShrineItem2, ShrineAmount1, ShrineAmount2, ShrineRot, Shrine, bitmaps, SC_E
 	static blueBoosterFields:=["Pine Tree", "Bamboo", "Blue Flower"], redBoosterFields:=["Rose", "Strawberry", "Mushroom"], mountainBoosterfields:=["Cactus", "Pumpkin", "Pineapple", "Spider", "Clover", "Dandelion", "Sunflower"]
 	if(VBState=1)
 		return
@@ -9489,7 +9568,124 @@ nm_toAnyBooster(){
 		return
 	if (QuestGatherField!="None" && QuestGatherField)
 		return
-		loop 3 {
+	nm_ShrineRotation() ; make sure ShrineRot hasnt changed
+	if (ShrineCheck && (nowUnix()-LastShrine)>3600) { ;1 hour
+		loop, 2 {
+			z := A_Index
+			nm_Reset()
+			nm_setStatus("Traveling", "Wind Shrine" ((A_Index > 1) ? " (Attempt 2)" : ""))
+
+			nm_gotoCollect("WindShrine")
+
+			searchRet := nm_imgSearch("e_button.png",30,"high")
+			If (searchRet[1] = 0) {
+				sendinput {%SC_E% down}
+				Sleep, 100
+				sendinput {%SC_E% up}
+				Sleep, (2000+KeyDelay)
+
+				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " (hwnd := GetRobloxHWND()))
+				MouseMove, WindowX+Windowwidth//2, WindowY+WindowHeight//1.35 - 5 ;dialog
+				sleep, 150
+				Click
+				sleep, 300
+				Loop {
+					sleep, 150
+					pBMScreen := Gdip_BitmapFromScreen(WindowX+WindowWidth//2-250 "|" WindowY+windowHeight//2-100 "|500|300")
+					Donation := % "ShrineItem" ShrineRot
+					DonationIMG := % %Donation%
+					
+					if (Gdip_ImageSearch(pBMScreen, Shrine[DonationIMG], , , , , , 2, , 4) > 0) {
+						sleep, 200
+						MouseMove, windowX+windowWidth//2+60, WindowY+windowHeight//2+160 ; add more of x item
+						sleep, 150
+						While (A_index < ShrineAmount%ShrineRot%) {
+							Click
+							sleep, 35
+						}
+						sleep, 300
+						MouseMove, windowX+windowWidth//2-70, WindowY+windowHeight//2+130 ; donate button
+						Gdip_DisposeBitmap(pBMScreen)
+						sleep, 150
+						Click
+						sleep, 2000
+						WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
+						Loop, 500 {
+							pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-50 "|" windowY+2*windowHeight//3 "|100|" windowHeight//3)
+							if (Gdip_ImageSearch(pBMScreen, bitmaps["dialog"], pos, , , , , 10, , 3) = 0) {
+								Gdip_DisposeImage(pBMScreen)
+								break
+							}
+							Gdip_DisposeImage(pBMScreen)
+							MouseMove, windowX+windowWidth//2, windowY+2*windowHeight//3+SubStr(pos, InStr(pos, ",")+1)-15
+							Click
+							sleep, 150
+						}
+						sleep, 500
+						gatherloot := "
+							(LTrim Join`r`n
+							" nm_Walk(7, RightKey, FwdKey) "
+							" nm_Walk(10, FwdKey) "
+							" nm_Walk(10, FwdKey, RightKey) "
+							" nm_Walk(7, BackKey) "
+							" nm_Walk(2, RightKey) "
+							" nm_Walk(3.75, BackKey) "
+							" nm_Walk(3, LeftKey)"
+							loop, 4 {
+							" nm_Walk(5, LeftKey) "
+							" nm_Walk(1.5, BackKey) "
+							" nm_Walk(5, RightKey)"
+							" nm_Walk(1.5, BackKey) "
+							}
+							loop, 2 {
+							" nm_Walk(15, LeftKey) "
+							" nm_Walk(1, FwdKey) "
+							" nm_Walk(15, RightKey) "
+							" nm_Walk(1, FwdKey) "
+							}
+							" nm_Walk(15, LeftKey) "
+							loop, 4 {
+							" nm_Walk(1.5, FwdKey) "
+							" nm_Walk(5, RightKey) "
+							" nm_Walk(1.5, FwdKey) "
+							" nm_Walk(5, LeftKey)"
+							}
+						)"
+						nm_createWalk(gatherloot)
+						KeyWait, F14, D T5 L
+						KeyWait, F14, T60 L
+						nm_endWalk()
+						nm_SetStatus("Collected", "Wind Shrine")
+						
+						if (ShrineIndex%ShrineRot% != "Infinite")  {
+							ShrineIndex%shrineRot%-- ;subtract from shrineindex for looping only if its a number
+							GuiControl,, ShrineData%ShrineRot%, % "(" ShrineAmount%ShrineRot% ") [" ((ShrineIndex%ShrineRot% = "Infinite") ? "∞" : ShrineIndex%ShrineRot%) "]"
+							IniWrite, % ShrineIndex%ShrineRot%, settings\nm_config.ini, Shrine, ShrineIndex%ShrineRot%
+						}
+						ShrineRot := Mod(ShrineRot, 2) + 1 ; determine Shrinerot
+						nm_ShrineRotation()
+		
+						break 2
+					} else {
+						MouseMove, windowX+windowWidth//2+30, WindowY+windowHeight//2-25
+						sleep 150
+						click
+						Gdip_DisposeImage(pBMScreen)
+						if (A_Index = 60) {
+							if (z = 2)
+								nm_setStatus("Failed", "Wind shrine")	
+							break
+						}
+						sleep, 100
+					}
+				}
+			}
+		}
+		LastShrine := nowUnix()
+		IniWrite, %LastShrine%, settings\nm_config.ini, Shrine, LastShrine
+		IniWrite, %ShrineRot%, settings\nm_config.ini, Shrine, ShrineRot
+	}
+	loop 3 {
 		if(FieldBooster%A_Index%="none" && QuestBlueBoost=0 && QuestRedBoost=0)
 			break
 		LastBooster:=max(LastBlueBoost, LastRedBoost, LastMountainBoost)
@@ -9518,136 +9714,6 @@ nm_toAnyBooster(){
 			nm_toBooster("mountain")
 		}
 	}
-}
-nm_shrine(){
-    global FwdKey, BackKey, LeftKey, RightKey, RotLeft, RotRight, KeyDelay, objective, CurrentAction, PreviousAction, MoveSpeedNum, GatherFieldBoostedStart, LastGlitter, MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff, VBState, LastShrine, ShrineCheck, ShrineItem1, ShrineItem2, ShrineAmount1, ShrineAmount2, ShrineRot, resetTime, Shrine, SC_E, SC_Space, SC_1
-    if(VBState=1)
-        return
-    FormatTime, utc_min, %A_NowUTC%, m
-    if((MondoBuffCheck && utc_min>=0 && utc_min<14 && (nowUnix()-LastMondoBuff)>960 && (MondoAction="Buff" || MondoAction="Kill")) || (MondoBuffCheck && utc_min>=0 && utc_min<12 && (nowUnix()-LastGuid)<60 && PMondoGuid && MondoAction="Guid") || (MondoBuffCheck && (utc_min>=0 && utc_min<=8) && (nowUnix()-LastMondoBuff)>960 && PMondoGuid && MondoAction="Tag"))
-        return
-    if ((nowUnix()-GatherFieldBoostedStart<900) || (nowUnix()-LastGlitter<900) || nm_boostBypassCheck())
-        return
-
-	hwnd := GetRobloxHWND()
-	offsetY := GetYOffset(hwnd)
-	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
-
-    if(CurrentAction!="Shrine") {
-        PreviousAction:=CurrentAction
-        CurrentAction:="Shrine"
-    }
-    nm_ShrineRotation() ; make sure ShrineRot hasnt changed
-    if (ShrineCheck && (nowUnix()-LastShrine)>3600) { ;1 hour
-        loop, 2 {
-            z := A_Index
-            nm_Reset()
-            nm_setStatus("Traveling", "Wind Shrine" ((A_Index > 1) ? " (Attempt 2)" : ""))
-
-            nm_gotoCollect("WindShrine")
-
-            searchRet := nm_imgSearch("e_button.png",30,"high")
-            If (searchRet[1] = 0) {
-                sendinput {%SC_E% down}
-                Sleep, 100
-                sendinput {%SC_E% up}
-                Sleep, 2000
-
-                MouseMove, WindowX+Windowwidth//2, WindowY+WindowHeight//1.35 - 5
-                sleep, 150
-                Click
-                sleep, 300
-                SearchX := WindowX+Windowwidth//2 + 20, SearchY := WindowY+WindowHeight//2 - 100
-                Loop
-                {
-                    sleep, 150
-					ShrineSS := Gdip_BitmapFromScreen(SearchX "|" SearchY "|170|245")
-                    Donation := % "ShrineItem" ShrineRot
-					DonationIMG := % %Donation%
-					
-                    if (Gdip_ImageSearch(ShrineSS, Shrine[DonationIMG], , , , , , 2, , 4) > 0) {
-						Gdip_DisposeImage(ShrineSS)
-						sleep, 200
-                        MouseMove, WindowX+WindowWidth//2 + 165, WindowY+WindowHeight//2 + 65 ; Add more items
-                        sleep, 150
-                        While (A_index < ShrineAmount%ShrineRot%) {
-                            Click
-                            sleep, 30
-                        }
-                        sleep, 300
-						MouseMove, WindowX+WindowWidth//2 - 70, WindowY+WindowHeight//2 + 130 ; click donate/confirm
-						sleep, 150
-						Click
-						sleep, 150
-						MouseMove, WindowX+WindowWidth//2, WindowY+WindowHeight//1.35 - 5 ; move mouse onto gui box
-						loop, 10 {
-							sleep, 200
-							Click
-						}
-						sleep, 500
-						gatherloot := "
-						    (LTrim Join`r`n
-						    " nm_Walk(7, RightKey, FwdKey) "
-						    " nm_Walk(10, FwdKey) "
-						    " nm_Walk(10, FwdKey, RightKey) "
-						    " nm_Walk(7, BackKey) "
-						    " nm_Walk(2, RightKey) "
-						    " nm_Walk(3.75, BackKey) "
-						    " nm_Walk(3, LeftKey)"
-						    loop, 4 {
-						        " nm_Walk(5, LeftKey) "
-						        " nm_Walk(1.5, BackKey) "
-						        " nm_Walk(5, RightKey)"
-						        " nm_Walk(1.5, BackKey) "
-						    }
-						    loop, 2 {
-						        " nm_Walk(15, LeftKey) "
-						        " nm_Walk(1, FwdKey) "
-						        " nm_Walk(15, RightKey) "
-						        " nm_Walk(1, FwdKey) "
-						    }
-						    " nm_Walk(15, LeftKey) "
-						    loop, 4 {
-						        " nm_Walk(1.5, FwdKey) "
-						        " nm_Walk(5, RightKey) "
-						        " nm_Walk(1.5, FwdKey) "
-						        " nm_Walk(5, LeftKey)"
-						    }
-						)"
-						nm_createWalk(gatherloot)
-						KeyWait, F14, D T5 L
-						KeyWait, F14, T60 L
-						nm_endWalk()
-						nm_SetStatus("Collected", "Wind Shrine")
-						
-						if (ShrineIndex%ShrineRot% != "Infinite")  {
-							ShrineIndex%shrineRot%-- ;subtract from shrineindex for looping only if its a number
-							GuiControl,, ShrineData%ShrineRot%, % "(" ShrineAmount%ShrineRot% ") [" ((ShrineIndex%ShrineRot% = "Infinite") ? "∞" : ShrineIndex%ShrineRot%) "]"
-							IniWrite, % ShrineIndex%ShrineRot%, settings\nm_config.ini, Shrine, ShrineIndex%ShrineRot%
-						}
-						ShrineRot := Mod(ShrineRot, 2) + 1 ; determine Shrinerot
-						nm_ShrineRotation()
-
-						break 2
-                    } else {
-						Gdip_DisposeImage(ShrineSS)
-                        MouseMove, WindowX+WindowWidth//2 + 165, WindowY+WindowHeight//2 - 20 ; go to next item
-                        sleep, 50
-                        Click
-                        if (A_Index = 60) {
-                            if (z = 2)
-                                nm_setStatus("Failed", "Wind shrine")	
-                            break
-                        }
-						sleep, 100
-                    }
-                }
-            }
-        }
-        LastShrine := nowUnix()
-        IniWrite, %LastShrine%, settings\nm_config.ini, collect, LastShrine
-        IniWrite, %ShrineRot%, settings\nm_config.ini, collect, ShrineRot
-    }
 }
 nm_Collect(){
 	global FwdKey, BackKey, LeftKey, RightKey, RotLeft, RotRight, KeyDelay, objective, CurrentAction, PreviousAction, MoveSpeedNum, GatherFieldBoostedStart, LastGlitter, MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff, VBState, ClockCheck, LastClock, AntPassCheck, AntPassAction, QuestAnt, LastAntPass, HoneyDisCheck, LastHoneyDis, TreatDisCheck, LastTreatDis, BlueberryDisCheck, LastBlueberryDis, StrawberryDisCheck, LastStrawberryDis, CoconutDisCheck, LastCoconutDis, GlueDisCheck, LastGlueDis, RoboPassCheck, LastRoboPass, HoneystormCheck, LastHoneystorm, RoyalJellyDisCheck, LastRoyalJellyDis, StockingsCheck, LastStockings, FeastCheck, RBPDelevelCheck, LastRBPDelevel, LastFeast, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon, beesmasActive, HoneySSCheck, resetTime, bitmaps, SC_E, SC_Space, SC_1, BlenderRot, LastBlenderRot, BlenderEnd, TimerInterval, BlenderIndex1, BlenderIndex2, BlenderIndex3, BlenderItem1, BlenderItem2, BlenderItem3, BlenderTime1, BlenderTime2, BlenderTime3, BlenderAmount1, BlenderAmount2, BlenderAmount3, Blendercheck
@@ -9770,10 +9836,10 @@ nm_Collect(){
 				sendinput {%SC_E% up}
 				Sleep, 500
 
-				SearchX := windowX+Windowwidth//2 - 277, SearchY := windowY+WindowHeight//2 - 243, BlenderSS := Gdip_BitmapFromScreen(SearchX "|" SearchY "|553|400")
+				SearchX := windowX+Windowwidth//2 - 280, SearchY := windowY+WindowHeight//2 - 245, BlenderSS := Gdip_BitmapFromScreen(SearchX "|" SearchY "|553|400")
 
 				if (Gdip_ImageSearch(BlenderSS, bitmaps["CancelCraft"], , , , , , 2, , 7) > 0) {
-					MouseMove, windowX+WindowWidth//2 + 230, windowY+WindowHeight//2 + 90 ; click cancel button
+					MouseMove, windowX+WindowWidth//2 + 230, windowY+WindowHeight//2 + 115 ; click cancel button
 					sleep, 150
 					Click
 				}
@@ -9788,13 +9854,13 @@ nm_Collect(){
 				} else if (BlenderEnd && Gdip_ImageSearch(BlenderSS, bitmaps["EndCraftR"], , , , , , 3, , 6) > 0) {
 					Iniwrite, 0, settings\nm_config.ini, Blender, BlenderEnd
 					BlenderEnd := 0
-					MouseMove, windowX+WindowWidth//2 - 60, windowY+WindowHeight//2 + 120 ; close red craft button
+					MouseMove, windowX+WindowWidth//2 - 120, windowY+WindowHeight//2 + 100 ; close red craft button
 					sleep, 150
 					Click
 				}
 
 				if (Gdip_ImageSearch(BlenderSS, bitmaps["EndCraftG"], , , , , , 4, , 6) > 0) {
-					MouseMove, windowX+WindowWidth//2 - 60, windowY+WindowHeight//2 + 120 ; close green craft button
+					MouseMove, windowX+WindowWidth//2 - 120, windowY+WindowHeight//2 + 100 ; close green craft button
 					sleep, 150
 					Click
 				}
@@ -9829,11 +9895,11 @@ nm_Collect(){
 							break
 						}
 						gdip_disposeimage(BlenderSS)
-						MouseMove, windowX+Windowwidth//2 + 80, windowY+WindowHeight//2 + 100 ;Open item menu
+						MouseMove, windowX+Windowwidth//2 - 15, windowY+WindowHeight//2 + 110 ;Open item menu
 						sleep, 150
 						click
 						sleep, 150
-						MouseMove, windowX+WindowWidth//2 - 60, windowY+WindowHeight//2 + 120 ;Add more of x item
+						MouseMove, windowX+WindowWidth//2 - 60, windowY+WindowHeight//2 + 130 ;Add more of x item
 						sleep, 150
 						While (A_Index < BlenderAmount%BlenderRot%) {
 							Click
@@ -9874,7 +9940,7 @@ nm_Collect(){
 							IniWrite, % BlenderIndex%BlenderRot%, settings\nm_config.ini, blender, BlenderIndex%BlenderRot%
 						}
 						sleep, 100
-						MouseMove, windowX+Windowwidth//2 + 80, windowY+WindowHeight//2 + 100 ;Click Confirm
+						MouseMove, windowX+Windowwidth//2 + 70, windowY+WindowHeight//2 + 110 ;Click Confirm
 						sleep, 150
 						Click
 						sleep, 100
@@ -9884,7 +9950,7 @@ nm_Collect(){
 						break 2
 					} else {
 						sleep, 50
-						MouseMove, windowX+WindowWidth//2 + 230, windowY+WindowHeight//2 + 140 ;not found go next item
+						MouseMove, windowX+WindowWidth//2 + 230, windowY+WindowHeight//2 + 115 ;not found go next item
 						sleep, 150
 						Click
 						sleep, 100
@@ -9969,8 +10035,8 @@ nm_Collect(){
 			QuestAnt:=0
 			movement := "
 			(LTrim Join`r`n
-			" nm_Walk(13, FwdKey, RightKey) "
-			" nm_Walk(5, FwdKey) "
+			" nm_Walk(12, FwdKey, RightKey) "
+			" nm_Walk(4, FwdKey) "
 			)"
 			nm_createWalk(movement)
 			KeyWait, F14, D T5 L
@@ -10181,7 +10247,6 @@ nm_Collect(){
 			nm_Reset()
 			nm_setStatus("Traveling", "Glue Dispenser" ((A_Index > 1) ? " (Attempt 2)" : ""))
 
-			nm_OpenMenu("itemmenu")
 			nm_gotoCollect("gluedis", 0) ; do not wait for end
 
 			;locate gumdrops
@@ -10194,7 +10259,7 @@ nm_Collect(){
 			KeyWait, F14, T120 L
 			nm_endWalk()
 
-			MouseClickDrag, Left, windowX+gumdropPos[1], windowY+gumdropPos[2], windowX+(windowWidth/2), windowY+(windowHeight/2), 5
+			MouseClickDrag, Left, windowX+gumdropPos[1], windowY+gumdropPos[2], windowX+(windowWidth//2), windowY+(windowHeight//2), 5
 			;close inventory
 			nm_OpenMenu()
 			Sleep, 500
@@ -12554,9 +12619,9 @@ nm_Bugrun(){
 				{
 					movement := "
 					(LTrim Join`r`n
-					" nm_Walk(47.25, BackKey, LeftKey) "
-					" nm_Walk(40.5, LeftKey) "
-					" nm_Walk(8.1, BackKey) "
+					" nm_Walk(44.75, BackKey, LeftKey) "
+					" nm_Walk(42.5, LeftKey) "
+					" nm_Walk(8.5, BackKey) "
 					" nm_Walk(22.5, LeftKey) "
 					send {" RotLeft " 2}
 					" nm_Walk(27, FwdKey) "
@@ -13208,13 +13273,14 @@ nm_GoGather(){
 	global WhirligigKey, PFieldBoosted, GlitterKey, GatherFieldBoosted, GatherFieldBoostedStart, LastGlitter, PMondoGuidComplete, LastGuid, PMondoGuid, PFieldGuidExtend, PFieldGuidExtendMins, PFieldBoostExtend, PPopStarExtend, HasPopStar, PopStarActive, FieldGuidDetected, CurrentAction, PreviousAction
 	global LastWhirligig
 	global BoostChaserCheck, LastBlueBoost, LastRedBoost, LastMountainBoost, FieldBooster3, FieldBooster2, FieldBooster1, FieldDefault, LastMicroConverter, HiveConfirmed, LastWreath, WreathCheck
+	global BlueFlowerBoosterCheck, BambooBoosterCheck, PineTreeBoosterCheck, DandelionBoosterCheck, SunflowerBoosterCheck, CloverBoosterCheck, SpiderBoosterCheck, PineappleBoosterCheck, CactusBoosterCheck, PumpkinBoosterCheck, MushroomBoosterCheck, StrawberryBoosterCheck, RoseBoosterCheck
 	global FieldName1, FieldPattern1, FieldPatternSize1, FieldPatternReps1, FieldPatternShift1, FieldPatternInvertFB1, FieldPatternInvertLR1, FieldUntilMins1, FieldUntilPack1, FieldReturnType1, FieldSprinklerLoc1, FieldSprinklerDist1, FieldRotateDirection1, FieldRotateTimes1, FieldDriftCheck1
 	global FieldName2, FieldPattern2, FieldPatternSize2, FieldPatternReps2, FieldPatternShift2, FieldPatternInvertFB2, FieldPatternInvertLR2, FieldUntilMins2, FieldUntilPack2, FieldReturnType2, FieldSprinklerLoc2, FieldSprinklerDist2, FieldRotateDirection2, FieldRotateTimes2, FieldDriftCheck2
 	global FieldName3, FieldPattern3, FieldPatternSize3, FieldPatternReps3, FieldPatternShift3, FieldPatternInvertFB3, FieldPatternInvertLR3, FieldUntilMins3, FieldUntilPack3, FieldReturnType3, FieldSprinklerLoc3, FieldSprinklerDist3, FieldRotateDirection3, FieldRotateTimes3, FieldDriftCheck3
 	global MondoBuffCheck, MondoAction, LastMondoBuff
 	global PlanterMode, gotoPlanterField, MPlanterGatherA, MPlanterGather1, MPlanterGather2, MPlanterGather3, LastPlanterGatherSlot, MPlanterHold1, MPlanterHold2, MPlanterHold3, PlanterField1, PlanterField2, PlanterField3, PlanterHarvestTime1, PlanterHarvestTime2, PlanterHarvestTime3
 	global QuestLadybugs, QuestRhinoBeetles, QuestSpider, QuestMantis, QuestScorpions, QuestWerewolf
-	global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, BugrunInterruptCheck, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BlackQuestCheck, BlackQuestComplete, QuestGatherField, BuckoQuestCheck, BuckoQuestComplete, RileyQuestCheck, RileyQuestComplete, PolarQuestCheck, PolarQuestComplete, RotateQuest, QuestGatherMins, QuestGatherReturnBy, BuckoRhinoBeetles, BuckoMantis, RileyLadybugs, RileyScorpions, RileyAll, GameFrozenCounter, HiveSlot, BugrunLadybugsCheck, BugrunRhinoBeetlesCheck, BugrunSpiderCheck, BugrunMantisCheck, BugrunScorpionsCheck, BugrunWerewolfCheck, MonsterRespawnTime
+	global PolarQuestGatherInterruptCheck, BuckoQuestGatherInterruptCheck, RileyQuestGatherInterruptCheck, BugrunInterruptCheck, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BlackQuestCheck, BlackQuestComplete, BrownQuestCheck, BrownQuestComplete, QuestGatherField, BuckoQuestCheck, BuckoQuestComplete, RileyQuestCheck, RileyQuestComplete, PolarQuestCheck, PolarQuestComplete, RotateQuest, QuestGatherMins, QuestGatherReturnBy, BuckoRhinoBeetles, BuckoMantis, RileyLadybugs, RileyScorpions, RileyAll, GameFrozenCounter, HiveSlot, BugrunLadybugsCheck, BugrunRhinoBeetlesCheck, BugrunSpiderCheck, BugrunMantisCheck, BugrunScorpionsCheck, BugrunWerewolfCheck, MonsterRespawnTime
 	global beesmasActive, BeesmasGatherInterruptCheck, StockingsCheck, LastStockings, FeastCheck, LastFeast, RBPDelevelCheck, LastRBPDelevel, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon
 	global GatherStartTime, TotalGatherTime, SessionGatherTime, ConvertStartTime, TotalConvertTime, SessionConvertTime
 	global bitmaps
@@ -13241,15 +13307,19 @@ nm_GoGather(){
 	loop 1 {
 		;boosted field override
 		if(BoostChaserCheck){
+
 			BoostChaserField:="None"
-			blueBoosterFields:=["Pine Tree", "Bamboo", "Blue Flower"]
-			redBoosterFields:=["Rose", "Strawberry", "Mushroom"]
-			mountainBoosterfields:=["Cactus", "Pumpkin", "Pineapple", "Spider", "Clover", "Dandelion", "Sunflower"]
-			otherFields:=["Stump", "Coconut", "Mountain Top", "Pepper"]
+			blueBoosterFields		:={PineTreeBoosterCheck: "Pine Tree", BambooBoosterCheck: "Bamboo", BlueFlowerBoosterCheck: "Blue Flower"}
+			redBoosterFields		:={RoseBoosterCheck: "Rose", StrawberryBoosterCheck: "Strawberry", MushroomBoosterCheck: "Mushroom"}
+			mountainBoosterfields	:={CactusBoosterCheck: "Cactus", PumpkinBoosterCheck: "Pumpkin", PineappleBoosterCheck: "Pineapple", SpiderBoosterCheck: "Spider", CloverBoosterCheck: "Clover", DandelionBoosterCheck: "Dandelion", SunflowerBoosterCheck: "Sunflower"}
+			otherFields				:=["Stump", "Coconut", "Mountain Top", "Pepper"]
+
 			loop 1 {
 				;blue
 				for key, value in blueBoosterFields {
-					if(nm_fieldBoostCheck(value, 1)) {
+					;MsgBox % "key: " %key% ", value: " value
+					if((nm_fieldBoostCheck(value, 1)) && (%key% = 1)) {
+						;MsgBox % "inside if((nm_fieldBoostCheck(value, 1)) && (%key% = 0)) statement"
 						BoostChaserField:=value
 						break
 					}
@@ -13258,7 +13328,7 @@ nm_GoGather(){
 					break
 				;mountain
 				for key, value in mountainBoosterFields {
-					if(nm_fieldBoostCheck(value, 1)) {
+					if((nm_fieldBoostCheck(value, 1)) && (%key% = 1)) {
 						BoostChaserField:=value
 						break
 					}
@@ -13267,7 +13337,7 @@ nm_GoGather(){
 					break
 				;red
 				for key, value in redBoosterFields {
-					if(nm_fieldBoostCheck(value, 1)) {
+					if((nm_fieldBoostCheck(value, 1)) && (%key% = 1)) {
 						BoostChaserField:=value
 						break
 					}
@@ -13308,7 +13378,7 @@ nm_GoGather(){
 			}
 		}
 		;questing override
-		if((BlackQuestCheck || BuckoQuestCheck || RileyQuestCheck || PolarQuestCheck) && (QuestGatherField && QuestGatherField!="None")){
+		if((BlackQuestCheck || BrownQuestCheck || BuckoQuestCheck || RileyQuestCheck || PolarQuestCheck) && (QuestGatherField && QuestGatherField!="None")){
 			fieldOverrideReason:="Quest"
 			thisfield:=QuestGatherField
 			if(QuestGatherField=FieldName1) {
@@ -13710,6 +13780,18 @@ nm_GoGather(){
 			}
 			;interrupt if
 			if (thisfield!=QuestGatherField || BlackQuestComplete){ ;change fields or this field is complete
+				interruptReason := "Next Quest Step"
+				break
+			}
+		}
+		;Brown Bear quest
+		if(RotateQuest="Brown" && BrownQuestCheck && fieldOverrideReason="Quest"){
+			nm_BrownQuestProg()
+			if(FieldPatternShift) {
+				nm_setShiftLock(1)
+			}
+			;interrupt if
+			if (thisfield!=QuestGatherField || BrownQuestComplete){ ;change fields or this field is complete
 				interruptReason := "Next Quest Step"
 				break
 			}
@@ -14172,18 +14254,18 @@ nm_BitterberryFeeder()
 		Loop, 10
 		{
 			Sleep, 100
-			pBMScreen := Gdip_BitmapFromScreen(windowX+(51*windowWidth)//100-216 ""|"" windowY+offsetY+(58*windowHeight)//100-59 ""|440|100"")
+			pBMScreen := Gdip_BitmapFromScreen(windowX+(54*windowWidth)//100-300 ""|"" windowY+offsetY+(46*windowHeight)//100-59 ""|250|100"")
 			if (Gdip_ImageSearch(pBMScreen, bitmaps[""feed""], pos, , , , , 2, , 2) = 1)
 			{
 				Gdip_DisposeImage(pBMScreen)
-				Click, % windowX+(51*windowWidth)//100-216+SubStr(pos, 1, InStr(pos, "","")-1)+140 "" "" windowY+offsetY+(58*windowHeight)//100-59+SubStr(pos, InStr(pos, "","")+1)+5 ; Click Number
+				Click, % windowX+(54*windowWidth)//100-300+SubStr(pos, 1, InStr(pos, "","")-1)+140 "" "" windowY+offsetY+(46*windowHeight)//100-59+SubStr(pos, InStr(pos, "","")+1)+5 ; Click Number
 				Sleep, 100
 				Loop % StrLen(bitterberrynos)
 				{
 					SendEvent % ""{Text}"" SubStr(bitterberrynos, A_Index, 1)
 					Sleep, 100
 				}
-				Click, % windowX+(51*windowWidth)//100-216+SubStr(pos, 1, InStr(pos, "","")-1) "" "" windowY+offsetY+(58*windowHeight)//100-59+SubStr(pos, InStr(pos, "","")+1) ; Click Feed
+				Click, % windowX+(54*windowWidth)//100-300+SubStr(pos, 1, InStr(pos, "","")-1) "" "" windowY+offsetY+(46*windowHeight)//100-59+SubStr(pos, InStr(pos, "","")+1) ; Click Feed
 				break
 			}
 			Gdip_DisposeImage(pBMScreen)
@@ -14317,11 +14399,11 @@ nm_BasicEggHatcher()
 		Loop, 10
 		{
 			Sleep, 100
-			pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 ""|"" windowY+offsetY+((6*windowHeight)//10-60) ""|500|150"")
+			pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250""|"" windowY+offsetY+windowHeight//2-52 ""|500|150"")
 			if (Gdip_ImageSearch(pBMScreen, bitmaps[""yes""], pos, , , , , 2, , 2) = 1)
 			{
 				Gdip_DisposeImage(pBMScreen)
-				Click % windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, "","")-1) "" "" windowY+offsetY+((6*windowHeight)//10-60)+SubStr(pos, InStr(pos, "","")+1)
+				Click % windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, "","")-1) "" "" windowY+offsetY+windowHeight//2-52+SubStr(pos, InStr(pos, "","")+1)
 				break
 			}
 			Gdip_DisposeImage(pBMScreen)
@@ -15586,17 +15668,23 @@ nm_Move(MoveTime, MoveKey1, MoveKey2:="None"){
 }
 CloseRoblox()
 {
-	local PrevKeyDelay, p
+	global KeyDelay, SC_Esc, SC_L, SC_Enter
 	; if roblox exists, activate it and send Esc+L+Enter
-	if GetRobloxHWND()
+	if (hwnd := GetRobloxHWND())
 	{
-		WinActivate, Roblox
-		PrevKeyDelay := A_KeyDelay
-		SetKeyDelay, 250+KeyDelay
-		send {%SC_Esc%}{%SC_L%}{%SC_Enter%}
-		SetKeyDelay, PrevKeyDelay
+		WinGetClientPos(, , , windowHeight, "ahk_id " hwnd)
+		if (windowHeight >= 500) ; requirement for L to activate "Leave"
+		{
+			WinActivate, Roblox
+			PrevKeyDelay := A_KeyDelay
+			SetKeyDelay, 250+KeyDelay
+			send {%SC_Esc%}{%SC_L%}{%SC_Enter%}
+			SetKeyDelay, PrevKeyDelay
+		}
 		WinClose, Roblox
-		Sleep, 5000 ;Delay to prevent Roblox Error Code 264
+		Sleep, 500
+		WinClose, Roblox
+		Sleep, 4500 ;Delay to prevent Roblox Error Code 264
 	}
 	; kill any remnant processes
 	for p in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process WHERE Name LIKE '%Roblox%' OR CommandLine LIKE '%ROBLOXCORPORATION%'")
@@ -15609,9 +15697,9 @@ DisconnectCheck(testCheck := 0)
 	
 	; return if not disconnected or crashed
 	WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
-	if ((windowWidth != 0) && !WinExist("Roblox Crash")) {
+	if ((windowWidth > 0) && !WinExist("Roblox Crash")) {
 		pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-200 "|" windowY+windowHeight//2-160 "|400|320")
-		if (Gdip_ImageSearch(pBMScreen, bitmaps["disconnected"], , , , , , 2) = 0) {
+		if (Gdip_ImageSearch(pBMScreen, bitmaps["disconnected"], , , , , , 2) != 1) {
 			Gdip_DisposeImage(pBMScreen)
 			return 0
 		}
@@ -15688,12 +15776,12 @@ DisconnectCheck(testCheck := 0)
 				CloseRoblox()
 				;Run Server Deeplink
 				nm_setStatus("Attempting", ServerLabels[server])
-				try Run % "roblox://placeID=1537690962" (server ? ("&linkCode=" linkCodes[server]) : "")
+				try Run % """roblox://placeID=1537690962" (server ? ("&linkCode=" linkCodes[server]) : "") """"
 				
 				case 3,4:
 				;Run Server Deeplink (without closing)
 				nm_setStatus("Attempting", ServerLabels[server])
-				try Run % "roblox://placeID=1537690962" (server ? ("&linkCode=" linkCodes[server]) : "")
+				try Run % """roblox://placeID=1537690962" (server ? ("&linkCode=" linkCodes[server]) : "") """"
 				
 				default:
 				if server {
@@ -15714,7 +15802,7 @@ DisconnectCheck(testCheck := 0)
 					;Close Roblox
 					(i = 1) ? CloseRoblox()
 					;Run Server Link (spam deeplink method)
-					try Run % "roblox://placeID=1537690962"
+					try Run % """roblox://placeID=1537690962"""
 				}
 			}
 			;STAGE 1 - wait for Roblox window
@@ -16035,9 +16123,11 @@ nm_claimHiveSlot(){
 
 		movement := "
 		(LTrim Join`r`n
-		" nm_Walk(35, FwdKey, RightKey) "
-		" nm_Walk(5, BackKey) "
-		" nm_Walk(3.5, LeftKey) "
+		Send {" RightKey " down}
+		Walk(4)
+		Send {" FwdKey " down}
+		Walk(20)
+		Send {" RightKey " up}{" FwdKey " up}
 		)"
 		nm_createWalk(movement)
 		KeyWait, F14, D T5 L
@@ -16048,7 +16138,7 @@ nm_claimHiveSlot(){
 		slots := {}
 		movement := "
 		(LTrim Join`r`n
-		" nm_Walk(8.35, LeftKey) "
+		" nm_Walk(9.2, LeftKey) "
 		)"
 		Loop % HiveSlot
 		{
@@ -16059,10 +16149,17 @@ nm_claimHiveSlot(){
 				KeyWait, F14, T20 L
 				nm_endWalk()
 			}
-
+			
 			Sleep, 500
-			pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-200 "|" windowY+offsetY+36 "|200|120")
-			if (Gdip_ImageSearch(pBMScreen, bitmaps["e_button"], , , , , , 2, , 6) = 1)
+			pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-200 "|" windowY+offsetY "|400|125")
+
+			while ((A_Index <= 10) && (Gdip_ImageSearch(pBMScreen, bitmaps["FriendJoin"], , , , , , 6) = 1)) {
+				Gdip_DisposeImage(pBMScreen)
+				Sleep 500
+				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-200 "|" windowY+offsetY "|400|125")
+			}
+
+			if (Gdip_ImageSearch(pBMScreen, bitmaps["claimhive"], , , , , , 2, , 6) = 1)
 				slots[A_Index] := 1
 			Gdip_DisposeImage(pBMScreen)
 		}
@@ -16075,15 +16172,23 @@ nm_claimHiveSlot(){
 			{
 				movement := "
 				(LTrim Join`r`n
-				" nm_Walk((HiveSlot - slots.MinIndex()) * 8.35, RightKey) "
+				" nm_Walk((HiveSlot - slots.MinIndex()) * 9.2, RightKey) "
 				)"
 				nm_createWalk(movement)
 				KeyWait, F14, D T5 L
 				KeyWait, F14, T20 L
 				nm_endWalk()
+
 				Sleep, 500
-				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-200 "|" windowY+offsetY+36 "|200|120")
-				if (Gdip_ImageSearch(pBMScreen, bitmaps["e_button"], , , , , , 2, , 6) = 1) {
+				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-200 "|" windowY+offsetY "|400|125")
+
+				while ((A_Index <= 10) && (Gdip_ImageSearch(pBMScreen, bitmaps["FriendJoin"], , , , , , 6) = 1)) {
+					Gdip_DisposeImage(pBMScreen)
+					Sleep 500
+					pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-200 "|" windowY+offsetY "|400|125")
+				}
+
+				if (Gdip_ImageSearch(pBMScreen, bitmaps["claimhive"], , , , , , 2, , 6) = 1) {
 					Gdip_DisposeImage(pBMScreen)
 					HiveSlot := slots.MinIndex()
 					break
@@ -16099,8 +16204,15 @@ nm_claimHiveSlot(){
 					nm_endWalk()
 
 					Sleep, 500
-					pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-200 "|" windowY+offsetY+36 "|200|120")
-					if (Gdip_ImageSearch(pBMScreen, bitmaps["e_button"], , , , , , 2, , 6) = 1) {
+					pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-200 "|" windowY+offsetY "|400|125")
+
+					while ((A_Index <= 10) && (Gdip_ImageSearch(pBMScreen, bitmaps["FriendJoin"], , , , , , 6) = 1)) {
+						Gdip_DisposeImage(pBMScreen)
+						Sleep 500
+						pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-200 "|" windowY+offsetY "|400|125")
+					}
+
+					if (Gdip_ImageSearch(pBMScreen, bitmaps["claimhive"], , , , , , 2, , 6) = 1) {
 						Gdip_DisposeImage(pBMScreen)
 						HiveSlot += A_Index
 						break 2
@@ -17293,9 +17405,9 @@ nm_PolarQuest(){
 	}
 }
 nm_QuestRotate(){
-	global QuestGatherField, RotateQuest, BlackQuestCheck, BlackQuestComplete, LastBlackQuest, BuckoQuestCheck, BuckoQuestComplete, RileyQuestCheck, RileyQuestComplete, HoneyQuestCheck, PolarQuestCheck, GatherFieldBoostedStart, LastGlitter, MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff, VBState, bitmaps
+	global QuestGatherField, RotateQuest, BlackQuestCheck, BlackQuestComplete, LastBlackQuest, BrownQuestCheck, BuckoQuestCheck, BuckoQuestComplete, RileyQuestCheck, RileyQuestComplete, HoneyQuestCheck, PolarQuestCheck, GatherFieldBoostedStart, LastGlitter, MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff, VBState, bitmaps
 
-	if ((BlackQuestCheck=0) && (BuckoQuestCheck=0) && (RileyQuestCheck=0) && (HoneyQuestCheck=0) && (PolarQuestCheck=0))
+	if ((BlackQuestCheck=0) && (BrownQuestCheck=0) && (BuckoQuestCheck=0) && (RileyQuestCheck=0) && (HoneyQuestCheck=0) && (PolarQuestCheck=0))
 		return
 	if(VBState=1)
 		return
@@ -17325,6 +17437,11 @@ nm_QuestRotate(){
 		}
 	}
 
+	if (QuestGatherField = "None") {
+		;all previous quests did not set a QuestGatherField, so check brown bear quest
+		nm_BrownQuest()
+	}
+
 	;honey bee quest
 	nm_HoneyQuest()
 }
@@ -17341,7 +17458,7 @@ nm_Feed(food){
 	Loop, 10
 	{
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
-		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" Max(480, windowHeight-offsetY-150))
+		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|" (54*windowWidth)//100-50 "|" Max(480, windowHeight-offsetY-150))
 
 		if (A_Index = 1)
 		{
@@ -17362,42 +17479,48 @@ nm_Feed(food){
 					{
 						Sleep, 50
 						Gdip_DisposeImage(pBMScreen)
-						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" Max(480, windowHeight-offsetY-150))
+						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|" (54*windowWidth)//100-50 "|" Max(480, windowHeight-offsetY-150))
 					}
 				}
 			}
 		}
 
-		if ((Gdip_ImageSearch(pBMScreen, bitmaps[food], pos, , , 306, , 10, , 5) = 0) || (nm_imgSearch("feeder.png",30)[1] = 0)) {
+		if ((Gdip_ImageSearch(pBMScreen, bitmaps[food], pos, , , 306, , 10, , 5) = 0) || (Gdip_ImageSearch(pBMScreen, bitmaps["feed"], , (54*windowWidth)//100-300, , , , 2, , 2) = 1)) {
 			Gdip_DisposeImage(pBMScreen)
 			break
 		}
 		Gdip_DisposeImage(pBMScreen)
 
-		MouseClickDrag, Left, windowX+30, windowY+SubStr(pos, InStr(pos, ",")+1)+190, windowX+windowWidth//2, windowY+windowHeight//2-10*A_Index, 5
+		MouseClickDrag, Left, windowX+30, windowY+SubStr(pos, InStr(pos, ",")+1)+190, windowX+windowWidth//2, windowY+41*windowHeight//100-10*(A_Index-1), 5
 		sleep, 500
 	}
-	Sleep, 250
-	;check if food is already visible
-	imgPos := nm_imgSearch("feeder.png",30)
-	If (imgPos[1]=0){
-		hwnd := GetRobloxHWND()
-		offsetY := GetYOffset(hwnd)
-		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
-		MouseMove, windowX+imgPos[2], windowY+imgPos[3]
-		sleep 100
-		Click
-		sleep 100
-		send 100
-		sleep 1000
-		imgPos := nm_imgSearch("feed.png",30)
-		If (imgPos[1]=0){
-			MouseMove, windowX+imgPos[2], windowY+imgPos[3]
+	Loop, 20 {
+		Sleep, 100
+		pBMScreen := Gdip_BitmapFromScreen(windowX+(54*windowWidth)//100-300 "|" windowY+offsetY+(46*windowHeight)//100-59 "|250|100")
+		if (Gdip_ImageSearch(pBMScreen, bitmaps["feed"], pos, , , , , 2, , 2) = 1) {
+			Gdip_DisposeImage(pBMScreen)
+			MouseMove, windowX+(54*windowWidth)//100-300+SubStr(pos, 1, InStr(pos, ",")-1)+140, windowY+offsetY+(46*windowHeight)//100-59+SubStr(pos, InStr(pos, ",")+1)+5 ; Number
+			Sleep, 100
+			Click
+			Sleep, 100
+			Send {Text}100
+			Sleep, 1000
+			MouseMove, windowX+(54*windowWidth)//100-300+SubStr(pos, 1, InStr(pos, ",")-1), windowY+offsetY+(46*windowHeight)//100-59+SubStr(pos, InStr(pos, ",")+1) ; Feed
+			Sleep, 100
 			Click
 			nm_setStatus("Completed", "Feed " food)
+			break
+		} else {
+			Gdip_DisposeImage(pBMScreen)
+			if (A_Index = 20) {
+				MouseMove, windowX+(54*windowWidth)//100-300+SubStr(pos, 1, InStr(pos, ",")-1), windowY+offsetY+(46*windowHeight)//100-59+SubStr(pos, InStr(pos, ",")+1)+64 ; Cancel
+				Sleep, 100
+				Click
+				nm_setStatus("Failed", "Feed " food)
+			}
 		}
-		MouseMove, windowX+350, windowY+offsetY+100
 	}
+	MouseMove, windowX+350, windowY+offsetY+100
 	;close inventory
 	nm_OpenMenu()
 }
@@ -18368,6 +18491,309 @@ nm_BlackQuest(){
 		IniWrite, %LastBlackQuest%, settings\nm_config.ini, Quests, LastBlackQuest
 	}
 }
+nm_BrownQuestProg(){
+	global BrownQuestCheck, BrownQuest, BrownStart, HiveBees, FieldName1
+	global QuestGatherField:="None"
+	global QuestGatherFieldSlot:=0
+	global BrownQuestComplete:=1
+	global BrownQuestProgress
+	global QuestBarSize
+	global QuestBarGapSize
+	global QuestBarInset
+	global state, bitmaps
+	if(!BrownQuestCheck)
+		return
+	nm_setShiftLock(0)
+	nm_OpenMenu("questlog")
+
+	hwnd := GetRobloxHWND()
+	offsetY := GetYOffset(hwnd)
+	;2 scrolls
+	Loop, 3 {
+		;search for brown quest
+		Loop, 70
+		{
+			Qfound:=nm_imgSearch("brown_bear.png",50,"quest")
+			if (Qfound[1]=0) {
+				if (A_Index > 1)
+					Gdip_DisposeImage(pBMLog)
+				break
+			}
+
+			Qfound:=nm_imgSearch("brown_bear2.png",50,"quest")
+			if (Qfound[1]=0) {
+				if (A_Index > 1)
+					Gdip_DisposeImage(pBMLog)
+				break
+			}
+
+			WinActivate, Roblox
+			switch A_Index
+			{
+				case 1:
+				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
+				MouseMove, windowX+30, windowY+offsetY+200, 5
+				Loop, 50 ; scroll all the way up
+				{
+					MouseMove, windowX+30, windowY+offsetY+200, 5
+					sendinput {WheelUp}
+					Sleep, 50
+				}
+				pBMLog := Gdip_BitmapFromScreen(windowX+30 "|" windowY+offsetY+180 "|30|400")
+
+				default:
+				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
+				MouseMove, windowX+30, windowY+offsetY+200, 5
+				sendinput {WheelDown}
+				Sleep, 500 ; wait for scroll to finish
+				pBMScreen := Gdip_BitmapFromScreen(windowX+30 "|" windowY+offsetY+180 "|30|400")
+				if (Gdip_ImageSearch(pBMScreen, pBMLog, , , , , , 50) = 1) { ; end of quest log
+					Gdip_DisposeImage(pBMLog), Gdip_DisposeImage(pBMScreen)
+					break
+				}
+				Gdip_DisposeImage(pBMLog), pBMLog := Gdip_CloneBitmap(pBMScreen), Gdip_DisposeImage(pBMScreen)
+			}
+		}
+		Sleep, 500
+
+		if(Qfound[1]=0){
+			;locate exact bottom of quest title bar coordinates
+			;titlebar = 30 pixels high
+			;quest objective bar spacing = 10 pixels
+			;quest objective bar height = 40 pixels
+			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
+			MouseMove, windowX+350, windowY+offsetY+100
+			xi := windowX
+			yi := windowY+Qfound[3]
+			ww := windowX+306
+			wh := windowY+windowHeight
+			fileName:="questbargap.png"
+			IfExist, %A_WorkingDir%\nm_image_assets\
+			{
+				ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *5 %A_WorkingDir%\nm_image_assets\%fileName%
+				if (ErrorLevel = 2) {
+					nm_setStatus("Error", "Image file " filename " was not found in:`n" A_WorkingDir "\nm_image_assets\" fileName)
+					Sleep, 5000
+					Process, Close, % DllCall("GetCurrentProcessId")
+				}
+			} else {
+				MsgBox Folder location cannot be found:`n%A_WorkingDir%\nm_image_assets\
+			}
+			BrownStart:=[ErrorLevel, FoundX-windowX, FoundY-windowY]
+			;determine quest bar sizes and spacing
+			if(QuestBarGapSize=0 || QuestBarSize=0 || QuestBarInset=0) {
+				Loop, 3 {
+					xi := windowX
+					yi := windowY+BrownStart[3]+15
+					ww := windowX+306
+					wh := windowY+BrownStart[3]+100
+					ImageSearch, FoundX, FoundY, xi, yi, ww, wh, *5 nm_image_assets\questbargap.png
+					if(ErrorLevel=0) {
+						QuestBarSize:=FoundY-windowY-BrownStart[3]
+						QuestBarGapSize:=3
+						QuestBarInset:=3
+						NextY:=FoundY+1
+						NextX:=FoundX+1
+						loop 20 {
+							ImageSearch, FoundX, FoundY, FoundX, NextY, ww, wh, *5 nm_image_assets\questbargap.png
+							if(ErrorLevel=0) {
+								NextY:=FoundY+1
+								QuestBarGapSize:=QuestBarGapSize+1
+							} else {
+								break
+							}
+						}
+						wh := windowY+BrownStart[3]+200
+						loop 20 {
+							ImageSearch, FoundX, FoundY, NextX, yi, ww, wh, *5 nm_image_assets\questbarinset.png
+							if(ErrorLevel=0) {
+								NextX:=FoundX+1
+								QuestBarInset:=QuestBarInset+1
+							} else {
+								break
+							}
+						}
+						break
+						;msgbox QuestBarSize=%QuestBarSize%`nQuestBarGapSize=%QuestBarGapSize%`nQuestBarInset=%QuestBarInset%
+					} else {
+						MouseMove, windowX+30, windowY+offsetY+225
+						Sleep, 50
+						send, {WheelDown 1}
+						Sleep, 50
+						BrownStart[3]-=150
+						Sleep, 500
+					}
+				}
+			}
+			;determine Quest objecives
+			static objectiveList := {"dandelion": "Dand", "sunflower": "Sunf", "mushroom": "Mush", "blueflower": "Bluf", "clover": "Clove"
+				, "strawberry": "Straw", "spider": "Spide", "bamboo": "Bamb", "pineapple": "Pinap", "stump": "Stump"
+				, "cactus": "Cact", "pumpkin": "Pump", "pinetree": "Pine"
+				, "rose": "Rose", "mountaintop": "Mount", "pepper": "Pepp", "coconut": "Coco"
+				, "redpollen": "Red", "bluepollen": "Blue", "whitepollen": "White"}
+			objectives := []
+
+			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
+			while ((objectives.Length() < 4) && (A_Index <= 5)) { ; maximum 4 objectives
+				objectivePos := objectives.Length() * QuestBarSize, objectiveSize := 0
+				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+BrownStart[3]+QuestBarGapSize+objectivePos "|304|" QuestBarSize-QuestBarGapSize)
+
+				if (Gdip_ImageSearch(pBMScreen, bitmaps["questbarinset"], , , , 6, , 5) = 1) {
+					for i,size in [16,15,14,18,17] { ; in approximate order of probability
+						if (Gdip_ImageSearch(pBMScreen, bitmaps["s" size "collect"], , 6, , , , 30) = 1) {
+							objectiveSize := size
+							break
+						}
+					}
+
+					if (objectiveSize = 0)
+						objectives.Push("unknown")
+					else {
+						for k in objectiveList {
+							for i,v in objectives ; if objective already exists, cannot be duplicated
+								if (k = v)
+									continue 2
+							if (bitmaps.HasKey("s" objectiveSize k) && (Gdip_ImageSearch(pBMScreen, bitmaps["s" objectiveSize k], , 6, , , , 30) = 1))
+								objectives.Push(k)
+						}
+					}
+				} else {
+					;//todo: replace this with proper questlog endpoint detection (similar to inventory) to determine if quest is cut off or not, instead of next quest title (which may not exist)
+					if ((Gdip_ImageSearch(pBMScreen, bitmaps["questbartitle"], , , , 6, , 5) = 1) || (Gdip_ImageSearch(pBMScreen, bitmaps["questbartitlebeesmas"], , , , 6, , 5) = 1)) {
+						Gdip_DisposeImage(pBMScreen)
+						break ; end of quest reached confirmed, since there is a quest below
+					}
+
+					;//todo: detect if scrollbar is already at end before scrolling, or how much has scrolled instead of fixed 150. every quest needs this, should be in rewrite
+					
+					; otherwise, scroll up
+					Gdip_DisposeImage(pBMScreen)
+					MouseMove, windowX+30, windowY+offsetY+225
+					Sleep, 50
+					send, {WheelDown 1}
+					Sleep, 500
+					continue 2
+				}
+
+				Gdip_DisposeImage(pBMScreen)
+			}
+			break
+		}
+	}
+
+	;Update Brown quest progress in GUI
+	;also set next steps
+	QuestGatherField:="None"
+	QuestGatherFieldSlot:=0
+	newLine:="|"
+	brownProgress:=""
+	BrownQuest:=(objectives.Length() = 1) ? "Solo" : ""
+	for i,obj in objectives {
+		action:="Collect"
+		; decide field (where)
+		;//todo: make this into a function for use in other quest functions
+		switch obj {
+			case "redpollen":
+			if(HiveBees>=35){
+				where:="Pepper"
+			} else if(HiveBees>=15){
+				where:="Rose"
+			} else if (HiveBees>=5) {
+				where:="Strawberry"
+			} else {
+				where:="Mushroom"
+			}
+
+			case "bluepollen":
+			if(HiveBees>=15){
+				where:="Pine Tree"
+			} else if (HiveBees>=5) {
+				where:="Bamboo"
+			} else {
+				where:="Blue Flower"
+			}
+
+			case "whitepollen":
+			if (HiveBees>=10) {
+				where:="Pineapple"
+			} else if (HiveBees>=5) {
+				where:="Spider"
+			} else {
+				where:="Sunflower"
+			}
+
+			case "blueflower":
+			where:="Blue Flower"
+
+			case "pinetree":
+			where:="Pine Tree"
+
+			case "mountaintop":
+			where:="Mountain Top"
+
+			default:
+			where:=Format("{:T}", obj) ; title case, capitalise first letter
+		}
+
+		PixelGetColor, questbarColor, windowX+QuestBarInset+10, windowY+QuestBarSize*(i-1)+BrownStart[3]+QuestBarGapSize+5, RGB fast
+		if((questbarColor=Format("{:d}",0xF46C55)) || (questbarColor=Format("{:d}",0x6EFF60))) {
+			BrownQuestComplete:=0
+			completeness:="Incomplete"
+			if(QuestGatherField="None") {
+				QuestGatherField:=where
+				QuestGatherFieldSlot:=i
+			}
+		}
+		;border color, white (titlebar), black (text)
+		else if((questbarColor!=Format("{:d}",0x96C3DE)) && (questbarColor!=Format("{:d}",0xE5F0F7)) && (questbarColor!=Format("{:d}",0x1B2A35))) {
+			completeness:="Complete"
+		} else {
+			completeness:="Unknown"
+		}
+		BrownQuest .= "-" . objectiveList[obj]
+		brownProgress .= newline . action . " " . where . ": " . completeness
+	}
+	brownProgress := (BrownQuest := LTrim(BrownQuest, "-")) . brownProgress
+
+	IniWrite, %brownProgress%, settings\nm_config.ini, Quests, BrownQuestProgress
+	GuiControl,,BrownQuestProgress, % StrReplace(brownProgress, "|", "`n")
+	if(QuestGatherField="None") {
+		BrownQuestComplete:=1
+	}
+}
+nm_BrownQuest(){
+	global BrownQuestCheck, BrownQuestComplete, LastBrownQuest, RotateQuest, QuestGatherField, CurrentAction, PreviousAction, TotalQuestsComplete, SessionQuestsComplete
+	if(!BrownQuestCheck)
+		return
+	RotateQuest:="Brown"
+	nm_BrownQuestProg()
+	if(BrownQuestComplete && (nowUnix()-LastBrownQuest)>3600) {
+		if(CurrentAction!="Quest") {
+			PreviousAction:=CurrentAction
+			CurrentAction:="Quest"
+		}
+		nm_gotoQuestgiver("Brown")
+		nm_BrownQuestProg()
+		if(!BrownQuestComplete){
+			nm_setStatus("Starting", "Brown Bear Quest: " . BrownQuest)
+			TotalQuestsComplete:=TotalQuestsComplete+1
+			SessionQuestsComplete:=SessionQuestsComplete+1
+			Prev_DetectHiddenWindows := A_DetectHiddenWindows
+			Prev_TitleMatchMode := A_TitleMatchMode
+			DetectHiddenWindows On
+			SetTitleMatchMode 2
+			if WinExist("StatMonitor.ahk ahk_class AutoHotkey") {
+				PostMessage, 0x5555, 5, 1
+			}
+			DetectHiddenWindows %Prev_DetectHiddenWindows%
+			SetTitleMatchMode %Prev_TitleMatchMode%
+			IniWrite, %TotalQuestsComplete%, settings\nm_config.ini, Status, TotalQuestsComplete
+			IniWrite, %SessionQuestsComplete%, settings\nm_config.ini, Status, SessionQuestsComplete
+		}
+		LastBrownQuest:=nowUnix()
+		IniWrite, %LastBrownQuest%, settings\nm_config.ini, Quests, LastBrownQuest
+	}
+}
 nm_bugDeathCheck(){
 	global objective, TotalBugKills, SessionBugKills, LastBugrunLadybugs, LastBugrunRhinoBeetles, LastBugrunSpider, LastBugrunMantis, LastBugrunScorpions, LastBugrunWerewolf, BugDeathCheckLockout, BugrunLadybugsCheck, BugrunRhinoBeetlesCheck, BugrunMantisCheck, BugrunWerewolfCheck
 	if(BugDeathCheckLockout && (nowUnix() - BugDeathCheckLockout)>20)
@@ -18912,6 +19338,7 @@ nm_gotoQuestgiver(giver){
 		#Include gtq-polar.ahk
 		#Include gtq-honey.ahk
 		#Include gtq-black.ahk
+		#Include gtq-brown.ahk
 		#Include gtq-riley.ahk
 		#Include gtq-bucko.ahk
 		SetMoveMethod := MoveMethod, SetHiveSlot := HiveSlot, SetHiveBees := HiveBees
@@ -20229,7 +20656,6 @@ ba_placePlanter(fieldName, planter, planterNum, atField:=0){
 	}
 
 	nm_setShiftLock(0)
-	nm_OpenMenu("itemmenu")
 
 	planterName := planter[1]
 	if (atField = 0)
@@ -20264,7 +20690,7 @@ ba_placePlanter(fieldName, planter, planterNum, atField:=0){
 	{
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
 		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|" windowWidth//2 "|" Max(480, windowHeight-offsetY-150))
-
+		
 		if (A_Index = 1)
 		{
 			; wait for red vignette effect to disappear
@@ -20286,7 +20712,7 @@ ba_placePlanter(fieldName, planter, planterNum, atField:=0){
 					{
 						Sleep, 50
 						Gdip_DisposeImage(pBMScreen)
-						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|306|" Max(480, windowHeight-offsetY-150))
+						pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+offsetY+150 "|" windowWidth//2 "|" Max(480, windowHeight-offsetY-150))
 					}
 				}
 			}
@@ -20305,9 +20731,9 @@ ba_placePlanter(fieldName, planter, planterNum, atField:=0){
 	{
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
 		loop 3 {
-			pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+((6*windowHeight)//10 - 60) "|500|150")
+			pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+windowHeight//2-52 "|500|150")
 			if (Gdip_ImageSearch(pBMScreen, bitmaps["yes"], pos, , , , , 2, , 2) = 1) {
-				MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+((6*windowHeight)//10 - 60)+SubStr(pos, InStr(pos, ",")+1)
+				MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+windowHeight//2-52+SubStr(pos, InStr(pos, ",")+1)
 				sleep, 150
 				Click
 				sleep 100
@@ -20379,7 +20805,6 @@ ba_harvestPlanter(planterNum){
 		WinActivate, Roblox
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
 
-		nm_OpenMenu("itemmenu")
 		planterPos := nm_InventorySearch(planterName, "up", 4)
 
 		if (planterPos != 0) { ; found planter in inventory planter is a phantom
@@ -20428,9 +20853,9 @@ ba_harvestPlanter(planterNum){
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
 		if (HarvestFullGrown = 1) {
 			loop 3 {
-				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+((6*windowHeight)//10 - 60) "|500|150")
+				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+windowHeight//2-52 "|500|150")
 				if (Gdip_ImageSearch(pBMScreen, bitmaps["no"], pos, , , , , 2, , 3) = 1) {
-					MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+((6*windowHeight)//10 - 60)+SubStr(pos, InStr(pos, ",")+1)
+					MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+windowHeight//2-52+SubStr(pos, InStr(pos, ",")+1)
 					sleep, 150
 					Click
 					sleep 100
@@ -20444,9 +20869,9 @@ ba_harvestPlanter(planterNum){
 		}
 		else {
 			loop 3 {
-				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+((6*windowHeight)//10 - 60) "|500|150")
+				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+windowHeight//2-52 "|500|150")
 				if (Gdip_ImageSearch(pBMScreen, bitmaps["yes"], pos, , , , , 2, , 2) = 1) {
-					MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+((6*windowHeight)//10 - 60)+SubStr(pos, InStr(pos, ",")+1)
+					MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+windowHeight//2-52+SubStr(pos, InStr(pos, ",")+1)
 					sleep, 150
 					Click
 					sleep 100
@@ -20760,8 +21185,7 @@ loop, 3 {
 		break
 	}
 }
-if !GetRobloxHWND()
-	disconnectCheck()
+disconnectCheck()
 WinActivate, Roblox
 ;check UIPI
 PostMessage, 0x100, 0x7, 0, , % "ahk_id " (hRoblox := GetRobloxHWND())
@@ -20769,11 +21193,11 @@ if (ErrorLevel = 1)
 	msgbox, 0x1030, WARNING!!, % "Your Roblox window is run as admin, but the macro is not!`nThis means the macro will be unable to send any inputs to Roblox.`nYou must either reinstall Roblox without administrative rights, or run Natro Macro as admin!`n`nNOTE: It is recommended to stop the macro now, as this issue also causes hotkeys to not work while Roblox is active.", 60
 PostMessage, 0x101, 0x7, 0xC0000000, , % "ahk_id " hRoblox
 nm_setShiftLock(0)
-nm_OpenMenu()
 WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hRoblox)
 offsetY := GetYOffset(hRoblox, offsetfail)
 if (offsetfail = 1)
 	msgbox, 0x1030, WARNING!!, % "Unable to detect in-game GUI offset!`nThis means the macro will NOT work correctly!`n`nThere are a few reasons why this can happen:`n - Incorrect graphics settings (check Troubleshooting Guide!)`n - Your 'Experience Language' is not set to English`n - Something is covering the top of your Roblox window`n`nJoin our Discord server for support!", 60
+nm_OpenMenu()
 MouseMove, windowX+350, windowY+offsetY+100
 Prev_DetectHiddenWindows := A_DetectHiddenWindows
 Prev_TitleMatchMode := A_TitleMatchMode
@@ -21195,15 +21619,15 @@ nm_UpdateGUIVar(var)
 
 		case "FieldName1":
 		GuiControl, , %k%, % StrReplace(fieldnamelist, "|" %k% "|", "|" %k% "||")
-		nm_FieldSelect1()
+		nm_FieldSelect1(1)
 
 		case "FieldName2":
 		GuiControl, , %k%, % StrReplace(fieldnamelist, "|" %k% "|", "|" %k% "||")
-		nm_FieldSelect2()
+		nm_FieldSelect2(1)
 
 		case "FieldName3":
 		GuiControl, , %k%, % StrReplace(fieldnamelist, "|" %k% "|", "|" %k% "||")
-		nm_FieldSelect3()
+		nm_FieldSelect3(1)
 
 		case "FieldPattern1", "FieldPattern2", "FieldPattern3":
 		GuiControl, , %k%, % StrReplace(patternlist "Stationary|", "|" %k% "|", "|" %k% "||")

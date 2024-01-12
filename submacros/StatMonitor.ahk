@@ -1,6 +1,6 @@
 ﻿/*
 Natro Macro (https://github.com/NatroTeam/NatroMacro)
-Copyright © 2022-2023 Natro Team (https://github.com/NatroTeam)
+Copyright © Natro Team (https://github.com/NatroTeam)
 
 This file is part of Natro Macro. Our source code will always be open and available.
 
@@ -278,8 +278,8 @@ if (natro_version := A_Args[1])
 }
 
 ; time until next report
-DllCall("GetSystemTimeAsFileTime", "int64p", start_time)
-VarSetCapacity(time,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",Ceil((36000000000-Mod(start_time, 36000000000))/10000000)*10000000,"wstr","m'm 's's'","str",time,"int",256)
+start_time := A_Now
+VarSetCapacity(time,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",(60*(59-A_Min)+(60-A_Sec))*10000000,"wstr","m'm 's's'","str",time,"int",256)
 
 
 ; FORM MESSAGE
@@ -439,7 +439,7 @@ Gdip_DeleteGraphics(G)
 ; TESTING
 ; ‎▰▰▰▰▰
 /*
-DllCall("GetSystemTimeAsFileTime", "int64p", start_time)
+start_time := A_Now
 status_changes[A_Min*60+A_Sec] := 0
 
 honey_values[0] := 170000000000000
@@ -478,7 +478,7 @@ Loop, 601
 buff_values["comforting"][600] := 100
 
 start_honey := 170000000000000
-start_time -= 36000000000
+EnvAdd, start_time, -1, Hours
 
 SendHourlyReport()
 KeyWait, F4, D
@@ -491,7 +491,7 @@ ExitApp
 ; ‎▰▰▰▰▰▰▰
 
 ; startup finished, set start time
-DllCall("GetSystemTimeAsFileTime", "int64p", start_time)
+start_time := A_Now
 status_changes[A_Min*60+A_Sec] := 0
 
 ; set emergency switches in case of time error
@@ -503,7 +503,7 @@ Loop
 	; obtain current time and wait until next 6-second interval
 	DllCall("GetSystemTimeAsFileTime", "int64p", time)
 	Sleep % (60000000-Mod(time, 60000000))//10000 + 100
-	time_value := Mod(time//60000000, 600)+1
+	time_value := (60*A_Min+A_Sec)//6
 	
 	; detect buffs every 6 seconds
 	DetectBuffs()
@@ -517,7 +517,7 @@ Loop
 	}
 	
 	; send report every hour	
-	if ((time_value = 600) || (last_report && time > last_report + 35980000000))
+	if ((time_value = 0) || (last_report && time > last_report + 35980000000))
 	{
 		SendHourlyReport()
 		DllCall("GetSystemTimeAsFileTime", "int64p", time)
@@ -542,8 +542,7 @@ DetectBuffs()
 	global buff_values, buff_characters, buff_bitmaps
 	
 	; set time value
-	DllCall("GetSystemTimeAsFileTime", "int64p", time)
-	time_value := Mod(time, 36000000000)//60000000
+	time_value := (60*A_Min+A_Sec)//6
 	i := (time_value = 0) ? 600 : time_value
 	
 	; check roblox window exists
@@ -852,8 +851,9 @@ DetectHoney()
 		honey_values[index] := current_honey
 		if FileExist("settings\nm_config.ini")
 		{
-			DllCall("GetSystemTimeAsFileTime", "int64p", time)
-			session_time := (time - start_time)//10000000, session_total := current_honey - start_honey
+			session_time := A_Now
+			EnvSub, session_time, %start_time%, Seconds
+			session_total := current_honey - start_honey
 			IniWrite, % FormatNumber(session_total), settings\nm_config.ini, Status, SessionTotalHoney
 			IniWrite, % FormatNumber(session_total*3600/session_time), settings\nm_config.ini, Status, HoneyAverage
 		}
@@ -1241,9 +1241,11 @@ SendHourlyReport()
 	}
 	
 	; calculate times
-	DllCall("GetSystemTimeAsFileTime", "int64p", time)
-	time -= Mod(time, 600000000)
-	session_time := Ceil((time - start_time)/10000000)
+	time := A_Now
+	EnvAdd, time, % -A_Min, Minutes
+	EnvAdd, time, % -A_Sec, Seconds
+	EnvSub, time, %start_time%, Seconds
+	session_time := time
 	
 	status_list := ["Gather","Convert","Other"]
 	for i,j in status_list
@@ -1750,8 +1752,7 @@ wParam is the ability (buff) to be changed, lParam is the value
 SetAbility(wParam, lParam){
 	global buff_values
 	static arr := ["popstar"]
-	DllCall("GetSystemTimeAsFileTime", "int64p", t)
-	time := Mod(t, 36000000000)//60000000, i := (time = 0) ? 600 : time
+	time_value := (60*A_Min+A_Sec)//6, i := (time_value = 0) ? 600 : time_value
 	buff_values[arr[wParam]][i] := lParam
 	return 0
 }

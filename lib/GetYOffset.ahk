@@ -9,12 +9,12 @@
 	{
 		WinActivate, Roblox
 		WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " hwnd)
-		pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2 "|" windowY "|300|100")
+		pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2 "|" windowY "|60|100")
 
 		Loop, 20 ; for red vignette effect
 		{ 
-			if ((Gdip_ImageSearch(pBMScreen, bitmaps["toppollen"], pos, , , , , 16) = 1)
-				&& (Gdip_ImageSearch(pBMScreen, bitmaps["toppollenfill"], , x := SubStr(pos, 1, (comma := InStr(pos, ",")) - 1), y := SubStr(pos, comma + 1), x + 41, y + 10, 16) = 0))
+			if ((Gdip_ImageSearch(pBMScreen, bitmaps["toppollen"], pos, , , , , 20) = 1)
+				&& (Gdip_ImageSearch(pBMScreen, bitmaps["toppollenfill"], , x := SubStr(pos, 1, (comma := InStr(pos, ",")) - 1), y := SubStr(pos, comma + 1), x + 41, y + 10, 20) = 0))
 			{
 				Gdip_DisposeImage(pBMScreen)
 				hRoblox := hwnd

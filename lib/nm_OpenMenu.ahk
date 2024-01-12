@@ -1,6 +1,6 @@
 ﻿nm_OpenMenu(menu:="", refresh:=0){
 	global bitmaps
-	static x := {"itemmenu":30, "questlog":85, "beemenu":140}, open:=""
+	static x := {"itemmenu":30, "questlog":85, "beemenu":140, "badgelist":195, "settingsmenu":250, "shopmenu": 305}, open:=""
 
 	if (hwnd := GetRobloxHWND())
 		WinActivate, Roblox

@@ -3,10 +3,10 @@
 paths["clover"] := "
 (LTrim Join`r`n
 ;gotoramp
-" nm_Walk(47.25, BackKey, LeftKey) "
+" nm_Walk(44.75, BackKey, LeftKey) " ; 47.25
 " nm_Walk(52.5, LeftKey) "
-" nm_Walk(2.2, BackKey, RightKey) "
-" nm_Walk(6.7, BackKey)"
+" nm_Walk(2.8, BackKey, RightKey) "
+" nm_Walk(6.7, BackKey)" ; 6.7
 " nm_Walk(25.5, LeftKey) "
 " nm_Walk(35, FwdKey, LeftKey)"
 " nm_Walk(7, BackKey, RightKey) "

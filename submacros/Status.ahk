@@ -1,6 +1,6 @@
 ﻿/*
 Natro Macro (https://github.com/NatroTeam/NatroMacro)
-Copyright © 2022-2023 Natro Team (https://github.com/NatroTeam)
+Copyright © Natro Team (https://github.com/NatroTeam)
 
 This file is part of Natro Macro. Our source code will always be open and available.
 
@@ -220,8 +220,8 @@ settings["InputSnailHealth"] := {"enum": 53, "type": "str", "section": "Collect"
 settings["InputChickHealth"] := {"enum": 54, "type": "str", "section": "Collect", "regex": "i)^(?:100(?:\.00?)?|\d?\d(?:\.\d\d?)?)$"}
 settings["ShrineItem1"] := {"enum": 55, "type": "str", "section": "Shrine", "regex": "i)^(strawberries|sunflowers|pineapples|Blueberries|blueextract|redextract|glue|oil|enzymes|gumdrops|tropicaldrink|mooncharms|glitter|starjelly|purplepotion|softwax|hardwax|swirledwax|causticwax|fielddice|smoothdice|loadeddice|supersmoothie|Turpentine)$"}
 settings["ShrineItem2"] := {"enum": 56, "type": "str", "section": "Shrine", "regex": "i)^(strawberries|sunflowers|pineapples|Blueberries|blueextract|redextract|glue|oil|enzymes|gumdrops|tropicaldrink|mooncharms|glitter|starjelly|purplepotion|softwax|hardwax|swirledwax|causticwax|fielddice|smoothdice|loadeddice|supersmoothie|Turpentine)$"}
-settings["ShrineIndex1"] := {"enum": 57, "type": "str", "section": "Blender", "regex": "i)^(Infinite|\d{1,3})$"}
-settings["ShrineIndex2"] := {"enum": 58, "type": "str", "section": "Blender", "regex": "i)^(Infinite|\d{1,3})$"}
+settings["ShrineIndex1"] := {"enum": 57, "type": "str", "section": "Shrine", "regex": "i)^(Infinite|\d{1,3})$"}
+settings["ShrineIndex2"] := {"enum": 58, "type": "str", "section": "Shrine", "regex": "i)^(Infinite|\d{1,3})$"}
 settings["BlenderIndex1"] := {"enum": 59, "type": "str", "section": "Blender", "regex": "i)^(Infinite|\d{1,3})$"}
 settings["BlenderIndex2"] := {"enum": 60, "type": "str", "section": "Blender", "regex": "i)^(Infinite|\d{1,3})$"}
 settings["BlenderIndex3"] := {"enum": 61, "type": "str", "section": "Blender", "regex": "i)^(Infinite|\d{1,3})$"}
@@ -471,20 +471,32 @@ settings["BlenderTime1"] := {"enum": 239, "type": "int", "section": "Blender", "
 settings["BlenderTime2"] := {"enum": 240, "type": "int", "section": "Blender", "regex": "i)^\d{1,10}$"}
 settings["BlenderTime3"] := {"enum": 241, "type": "int", "section": "Blender", "regex": "i)^\d{1,10}$"}
 settings["MondoSecs"] := {"enum": 242, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
-settings["MemoryMatchNormalCheck"] := {"enum": 243, "type": "int", "section": "Collect", "regex": "i)^(0|1)$"}
-settings["MemoryMatchMegaCheck"] := {"enum": 244, "type": "int", "section": "Collect", "regex": "i)^(0|1)$"}
-settings["MemoryMatchExtremeCheck"] := {"enum": 245, "type": "int", "section": "Collect", "regex": "i)^(0|1)$"}
-settings["LastMemoryMatchNormal"] := {"enum": 246, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
-settings["LastMemoryMatchMega"] := {"enum": 247, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
-settings["LastMemoryMatchExtreme"] := {"enum": 248, "type": "int", "section": "Collect", "regex": "i)^\d{1,10}$"}
-settings["MPlanterGatherA"] := {"enum": 249, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
-settings["MPlanterGather1"] := {"enum": 250, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
-settings["MPlanterGather2"] := {"enum": 251, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
-settings["MPlanterGather3"] := {"enum": 252, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
-settings["MPuffModeA"] := {"enum": 253, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
-settings["MPuffMode1"] := {"enum": 254, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
-settings["MPuffMode2"] := {"enum": 255, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
-settings["MPuffMode3"] := {"enum": 256, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPlanterGatherA"] := {"enum": 243, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPlanterGather1"] := {"enum": 244, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPlanterGather2"] := {"enum": 245, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPlanterGather3"] := {"enum": 246, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPuffModeA"] := {"enum": 247, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPuffMode1"] := {"enum": 248, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPuffMode2"] := {"enum": 249, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPuffMode3"] := {"enum": 250, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["BlueFlowerBoosterCheck"] := {"enum": 251, "type": "int", "section": "Boost", "regex": "i)^(0|1)$"}
+settings["BambooBoosterCheck"] := {"enum": 252, "type": "int", "section": "Boost", "regex": "i)^(0|1)$"}
+settings["PineTreeBoosterCheck"] := {"enum": 253, "type": "int", "section": "Boost", "regex": "i)^(0|1)$"}
+settings["DandelionBoosterCheck"] := {"enum": 254, "type": "int", "section": "Boost", "regex": "i)^(0|1)$"}
+settings["SunflowerBoosterCheck"] := {"enum": 255, "type": "int", "section": "Boost", "regex": "i)^(0|1)$"}
+settings["CloverBoosterCheck"] := {"enum": 256, "type": "int", "section": "Boost", "regex": "i)^(0|1)$"}
+settings["SpiderBoosterCheck"] := {"enum": 257, "type": "int", "section": "Boost", "regex": "i)^(0|1)$"}
+settings["PineappleBoosterCheck"] := {"enum": 258, "type": "int", "section": "Boost", "regex": "i)^(0|1)$"}
+settings["CactusBoosterCheck"] := {"enum": 259, "type": "int", "section": "Boost", "regex": "i)^(0|1)$"}
+settings["PumpkinBoosterCheck"] := {"enum": 260, "type": "int", "section": "Boost", "regex": "i)^(0|1)$"}
+settings["MushroomBoosterCheck"] := {"enum": 261, "type": "int", "section": "Boost", "regex": "i)^(0|1)$"}
+settings["StrawberryBoosterCheck"] := {"enum": 262, "type": "int", "section": "Boost", "regex": "i)^(0|1)$"}
+settings["RoseBoosterCheck"] := {"enum": 263, "type": "int", "section": "Boost", "regex": "i)^(0|1)$"}
+settings["MPlanterHold1"] := {"enum": 264, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPlanterHold2"] := {"enum": 265, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["MPlanterHold3"] := {"enum": 266, "type": "int", "section": "Planters", "regex": "i)^(0|1)$"}
+settings["BrownQuestCheck"] := {"enum": 267, "type": "int", "section": "Quests", "regex": "i)^(0|1)$"}
+settings["LastBrownQuest"] := {"enum": 268, "type": "int", "section": "Quests", "regex": "i)^\d{1,10}$"}
 
 bitmaps := {}
 bitmaps["moon"] := Gdip_BitmapFromBase64("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")
@@ -1725,8 +1737,6 @@ nm_command(command)
 			if (p := InStr(A_LoopField, "="))
 			k := SubStr(A_LoopField, 1, p-1), %k% := SubStr(A_LoopField, p+1)
 
-		ShrineRotTemp := (ShrineRot + 1 = 3) ? 1 : ShrineRot + 1
-
 		switch % params[2]
 		{
 			case "ready":
@@ -1761,7 +1771,7 @@ nm_command(command)
 				discord.SendEmbed((StrLen(params[3]) = 0) ? "You must specify a slot to clear!" : ("Slot must be 1, 2, or 3!\nYou entered " params[3] "."), 16711731, , , , id)			
 
 			case default:
-			t := nowUnix(), VarSetCapacity(duration,256), DllCall("GetDurationFormatEx","Ptr",0,"UInt",0,"Ptr",0,"Int64",(time := (LastShrine + 3600 - t))*10000000,"WStr",(time > 0) ? (((time >= 86400) ? "d'd' h" : "") ((time >= 3600) ? "h'h' m" : "") ((time >= 60) ? "m'm' s" : "") "s's'") : "'Ready'","Str",duration,"Int",256)
+			ShrineRotTemp := (ShrineRot = 2) ? 1 : 2, t := nowUnix(), VarSetCapacity(duration,256), DllCall("GetDurationFormatEx","Ptr",0,"UInt",0,"Ptr",0,"Int64",(time := (LastShrine + 3600 - t))*10000000,"WStr",(time > 0) ? (((time >= 86400) ? "d'd' h" : "") ((time >= 3600) ? "h'h' m" : "") ((time >= 60) ? "m'm' s" : "") "s's'") : "'Ready'","Str",duration,"Int",256)
 			postdata := "
 			(LTrim Join
 			{
@@ -1782,7 +1792,7 @@ nm_command(command)
 					},
 					{
 						""name"": ""Next Donation"",
-						""value"": """ ShrineItem%ShrineRot2% """,
+						""value"": """ ShrineItem%ShrineRotTemp% """,
 						""inline"": true
 					},
 					{

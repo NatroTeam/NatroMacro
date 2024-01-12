@@ -18,7 +18,10 @@ HyperSleep(500)
 " nm_Walk(5, BackKey, LeftKey) "
 " nm_Walk(23, FwdKey) "
 " nm_Walk(12, LeftKey) "
-" nm_Walk(1.3, LeftKey, FwdKey) "
-" nm_Walk(31, LeftKey) "
-" nm_Walk(6, RightKey) "
+" nm_Walk(8, LeftKey, FwdKey) " ; 1.3
+" nm_Walk(10, FwdKey) " ; 1.3
+" nm_Walk(5, RightKey) " ; 1.3
+" nm_Walk(25, FwdKey, RightKey) " ; 31
+" nm_Walk(25, LeftKey) " ; 31
+" nm_Walk(17, BackKey) "
 )"

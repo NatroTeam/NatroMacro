@@ -1,6 +1,7 @@
 <!-- : Begin batch script
 @echo off
 setlocal EnableDelayedExpansion
+chcp 65001 > nul
 cd %~dp0
 
 :: IF script and executable exist, run the macro
@@ -60,7 +61,7 @@ if not [!grandparent!] == [] (
 				echo:
 				
 				echo %yellow%Deleting !zip!...%reset%
-				del /f /s /q "%USERPROFILE%\%%~a\!zip!" >nul
+				del /f /q "%USERPROFILE%\%%~a\!zip!" >nul
 				echo %yellow%Deleted successfully^^!%reset%
 				echo:
 				

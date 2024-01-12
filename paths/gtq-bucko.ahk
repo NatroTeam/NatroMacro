@@ -17,10 +17,10 @@
 	" nm_Walk(9, RightKey, BackKey) "
 	" nm_Walk(4, RightKey) "
 	" nm_Walk(2, LeftKey) "
-	" nm_Walk(21, BackKey) "
-	" nm_Walk(9, FwdKey, LeftKey) "
-	" nm_Walk(3, LeftKey) "
-	" nm_Walk(2, FwdKey) "
+	" nm_Walk(28, BackKey) "
+	" nm_Walk(1.75, FwdKey) "
+	" nm_Walk(9.5, LeftKey) "
+	" nm_Walk(6.5, FwdKey) "
 	sleep, 100
 	send {space down}
 	Hypersleep(300)
@@ -58,10 +58,10 @@ else
 	" nm_Walk(9, RightKey, BackKey) "
 	" nm_Walk(4, RightKey) "
 	" nm_Walk(2, LeftKey) "
-	" nm_Walk(21, BackKey) "
-	" nm_Walk(9, FwdKey, LeftKey) "
-	" nm_Walk(3, LeftKey) "
-	" nm_Walk(2, FwdKey) "
+	" nm_Walk(28, BackKey) "
+	" nm_Walk(1.75, FwdKey) "
+	" nm_Walk(9.5, LeftKey) "
+	" nm_Walk(6.5, FwdKey) "
 	sleep, 100
 	send {space down}
 	Hypersleep(300)

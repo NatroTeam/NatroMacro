@@ -2,11 +2,15 @@
 (LTrim Join`r`n
 if (" HiveBees " > 25) {
     ;gotoramp
-    send {space down}
-    HyperSleep(300)
+    Send {space down}{" RightKey " down}
+    Sleep, 100
     Send {space up}
-    " nm_Walk(36, RightKey) "
-    send {space down}
+    Walk(2)
+    Send {" FwdKey " down}
+    Walk(1.8)
+    Send {" FwdKey " up}
+    Walk(30)
+    send {" RightKey " up}{space down}
     HyperSleep(300)
     send {space up}
     " nm_Walk(6, RightKey) "
@@ -41,10 +45,16 @@ else {
 	send {" RotRight " 2}
 	" nm_Walk(9, BackKey) "
 	" nm_Walk(15.75, BackKey, RightKey) "
-	" nm_Walk(29.7, LeftKey) "
-	" nm_Walk(23.85, FwdKey) "
-	" nm_Walk(22.95, LeftKey) "
-	" nm_Walk(11.25, BackKey) "
+	" nm_Walk(30, LeftKey) "
+	" nm_Walk(36, FwdKey) "
+	" nm_Walk(28, LeftKey) "
+	" nm_Walk(5, RightKey) "
+	" nm_Walk(3.5, BackKey) "
+	" nm_Walk(23.5, LeftKey) "
+	" nm_Walk(3, BackKey) "
+	" nm_Walk(10, RightKey) "
+	" nm_Walk(3, LeftKey) "
+	" nm_Walk(8, BackKey) "
 }
 )"
 ;dual path 230629 noobyguy

@@ -14,14 +14,15 @@
 	send {" SC_Space " up}
 	Walk(108)
 	send {" FwdKey " up}
+	" nm_Walk(3, BackKey) "
 	switch % " HiveSlot "
 		{
 		case 3:
-		" nm_Walk(4.2, BackKey) "
+		" nm_Walk(0.25, BackKey) " ; 4.2, BackKey
 
 		default:
 		" nm_Walk(23, RightKey) "
-		" nm_Walk(2, FwdKey) "
+		" nm_Walk(3.5, FwdKey) " ; 2
 		}
 	)"
 	}
@@ -47,14 +48,15 @@ else {
 	send {" FwdKey " up}
 	HyperSleep(2600)
 	" nm_Walk(13, FwdKey) "
+	" nm_Walk(3, BackKey) "
 	switch % " HiveSlot "
 		{
 		case 3:
-		" nm_Walk(4.2, BackKey) "
+		" nm_Walk(0.25, BackKey) " ; 4.2, BackKey
 
 		default:
 		" nm_Walk(23, RightKey) "
-		" nm_Walk(2, FwdKey) "
+		" nm_Walk(3.5, FwdKey) " ; 2
 		}
 	)"
 	}

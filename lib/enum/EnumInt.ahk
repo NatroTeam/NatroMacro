@@ -240,12 +240,6 @@
 	, "BlenderTime2"
 	, "BlenderTime3"
 	, "MondoSecs"
-	, "MemoryMatchNormalCheck"
-	, "MemoryMatchMegaCheck"
-	, "MemoryMatchExtremeCheck"
-	, "LastMemoryMatchNormal"
-	, "LastMemoryMatchMega"
-	, "LastMemoryMatchExtreme"
 	, "MPlanterGatherA"
 	, "MPlanterGather1"
 	, "MPlanterGather2"
@@ -253,10 +247,22 @@
 	, "MPuffModeA"
 	, "MPuffMode1"
 	, "MPuffMode2"]
-arr2 := arr.Push("MPuffMode3" ; 256
-	, "MPlanterRelease1" ; 257
-	, "MPlanterRelease2"
-	, "MPlanterRelease3"
-	, "MPlanterSmoking1"
-	, "MPlanterSmoking2"
-	, "MPlanterSmoking3")
+arr2 := arr.Push("MPuffMode3" ; 250
+	, "BlueFlowerBoosterCheck" ; 251
+	, "BambooBoosterCheck"
+	, "PineTreeBoosterCheck"
+	, "DandelionBoosterCheck"
+	, "SunflowerBoosterCheck"
+	, "CloverBoosterCheck"
+	, "SpiderBoosterCheck"
+	, "PineappleBoosterCheck"
+	, "CactusBoosterCheck"
+	, "PumpkinBoosterCheck"
+	, "MushroomBoosterCheck"
+	, "StrawberryBoosterCheck"
+	, "RoseBoosterCheck"
+	, "MPlanterHold1"
+	, "MPlanterHold2"
+	, "MPlanterHold3"
+	, "BrownQuestCheck"
+	, "LastBrownQuest")
