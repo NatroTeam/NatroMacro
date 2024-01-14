@@ -5622,16 +5622,6 @@ nm_BlackQuestCheck(){
 	if BlackQuestCheck
 		msgbox,0,Black Bear Quest, This option only works for the repeatable quests.  You must first complete the main questline before this option will work properly.
 }
-
-nm_StickerStackerCheack(){
-	global
-	Gui +OwnDialogs
-	GuiControlGet, StickerStackerCheack
-	IniWrite, %StickerStackerCheack%, settings\nm_config.ini, Collect, StickerStackerCheack
-	if StickerStackerCheack
-		msgbox,0,BEFORE USING THIS OPTION PLEASE TRADE ALL UR VALUABLE STICKERS TO ALT
-}
-
 nm_BrownQuestCheck(){
 	global
 	GuiControlGet, BrownQuestCheck
