@@ -382,8 +382,7 @@ config["Settings"] := {"GuiTheme":"MacLion3"
 	, "TimersHotkey":"F5"
 	, "ShowOnPause":0
 	, "IgnoreUpdateVersion":""
-	, "FDCWarn":1
-	, "StickerStackerCheack":0}
+	, "FDCWarn":1}
 
 config["Status"] := {"StatusLogReverse":0
 	, "TotalRuntime":0
@@ -9843,12 +9842,13 @@ nm_Collect(){
 				sendinput {%SC_E% up}
 				sleep, 500
 				nm_setStatus("Stacking", "Sticker")
-				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " (hwnd := GetRobloxHWND()))
-				MouseMove, 729, 469
+				MouseMove, 729, 469 ;;;change it to MouseMove, windowX+WindowWidth//, windowY+WindowHeight//
 				sleep, 200
 				Click
 				Sleep, 200
-				MouseMove, 863,574
+				MouseMove, 863,574 ;;;change it to MouseMove, windowX+WindowWidth//, windowY+WindowHeight//
+				Click
+				Sleep, 200
 				Click
 				Sleep, 200
 				Click
