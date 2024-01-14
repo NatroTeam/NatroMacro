@@ -2389,10 +2389,6 @@ Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_AntPassAction hwndhAPALeft Disabled, <
 Gui, Add, Button, xp+60 yp w12 h16 gnm_AntPassAction hwndhAPARight Disabled, >
 Gui, Add, Checkbox, x10 yp+19 +BackgroundTrans vRoboPassCheck gnm_saveCollect Checked%RoboPassCheck% Disabled, Robo Pass
 Gui, Add, Checkbox, x10 yp+18 +BackgroundTrans vHoneystormCheck gnm_saveCollect Checked%HoneystormCheck% Disabled, Honeystorm
-
-
-
-;arkhalis
 Gui, Add, Checkbox, x10 yp+19 +BackgroundTrans vStickerStackerCheack gnm_saveCollect Checked%StickerStackerCheack% Disabled, Sticker Stacker 
 
 
