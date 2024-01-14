@@ -9828,7 +9828,7 @@ nm_Collect(){
 
 
 	;Sticker_stacker
-	if (StickerStackerCheack && (nowUnix()-LastStickerStacker)>1800) { ;waits 30 min
+	if (StickerStackerCheack && (nowUnix()-LastStickerStacker)>3600) { ;waits 1h
 		loop, 2 {
 			nm_Reset()
 			nm_setStatus("Traveling", "Sticker Stacker" ((A_Index > 1) ? " (Attempt 2)" : ""))
