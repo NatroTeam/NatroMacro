@@ -9827,8 +9827,8 @@ nm_Collect(){
 	}
 
 
-	;Sticker_stacker
-	if (StickerStackerCheack && (nowUnix()-LastStickerStacker)>1800) { ;30 min
+		;Sticker_stacker
+	if (StickerStackerCheack && (nowUnix()-LastStickerStacker)>960) { ;16 min
 		loop, 2 {
 			nm_Reset()
 			nm_setStatus("Traveling", "Sticker Stacker" ((A_Index > 1) ? " (Attempt 2)" : ""))
@@ -9842,19 +9842,16 @@ nm_Collect(){
 				sendinput {%SC_E% up}
 				sleep, 500
 				nm_setStatus("Stacking", "Sticker")
-				MouseMove, 729, 469 ;;;change it to MouseMove, windowX+WindowWidth//, windowY+WindowHeight//
+				MouseMove, windowX+windowWidth//2-220, WindowY+windowHeight//2-80 ; select sticker
 				sleep, 200
 				Click
 				Sleep, 200
-				MouseMove, 863,574 ;;;change it to MouseMove, windowX+WindowWidth//, windowY+WindowHeight//
+				MouseMove, windowX+windowWidth//2-90, WindowY+windowHeight//2+50 ; yes
+				sleep, 200
 				Click
-				Sleep, 200
+				sleep, 200
 				Click
-				Sleep, 200
-				Click
-				Sleep, 200
-				Click
-				Sleep, 200
+				sleep, 200
 				Click
 				break
 			}
