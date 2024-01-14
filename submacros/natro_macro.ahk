@@ -383,7 +383,7 @@ config["Settings"] := {"GuiTheme":"MacLion3"
 	, "ShowOnPause":0
 	, "IgnoreUpdateVersion":""
 	, "FDCWarn":1
-	, "StickerStackerCheack":1}
+	, "StickerStackerCheack":0}
 
 config["Status"] := {"StatusLogReverse":0
 	, "TotalRuntime":0
@@ -487,7 +487,7 @@ config["Gather"] := {"FieldName1":"Sunflower"
 
 config["Collect"] := {"ClockCheck":1
 	, "LastClock":1
-	, "StickerStackerCheack":1
+	, "StickerStackerCheack":0
 	, "LastStickerStacker":1
 	, "MondoBuffCheck":0
 	, "MondoAction":"Buff"
