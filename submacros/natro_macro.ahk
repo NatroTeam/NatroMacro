@@ -9860,7 +9860,7 @@ nm_Collect(){
 			}
 		}
 		LastStickerStacker:=nowUnix()
-		IniWrite, %StickerStacker%, settings\nm_config.ini, Collect, LastStickerStacker
+		IniWrite, %LastStickerStacker%, settings\nm_config.ini, Collect, LastStickerStacker
 	}
 	;Blender	
 	nm_BlenderRotation()
