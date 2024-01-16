@@ -63,5 +63,5 @@ else { ;use yellow cannon
     }
 )"
 ; [2024-01-15/rpertusio] Avoid using corner (Hive 1 and ramp) where character gets stuck after 2024-01-12 BSS update
-; [2024-01-15/rpertusio] Now uses yellow cannon if 12+ bees
+; [2024-01-15/rpertusio] Now can walk without yellow cannon if < 12 bees
 ; [2024-01-15/rpertusio] Aligns with default SpawnLocation, saves walking if player chose Hive 3
