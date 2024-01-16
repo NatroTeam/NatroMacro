@@ -112,7 +112,7 @@ If (!FileExist("settings")) ; make sure the settings folder exists
 	}
 }
 
-VersionID := "0.9.9"
+VersionID := "0.9.9.1"
 currentWalk := {"pid":"", "name":""} ; stores "pid" (script process ID) and "name" (pattern/movement name)
 
 ;initial load warnings
@@ -374,6 +374,7 @@ config["Settings"] := {"GuiTheme":"MacLion3"
 	, "ClickCount":1000
 	, "ClickDelay":10
 	, "ClickMode":0
+	, "ClickDuration":50
 	, "KeyDelay":20
 	, "StartHotkey":"F1"
 	, "PauseHotkey":"F2"
@@ -1517,7 +1518,7 @@ FieldDefault["Coconut"] := {"pattern":"CornerXSnake"
 	, "drift":0
 	, "shiftlock":0
 	, "invertFB":0
-	, "invertLR":0}
+	, "invertLR":1}
 
 FieldDefault["Pepper"] := {"pattern":"CornerXSnake"
 	, "size":"M"
@@ -3141,6 +3142,7 @@ mp_PlantPlanter(PlanterIndex) {
 	nm_setShiftLock(0)
 
 	nm_Reset()
+	nm_OpenMenu("itemmenu")
 	nm_setStatus("Traveling", MPlanterName " (" MFieldName ")")
 	nm_gotoPlanter(MFieldName, 0)
 
@@ -3289,6 +3291,7 @@ mp_UseGlitter(PlanterIndex, atField:=0) {
 
 	if (atField = 0) {
 		nm_Reset()
+		nm_OpenMenu("itemmenu")
 		nm_setStatus("Traveling", "Glitter: " PlanterName%PlanterIndex% " (" PlanterField%PlanterIndex% ")")
 		nm_gotoPlanter(PlanterField%PlanterIndex%, 0)
 	}
@@ -4304,10 +4307,14 @@ nm_testButton(){ ;~~ lines 3464 and 3465 have the same change as 14156
 	nm_reset()
 	{
 		global offsetY
-		pBMHive := Gdip_CreateBitmap(25, 11), G := Gdip_GraphicsFromImage(pBMHive), Gdip_GraphicsClear(G,0xff50440A), Gdip_DeleteGraphics(G)
-		pBMHiveEH := Gdip_CreateBitmap(30, 30), G := Gdip_GraphicsFromImage(pBMHiveEH), Gdip_GraphicsClear(G,0xff7C6815), Gdip_DeleteGraphics(G)
-		pBMHiveDNT := Gdip_CreateBitmap(20, 200), G := Gdip_GraphicsFromImage(pBMHiveDNT), Gdip_GraphicsClear(G, 0xff9E831D), Gdip_DeleteGraphics(G) 
-		pBMHiveNNT := Gdip_CreateBitmap(20, 200), G := Gdip_GraphicsFromImage(pBMHiveNNT), Gdip_GraphicsClear(G, 0xff7A6615), Gdip_DeleteGraphics(G)
+		
+		bitmaps := {}
+		bitmaps[""""day""""] := Gdip_CreateBitmap(1, 4), G := Gdip_GraphicsFromImage(bitmaps[""""day""""]), Gdip_GraphicsClear(G, 0xffda9400), Gdip_DeleteGraphics(G)
+		bitmaps[""""night""""] := Gdip_CreateBitmap(1, 4), G := Gdip_GraphicsFromImage(bitmaps[""""night""""]), Gdip_GraphicsClear(G, 0xffd18e00), Gdip_DeleteGraphics(G)
+		bitmaps[""""honeystorm""""] := Gdip_CreateBitmap(1, 4), G := Gdip_GraphicsFromImage(bitmaps[""""honeystorm""""]), Gdip_GraphicsClear(G, 0xffdc9e29), Gdip_DeleteGraphics(G)
+		bitmaps[""""untextured-day""""] := Gdip_CreateBitmap(1, 4), G := Gdip_GraphicsFromImage(bitmaps[""""untextured-day""""]), Gdip_GraphicsClear(G, 0xff7d5700), Gdip_DeleteGraphics(G)
+		bitmaps[""""untextured-night""""] := Gdip_CreateBitmap(1, 4), G := Gdip_GraphicsFromImage(bitmaps[""""untextured-night""""]), Gdip_GraphicsClear(G, 0xff684900), Gdip_DeleteGraphics(G)
+		bitmaps[""""untextured-honeystorm""""] := Gdip_CreateBitmap(1, 4), G := Gdip_GraphicsFromImage(bitmaps[""""untextured-honeystorm""""]), Gdip_GraphicsClear(G, 0xff8e6d29), Gdip_DeleteGraphics(G)
 
 		pBMR := Gdip_BitmapFromBase64(""""iVBORw0KGgoAAAANSUhEUgAAACgAAAAGCAAAAACUM4P3AAAAAnRSTlMAAHaTzTgAAAAXdEVYdFNvZnR3YXJlAFBob3RvRGVtb24gOS4wzRzYMQAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0n77u/JyBpZD0nVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkJz8+Cjx4OnhtcG1ldGEgeG1sbnM6eD0nYWRvYmU6bnM6bWV0YS8nIHg6eG1wdGs9J0ltYWdlOjpFeGlmVG9vbCAxMi40NCc+CjxyZGY6UkRGIHhtbG5zOnJkZj0naHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyc+CgogPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9JycKICB4bWxuczpleGlmPSdodHRwOi8vbnMuYWRvYmUuY29tL2V4aWYvMS4wLyc+CiAgPGV4aWY6UGl4ZWxYRGltZW5zaW9uPjQwPC9leGlmOlBpeGVsWERpbWVuc2lvbj4KICA8ZXhpZjpQaXhlbFlEaW1lbnNpb24+NjwvZXhpZjpQaXhlbFlEaW1lbnNpb24+CiA8L3JkZjpEZXNjcmlwdGlvbj4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOnRpZmY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvJz4KICA8dGlmZjpJbWFnZUxlbmd0aD42PC90aWZmOkltYWdlTGVuZ3RoPgogIDx0aWZmOkltYWdlV2lkdGg+NDA8L3RpZmY6SW1hZ2VXaWR0aD4KICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogIDx0aWZmOlJlc29sdXRpb25Vbml0PjI8L3RpZmY6UmVzb2x1dGlvblVuaXQ+CiAgPHRpZmY6WFJlc29sdXRpb24+OTYvMTwvdGlmZjpYUmVzb2x1dGlvbj4KICA8dGlmZjpZUmVzb2x1dGlvbj45Ni8xPC90aWZmOllSZXNvbHV0aW9uPgogPC9yZGY6RGVzY3JpcHRpb24+CjwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9J3InPz77yGiWAAAAI0lEQVR42mNUYyAOMDJggOUMDAyRmAqXMxAHmBiobjWxngEAj7gC+wwAe1AAAAAASUVORK5CYII="""")
 		success := 0
@@ -4329,25 +4336,29 @@ nm_testButton(){ ;~~ lines 3464 and 3465 have the same change as 14156
 				Gdip_DisposeImage(pBMScreen)
 			}
 			Sleep, 1000
-			Send {"" RotRight "" 3}
-			SendEvent {"" ZoomOut "" 2}
-			Loop, 4
-			{
-				Sleep, 250
-				pBMScreen := Gdip_BitmapFromScreen(WindowX """"|"""" WindowY+windowHeight//2-50 """"|400|250"""")
-				if ((Gdip_ImageSearch(pBMScreen, pBMHive, , , , , , 5) = 1) || (Gdip_ImageSearch(pBMScreen, pBMHiveEH) = 1) || (Gdip_ImageSearch(pBMScreen, pBMHiveDNT, , , , , , 5) = 1) || (Gdip_ImageSearch(pBMScreen, pBMHiveNNT, , , , , , 5) = 1))
-				{
-					Gdip_DisposeImage(pBMScreen)
-					Send {"" RotLeft "" 3}
-					SendEvent {"" ZoomOut "" 3}
-					success:=1
-					break 2
+
+			hiveWidth := 5*windowHeight//9
+			region := windowX+windowWidth//2-hiveWidth//2 """"|"""" windowY """"|"""" hiveWidth """"|"""" windowHeight//2
+			sconf := hiveWidth**2//200
+			loop, 4 {
+				sleep 250
+				pBMScreen := Gdip_BitmapFromScreen(region), s := 0
+				for i, k in [""""day"""", """"night"""", """"honeystorm"""", """"untextured-day"""", """"untextured-night"""", """"untextured-honeystorm""""] {
+					s := Max(s, Gdip_ImageSearch(pBMScreen, bitmaps[k], , , , , , 8, , , 0))
+					if (s > (sconf * (InStr(k, """"untextured"""") ? 2 : 1))) {
+						Gdip_DisposeImage(pBMScreen)
+						success := 1
+						SendEvent {"" ZoomOut "" 5}
+						break 3
+					}
 				}
 				Gdip_DisposeImage(pBMScreen)
 				Send {"" RotRight "" 4}
 			}
 		}
-		Gdip_DisposeImage(pBMHive), Gdip_DisposeImage(pBMHiveEH), Gdip_DisposeImage(pBMHiveDNT), Gdip_DisposeImage(pBMHiveNNT)
+		Gdip_DisposeImage(pBMR)
+		for k,v in bitmaps
+			Gdip_DisposeImage(v)
 		if (success = 0)
 		{
 			msgbox, 0x40034, Test Paths/Patterns, Reset Failed!````r````nTest has been aborted.
@@ -8421,7 +8432,7 @@ nm_autoclickerbutton()
 	Gui, clicker:Destroy
 	Gui, clicker:+AlwaysOnTop +Border
 	Gui, clicker:Font, s8 cDefault w700, Tahoma
-	Gui, clicker:Add, Groupbox, x5 y2 w161 h60, Settings
+	Gui, clicker:Add, Groupbox, x5 y2 w161 h80, Settings
 	Gui, clicker:Font, Norm
 	Gui, clicker:Add, Checkbox, x76 y2 +BackgroundTrans vClickMode gnm_saveAutoClicker Checked%ClickMode%, Infinite
 	Gui, clicker:Add, Text, x13 y21, Repeat
@@ -8431,7 +8442,10 @@ nm_autoclickerbutton()
 	Gui, clicker:Add, Text, x10 y41, Click Interval (ms):
 	Gui, clicker:Add, Edit, x100 y39 w61 h18 +BackgroundTrans Number gnm_saveAutoClicker Limit5, %ClickDelay%
 	Gui, clicker:Add, UpDown, vClickDelay gnm_saveAutoClicker Range0-99999, %ClickDelay%
-	Gui, clicker:Add, Button, x45 y68 w80 h20 gnm_StartAutoClicker, Start (%AutoClickerHotkey%)
+	Gui, clicker:Add, Text, x10 y61, Click Duration (ms):
+	Gui, clicker:Add, Edit, x104 y59 w57 h18 +BackgroundTrans Number gnm_saveAutoClicker Limit4, %ClickDuration%
+	Gui, clicker:Add, UpDown, vClickDuration gnm_saveAutoClicker Range0-9999, %ClickDuration%
+	Gui, clicker:Add, Button, x45 y88 w80 h20 gnm_StartAutoClicker, Start (%AutoClickerHotkey%)
 	Gui, clicker:Show, w170, AutoClicker
 }
 nm_saveAutoClicker(){
@@ -8439,9 +8453,11 @@ nm_saveAutoClicker(){
 	GuiControlGet, ClickDelay, clicker:
 	GuiControlGet, ClickCount, clicker:
 	GuiControlGet, ClickMode, clicker:
+	GuiControlGet, ClickDuration, clicker:
 	IniWrite, %ClickDelay%, settings\nm_config.ini, Settings, ClickDelay
 	IniWrite, %ClickCount%, settings\nm_config.ini, Settings, ClickCount
 	IniWrite, %ClickMode%, settings\nm_config.ini, Settings, ClickMode
+	IniWrite, %ClickDuration%, settings\nm_config.ini, Settings, ClickDuration
 	GuiControl, % (ClickMode ? "Disable" : "Enable"), ClickCount
 	GuiControl, % (ClickMode ? "Disable" : "Enable"), ClickCountEdit
 }
@@ -9132,9 +9148,9 @@ nm_Reset(checkAll:=1, wait:=2000, convert:=1, force:=0){
 			MouseMove, windowX+350, windowY+offsetY+100
 		}
 		;check to make sure you are not in blender screen
-		BlenderSS := Gdip_BitmapFromScreen(WindowX+Windowwidth//2 - 280 "|" windowY+WindowHeight//2 - 245 "|553|400")
+		BlenderSS := Gdip_BitmapFromScreen(windowX+windowWidth//2 - 275 "|" windowY+Floor(0.48*windowHeight) - 220 "|550|400")
 		if (Gdip_ImageSearch(BlenderSS, bitmaps["CloseGUI"], , , , , , 5) > 0) {
-			MouseMove, WindowX+Windowwidth//2 - 250, windowY+WindowHeight//2 - 210
+			MouseMove, windowX+windowWidth//2 - 250, windowY+Floor(0.48*windowHeight) - 200
 			sleep, 150 
 			click
 		}
@@ -9192,17 +9208,22 @@ nm_Reset(checkAll:=1, wait:=2000, convert:=1, force:=0){
 			Sleep, 1000
 		}
 		SetKeyDelay, PrevKeyDelay
-		sendinput {%RotRight% 3}
-		send {%ZoomOut% 2}
+
+		; hive check
+		hiveWidth := 5*windowHeight//9
+		region := windowX+windowWidth//2-hiveWidth//2 "|" windowY "|" hiveWidth "|" windowHeight//2
+		sconf := hiveWidth**2//200
 		loop, 4 {
 			sleep (250+KeyDelay)
-			pBMScreen := Gdip_BitmapFromScreen(windowX "|" WindowY+windowHeight//2-50 "|400|250")
-			if (Gdip_ImageSearch(pBMScreen, bitmaps["pBMHive"], , , , , , 5) = 1 || Gdip_ImageSearch(pBMScreen, bitmaps["pBMHiveEH"]) = 1 || Gdip_ImageSearch(pBMScreen, bitmaps["pBMHiveDNT"], , , , , , 5) = 1 || Gdip_ImageSearch(pBMScreen, bitmaps["pBMHiveNNT"], , , , , , 5) = 1) {
-				Gdip_DisposeImage(pBMScreen)
-				sendinput {%RotLeft% 3}
-				send {%ZoomOut% 3}
-				HiveConfirmed:=1
-				break
+			pBMScreen := Gdip_BitmapFromScreen(region), s := 0
+			for i, k in ["day", "night", "honeystorm", "untextured-day", "untextured-night", "untextured-honeystorm"] {
+				s := Max(s, Gdip_ImageSearch(pBMScreen, bitmaps["hive"][k], , , , , , 8, , , 0))
+				if (s > (sconf * (InStr(k, "untextured") ? 2 : 1))) {
+					Gdip_DisposeImage(pBMScreen)
+					HiveConfirmed := 1
+					Send {%ZoomOut% 5}
+					break 2
+				}
 			}
 			Gdip_DisposeImage(pBMScreen)
 			sendinput {%RotRight% 4}
@@ -9393,7 +9414,7 @@ nm_gotoCannon(){
 				{
 					movement := "
 					(LTrim Join`r`n
-					" nm_Walk(1.5, FwdKey) "
+					" nm_Walk(1.5, LeftKey) "
 					)"
 					nm_createWalk(movement)
 					KeyWait, F14, D T5 L
@@ -9585,26 +9606,26 @@ nm_toAnyBooster(){
 				Sleep, (2000+KeyDelay)
 
 				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " (hwnd := GetRobloxHWND()))
-				MouseMove, WindowX+Windowwidth//2, WindowY+WindowHeight//1.35 - 5 ;dialog
+				MouseMove, windowX+windowWidth//2, windowY+Floor(0.74*windowHeight) - 5 ;dialog
 				sleep, 150
 				Click
 				sleep, 300
 				Loop {
 					sleep, 150
-					pBMScreen := Gdip_BitmapFromScreen(WindowX+WindowWidth//2-250 "|" WindowY+windowHeight//2-100 "|500|300")
+					pBMScreen := Gdip_BitmapFromScreen(WindowX+Floor(0.515*windowWidth)-250 "|" windowY+Floor(0.535*windowHeight)-100 "|500|300")
 					Donation := % "ShrineItem" ShrineRot
 					DonationIMG := % %Donation%
 					
 					if (Gdip_ImageSearch(pBMScreen, Shrine[DonationIMG], , , , , , 2, , 4) > 0) {
 						sleep, 200
-						MouseMove, windowX+windowWidth//2+60, WindowY+windowHeight//2+160 ; add more of x item
+						MouseMove, windowX+Floor(0.515*windowWidth)+157, windowY+Floor(0.535*windowHeight)+40 ; add more of x item
 						sleep, 150
 						While (A_index < ShrineAmount%ShrineRot%) {
 							Click
 							sleep, 35
 						}
 						sleep, 300
-						MouseMove, windowX+windowWidth//2-70, WindowY+windowHeight//2+130 ; donate button
+						MouseMove, windowX+Floor(0.515*windowWidth)-72, windowY+Floor(0.535*windowHeight)+116 ; donate button
 						Gdip_DisposeBitmap(pBMScreen)
 						sleep, 150
 						Click
@@ -9667,7 +9688,7 @@ nm_toAnyBooster(){
 		
 						break 2
 					} else {
-						MouseMove, windowX+windowWidth//2+30, WindowY+windowHeight//2-25
+						MouseMove, windowX+Floor(0.515*windowWidth)+157, WindowY+Floor(0.535*windowHeight)-45
 						sleep 150
 						click
 						Gdip_DisposeImage(pBMScreen)
@@ -9836,10 +9857,10 @@ nm_Collect(){
 				sendinput {%SC_E% up}
 				Sleep, 500
 
-				SearchX := windowX+Windowwidth//2 - 280, SearchY := windowY+WindowHeight//2 - 245, BlenderSS := Gdip_BitmapFromScreen(SearchX "|" SearchY "|553|400")
+				SearchX := windowX+windowWidth//2 - 275, SearchY := windowY+Floor(0.48*windowHeight) - 220, BlenderSS := Gdip_BitmapFromScreen(SearchX "|" SearchY "|550|400")
 
 				if (Gdip_ImageSearch(BlenderSS, bitmaps["CancelCraft"], , , , , , 2, , 7) > 0) {
-					MouseMove, windowX+WindowWidth//2 + 230, windowY+WindowHeight//2 + 115 ; click cancel button
+					MouseMove, windowX+windowWidth//2 + 230, windowY+Floor(0.48*windowHeight) + 130 ; click cancel button
 					sleep, 150
 					Click
 				}
@@ -9847,20 +9868,21 @@ nm_Collect(){
 				if (!BlenderEnd && Gdip_ImageSearch(BlenderSS, bitmaps["EndCraftR"], , , , , , 3, , 6) > 0)
 				{
 					nm_setStatus("Confirmed", "Blender is already in use")
-					MouseMove, windowX+Windowwidth//2 - 250, windowY+WindowHeight//2 - 210, Gdip_disposeimage(BlenderSS) ;Close GUI and dispose of bitmap
+					MouseMove, windowX+windowwidth//2 - 250, windowY+Floor(0.48*windowHeight) - 200
+					Gdip_disposeimage(BlenderSS) ;Close GUI and dispose of bitmap
 					sleep, 150
 					Click
 					break
 				} else if (BlenderEnd && Gdip_ImageSearch(BlenderSS, bitmaps["EndCraftR"], , , , , , 3, , 6) > 0) {
 					Iniwrite, 0, settings\nm_config.ini, Blender, BlenderEnd
 					BlenderEnd := 0
-					MouseMove, windowX+WindowWidth//2 - 120, windowY+WindowHeight//2 + 100 ; close red craft button
+					MouseMove, windowX+windowWidth//2 - 120, windowY+Floor(0.48*windowHeight) + 120 ; close red craft button
 					sleep, 150
 					Click
 				}
 
 				if (Gdip_ImageSearch(BlenderSS, bitmaps["EndCraftG"], , , , , , 4, , 6) > 0) {
-					MouseMove, windowX+WindowWidth//2 - 120, windowY+WindowHeight//2 + 100 ; close green craft button
+					MouseMove, windowX+WindowWidth//2 - 120, windowY+Floor(0.48*windowHeight) + 120 ; close green craft button
 					sleep, 150
 					Click
 				}
@@ -9895,11 +9917,11 @@ nm_Collect(){
 							break
 						}
 						gdip_disposeimage(BlenderSS)
-						MouseMove, windowX+Windowwidth//2 - 15, windowY+WindowHeight//2 + 110 ;Open item menu
+						MouseMove, windowX+windowWidth//2, windowY+Floor(0.48*windowHeight) + 130 ;Open item menu
 						sleep, 150
 						click
 						sleep, 150
-						MouseMove, windowX+WindowWidth//2 - 60, windowY+WindowHeight//2 + 130 ;Add more of x item
+						MouseMove, windowX+windowWidth//2 - 60, windowY+Floor(0.48*windowHeight) + 140 ;Add more of x item
 						sleep, 150
 						While (A_Index < BlenderAmount%BlenderRot%) {
 							Click
@@ -9940,24 +9962,24 @@ nm_Collect(){
 							IniWrite, % BlenderIndex%BlenderRot%, settings\nm_config.ini, blender, BlenderIndex%BlenderRot%
 						}
 						sleep, 100
-						MouseMove, windowX+Windowwidth//2 + 70, windowY+WindowHeight//2 + 110 ;Click Confirm
+						MouseMove, windowX+windowWidth//2 + 70, windowY+Floor(0.48*windowHeight) + 130 ;Click Confirm
 						sleep, 150
 						Click
 						sleep, 100
-						MouseMove, windowX+Windowwidth//2 - 250, windowY+WindowHeight//2 - 210 ;Close GUI
+						MouseMove, windowX+windowWidth//2 - 250, windowY+Floor(0.48*windowHeight) - 200 ;Close GUI
 						sleep, 150
 						Click
 						break 2
 					} else {
 						sleep, 50
-						MouseMove, windowX+WindowWidth//2 + 230, windowY+WindowHeight//2 + 115 ;not found go next item
+						MouseMove, windowX+windowWidth//2 + 230, windowY+Floor(0.48*windowHeight) + 110 ;not found go next item
 						sleep, 150
 						Click
 						sleep, 100
 						if (A_Index = 60) {
 							if (z = 2) {
 								nm_setStatus("Failed", "Blender")
-								MouseMove, windowX+Windowwidth//2 - 250, windowY+WindowHeight//2 - 210 ;Close GUI
+								MouseMove, windowX+windowWidth//2 - 250, windowY+Floor(0.48*windowHeight) - 200 ;Close GUI
 								sleep, 150
 								Click
 
@@ -10052,9 +10074,17 @@ nm_Collect(){
 				Sleep, 500
 				send {%SC_1%}
 				MoveSpeedFactor := round(18/MoveSpeedNum, 2)
-				nm_Move(2000*MoveSpeedFactor, BackKey)
-				nm_Move(500*MoveSpeedFactor, RightKey)
-				nm_Move(100*MoveSpeedFactor, FwdKey)
+				movement := "
+				(LTrim Join`r`n
+				" nm_Walk(9, BackKey) "
+				" nm_Walk(3, RightKey, FwdKey) "
+				" nm_Walk(1, FwdKey) "
+				)"
+				nm_createWalk(movement)
+				KeyWait, F14, D T5 L
+				KeyWait, F14, T30 L
+				nm_endWalk()
+				click, down
 				loop 300 {
 					if (Mod(A_Index, 10) = 1) {
 						resetTime:=nowUnix()
@@ -10082,8 +10112,8 @@ nm_Collect(){
 						break
 					}
 					sleep, 1000
-					click
 				}
+				click, up
 			}
 			else {
 				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-200 "|" windowY+offsetY "|400|125")
@@ -10245,6 +10275,8 @@ nm_Collect(){
 	if (GlueDisCheck && (nowUnix()-LastGlueDis)>(79200)) { ;22 hours
 		loop, 2 {
 			nm_Reset()
+			nm_OpenMenu("itemmenu")
+			
 			nm_setStatus("Traveling", "Glue Dispenser" ((A_Index > 1) ? " (Attempt 2)" : ""))
 
 			nm_gotoCollect("gluedis", 0) ; do not wait for end
@@ -10789,8 +10821,6 @@ nm_Bugrun(){
 						}
 						if(youDied)
 							break
-						if(!DisableToolUse)
-							click
 					}
 					sendinput % "{" RotDown " 4}" ((r = 1) ? "{" RotRight " 2}" : "")
 					sleep, 500
@@ -10922,8 +10952,6 @@ nm_Bugrun(){
 							}
 							if(youDied)
 								break
-							if(!DisableToolUse)
-								Click
 						}
 						sendinput % "{" RotDown " 4}" ((r = 1) ? "{" RotRight " 2}" : "")
 						sleep, 500
@@ -11045,8 +11073,6 @@ nm_Bugrun(){
 						}
 						if(youDied)
 							break
-						if(!DisableToolUse)
-							click
 					}
 					sendinput % "{" RotDown " 4}" ((r = 1) ? "{" RotRight " 2}" : "")
 					sleep, 500
@@ -11157,10 +11183,6 @@ nm_Bugrun(){
 						}
 						if(youDied)
 							break
-						if(!DisableToolUse)
-						{
-							Click
-						}
 					}
 					sendinput {%RotDown% 4}
 					click up
@@ -11294,8 +11316,6 @@ nm_Bugrun(){
 						}
 						if(youDied)
 							break
-						if(!DisableToolUse)
-							Click
 					}
 					sendinput % "{" RotDown " 4}" ((r = 1) ? "{" RotRight " 2}" : "")
 					sleep, 500
@@ -11399,8 +11419,6 @@ nm_Bugrun(){
 							}
 							if(youDied)
 								break
-							if(!DisableToolUse)
-								Click
 						}
 						sendinput % "{" RotDown " 4}" ((r = 1) ? "{" RotRight " 2}" : "")
 						sleep, 500
@@ -11563,8 +11581,6 @@ nm_Bugrun(){
 						}
 						if(youDied)
 							break
-						if(!DisableToolUse)
-							Click
 						sleep, 250
 					}
 					sendinput % "{" RotDown " 4}" ((r = 1) ? "{" RotRight " 2}" : "")
@@ -11724,8 +11740,6 @@ nm_Bugrun(){
 								success:=1
 							if(youDied)
 								break
-							if(!DisableToolUse)
-								Click
 						}
 						sendinput {%RotDown% 4}
 						sleep, 500
@@ -11850,8 +11864,6 @@ nm_Bugrun(){
 							}
 							if(youDied)
 								break
-							if(!DisableToolUse)
-								Click
 						}
 						sendinput % "{" RotDown " 4}" ((r = 1) ? "{" RotRight " 2}" : "")
 						sleep, 500
@@ -12044,8 +12056,6 @@ nm_Bugrun(){
 								success:=1
 							if(youDied)
 								break
-							if(!DisableToolUse)
-								Click
 						}
 						sendinput {%RotDown% 4}
 						sleep, 500
@@ -12988,8 +12998,11 @@ nm_Bugrun(){
 
 						Loop, 600
 						{
-							if(!DisableToolUse)
-								Click
+							if(!DisableToolUse) {
+								sendinput {click down}
+								sleep, 50
+								sendinput {click up}
+							}
 							if(nm_imgSearch("crab.png",70,"lowright")[1] = 0){
 								Crdead:=1
 								send {%RotUp% 2}
@@ -14399,7 +14412,7 @@ nm_BasicEggHatcher()
 		Loop, 10
 		{
 			Sleep, 100
-			pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250""|"" windowY+offsetY+windowHeight//2-52 ""|500|150"")
+			pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 ""|"" windowY+offsetY+windowHeight//2-52 ""|500|150"")
 			if (Gdip_ImageSearch(pBMScreen, bitmaps[""yes""], pos, , , , , 2, , 2) = 1)
 			{
 				Gdip_DisposeImage(pBMScreen)
@@ -17451,7 +17464,6 @@ nm_Feed(food){
 	nm_Reset(0,0,0,1)
 	nm_setStatus("Feeding", food)
 	;feed
-	nm_OpenMenu("itemmenu")
 	nm_InventorySearch(food)
 	hwnd := GetRobloxHWND()
 	offsetY := GetYOffset(hwnd)
@@ -18521,6 +18533,20 @@ nm_BrownQuestProg(){
 			}
 
 			Qfound:=nm_imgSearch("brown_bear2.png",50,"quest")
+			if (Qfound[1]=0) {
+				if (A_Index > 1)
+					Gdip_DisposeImage(pBMLog)
+				break
+			}
+
+			Qfound:=nm_imgSearch("brown_bear3.png",50,"quest")
+			if (Qfound[1]=0) {
+				if (A_Index > 1)
+					Gdip_DisposeImage(pBMLog)
+				break
+			}
+
+			Qfound:=nm_imgSearch("brown_bear4.png",50,"quest")
 			if (Qfound[1]=0) {
 				if (A_Index > 1)
 					Gdip_DisposeImage(pBMLog)
@@ -20661,6 +20687,7 @@ ba_placePlanter(fieldName, planter, planterNum, atField:=0){
 	if (atField = 0)
 	{
 		nm_Reset()
+		nm_OpenMenu("itemmenu")
 		nm_setStatus("Traveling", (planterName . " (" . fieldName . ")"))
 		nm_gotoPlanter(fieldName, 0)
 	}
@@ -21455,13 +21482,16 @@ Pause, Toggle, 1
 return
 ;AUTOCLICKER
 autoclicker(){
-	global ClickMode, ClickCount, ClickDelay
+	global ClickMode, ClickCount, ClickDelay, ClickDuration
 	static toggle:=0
 	toggle := !toggle
 	while ((ClickMode || (A_Index <= ClickCount)) && toggle) {
-		click
+		sendinput {click down}
+		sleep %ClickDuration%
+		sendinput {click up}
 		sleep %ClickDelay%
 	}
+	toggle := 0
 }
 return
 ;TIMERS

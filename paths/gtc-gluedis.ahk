@@ -37,8 +37,11 @@
 	send {space down}
 	Hypersleep(300)
 	send {space up}
-	" nm_Walk(8.5, FwdKey) "
-	" nm_Walk(2.5, FwdKey, RightKey) "
+	" nm_Walk(6, FwdKey) "
+	send {space down}
+	HyperSleep(100)
+	send {space up}
+	" nm_Walk(4, FwdKey, RightKey) "
 	send {" RotLeft " 4}
 	Sleep, 1500
 	)"
@@ -56,7 +59,8 @@ else
 	send {space 2}{" FwdKey " up}
 	HyperSleep(6750)
 	" nm_Walk(18, FwdKey) "
-	" nm_Walk(9, LeftKey) "
+	" nm_Walk(8.5, LeftKey) "
+	" nm_Walk(3, LeftKey, FwdKey) "
 	Sleep, 1500
 	)"
 }

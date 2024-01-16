@@ -29,7 +29,7 @@ else
 	HyperSleep(1000)
 	send {" RotLeft " 2}
 	" nm_Walk(10, LeftKey) "
-	" nm_Walk(10, RightKey) "
+	" nm_Walk(8, RightKey) "
 	;inside
 	" nm_Walk(10, FwdKey) "
 	send {" RotRight " 1}
