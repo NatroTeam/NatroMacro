@@ -9825,9 +9825,7 @@ nm_Collect(){
 			}
 		}
 	}
-
-
-		;Sticker_stacker
+	;Sticker_stacker
 	if (StickerStackerCheck && (nowUnix()-LastStickerStacker)>960) { ;16 min
 		loop, 2 {
 			nm_Reset()
@@ -9842,17 +9840,24 @@ nm_Collect(){
 				sendinput {%SC_E% up}
 				sleep, 500
 				nm_setStatus("Stacking", "Sticker")
-				MouseMove, windowX+windowWidth//2-220, WindowY+windowHeight//2-80 ; select sticker
+				MouseMove, windowX+windowWidth//2-230, windowY+4*windowHeight//10+40 ; select sticker
 				sleep, 200
 				Click
-				Sleep, 200
-				MouseMove, windowX+windowWidth//2-90, WindowY+windowHeight//2+50 ; yes
-				sleep, 200
-				Click
-				sleep, 200
-				Click
-				sleep, 200
-				Click
+				i := 0
+				loop 16 {
+					sleep, 250
+					pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+windowHeight//2-52 "|500|150")
+					if (Gdip_ImageSearch(pBMScreen, bitmaps["yes"], pos, , , , , 2, , 2) = 1) {
+						MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1), windowY+windowHeight//2-52+SubStr(pos, InStr(pos, ",")+1)
+						sleep 150
+						Click
+						sleep 100
+						i++
+					} else if (i > 0) {
+						Gdip_DisposeImage(pBMScreen)
+						break
+					}
+				}
 				break
 			}
 		}
