@@ -9454,16 +9454,6 @@ nm_findHiveSlot(){
 		Gdip_DisposeImage(pBMScreen)
 
 		; find hive slot
-		movement := "
-		(LTrim Join`r`n
-		" nm_Walk(4, FwdKey) "
-		" nm_Walk(4.25, BackKey) " ; 5.25
-		)"
-		nm_createWalk(movement)
-		KeyWait, F14, D T5 L
-		KeyWait, F14, T20 L
-		nm_endWalk()
-
 		DllCall("GetSystemTimeAsFileTime","int64p",s)
 		n := s, f := s+150000000
 		SendInput {%LeftKey% down}
