@@ -1,6 +1,6 @@
 if (MoveMethod = "cannon")
 {
-paths["sticker"] := "
+paths["stickerstack"] := "
         (LTrim Join`r`n
         ;gotoramp
         ;gotocannon
@@ -26,7 +26,7 @@ paths["sticker"] := "
 }
 else
 {
-paths["sticker"] := "
+paths["stickerstack"] := "
         (LTrim Join`r`n
 	;gotoramp
 	" nm_Walk(67.5, BackKey, LeftKey) "

@@ -486,8 +486,6 @@ config["Gather"] := {"FieldName1":"Sunflower"
 
 config["Collect"] := {"ClockCheck":1
 	, "LastClock":1
-	, "StickerStackerCheck":0
-	, "LastStickerStacker":1
 	, "MondoBuffCheck":0
 	, "MondoAction":"Buff"
 	, "LastMondoBuff":1
@@ -688,7 +686,9 @@ config["Boost"] := {"FieldBoostStacks":0
 	, "PumpkinBoosterCheck":1
 	, "MushroomBoosterCheck":1
 	, "StrawberryBoosterCheck":1
-	, "RoseBoosterCheck":1}
+	, "RoseBoosterCheck":1
+	, "StickerStackCheck":0
+	, "LastStickerStack":1}
 
 config["Quests"] := {"QuestGatherMins":5
 	, "QuestGatherReturnBy":"Walk"
@@ -2388,9 +2388,6 @@ Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_AntPassAction hwndhAPALeft Disabled, <
 Gui, Add, Button, xp+60 yp w12 h16 gnm_AntPassAction hwndhAPARight Disabled, >
 Gui, Add, Checkbox, x10 yp+19 +BackgroundTrans vRoboPassCheck gnm_saveCollect Checked%RoboPassCheck% Disabled, Robo Pass
 Gui, Add, Checkbox, x10 yp+18 +BackgroundTrans vHoneystormCheck gnm_saveCollect Checked%HoneystormCheck% Disabled, Honeystorm
-Gui, Add, Checkbox, x10 yp+19 +BackgroundTrans vStickerStackerCheck gnm_saveCollect Checked%StickerStackerCheck% Disabled, Sticker Stacker 
-
-
 ;dispensers
 Gui, Font, w700
 Gui, Add, GroupBox, x135 y42 w165 h105 vDispensersGroupBox, Dispensers
@@ -2558,61 +2555,61 @@ Gui, Tab, Boost
 ;GuiControl,focus, Tab
 ;boosters
 Gui, Font, W700
-Gui, Add, GroupBox, x10 y25 w480 h70, Field Boost
+Gui, Add, GroupBox, x10 y25 w285 h72, Field Boost
 Gui, Add, GroupBox, x10 y97 w285 h138, Hotbar Slots
 Gui, Font, s8 cDefault Norm, Tahoma
 ;field booster
-Gui, Add, Text, x20 y41 +BackgroundTrans, Free Booster Order:
-Gui, Add, Text, x+6 yp +BackgroundTrans Section, 1:
+Gui, Add, Text, x15 y40 +BackgroundTrans Section, 1:
 Gui, Add, Text, x+14 yp w50 vFieldBooster1 +Center +BackgroundTrans, %FieldBooster1%
 Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_FieldBooster hwndhFB1Left Disabled, <
 Gui, Add, Button, xp+61 yp w12 h16 gnm_FieldBooster hwndhFB1Right Disabled, >
-Gui, Add, Text, xs+96 ys +BackgroundTrans, 2:
+Gui, Add, Text, xs ys+18 +BackgroundTrans, 2:
 Gui, Add, Text, x+14 yp w50 vFieldBooster2 +Center +BackgroundTrans, %FieldBooster2%
 Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_FieldBooster hwndhFB2Left Disabled, <
 Gui, Add, Button, xp+61 yp w12 h16 gnm_FieldBooster hwndhFB2Right Disabled, >
-Gui, Add, Text, xs+192 ys +BackgroundTrans, 3:
+Gui, Add, Text, xs ys+36 +BackgroundTrans, 3:
 Gui, Add, Text, x+14 yp w50 vFieldBooster3 +Center +BackgroundTrans, %FieldBooster3%
 Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_FieldBooster hwndhFB3Left Disabled, <
 Gui, Add, Button, xp+61 yp w12 h16 gnm_FieldBooster hwndhFB3Right Disabled, >
-Gui, Add, Text, xs+292 ys-7 left +BackgroundTrans, Separate By:
-Gui, Add, Text, xp+3 y+0 w12 vFieldBoosterMins +Center, %FieldBoosterMins%
+Gui, Add, Text, x120 y35 left +BackgroundTrans, Separate By:
+Gui, Add, Text, xp+3 y+1 w12 vFieldBoosterMins +Center, %FieldBoosterMins%
 Gui, Add, UpDown, xp+14 yp-1 h16 -16 Range0-12 vFieldBoosterMinsUpDown gnm_FieldBoosterMins Disabled, % FieldBoosterMins//5
 Gui, Add, Text, xp+20 yp+1 w100 left +BackgroundTrans, Mins
-Gui, Add, CheckBox, x20 y62 +center vBoostChaserCheck gnm_BoostChaserCheck Checked%BoostChaserCheck% Disabled, Gather in`nBoosted Field
+Gui, Add, CheckBox, x109 y67 +center vBoostChaserCheck gnm_BoostChaserCheck Checked%BoostChaserCheck% Disabled, Gather in`nBoosted Field
+Gui, Add, Button, x200 y65 w90 h30 vBoostedFieldSelectButton gnm_BoostedFieldSelectButton Disabled, Select Boosted Gather Fields
 Gui, Font, w700
 ;shrine
-Gui, Add, GroupBox, x300 y97 w190 h138, Shrine
+Gui, Add, GroupBox, x300 y25 w190 h105, Wind Shrine
 Gui, Font, s8 cDefault Norm, Tahoma
 loop 2 {
 	xCoords := 246 + (86 * A_Index)
-	Gui, add, picture, x%xcoords% y153 h40 w40 hwndhShrineItem%A_Index%Picture vShrineItem%A_Index%Picture +BackgroundTrans +0xE
-	Gui, Add, Button, x%xCoords% y203 w40 h13 vShrineAdd%A_Index% hwndhShrineClear%A_Index% gba_setShrineData Disabled, % (ShrineItem%A_Index% = "None") ? "Add" : "Clear"
+	Gui, add, picture, x%xcoords% y61 h40 w40 hwndhShrineItem%A_Index%Picture vShrineItem%A_Index%Picture +BackgroundTrans +0xE
+	Gui, Add, Button, x%xCoords% y107 w40 h13 vShrineAdd%A_Index% hwndhShrineClear%A_Index% gba_setShrineData Disabled, % (ShrineItem%A_Index% = "None") ? "Add" : "Clear"
 	if (ShrineItem%A_Index% != "None")
 		GuiControl, , % hShrineItem%A_Index%Picture, % hBitmapsSB[ShrineItem%A_index%] ? ("HBITMAP:*" hBitmapsSB[ShrineItem%A_index%]) : ""
 	xCoords := 237 + (86 * A_index)
-	Gui, Add, Text, x%xCoords% y130 w60 +Center vShrineData%A_index%, % "(" ShrineAmount%A_Index% ") [" ((ShrineIndex%A_index% = "Infinite") ? "∞" : ShrineIndex%A_index%) "]"
+	Gui, Add, Text, x%xCoords% y41 w60 +Center vShrineData%A_index%, % "(" ShrineAmount%A_Index% ") [" ((ShrineIndex%A_index% = "Infinite") ? "∞" : ShrineIndex%A_index%) "]"
 }
 ShrineAdd := 0
 
-Gui, Add, Text, x426 y197 w41 h16 +Center +0x200 vShrineAmountNum Hidden
+Gui, Add, Text, x426 y108 w41 h16 +Center +0x200 vShrineAmountNum Hidden
 Gui, Add, UpDown, vShrineAmount Range1-999 Hidden, 1
-Gui, Add, Text, x430 y178 vShrineAmountText Hidden, Amount
-Gui, Add, Text, x430 y122 vShrineRepeatText Hidden, Repeat
+Gui, Add, Text, x430 y89 vShrineAmountText Hidden, Amount
+Gui, Add, Text, x430 y33 vShrineRepeatText Hidden, Repeat
 Gui, Font, w700 underline
-Gui, Add, Text, x327 y130 w80 vshrinetitle1 Hidden, Add Item
+Gui, Add, Text, x327 y41 w80 vshrinetitle1 Hidden, Add Item
 Gui, Font, s8 cDefault Norm, Tahoma
-Gui, Add, Text, x302 y146 w103 h1 vShrineline1 Hidden 0x7
-Gui, Add, Text, x404 y104 w1 h130 vShrineline2 Hidden 0x7
-Gui, Add, Text, x405 y136 w83 h1 vShrineline3 Hidden 0x7
-Gui, Add, Text, x405 y193 w83 h1 vShrineline4 Hidden 0x7
-Gui, Add, Text, x426 y158 w41 h16 +Center +0x200 vShrineIndexNum Hidden
+Gui, Add, Text, x302 y57 w103 h1 vShrineline1 Hidden 0x7
+Gui, Add, Text, x404 y32 w1 h97 vShrineline2 Hidden 0x7
+Gui, Add, Text, x405 y47 w83 h1 vShrineline3 Hidden 0x7
+Gui, Add, Text, x405 y104 w83 h1 vShrineline4 Hidden 0x7
+Gui, Add, Text, x426 y69 w41 h16 +Center +0x200 vShrineIndexNum Hidden
 Gui, Add, UpDown, vShrineIndex Range1-999 Hidden, 1
-Gui, Add, Checkbox, x422 y141 w60 vShrineIndexOption gnm_ShrineIndexOption Hidden, Infinite
-Gui, Add, Picture, x331 y152 w40 h40 hwndhAddShrineItem vShrineItem Hidden +0xE
-Gui, Add, Button, x307 y167 w18 h18 vShrineLeft hwndhfShrineleft gba_AddShrineItemButton Hidden, <
-Gui, Add, Button, x380 y167 w18 h18 vShrineRight hwndhfShrineright gba_AddShrineItemButton Hidden, >
-Gui, Add, Button, x313 y197 w80 h16 +Center gba_AddShrineItem vShrineAddSlot Hidden
+Gui, Add, Checkbox, x422 y52 w60 vShrineIndexOption gnm_ShrineIndexOption Hidden, Infinite
+Gui, Add, Picture, x331 y63 w40 h40 hwndhAddShrineItem vShrineItem Hidden +0xE
+Gui, Add, Button, x307 y78 w18 h18 vShrineLeft hwndhfShrineleft gba_AddShrineItemButton Hidden, <
+Gui, Add, Button, x380 y78 w18 h18 vShrineRight hwndhfShrineright gba_AddShrineItemButton Hidden, >
+Gui, Add, Button, x313 y108 w80 h16 +Center gba_AddShrineItem vShrineAddSlot Hidden
 
 ;hotbar
 Loop, 6
@@ -2629,10 +2626,13 @@ Loop, 6
 	SetLoadingProgress(31+A_Index)
 }
 nm_HotbarWhile()
-Gui, Add, Button, x120 y61 w90 h30 vBoostedFieldSelectButton gnm_BoostedFieldSelectButton Disabled, Select Boosted Gather Fields
-Gui, Add, Button, x225 y61 w90 h30 vAutoFieldBoostButton gnm_autoFieldBoostButton Disabled, % (AutoFieldBoostActive ? "Auto Field Boost`n[ON]" : "Auto Field Boost`n[OFF]")
+Gui, Add, Button, x200 y34 w90 h30 vAutoFieldBoostButton gnm_autoFieldBoostButton Disabled, % (AutoFieldBoostActive ? "Auto Field Boost`n[ON]" : "Auto Field Boost`n[OFF]")
+
+;stickers
 Gui, Font, w700
+Gui, Add, GroupBox, x300 y130 w190 h105, Stickers
 Gui, Font, s8 cDefault Norm, Tahoma
+Gui, Add, Checkbox, x305 yp+16 vStickerStackCheck gnm_saveBoost Checked%StickerStackCheck% Disabled, Sticker Stack
 
 ;QUEST TAB
 ;------------------------
@@ -5154,7 +5154,6 @@ nm_TabCollectLock(){
 	GuiControl, disable, % hMARight
 	GuiControl, disable, RoboPassCheck
 	GuiControl, disable, HoneystormCheck
-	GuiControl, disable, StickerStackerCheck
 	GuiControl, disable, AntPassCheck
 	GuiControl, disable, % hAPALeft
 	GuiControl, disable, % hAPARight
@@ -5238,7 +5237,6 @@ nm_TabCollectUnLock(){
 	GuiControl, enable, % hMARight
 	GuiControl, enable, RoboPassCheck
 	GuiControl, enable, HoneystormCheck
-	GuiControl, enable, StickerStackerCheck
 	GuiControl, enable, AntPassCheck
 	GuiControl, enable, % hAPALeft
 	GuiControl, enable, % hAPARight
@@ -5375,6 +5373,7 @@ nm_TabBoostLock(){
 	GuiControl, disable, HotbarMax5
 	GuiControl, disable, HotbarMax6
 	GuiControl, disable, HotbarMax7
+	GuiControl, disable, StickerStackCheck
 }
 nm_TabBoostUnLock(){
 	global
@@ -5412,6 +5411,7 @@ nm_TabBoostUnLock(){
 	GuiControl, enable, HotbarMax5
 	GuiControl, enable, HotbarMax6
 	GuiControl, enable, HotbarMax7
+	GuiControl, enable, StickerStackCheck
 }
 nm_FieldBooster(hCtrl:=""){
 	global
@@ -8389,7 +8389,7 @@ nm_CollectKillButton(hCtrl){
 	global
 	static CollectControls := ["CollectGroupBox","DispensersGroupBox","BeesmasGroupBox","BlenderGroupBox","BeesmasFailImage","BeesmasImage"
 		,"ClockCheck","MondoBuffCheck","MondoAction","MondoPointText","MondoSecs","MondoSecsText","AntPassCheck","AntPassAction","RoboPassCheck","HoneystormCheck"
-		,"HoneyDisCheck","TreatDisCheck","BlueberryDisCheck","StrawberryDisCheck","CoconutDisCheck","RoyalJellyDisCheck","GlueDisCheck","StickerStackerCheck"]
+		,"HoneyDisCheck","TreatDisCheck","BlueberryDisCheck","StrawberryDisCheck","CoconutDisCheck","RoyalJellyDisCheck","GlueDisCheck"]
 	, CollectControlsH := ["hMALeft","hMARight","hAPALeft","hAPARight","hBeesmas1","hBeesmas2","hBeesmas3","hBeesmas4","hBeesmas5","hBeesmas6","hBeesmas7","hBeesmas8","hBeesmas9","hBeesmas10","hBeesmas11"]
 	, KillControls := ["BugRunGroupBox","BugRunCheck","MonsterRespawnTime","TextMonsterRespawnPercent","TextMonsterRespawn","MonsterRespawnTimeHelp","BugrunInterruptCheck","TextLoot","TextKill","TextLineBugRun1","TextLineBugRun2","BugrunLadybugsLoot","BugrunRhinoBeetlesLoot","BugrunSpiderLoot","BugrunMantisLoot","BugrunScorpionsLoot","BugrunWerewolfLoot","BugrunLadybugsCheck","BugrunRhinoBeetlesCheck","BugrunSpiderCheck","BugrunMantisCheck","BugrunScorpionsCheck","BugrunWerewolfCheck","StingersGroupBox","StingerCheck","StingerDailyBonusCheck","TextFields","StingerCloverCheck","StingerSpiderCheck","StingerCactusCheck","StingerRoseCheck","StingerMountainTopCheck","StingerPepperCheck","BossesGroupBox","TunnelBearCheck","KingBeetleCheck","CocoCrabCheck","StumpSnailCheck","CommandoCheck","TunnelBearBabyCheck","KingBeetleBabyCheck","BabyLovePicture1","BabyLovePicture2","KingBeetleAmuletMode","ShellAmuletMode","KingBeetleAmuPicture","ShellAmuPicture","KingBeetleAmuletModeText","ShellAmuletModeText","ChickLevelTextLabel","ChickLevelText","ChickLevel","SnailHPText","SnailHealthEdit","SnailHealthText","ChickHPText","ChickHealthEdit","ChickHealthText","SnailTimeText","SnailTimeUpDown","ChickTimeText","ChickTimeUpDown","BossConfigHelp","TextLineBosses1","TextLineBosses2","TextLineBosses3","TextBosses1","TextBosses2","TextBosses3"]
 	, BlenderMain := ["BlenderItem1Picture", "BlenderItem2Picture", "BlenderItem3Picture", "BlenderAdd1", "BlenderAdd2", "BlenderAdd3", "BlenderData1", "BlenderData2", "BlenderData3"]
@@ -9723,7 +9723,7 @@ nm_toAnyBooster(){
 	}
 }
 nm_Collect(){
-	global FwdKey, BackKey, LeftKey, RightKey, RotLeft, RotRight, KeyDelay, objective, CurrentAction, PreviousAction, MoveSpeedNum, GatherFieldBoostedStart, LastGlitter, MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff, VBState, ClockCheck, LastClock, AntPassCheck, AntPassAction, QuestAnt, LastAntPass, HoneyDisCheck, LastHoneyDis, TreatDisCheck, LastTreatDis, BlueberryDisCheck, LastBlueberryDis, StrawberryDisCheck, LastStrawberryDis, CoconutDisCheck, LastCoconutDis, GlueDisCheck, LastGlueDis, RoboPassCheck, LastRoboPass, HoneystormCheck, LastHoneystorm, StickerStackerCheck, LastStickerStacker, RoyalJellyDisCheck, LastRoyalJellyDis, StockingsCheck, LastStockings, FeastCheck, RBPDelevelCheck, LastRBPDelevel, LastFeast, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon, beesmasActive, HoneySSCheck, resetTime, bitmaps, SC_E, SC_Space, SC_1, BlenderRot, LastBlenderRot, BlenderEnd, TimerInterval, BlenderIndex1, BlenderIndex2, BlenderIndex3, BlenderItem1, BlenderItem2, BlenderItem3, BlenderTime1, BlenderTime2, BlenderTime3, BlenderAmount1, BlenderAmount2, BlenderAmount3, Blendercheck
+	global FwdKey, BackKey, LeftKey, RightKey, RotLeft, RotRight, KeyDelay, objective, CurrentAction, PreviousAction, MoveSpeedNum, GatherFieldBoostedStart, LastGlitter, MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff, VBState, ClockCheck, LastClock, AntPassCheck, AntPassAction, QuestAnt, LastAntPass, HoneyDisCheck, LastHoneyDis, TreatDisCheck, LastTreatDis, BlueberryDisCheck, LastBlueberryDis, StrawberryDisCheck, LastStrawberryDis, CoconutDisCheck, LastCoconutDis, GlueDisCheck, LastGlueDis, RoboPassCheck, LastRoboPass, HoneystormCheck, LastHoneystorm, StickerStackCheck, LastStickerStack, RoyalJellyDisCheck, LastRoyalJellyDis, StockingsCheck, LastStockings, FeastCheck, RBPDelevelCheck, LastRBPDelevel, LastFeast, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon, beesmasActive, HoneySSCheck, resetTime, bitmaps, SC_E, SC_Space, SC_1, BlenderRot, LastBlenderRot, BlenderEnd, TimerInterval, BlenderIndex1, BlenderIndex2, BlenderIndex3, BlenderItem1, BlenderItem2, BlenderItem3, BlenderTime1, BlenderTime2, BlenderTime3, BlenderAmount1, BlenderAmount2, BlenderAmount3, Blendercheck
 	static AntPassNum:=2, RoboPassNum:=1, LastHoneyLB:=1
 
 	if(VBState=1)
@@ -9825,13 +9825,13 @@ nm_Collect(){
 			}
 		}
 	}
-	;Sticker_stacker
-	if (StickerStackerCheck && (nowUnix()-LastStickerStacker)>960) { ;16 min
+	;Sticker Stack
+	if (StickerStackCheck && (nowUnix()-LastStickerStack)>960) { ;16 min
 		loop, 2 {
 			nm_Reset()
-			nm_setStatus("Traveling", "Sticker Stacker" ((A_Index > 1) ? " (Attempt 2)" : ""))
+			nm_setStatus("Traveling", "Sticker Stack" ((A_Index > 1) ? " (Attempt 2)" : ""))
 
-			nm_gotoCollect("Sticker")
+			nm_gotoCollect("stickerstack")
 
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
@@ -9861,8 +9861,8 @@ nm_Collect(){
 				break
 			}
 		}
-		LastStickerStacker:=nowUnix()
-		IniWrite, %LastStickerStacker%, settings\nm_config.ini, Collect, LastStickerStacker
+		LastStickerStack:=nowUnix()
+		IniWrite, %LastStickerStack%, settings\nm_config.ini, Boost, LastStickerStack
 	}
 	;Blender	
 	nm_BlenderRotation()
@@ -19318,7 +19318,7 @@ nm_gotoCollect(location, waitEnd := 1){
 		#Include gtc-coconutdis.ahk
 		#Include gtc-gluedis.ahk
 		#Include gtc-royaljellydis.ahk
-		#Include gtc-StickerStacker.ahk
+		#Include gtc-stickerstack.ahk
 		;beesmas
 		#Include gtc-stockings.ahk
 		#Include gtc-wreath.ahk
@@ -21235,8 +21235,8 @@ loop, 3 {
 
 ;Sticker Warning
 loop, 3 {
-	if (StickerStackerCheck = 1) { ;Warns user about stickers
-		msgbox, 0x1040, Sticker Stacker ,% "Consider trading all of your valuable stickers to alternative account, to ensure that you do not lose any valuable stickers.", 30
+	if (StickerStackCheck = 1) { ;Warns user about stickers
+		msgbox, 0x1040, Sticker Stack ,% "Consider trading all of your valuable stickers to alternative account, to ensure that you do not lose any valuable stickers.", 30
 		break
 	}
 }
