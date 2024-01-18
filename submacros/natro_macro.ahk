@@ -1,4 +1,4 @@
-﻿/*
+/*
 Natro Macro (https://github.com/NatroTeam/NatroMacro)
 Copyright © Natro Team (https://github.com/NatroTeam)
 
@@ -485,7 +485,10 @@ config["Gather"] := {"FieldName1":"Sunflower"
 	, "FieldDriftCheck3":1
 	, "CurrentFieldNum":1}
 
-config["Collect"] := {"ClockCheck":1
+config["Collect"] := {"StickerPrinterCheck":0
+	, "StickerPrinterEgg":"Basic"
+	, "LastStickerPrinter":1
+	, "ClockCheck":1
 	, "LastClock":1
 	, "MondoBuffCheck":0
 	, "MondoAction":"Buff"
@@ -2387,6 +2390,11 @@ Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_AntPassAction hwndhAPALeft Disabled, <
 Gui, Add, Button, xp+60 yp w12 h16 gnm_AntPassAction hwndhAPARight Disabled, >
 Gui, Add, Checkbox, x10 yp+19 +BackgroundTrans vRoboPassCheck gnm_saveCollect Checked%RoboPassCheck% Disabled, Robo Pass
 Gui, Add, Checkbox, x10 yp+18 +BackgroundTrans vHoneystormCheck gnm_saveCollect Checked%HoneystormCheck% Disabled, Honeystorm
+Gui, Add, Checkbox, x10 yp+17 +BackgroundTrans vStickerPrinterCheck gnm_saveCollect Checked%StickerPrinterCheck% Disabled, Sticker Printer
+Gui, Add, Text, x30 yp+15 w11 vStickerPrinterPointText +left +BackgroundTrans, \___
+Gui, Add, Text, x66 yp w49 vStickerPrinterEgg +Center +BackgroundTrans,%StickerPrinterEgg%
+Gui, Add, Button, xp-10 yp-1 w12 h16 gnm_StickerPrinterEgg hwndhSPELeft Disabled, <
+Gui, Add, Button, xp+58 yp w12 h16 gnm_StickerPrinterEgg hwndhSPERight Disabled, >
 ;dispensers
 Gui, Font, w700
 Gui, Add, GroupBox, x135 y42 w165 h105 vDispensersGroupBox, Dispensers
@@ -5163,6 +5171,9 @@ nm_TabCollectLock(){
 	GuiControl, disable, AntPassCheck
 	GuiControl, disable, % hAPALeft
 	GuiControl, disable, % hAPARight
+	GuiControl, disable, StickerPrinterCheck
+	GuiControl, disable, % hSPELeft
+	GuiControl, disable, % hSPERight
 	GuiControl, disable, HoneyDisCheck
 	GuiControl, disable, TreatDisCheck
 	GuiControl, disable, BlueberryDisCheck
@@ -5243,6 +5254,9 @@ nm_TabCollectUnLock(){
 	GuiControl, enable, % hMARight
 	GuiControl, enable, RoboPassCheck
 	GuiControl, enable, HoneystormCheck
+	GuiControl, enable, StickerPrinterCheck
+	GuiControl, enable, % hSPELeft
+	GuiControl, enable, % hSPERight
 	GuiControl, enable, AntPassCheck
 	GuiControl, enable, % hAPALeft
 	GuiControl, enable, % hAPARight
@@ -7154,6 +7168,15 @@ nm_AntPassAction(hCtrl){
 	GuiControl, , AntPassAction, % (AntPassAction := val[(hCtrl = hAPARight) ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)])
 	IniWrite, %AntPassAction%, settings\nm_config.ini, Collect, AntPassAction
 }
+nm_StickerPrinterEgg(hCtrl){
+	global StickerPrinterEgg, hSPELeft, hSPERight
+	static val := ["Basic", "Gold"], l := val.Length()
+
+	i := (StickerPrinterEgg = "Basic") ? 1 : 2
+
+	GuiControl, , StickerPrinterEgg, % (StickerPrinterEgg := val[(hCtrl = hSPERight) ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)])
+	IniWrite, %StickerPrinterEgg%, settings\nm_config.ini, Collect, StickerPrinterEgg
+}
 nm_FieldBoosterMins(){
 	global FieldBoosterMins
 	GuiControlGet, FieldBoosterMinsUpDown
@@ -8392,7 +8415,7 @@ nm_ContributorsPageButton(hwnd){
 nm_CollectKillButton(hCtrl){
 	global
 	static CollectControls := ["CollectGroupBox","DispensersGroupBox","BeesmasGroupBox","BlenderGroupBox","BeesmasFailImage","BeesmasImage"
-		,"ClockCheck","MondoBuffCheck","MondoAction","MondoPointText","MondoSecs","MondoSecsText","AntPassCheck","AntPassAction","RoboPassCheck","HoneystormCheck"
+		,"ClockCheck","MondoBuffCheck","MondoAction","MondoPointText","MondoSecs","MondoSecsText","AntPassCheck","AntPassAction","RoboPassCheck","HoneystormCheck","StickerPrinterCheck","StickerPrinterEgg","StickerPrinterPointText",
 		,"HoneyDisCheck","TreatDisCheck","BlueberryDisCheck","StrawberryDisCheck","CoconutDisCheck","RoyalJellyDisCheck","GlueDisCheck"]
 	, CollectControlsH := ["hMALeft","hMARight","hAPALeft","hAPARight","hBeesmas1","hBeesmas2","hBeesmas3","hBeesmas4","hBeesmas5","hBeesmas6","hBeesmas7","hBeesmas8","hBeesmas9","hBeesmas10","hBeesmas11"]
 	, KillControls := ["BugRunGroupBox","BugRunCheck","MonsterRespawnTime","TextMonsterRespawnPercent","TextMonsterRespawn","MonsterRespawnTimeHelp","BugrunInterruptCheck","TextLoot","TextKill","TextLineBugRun1","TextLineBugRun2","BugrunLadybugsLoot","BugrunRhinoBeetlesLoot","BugrunSpiderLoot","BugrunMantisLoot","BugrunScorpionsLoot","BugrunWerewolfLoot","BugrunLadybugsCheck","BugrunRhinoBeetlesCheck","BugrunSpiderCheck","BugrunMantisCheck","BugrunScorpionsCheck","BugrunWerewolfCheck","StingersGroupBox","StingerCheck","StingerDailyBonusCheck","TextFields","StingerCloverCheck","StingerSpiderCheck","StingerCactusCheck","StingerRoseCheck","StingerMountainTopCheck","StingerPepperCheck","BossesGroupBox","TunnelBearCheck","KingBeetleCheck","CocoCrabCheck","StumpSnailCheck","CommandoCheck","TunnelBearBabyCheck","KingBeetleBabyCheck","BabyLovePicture1","BabyLovePicture2","KingBeetleAmuletMode","ShellAmuletMode","KingBeetleAmuPicture","ShellAmuPicture","KingBeetleAmuletModeText","ShellAmuletModeText","ChickLevelTextLabel","ChickLevelText","ChickLevel","SnailHPText","SnailHealthEdit","SnailHealthText","ChickHPText","ChickHealthEdit","ChickHealthText","SnailTimeText","SnailTimeUpDown","ChickTimeText","ChickTimeUpDown","BossConfigHelp","TextLineBosses1","TextLineBosses2","TextLineBosses3","TextBosses1","TextBosses2","TextBosses3"]
@@ -9737,7 +9760,7 @@ nm_toAnyBooster(){
 	}
 }
 nm_Collect(){
-	global FwdKey, BackKey, LeftKey, RightKey, RotLeft, RotRight, KeyDelay, objective, CurrentAction, PreviousAction, MoveSpeedNum, GatherFieldBoostedStart, LastGlitter, MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff, VBState, ClockCheck, LastClock, AntPassCheck, AntPassAction, QuestAnt, LastAntPass, HoneyDisCheck, LastHoneyDis, TreatDisCheck, LastTreatDis, BlueberryDisCheck, LastBlueberryDis, StrawberryDisCheck, LastStrawberryDis, CoconutDisCheck, LastCoconutDis, GlueDisCheck, LastGlueDis, RoboPassCheck, LastRoboPass, HoneystormCheck, LastHoneystorm, RoyalJellyDisCheck, LastRoyalJellyDis, StockingsCheck, LastStockings, FeastCheck, RBPDelevelCheck, LastRBPDelevel, LastFeast, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon, beesmasActive, HoneySSCheck, resetTime, bitmaps, SC_E, SC_Space, SC_1, BlenderRot, LastBlenderRot, BlenderEnd, TimerInterval, BlenderIndex1, BlenderIndex2, BlenderIndex3, BlenderItem1, BlenderItem2, BlenderItem3, BlenderTime1, BlenderTime2, BlenderTime3, BlenderAmount1, BlenderAmount2, BlenderAmount3, Blendercheck
+	global FwdKey, BackKey, LeftKey, RightKey, RotLeft, RotRight, KeyDelay, objective, CurrentAction, PreviousAction, MoveSpeedNum, GatherFieldBoostedStart, LastGlitter, MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff, VBState, ClockCheck, LastClock, AntPassCheck, AntPassAction, QuestAnt, LastAntPass, StickerPrinterCheck, LastStickerPrinter, StickerPrinterEgg, HoneyDisCheck, LastHoneyDis, TreatDisCheck, LastTreatDis, BlueberryDisCheck, LastBlueberryDis, StrawberryDisCheck, LastStrawberryDis, CoconutDisCheck, LastCoconutDis, GlueDisCheck, LastGlueDis, RoboPassCheck, LastRoboPass, HoneystormCheck, LastHoneystorm, RoyalJellyDisCheck, LastRoyalJellyDis, StockingsCheck, LastStockings, FeastCheck, RBPDelevelCheck, LastRBPDelevel, LastFeast, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon, beesmasActive, HoneySSCheck, resetTime, bitmaps, SC_E, SC_Space, SC_1, BlenderRot, LastBlenderRot, BlenderEnd, TimerInterval, BlenderIndex1, BlenderIndex2, BlenderIndex3, BlenderItem1, BlenderItem2, BlenderItem3, BlenderTime1, BlenderTime2, BlenderTime3, BlenderAmount1, BlenderAmount2, BlenderAmount3, Blendercheck
 	static AntPassNum:=2, RoboPassNum:=1, LastHoneyLB:=1
 
 	if(VBState=1)
@@ -10716,6 +10739,110 @@ nm_Collect(){
 		}
 		LastHoneystorm:=nowUnix()
 		IniWrite, %LastHoneystorm%, settings\nm_config.ini, Collect, LastHoneystorm
+	}
+	; Sticker Printer
+	If (StickerPrinterCheck && (nowUnix()-LastStickerPrinter)>3600) { ;1 hour
+		loop, 2 {
+			nm_Reset()
+			nm_setStatus("Traveling", "Sticker Printer" ((A_Index > 1) ? " (Attempt 2)" : ""))
+
+			nm_gotoCollect("stickerPrinter")
+			searchRet := nm_imgSearch("e_button.png",30,"high")
+			If (searchRet[1] = 0) {
+				sendinput {%SC_E% down}
+				Sleep, 100
+				sendinput {%SC_E% up}
+
+				If (StickerPrinterEgg="Basic") {
+					WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
+					Sleep, 100
+					Sleep, 1000
+					If (windowHeight > 1201) { ; all of these if statements are because when swithcing to diffrent resolutions the height was not working, not sure how to fix this pls lmk if u know
+   						MouseMove, windowX+windowWidth//2-90, windowY+windowHeight//2-175
+					} else If (windowHeight > 1000 && windowHeight < 1201) {
+					    MouseMove, windowX+windowWidth//2-90, windowY+windowHeight//2-140
+					} else If (windowHeight > 800 && windowHeight < 1001) {
+    					MouseMove, windowX+windowWidth//2-90, windowY+windowHeight//2-120
+					} else If (windowHeight > 598 && windowHeight < 801) {
+    					MouseMove, windowX+windowWidth//2-90, windowY+windowHeight//2-90
+					}
+					Sleep, 500
+					Click
+					Sleep, 500
+					If (nm_imgSearch("stickerPrinterCD.png",30,"full")[1] = 0) {
+						nm_setStatus("Error", "Sticker Printer on Cooldown")
+						Sleep, 500
+						sendinput {%SC_E% down}
+						Sleep, 100
+						sendinput {%SC_E% up}
+						break
+					}
+					Sleep, 500			
+					If (windowHeight > 1201) {
+						MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+55
+					} else If (windowHeight > 1000 && windowHeight < 1201) {
+					    MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+75
+					} else If (windowHeight > 800 && windowHeight < 1001) {
+    					MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+95
+					} else If (windowHeight > 598 && windowHeight < 801) {
+    					MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+130
+					}
+					Sleep, 100
+					Click
+					Sleep, 500
+					MouseMove, windowX+windowWidth//2-92, WindowY+windowHeight//2+34.5
+					Sleep, 100 
+					Click
+					Sleep, 8000 ; wait for printer to print
+					nm_setStatus("Collected", "Sticker Printer (Basic Egg)")
+					break
+				} else If (StickerPrinterEgg="Gold") {
+					WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
+					Sleep, 100
+					If (windowHeight > 1201) {
+						MouseMove, windowX+windowWidth//2+28, windowY+windowHeight//2-175
+				 	} else If (windowHeight > 1000 && windowHeight < 1201) {
+					 MouseMove, windowX+windowWidth//2+28, windowY+windowHeight//2-140
+				 	} else If (windowHeight > 800 && windowHeight < 1001) {
+					 MouseMove, windowX+windowWidth//2+28, windowY+windowHeight//2-120
+				 	} else If (windowHeight > 598 && windowHeight < 801) {
+					 MouseMove, windowX+windowWidth//2+28, windowY+windowHeight//2-90
+				 	}
+					Sleep, 500
+					Click
+					If (nm_imgSearch("stickerPrinterCD.png",30,"full")[1] = 0) {
+						nm_setStatus("Error", "Sticker Printer on Cooldown")
+						Sleep, 500
+						sendinput {%SC_E% down}
+						Sleep, 100
+						sendinput {%SC_E% up}
+						break
+					}
+					Sleep, 500
+					If (windowHeight > 1201) {
+						MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+55
+					} else If (windowHeight > 1000 && windowHeight < 1201) {
+					    MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+75
+					} else If (windowHeight > 800 && windowHeight < 1001) {
+    					MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+95
+					} else If (windowHeight > 598 && windowHeight < 801) {
+    					MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+130
+					}
+					SLeep, 100
+					Click
+					Sleep, 500
+					MouseMove, windowX+windowWidth//2-92, WindowY+windowHeight//2+34.5
+					Sleep, 100
+					Click
+					Sleep, 8000 ; wait for printer to print
+					nm_setStatus("Collected", "Sticker Printer (Gold Egg)")
+					break
+				}
+				
+			}
+		}
+		LastStickerPrinter:=nowUnix()
+		IniWrite, %LastStickerPrinter%, settings\nm_config.ini, Collect, LastStickerPrinter
 	}
 	;Daily Honey LB
 	if (HoneySSCheck) {
@@ -19310,6 +19437,7 @@ nm_gotoCollect(location, waitEnd := 1){
 		#Include gtc-gummybeacon.ahk
 		#Include gtc-rbpdelevel.ahk
 		;other
+		#Include gtc-stickerPrinter.ahk
 		#Include gtc-honeystorm.ahk
 		#Include gtc-honeylb.ahk
 		SetMoveMethod := MoveMethod, SetHiveSlot := HiveSlot, SetHiveBees := HiveBees
