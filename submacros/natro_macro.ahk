@@ -10740,105 +10740,41 @@ nm_Collect(){
 		LastHoneystorm:=nowUnix()
 		IniWrite, %LastHoneystorm%, settings\nm_config.ini, Collect, LastHoneystorm
 	}
-	; Sticker Printer
+	; Sticker Printer ;//todo: move to Boost, merge with sticker stack
 	If (StickerPrinterCheck && (nowUnix()-LastStickerPrinter)>3600) { ;1 hour
 		loop, 2 {
 			nm_Reset()
 			nm_setStatus("Traveling", "Sticker Printer" ((A_Index > 1) ? " (Attempt 2)" : ""))
 
-			nm_gotoCollect("stickerPrinter")
+			nm_gotoCollect("stickerprinter")
 			searchRet := nm_imgSearch("e_button.png",30,"high")
 			If (searchRet[1] = 0) {
 				sendinput {%SC_E% down}
 				Sleep, 100
 				sendinput {%SC_E% up}
 
-				If (StickerPrinterEgg="Basic") {
-					WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
+				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
+				MouseMove, (StickerPrinterEgg="Basic") ? windowX+windowWidth//2-90 : windowX+windowWidth//2+28, windowY+4*windowHeight//10-20
+				Sleep, 200
+				Click
+				Sleep, 200
+				If (nm_imgSearch("stickerPrinterCD.png",30,"full")[1] = 0) { ;//todo: change to Gdip_ImageSearch with calculated region
+					nm_setStatus("Error", "Sticker Printer on Cooldown")
+					Sleep, 500
+					sendinput {%SC_E% down}
 					Sleep, 100
-					Sleep, 1000
-					If (windowHeight > 1201) { ; all of these if statements are because when swithcing to diffrent resolutions the height was not working, not sure how to fix this pls lmk if u know
-   						MouseMove, windowX+windowWidth//2-90, windowY+windowHeight//2-175
-					} else If (windowHeight > 1000 && windowHeight < 1201) {
-					    MouseMove, windowX+windowWidth//2-90, windowY+windowHeight//2-140
-					} else If (windowHeight > 800 && windowHeight < 1001) {
-    					MouseMove, windowX+windowWidth//2-90, windowY+windowHeight//2-120
-					} else If (windowHeight > 598 && windowHeight < 801) {
-    					MouseMove, windowX+windowWidth//2-90, windowY+windowHeight//2-90
-					}
-					Sleep, 500
-					Click
-					Sleep, 500
-					If (nm_imgSearch("stickerPrinterCD.png",30,"full")[1] = 0) {
-						nm_setStatus("Error", "Sticker Printer on Cooldown")
-						Sleep, 500
-						sendinput {%SC_E% down}
-						Sleep, 100
-						sendinput {%SC_E% up}
-						break
-					}
-					Sleep, 500			
-					If (windowHeight > 1201) {
-						MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+55
-					} else If (windowHeight > 1000 && windowHeight < 1201) {
-					    MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+75
-					} else If (windowHeight > 800 && windowHeight < 1001) {
-    					MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+95
-					} else If (windowHeight > 598 && windowHeight < 801) {
-    					MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+130
-					}
-					Sleep, 100
-					Click
-					Sleep, 500
-					MouseMove, windowX+windowWidth//2-92, WindowY+windowHeight//2+34.5
-					Sleep, 100 
-					Click
-					Sleep, 8000 ; wait for printer to print
-					nm_setStatus("Collected", "Sticker Printer (Basic Egg)")
-					break
-				} else If (StickerPrinterEgg="Gold") {
-					WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
-					Sleep, 100
-					If (windowHeight > 1201) {
-						MouseMove, windowX+windowWidth//2+28, windowY+windowHeight//2-175
-				 	} else If (windowHeight > 1000 && windowHeight < 1201) {
-					 MouseMove, windowX+windowWidth//2+28, windowY+windowHeight//2-140
-				 	} else If (windowHeight > 800 && windowHeight < 1001) {
-					 MouseMove, windowX+windowWidth//2+28, windowY+windowHeight//2-120
-				 	} else If (windowHeight > 598 && windowHeight < 801) {
-					 MouseMove, windowX+windowWidth//2+28, windowY+windowHeight//2-90
-				 	}
-					Sleep, 500
-					Click
-					If (nm_imgSearch("stickerPrinterCD.png",30,"full")[1] = 0) {
-						nm_setStatus("Error", "Sticker Printer on Cooldown")
-						Sleep, 500
-						sendinput {%SC_E% down}
-						Sleep, 100
-						sendinput {%SC_E% up}
-						break
-					}
-					Sleep, 500
-					If (windowHeight > 1201) {
-						MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+55
-					} else If (windowHeight > 1000 && windowHeight < 1201) {
-					    MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+75
-					} else If (windowHeight > 800 && windowHeight < 1001) {
-    					MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+95
-					} else If (windowHeight > 598 && windowHeight < 801) {
-    					MouseMove, windowX+windowWidth//2+225, WindowY+windowHeight//2+130
-					}
-					SLeep, 100
-					Click
-					Sleep, 500
-					MouseMove, windowX+windowWidth//2-92, WindowY+windowHeight//2+34.5
-					Sleep, 100
-					Click
-					Sleep, 8000 ; wait for printer to print
-					nm_setStatus("Collected", "Sticker Printer (Gold Egg)")
+					sendinput {%SC_E% up}
 					break
 				}
-				
+				MouseMove, windowX+windowWidth//2+225, windowY+4*windowHeight//10+195
+				Sleep, 200
+				Click
+				MouseMove, windowX+windowWidth//2-92, WindowY+windowHeight//2+34.5
+				Sleep, 100 ;//todo: wait for yes button instead of unreliable delay-click
+				Click
+				Sleep, 8000 ; wait for printer to print
+				nm_setStatus("Collected", "Sticker Printer (" StickerPrinterEgg " Egg)")
+				break
 			}
 		}
 		LastStickerPrinter:=nowUnix()
