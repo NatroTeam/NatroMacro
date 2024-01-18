@@ -485,10 +485,7 @@ config["Gather"] := {"FieldName1":"Sunflower"
 	, "FieldDriftCheck3":1
 	, "CurrentFieldNum":1}
 
-config["Collect"] := {"StickerPrinterCheck":0
-	, "StickerPrinterEgg":"Basic"
-	, "LastStickerPrinter":1
-	, "ClockCheck":1
+config["Collect"] := {"ClockCheck":1
 	, "LastClock":1
 	, "MondoBuffCheck":0
 	, "MondoAction":"Buff"
@@ -690,7 +687,10 @@ config["Boost"] := {"FieldBoostStacks":0
 	, "PumpkinBoosterCheck":1
 	, "MushroomBoosterCheck":1
 	, "StrawberryBoosterCheck":1
-	, "RoseBoosterCheck":1}
+	, "RoseBoosterCheck":1
+	, "StickerPrinterCheck":0
+	, "LastStickerPrinter":1
+	, "StickerPrinterEgg":"Basic"}
 
 config["Quests"] := {"QuestGatherMins":5
 	, "QuestGatherReturnBy":"Walk"
@@ -2390,11 +2390,6 @@ Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_AntPassAction hwndhAPALeft Disabled, <
 Gui, Add, Button, xp+60 yp w12 h16 gnm_AntPassAction hwndhAPARight Disabled, >
 Gui, Add, Checkbox, x10 yp+19 +BackgroundTrans vRoboPassCheck gnm_saveCollect Checked%RoboPassCheck% Disabled, Robo Pass
 Gui, Add, Checkbox, x10 yp+18 +BackgroundTrans vHoneystormCheck gnm_saveCollect Checked%HoneystormCheck% Disabled, Honeystorm
-Gui, Add, Checkbox, x10 yp+17 +BackgroundTrans vStickerPrinterCheck gnm_saveCollect Checked%StickerPrinterCheck% Disabled, Sticker Printer
-Gui, Add, Text, x30 yp+15 w11 vStickerPrinterPointText +left +BackgroundTrans, \___
-Gui, Add, Text, x66 yp w49 vStickerPrinterEgg +Center +BackgroundTrans,%StickerPrinterEgg%
-Gui, Add, Button, xp-10 yp-1 w12 h16 gnm_StickerPrinterEgg hwndhSPELeft Disabled, <
-Gui, Add, Button, xp+58 yp w12 h16 gnm_StickerPrinterEgg hwndhSPERight Disabled, >
 ;dispensers
 Gui, Font, w700
 Gui, Add, GroupBox, x135 y42 w165 h105 vDispensersGroupBox, Dispensers
@@ -2637,6 +2632,14 @@ Gui, Add, Button, x120 y61 w90 h30 vBoostedFieldSelectButton gnm_BoostedFieldSel
 Gui, Add, Button, x225 y61 w90 h30 vAutoFieldBoostButton gnm_autoFieldBoostButton Disabled, % (AutoFieldBoostActive ? "Auto Field Boost`n[ON]" : "Auto Field Boost`n[OFF]")
 Gui, Font, w700
 Gui, Font, s8 cDefault Norm, Tahoma
+
+
+Gui, Add, Checkbox, x305 yp+17 vStickerPrinterCheck gnm_StickerPrinterCheck Checked%StickerPrinterCheck%, Sticker Printer
+Gui, Add, Text, xp+6 yp+14 +BackgroundTrans, \__
+Gui, Add, Text, x+0 yp+4 w36 +Center +BackgroundTrans, Egg:
+Gui, Add, Text, x+12 yp w55 vStickerPrinterEgg +Center +BackgroundTrans, %StickerPrinterEgg%
+Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_StickerPrinterEgg hwndhSPELeft Disabled, <
+Gui, Add, Button, xp+66 yp w12 h16 gnm_StickerPrinterEgg hwndhSPERight Disabled, >
 
 ;QUEST TAB
 ;------------------------
@@ -5171,9 +5174,6 @@ nm_TabCollectLock(){
 	GuiControl, disable, AntPassCheck
 	GuiControl, disable, % hAPALeft
 	GuiControl, disable, % hAPARight
-	GuiControl, disable, StickerPrinterCheck
-	GuiControl, disable, % hSPELeft
-	GuiControl, disable, % hSPERight
 	GuiControl, disable, HoneyDisCheck
 	GuiControl, disable, TreatDisCheck
 	GuiControl, disable, BlueberryDisCheck
@@ -5254,9 +5254,6 @@ nm_TabCollectUnLock(){
 	GuiControl, enable, % hMARight
 	GuiControl, enable, RoboPassCheck
 	GuiControl, enable, HoneystormCheck
-	GuiControl, enable, StickerPrinterCheck
-	GuiControl, enable, % hSPELeft
-	GuiControl, enable, % hSPERight
 	GuiControl, enable, AntPassCheck
 	GuiControl, enable, % hAPALeft
 	GuiControl, enable, % hAPARight
@@ -5393,6 +5390,9 @@ nm_TabBoostLock(){
 	GuiControl, disable, HotbarMax5
 	GuiControl, disable, HotbarMax6
 	GuiControl, disable, HotbarMax7
+	GuiControl, disable, StickerPrinterCheck
+	GuiControl, disable, % hSPELeft
+	GuiControl, disable, % hSPERight
 }
 nm_TabBoostUnLock(){
 	global
@@ -5430,6 +5430,11 @@ nm_TabBoostUnLock(){
 	GuiControl, enable, HotbarMax5
 	GuiControl, enable, HotbarMax6
 	GuiControl, enable, HotbarMax7
+	GuiControl, enable, StickerPrinterCheck
+	if (StickerPrinterCheck = 1) {
+		GuiControl, enable, % hSPELeft
+		GuiControl, enable, % hSPERight
+	}
 }
 nm_FieldBooster(hCtrl:=""){
 	global
@@ -7168,6 +7173,15 @@ nm_AntPassAction(hCtrl){
 	GuiControl, , AntPassAction, % (AntPassAction := val[(hCtrl = hAPARight) ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)])
 	IniWrite, %AntPassAction%, settings\nm_config.ini, Collect, AntPassAction
 }
+nm_StickerPrinterCheck(){
+	global
+	local c
+	GuiControlGet, StickerPrinterCheck
+	c :=  (StickerPrinterCheck = 1) ? "Enable" : "Disable"
+	GuiControl, %c%, % hSPELeft
+	GuiControl, %c%, % hSPERight
+	IniWrite, %StickerPrinterCheck%, settings\nm_config.ini, Boost, StickerPrinterCheck
+}
 nm_StickerPrinterEgg(hCtrl){
 	global StickerPrinterEgg, hSPELeft, hSPERight
 	static val := ["Basic", "Gold"], l := val.Length()
@@ -7175,7 +7189,7 @@ nm_StickerPrinterEgg(hCtrl){
 	i := (StickerPrinterEgg = "Basic") ? 1 : 2
 
 	GuiControl, , StickerPrinterEgg, % (StickerPrinterEgg := val[(hCtrl = hSPERight) ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)])
-	IniWrite, %StickerPrinterEgg%, settings\nm_config.ini, Collect, StickerPrinterEgg
+	IniWrite, %StickerPrinterEgg%, settings\nm_config.ini, Boost, StickerPrinterEgg
 }
 nm_FieldBoosterMins(){
 	global FieldBoosterMins
@@ -8415,7 +8429,7 @@ nm_ContributorsPageButton(hwnd){
 nm_CollectKillButton(hCtrl){
 	global
 	static CollectControls := ["CollectGroupBox","DispensersGroupBox","BeesmasGroupBox","BlenderGroupBox","BeesmasFailImage","BeesmasImage"
-		,"ClockCheck","MondoBuffCheck","MondoAction","MondoPointText","MondoSecs","MondoSecsText","AntPassCheck","AntPassAction","RoboPassCheck","HoneystormCheck","StickerPrinterCheck","StickerPrinterEgg","StickerPrinterPointText",
+		,"ClockCheck","MondoBuffCheck","MondoAction","MondoPointText","MondoSecs","MondoSecsText","AntPassCheck","AntPassAction","RoboPassCheck","HoneystormCheck",
 		,"HoneyDisCheck","TreatDisCheck","BlueberryDisCheck","StrawberryDisCheck","CoconutDisCheck","RoyalJellyDisCheck","GlueDisCheck"]
 	, CollectControlsH := ["hMALeft","hMARight","hAPALeft","hAPARight","hBeesmas1","hBeesmas2","hBeesmas3","hBeesmas4","hBeesmas5","hBeesmas6","hBeesmas7","hBeesmas8","hBeesmas9","hBeesmas10","hBeesmas11"]
 	, KillControls := ["BugRunGroupBox","BugRunCheck","MonsterRespawnTime","TextMonsterRespawnPercent","TextMonsterRespawn","MonsterRespawnTimeHelp","BugrunInterruptCheck","TextLoot","TextKill","TextLineBugRun1","TextLineBugRun2","BugrunLadybugsLoot","BugrunRhinoBeetlesLoot","BugrunSpiderLoot","BugrunMantisLoot","BugrunScorpionsLoot","BugrunWerewolfLoot","BugrunLadybugsCheck","BugrunRhinoBeetlesCheck","BugrunSpiderCheck","BugrunMantisCheck","BugrunScorpionsCheck","BugrunWerewolfCheck","StingersGroupBox","StingerCheck","StingerDailyBonusCheck","TextFields","StingerCloverCheck","StingerSpiderCheck","StingerCactusCheck","StingerRoseCheck","StingerMountainTopCheck","StingerPepperCheck","BossesGroupBox","TunnelBearCheck","KingBeetleCheck","CocoCrabCheck","StumpSnailCheck","CommandoCheck","TunnelBearBabyCheck","KingBeetleBabyCheck","BabyLovePicture1","BabyLovePicture2","KingBeetleAmuletMode","ShellAmuletMode","KingBeetleAmuPicture","ShellAmuPicture","KingBeetleAmuletModeText","ShellAmuletModeText","ChickLevelTextLabel","ChickLevelText","ChickLevel","SnailHPText","SnailHealthEdit","SnailHealthText","ChickHPText","ChickHealthEdit","ChickHealthText","SnailTimeText","SnailTimeUpDown","ChickTimeText","ChickTimeUpDown","BossConfigHelp","TextLineBosses1","TextLineBosses2","TextLineBosses3","TextBosses1","TextBosses2","TextBosses3"]
@@ -10778,7 +10792,7 @@ nm_Collect(){
 			}
 		}
 		LastStickerPrinter:=nowUnix()
-		IniWrite, %LastStickerPrinter%, settings\nm_config.ini, Collect, LastStickerPrinter
+		IniWrite, %LastStickerPrinter%, settings\nm_config.ini, Boost, LastStickerPrinter
 	}
 	;Daily Honey LB
 	if (HoneySSCheck) {
@@ -19373,7 +19387,7 @@ nm_gotoCollect(location, waitEnd := 1){
 		#Include gtc-gummybeacon.ahk
 		#Include gtc-rbpdelevel.ahk
 		;other
-		#Include gtc-stickerPrinter.ahk
+		#Include gtc-stickerprinter.ahk
 		#Include gtc-honeystorm.ahk
 		#Include gtc-honeylb.ahk
 		SetMoveMethod := MoveMethod, SetHiveSlot := HiveSlot, SetHiveBees := HiveBees
