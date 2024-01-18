@@ -1,20 +1,31 @@
 ﻿if (MoveMethod = "walk")
 {
-	paths["sticker"] := "
+	paths["stickerprinter"] := "
 	(LTrim Join`r`n
 	;gotoramp
-	" nm_Walk(44.75, BackKey, LeftKey) " ; 47.25
-	" nm_Walk(52.5, LeftKey) "
-	" nm_Walk(2.8, BackKey, RightKey) "
-	" nm_Walk(6.7, BackKey)"
-	" nm_Walk(40.5, LeftKey) "
-	" nm_Walk(5, BackKey) "
-	send {" RotRight " 2}
+	" nm_Walk(67.5, BackKey, LeftKey) "
+	send {" RotRight " 4}
+	" nm_Walk(31, FwdKey) "
+	" nm_Walk(7.8, LeftKey) "
+	" nm_Walk(10, BackKey) "
+	" nm_Walk(5, RightKey) "
+	" nm_Walk(1.5, FwdKey) "
+	" nm_Walk(60, LeftKey) "
+	" nm_Walk(3.75, RightKey) "
+	" nm_Walk(85, FwdKey) "
+	" nm_Walk(45, RightKey) "
+	" nm_Walk(50, BackKey) "
+	" nm_Walk(60, RightKey) "
+	" nm_Walk(15.75, FwdKey, LeftKey) "
+	" nm_Walk(18, FwdKey) "
+	send {" RotRight " 4}
+	" nm_Walk(31, LeftKey) "
+	" nm_Walk(3, BackKey) "
 	)"
 }
 else
 {
-	paths["stickerPrinter"] := "
+	paths["stickerprinter"] := "
 	(LTrim Join`r`n
 	;gotoramp
 	;gotocannon
@@ -23,10 +34,7 @@ else
 	send {e up}
 	Sleep, 4000
 	" nm_Walk(31, LeftKey) "
-	Sleep, 200
-	send {s down}
-	Sleep, 300
-	send {s up}
+	" nm_Walk(3, BackKey) "
 	)"
 }
 ;path idkwhatimdoing money_mountain
