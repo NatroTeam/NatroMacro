@@ -61,4 +61,5 @@
 	, "BlenderIndex3"
 	, "BlenderItem1"
 	, "BlenderItem2"
-	, "BlenderItem3"]
+	, "BlenderItem3"
+	, "StickerStackItem"]

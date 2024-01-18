@@ -5668,16 +5668,17 @@ nm_StickerStackItem(hCtrl){
 	GuiControl, , StickerStackItem, % (StickerStackItem := val[(hCtrl = hSSIRight) ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)])
 	IniWrite, %StickerStackItem%, settings\nm_config.ini, Boost, StickerStackItem
 }
-nm_StickerStackMode(){
+nm_StickerStackMode(hCtrl:=""){
 	global StickerStackMode, StickerStackTimer
+
+	if hCtrl
+		StickerStackMode := (StickerStackMode = 1) ? 0 : 1
 	
-	if (StickerStackMode = 1) {
-		StickerStackMode := 0
+	if (StickerStackMode = 0) {
 		GuiControl, MoveDraw, StickerStackModeText, w85
 		GuiControl, , StickerStackModeText, Detect
 		GuiControl, Hide, StickerStackTimer
 	} else {
-		StickerStackMode := 1
 		GuiControl, MoveDraw, StickerStackModeText, w68
 		GuiControl, , StickerStackModeText, % nm_DurationFromSeconds(StickerStackTimer)
 		GuiControl, Show, StickerStackTimer
@@ -21917,6 +21918,9 @@ nm_UpdateGUIVar(var)
 			local ShrineData1, ShrineData2, ShrineData3, pos
 			GuiControlGet, ShrineData%Num%
 			GuiControl,, ShrineData%Num%, % StrReplace(ShrineData%Num%, SubStr(ShrineData%Num%, 1, InStr(ShrineData%Num%, " ") - 1), "(" %k% ")")
+
+			case "StickerStackMode":
+			nm_StickerStackMode()
 		}
 
 		default:
