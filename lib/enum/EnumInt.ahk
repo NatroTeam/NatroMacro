@@ -265,4 +265,6 @@ arr2 := arr.Push("MPuffMode3" ; 250
 	, "MPlanterHold2"
 	, "MPlanterHold3"
 	, "BrownQuestCheck"
-	, "LastBrownQuest")
+	, "LastBrownQuest"
+	, "StickerPrinterCheck"
+	, "LastStickerPrinter")
