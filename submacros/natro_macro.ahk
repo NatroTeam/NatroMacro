@@ -687,7 +687,12 @@ config["Boost"] := {"FieldBoostStacks":0
 	, "PumpkinBoosterCheck":1
 	, "MushroomBoosterCheck":1
 	, "StrawberryBoosterCheck":1
-	, "RoseBoosterCheck":1}
+	, "RoseBoosterCheck":1
+	, "StickerStackCheck":0
+	, "LastStickerStack":1
+	, "StickerStackItem":"Tickets"
+	, "StickerStackMode":0
+	, "StickerStackTimer":900}
 
 config["Quests"] := {"QuestGatherMins":5
 	, "QuestGatherReturnBy":"Walk"
@@ -1784,6 +1789,7 @@ bitmaps := {}, shrine := {}, hBitmapsSBT := {}
 #Include perfstats\bitmaps.ahk
 #Include gui\blendershrine_bitmaps.ahk
 #Include quests\bitmaps.ahk
+#Include stickerstack\bitmaps.ahk
 
 hBitmapsSB := {}
 for x,y in hBitmapsSBT
@@ -2554,61 +2560,61 @@ Gui, Tab, Boost
 ;GuiControl,focus, Tab
 ;boosters
 Gui, Font, W700
-Gui, Add, GroupBox, x10 y25 w480 h70, Field Boost
+Gui, Add, GroupBox, x10 y25 w285 h72, Field Boost
 Gui, Add, GroupBox, x10 y97 w285 h138, Hotbar Slots
 Gui, Font, s8 cDefault Norm, Tahoma
 ;field booster
-Gui, Add, Text, x20 y41 +BackgroundTrans, Free Booster Order:
-Gui, Add, Text, x+6 yp +BackgroundTrans Section, 1:
+Gui, Add, Text, x15 y40 +BackgroundTrans Section, 1:
 Gui, Add, Text, x+14 yp w50 vFieldBooster1 +Center +BackgroundTrans, %FieldBooster1%
 Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_FieldBooster hwndhFB1Left Disabled, <
 Gui, Add, Button, xp+61 yp w12 h16 gnm_FieldBooster hwndhFB1Right Disabled, >
-Gui, Add, Text, xs+96 ys +BackgroundTrans, 2:
+Gui, Add, Text, xs ys+18 +BackgroundTrans, 2:
 Gui, Add, Text, x+14 yp w50 vFieldBooster2 +Center +BackgroundTrans, %FieldBooster2%
 Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_FieldBooster hwndhFB2Left Disabled, <
 Gui, Add, Button, xp+61 yp w12 h16 gnm_FieldBooster hwndhFB2Right Disabled, >
-Gui, Add, Text, xs+192 ys +BackgroundTrans, 3:
+Gui, Add, Text, xs ys+36 +BackgroundTrans, 3:
 Gui, Add, Text, x+14 yp w50 vFieldBooster3 +Center +BackgroundTrans, %FieldBooster3%
 Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_FieldBooster hwndhFB3Left Disabled, <
 Gui, Add, Button, xp+61 yp w12 h16 gnm_FieldBooster hwndhFB3Right Disabled, >
-Gui, Add, Text, xs+292 ys-7 left +BackgroundTrans, Separate By:
-Gui, Add, Text, xp+3 y+0 w12 vFieldBoosterMins +Center, %FieldBoosterMins%
+Gui, Add, Text, x120 y35 left +BackgroundTrans, Separate By:
+Gui, Add, Text, xp+3 y+1 w12 vFieldBoosterMins +Center, %FieldBoosterMins%
 Gui, Add, UpDown, xp+14 yp-1 h16 -16 Range0-12 vFieldBoosterMinsUpDown gnm_FieldBoosterMins Disabled, % FieldBoosterMins//5
 Gui, Add, Text, xp+20 yp+1 w100 left +BackgroundTrans, Mins
-Gui, Add, CheckBox, x20 y62 +center vBoostChaserCheck gnm_BoostChaserCheck Checked%BoostChaserCheck% Disabled, Gather in`nBoosted Field
+Gui, Add, CheckBox, x109 y67 +center vBoostChaserCheck gnm_BoostChaserCheck Checked%BoostChaserCheck% Disabled, Gather in`nBoosted Field
+Gui, Add, Button, x200 y65 w90 h30 vBoostedFieldSelectButton gnm_BoostedFieldSelectButton Disabled, Select Boosted Gather Fields
 Gui, Font, w700
 ;shrine
-Gui, Add, GroupBox, x300 y97 w190 h138, Shrine
+Gui, Add, GroupBox, x300 y25 w190 h105, Wind Shrine
 Gui, Font, s8 cDefault Norm, Tahoma
 loop 2 {
 	xCoords := 246 + (86 * A_Index)
-	Gui, add, picture, x%xcoords% y153 h40 w40 hwndhShrineItem%A_Index%Picture vShrineItem%A_Index%Picture +BackgroundTrans +0xE
-	Gui, Add, Button, x%xCoords% y203 w40 h13 vShrineAdd%A_Index% hwndhShrineClear%A_Index% gba_setShrineData Disabled, % (ShrineItem%A_Index% = "None") ? "Add" : "Clear"
+	Gui, add, picture, x%xcoords% y61 h40 w40 hwndhShrineItem%A_Index%Picture vShrineItem%A_Index%Picture +BackgroundTrans +0xE
+	Gui, Add, Button, x%xCoords% y107 w40 h13 vShrineAdd%A_Index% hwndhShrineClear%A_Index% gba_setShrineData Disabled, % (ShrineItem%A_Index% = "None") ? "Add" : "Clear"
 	if (ShrineItem%A_Index% != "None")
 		GuiControl, , % hShrineItem%A_Index%Picture, % hBitmapsSB[ShrineItem%A_index%] ? ("HBITMAP:*" hBitmapsSB[ShrineItem%A_index%]) : ""
 	xCoords := 237 + (86 * A_index)
-	Gui, Add, Text, x%xCoords% y130 w60 +Center vShrineData%A_index%, % "(" ShrineAmount%A_Index% ") [" ((ShrineIndex%A_index% = "Infinite") ? "∞" : ShrineIndex%A_index%) "]"
+	Gui, Add, Text, x%xCoords% y41 w60 +Center vShrineData%A_index%, % "(" ShrineAmount%A_Index% ") [" ((ShrineIndex%A_index% = "Infinite") ? "∞" : ShrineIndex%A_index%) "]"
 }
 ShrineAdd := 0
 
-Gui, Add, Text, x426 y197 w41 h16 +Center +0x200 vShrineAmountNum Hidden
+Gui, Add, Text, x426 y108 w41 h16 +Center +0x200 vShrineAmountNum Hidden
 Gui, Add, UpDown, vShrineAmount Range1-999 Hidden, 1
-Gui, Add, Text, x430 y178 vShrineAmountText Hidden, Amount
-Gui, Add, Text, x430 y122 vShrineRepeatText Hidden, Repeat
+Gui, Add, Text, x430 y89 vShrineAmountText Hidden, Amount
+Gui, Add, Text, x430 y33 vShrineRepeatText Hidden, Repeat
 Gui, Font, w700 underline
-Gui, Add, Text, x327 y130 w80 vshrinetitle1 Hidden, Add Item
+Gui, Add, Text, x327 y41 w80 vshrinetitle1 Hidden, Add Item
 Gui, Font, s8 cDefault Norm, Tahoma
-Gui, Add, Text, x302 y146 w103 h1 vShrineline1 Hidden 0x7
-Gui, Add, Text, x404 y104 w1 h130 vShrineline2 Hidden 0x7
-Gui, Add, Text, x405 y136 w83 h1 vShrineline3 Hidden 0x7
-Gui, Add, Text, x405 y193 w83 h1 vShrineline4 Hidden 0x7
-Gui, Add, Text, x426 y158 w41 h16 +Center +0x200 vShrineIndexNum Hidden
+Gui, Add, Text, x302 y57 w103 h1 vShrineline1 Hidden 0x7
+Gui, Add, Text, x404 y32 w1 h97 vShrineline2 Hidden 0x7
+Gui, Add, Text, x405 y47 w83 h1 vShrineline3 Hidden 0x7
+Gui, Add, Text, x405 y104 w83 h1 vShrineline4 Hidden 0x7
+Gui, Add, Text, x426 y69 w41 h16 +Center +0x200 vShrineIndexNum Hidden
 Gui, Add, UpDown, vShrineIndex Range1-999 Hidden, 1
-Gui, Add, Checkbox, x422 y141 w60 vShrineIndexOption gnm_ShrineIndexOption Hidden, Infinite
-Gui, Add, Picture, x331 y152 w40 h40 hwndhAddShrineItem vShrineItem Hidden +0xE
-Gui, Add, Button, x307 y167 w18 h18 vShrineLeft hwndhfShrineleft gba_AddShrineItemButton Hidden, <
-Gui, Add, Button, x380 y167 w18 h18 vShrineRight hwndhfShrineright gba_AddShrineItemButton Hidden, >
-Gui, Add, Button, x313 y197 w80 h16 +Center gba_AddShrineItem vShrineAddSlot Hidden
+Gui, Add, Checkbox, x422 y52 w60 vShrineIndexOption gnm_ShrineIndexOption Hidden, Infinite
+Gui, Add, Picture, x331 y63 w40 h40 hwndhAddShrineItem vShrineItem Hidden +0xE
+Gui, Add, Button, x307 y78 w18 h18 vShrineLeft hwndhfShrineleft gba_AddShrineItemButton Hidden, <
+Gui, Add, Button, x380 y78 w18 h18 vShrineRight hwndhfShrineright gba_AddShrineItemButton Hidden, >
+Gui, Add, Button, x313 y108 w80 h16 +Center gba_AddShrineItem vShrineAddSlot Hidden
 
 ;hotbar
 Loop, 6
@@ -2625,10 +2631,26 @@ Loop, 6
 	SetLoadingProgress(31+A_Index)
 }
 nm_HotbarWhile()
-Gui, Add, Button, x120 y61 w90 h30 vBoostedFieldSelectButton gnm_BoostedFieldSelectButton Disabled, Select Boosted Gather Fields
-Gui, Add, Button, x225 y61 w90 h30 vAutoFieldBoostButton gnm_autoFieldBoostButton Disabled, % (AutoFieldBoostActive ? "Auto Field Boost`n[ON]" : "Auto Field Boost`n[OFF]")
+Gui, Add, Button, x200 y34 w90 h30 vAutoFieldBoostButton gnm_autoFieldBoostButton Disabled, % (AutoFieldBoostActive ? "Auto Field Boost`n[ON]" : "Auto Field Boost`n[OFF]")
+
+;stickers
 Gui, Font, w700
+Gui, Add, GroupBox, x300 y130 w190 h105, Stickers
 Gui, Font, s8 cDefault Norm, Tahoma
+Gui, Add, Checkbox, x305 yp+16 vStickerStackCheck gnm_StickerStackCheck Checked%StickerStackCheck% Disabled, Sticker Stack
+Gui, Add, Text, xp+6 yp+14 +BackgroundTrans Section, \__
+Gui, Add, Text, x+0 yp+4 w36 +Center +BackgroundTrans, Item:
+Gui, Add, Text, x+12 yp w85 vStickerStackItem +Center +BackgroundTrans, %StickerStackItem%
+Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_StickerStackItem hwndhSSILeft Disabled, <
+Gui, Add, Button, xp+96 yp w12 h16 gnm_StickerStackItem hwndhSSIRight Disabled, >
+Gui, Add, Button, xp+14 yp+1 w12 h14 gnm_StickerStackItemHelp vStickerStackItemHelp Disabled, ?
+Gui, Add, Text, xs yp+14 +BackgroundTrans, \__
+Gui, Add, Text, x+0 yp+4 w36 +Center +BackgroundTrans, Timer:
+Gui, Add, Text, % "x+12 yp w" ((StickerStackMode = 0) ? 85 : 68) " vStickerStackModeText gnm_StickerStackModeText +Center +BackgroundTrans", % (StickerStackMode = 0) ? "Detect" : nm_DurationFromSeconds(StickerStackTimer)
+Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_StickerStackMode hwndhSSMLeft Disabled, <
+Gui, Add, Button, xp+96 yp w12 h16 gnm_StickerStackMode hwndhSSMRight Disabled, >
+Gui, Add, UpDown, % "xp-18 yp h16 -16 Range900-86400 vStickerStackTimer gnm_StickerStackTimer Disabled Hidden" (StickerStackMode = 0), %StickerStackTimer%
+Gui, Add, Button, xp+32 yp+1 w12 h14 gnm_StickerStackModeHelp vStickerStackModeHelp Disabled, ?
 
 ;QUEST TAB
 ;------------------------
@@ -5379,6 +5401,14 @@ nm_TabBoostLock(){
 	GuiControl, disable, HotbarMax5
 	GuiControl, disable, HotbarMax6
 	GuiControl, disable, HotbarMax7
+	GuiControl, disable, StickerStackCheck
+	GuiControl, disable, % hSSILeft
+	GuiControl, disable, % hSSIRight
+	GuiControl, disable, % hSSMLeft
+	GuiControl, disable, % hSSMRight
+	GuiControl, disable, StickerStackTimer
+	GuiControl, disable, StickerStackItemHelp
+	GuiControl, disable, StickerStackModeHelp
 }
 nm_TabBoostUnLock(){
 	global
@@ -5416,6 +5446,16 @@ nm_TabBoostUnLock(){
 	GuiControl, enable, HotbarMax5
 	GuiControl, enable, HotbarMax6
 	GuiControl, enable, HotbarMax7
+	GuiControl, enable, StickerStackCheck
+	if (StickerStackCheck = 1) {
+		GuiControl, enable, % hSSILeft
+		GuiControl, enable, % hSSIRight
+		GuiControl, enable, % hSSMLeft
+		GuiControl, enable, % hSSMRight
+		GuiControl, enable, StickerStackTimer
+		GuiControl, enable, StickerStackItemHelp
+		GuiControl, enable, StickerStackModeHelp
+	}
 }
 nm_FieldBooster(hCtrl:=""){
 	global
@@ -5605,6 +5645,90 @@ nm_HotkeyEditTime(hCtrl){
 	}
 	else if (time != "")
 		msgbox, 0x40030, Hotbar Slot Time, You must enter a valid number of seconds between 1 and 99999!, 20
+}
+nm_StickerStackCheck(){
+	global
+	local c
+	GuiControlGet, StickerStackCheck
+	c :=  (StickerStackCheck = 1) ? "Enable" : "Disable"
+	GuiControl, %c%, % hSSILeft
+	GuiControl, %c%, % hSSIRight
+	GuiControl, %c%, % hSSMLeft
+	GuiControl, %c%, % hSSMRight
+	GuiControl, %c%, StickerStackTimer
+	GuiControl, %c%, StickerStackItemHelp
+	GuiControl, %c%, StickerStackModeHelp
+	IniWrite, %StickerStackCheck%, settings\nm_config.ini, Boost, StickerStackCheck
+}
+nm_StickerStackItem(hCtrl){
+	global StickerStackItem, hSSILeft, hSSIRight
+	static val := ["Tickets", "Sticker"], l := val.Length()
+	
+	if (StickerStackItem = "Tickets")
+	{
+		Gui, +OwnDialogs
+		msgbox, 0x1034, Sticker Stack, % "Consider trading all of your valuable stickers to alternative account, to ensure that you do not lose any valuable stickers. Are you sure you want to use Stickers?", 60
+		IfMsgBox Yes
+			i := 1
+		else
+			return
+	}
+	else
+		i := 2
+	
+	GuiControl, , StickerStackItem, % (StickerStackItem := val[(hCtrl = hSSIRight) ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)])
+	IniWrite, %StickerStackItem%, settings\nm_config.ini, Boost, StickerStackItem
+}
+nm_StickerStackMode(hCtrl:=""){
+	global StickerStackMode, StickerStackTimer
+
+	if hCtrl
+		StickerStackMode := (StickerStackMode = 1) ? 0 : 1
+	
+	if (StickerStackMode = 0) {
+		GuiControl, MoveDraw, StickerStackModeText, w85
+		GuiControl, , StickerStackModeText, Detect
+		GuiControl, Hide, StickerStackTimer
+	} else {
+		GuiControl, MoveDraw, StickerStackModeText, w68
+		GuiControl, , StickerStackModeText, % nm_DurationFromSeconds(StickerStackTimer)
+		GuiControl, Show, StickerStackTimer
+	}
+
+	IniWrite, %StickerStackMode%, settings\nm_config.ini, Boost, StickerStackMode
+}
+nm_StickerStackTimer(){
+	global StickerStackTimer
+	GuiControlGet, StickerStackTimer
+	GuiControl, -Redraw, StickerStackModeText
+	GuiControl, , StickerStackModeText, % nm_DurationFromSeconds(StickerStackTimer)
+	GuiControl, +Redraw, StickerStackModeText
+	IniWrite, %StickerStackTimer%, settings\nm_config.ini, Boost, StickerStackTimer
+}
+nm_StickerStackModeText(){
+	global StickerStackMode, StickerStackTimer
+	if (StickerStackMode = 1) {
+		Gui, +OwnDialogs
+		InputBox, time, Sticker Stack Timer, Enter the number of seconds (900-86400) to wait between each use of the Sticker Stack:
+		if time is integer 
+		{
+			if ((time >= 900) && (time <= 86400)) {
+				GuiControl, , StickerStackTimer, % StickerStackTimer := time
+				GuiControl, , StickerStackModeText, % nm_DurationFromSeconds(StickerStackTimer)
+				IniWrite, %StickerStackTimer%, settings\nm_config.ini, Boost, StickerStackTimer
+			} else {
+				msgbox, 0x40030, Sticker Stack Timer, You must enter an integer between 900 and 86400!, 20
+			}
+		} else {
+			msgbox, 0x40030, Sticker Stack Timer, You must enter an integer!, 20
+		}			
+	}
+}
+nm_StickerStackItemHelp(){
+	msgbox, 0x40000, Sticker Stack Item, Choose the item you prefer to use for activating the Sticker Stack!`n`n'Tickets' is the default option: it will use the 25 Tickets option to activate the boost.`n`n'Sticker' is an option if you want to stack your Stickers. It will always use your first sticker if there is one, otherwise it falls back to using Tickets. If you don't want this, remember to disable Sticker Stack before you run out of Stickers, e.g. with Remote Control.
+}
+nm_StickerStackModeHelp(){
+	msgbox, 0x40000, Sticker Stack Timer, Choose how long you want to wait between each Sticker Stack boost!`n`n'Detect' is the default option: it will detect the time each boost lasts and will go back to activate the Sticker Stack when it's over.`n`nThe other option is a custom timer, you can set it to any value between 15 minutes and 24 hours, the macro will activate Sticker Stack at this time interval.`n`nNOTE: If you change from a custom timer to 'Detect', the macro will still use your custom timer for the time until your next visit to the Sticker Stack.
 }
 nm_savequest(){
 	global
@@ -9571,6 +9695,7 @@ nm_toAnyBooster(){
 	global objective, CurrentAction, PreviousAction
 	global MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff
 	global LastShrine, ShrineCheck, ShrineItem1, ShrineItem2, ShrineAmount1, ShrineAmount2, ShrineRot, Shrine, bitmaps, SC_E
+	global StickerStackCheck, LastStickerStack, StickerStackItem, StickerStackMode, StickerStackTimer
 	static blueBoosterFields:=["Pine Tree", "Bamboo", "Blue Flower"], redBoosterFields:=["Rose", "Strawberry", "Mushroom"], mountainBoosterfields:=["Cactus", "Pumpkin", "Pineapple", "Spider", "Clover", "Dandelion", "Sunflower"]
 	if(VBState=1)
 		return
@@ -9723,6 +9848,90 @@ nm_toAnyBooster(){
 				CurrentAction:="Booster"
 			}
 			nm_toBooster("mountain")
+		}
+	}
+	;Sticker Stack
+	if (StickerStackCheck && (nowUnix()-LastStickerStack)>StickerStackTimer) {
+		loop, 2 {
+			nm_Reset()
+			nm_setStatus("Traveling", "Sticker Stack" ((A_Index > 1) ? " (Attempt 2)" : ""))
+
+			nm_gotoCollect("stickerstack")
+			WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " (hwnd := GetRobloxHWND()))
+
+			searchRet := nm_imgSearch("e_button.png",30,"high")
+			If (searchRet[1] = 0) {
+				sendinput {%SC_E% down}
+				Sleep, 100
+				sendinput {%SC_E% up}
+				sleep, 500 ;//todo: wait for GUI with timeout instead of fixed time
+
+				; detect stack boost time
+				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-275 "|" windowY+4*windowHeight//10 "|550|55")
+				Loop, 1 {
+					if (Gdip_ImageSearch(pBMScreen, bitmaps["stickerstackdigits"][")"], pos, 275, , , , 20) = 1) {
+						x := SubStr(pos, 1, InStr(pos, ",")-1)
+						digits := {}
+						Loop, 10 {
+							n := 10-A_Index
+							Gdip_ImageSearch(pBMScreen, bitmaps["stickerstackdigits"][n], pos, x, , , , 20, , , 4, , "`n")
+							Loop, Parse, pos, `n
+								if (A_Index & 1)
+									digits[A_LoopField] := n
+						}
+
+						num := ""
+						for x,y in digits
+							num .= y
+
+						if ((StrLen(num) = 4) && (SubStr(num, 4) = "0")) { ; check valid time before updating
+							nm_setStatus("Detected", "Stack Boost Time: " nm_DurationFromSeconds(time := 60 * SubStr(num, 1, 2) + SubStr(num, 3)))
+							if (StickerStackMode = 0)
+								StickerStackTimer := time
+							break
+						}
+					}
+					nm_setStatus("Error", "Unable to detect Stack Boost time!")
+				}
+
+				; check if sticker is available to donate
+				if ((StickerStackItem = "Sticker") && (Gdip_ImageSearch(pBMScreen, bitmaps["nosticker"], , , , , , 20) = 0)) {
+					nm_setStatus("Stacking", "Sticker")
+					MouseMove, windowX+windowWidth//2-230, windowY+4*windowHeight//10+40 ; select sticker
+					if (StickerStackMode = 0)
+						StickerStackTimer += 10
+				} else {
+					nm_setStatus("Stacking", "Tickets")
+					MouseMove, windowX+windowWidth//2+180, windowY+4*windowHeight//10-78 ; select tickets
+				}
+				Sleep, 100
+				Click
+				Gdip_DisposeImage(pBMScreen)
+
+				i := 0
+				loop 16 {
+					sleep, 250
+					pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+windowHeight//2-52 "|500|150")
+					if (Gdip_ImageSearch(pBMScreen, bitmaps["yes"], pos, , , , , 2, , 2) = 1) {
+						MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1)-50, windowY+windowHeight//2-52+SubStr(pos, InStr(pos, ",")+1)
+						sleep 150
+						Click
+						sleep 100
+						i++
+					} else if (i > 0) {
+						Gdip_DisposeImage(pBMScreen)
+						break
+					}
+					Gdip_DisposeImage(pBMScreen)
+				}
+				break
+			}
+		}
+		LastStickerStack:=nowUnix()
+		IniWrite, %LastStickerStack%, settings\nm_config.ini, Boost, LastStickerStack
+		if (StickerStackMode = 0) {
+			GuiControl, , StickerStackTimer, %StickerStackTimer%
+			IniWrite, %StickerStackTimer%, settings\nm_config.ini, Boost, StickerStackTimer
 		}
 	}
 }
@@ -19288,6 +19497,7 @@ nm_gotoCollect(location, waitEnd := 1){
 		#Include gtc-coconutdis.ahk
 		#Include gtc-gluedis.ahk
 		#Include gtc-royaljellydis.ahk
+		#Include gtc-stickerstack.ahk
 		;beesmas
 		#Include gtc-stockings.ahk
 		#Include gtc-wreath.ahk
@@ -21202,6 +21412,11 @@ loop, 3 {
 		break
 	}
 }
+;Sticker Warning
+if ((StickerStackCheck = 1) && (StickerStackItem = "Sticker")) { ;Warns user about stickers
+	msgbox, 0x1040, Sticker Stack ,% "You have enabled the Sticker option for Sticker Stack!`nConsider trading all of your valuable stickers to alternative account, to ensure that you do not lose any valuable stickers.", 30
+}
+
 disconnectCheck()
 WinActivate, Roblox
 ;check UIPI
@@ -21723,6 +21938,9 @@ nm_UpdateGUIVar(var)
 			local ShrineData1, ShrineData2, ShrineData3, pos
 			GuiControlGet, ShrineData%Num%
 			GuiControl,, ShrineData%Num%, % StrReplace(ShrineData%Num%, SubStr(ShrineData%Num%, 1, InStr(ShrineData%Num%, " ") - 1), "(" %k% ")")
+
+			case "StickerStackMode":
+			nm_StickerStackMode()
 		}
 
 		default:
