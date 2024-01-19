@@ -1787,6 +1787,7 @@ bitmaps := {}, shrine := {}, hBitmapsSBT := {}
 #Include perfstats\bitmaps.ahk
 #Include gui\blendershrine_bitmaps.ahk
 #Include quests\bitmaps.ahk
+#Include stickerprinter\bitmaps.ahk
 
 hBitmapsSB := {}
 for x,y in hBitmapsSBT
@@ -8429,7 +8430,7 @@ nm_ContributorsPageButton(hwnd){
 nm_CollectKillButton(hCtrl){
 	global
 	static CollectControls := ["CollectGroupBox","DispensersGroupBox","BeesmasGroupBox","BlenderGroupBox","BeesmasFailImage","BeesmasImage"
-		,"ClockCheck","MondoBuffCheck","MondoAction","MondoPointText","MondoSecs","MondoSecsText","AntPassCheck","AntPassAction","RoboPassCheck","HoneystormCheck",
+		,"ClockCheck","MondoBuffCheck","MondoAction","MondoPointText","MondoSecs","MondoSecsText","AntPassCheck","AntPassAction","RoboPassCheck","HoneystormCheck"
 		,"HoneyDisCheck","TreatDisCheck","BlueberryDisCheck","StrawberryDisCheck","CoconutDisCheck","RoyalJellyDisCheck","GlueDisCheck"]
 	, CollectControlsH := ["hMALeft","hMARight","hAPALeft","hAPARight","hBeesmas1","hBeesmas2","hBeesmas3","hBeesmas4","hBeesmas5","hBeesmas6","hBeesmas7","hBeesmas8","hBeesmas9","hBeesmas10","hBeesmas11"]
 	, KillControls := ["BugRunGroupBox","BugRunCheck","MonsterRespawnTime","TextMonsterRespawnPercent","TextMonsterRespawn","MonsterRespawnTimeHelp","BugrunInterruptCheck","TextLoot","TextKill","TextLineBugRun1","TextLineBugRun2","BugrunLadybugsLoot","BugrunRhinoBeetlesLoot","BugrunSpiderLoot","BugrunMantisLoot","BugrunScorpionsLoot","BugrunWerewolfLoot","BugrunLadybugsCheck","BugrunRhinoBeetlesCheck","BugrunSpiderCheck","BugrunMantisCheck","BugrunScorpionsCheck","BugrunWerewolfCheck","StingersGroupBox","StingerCheck","StingerDailyBonusCheck","TextFields","StingerCloverCheck","StingerSpiderCheck","StingerCactusCheck","StingerRoseCheck","StingerMountainTopCheck","StingerPepperCheck","BossesGroupBox","TunnelBearCheck","KingBeetleCheck","CocoCrabCheck","StumpSnailCheck","CommandoCheck","TunnelBearBabyCheck","KingBeetleBabyCheck","BabyLovePicture1","BabyLovePicture2","KingBeetleAmuletMode","ShellAmuletMode","KingBeetleAmuPicture","ShellAmuPicture","KingBeetleAmuletModeText","ShellAmuletModeText","ChickLevelTextLabel","ChickLevelText","ChickLevel","SnailHPText","SnailHealthEdit","SnailHealthText","ChickHPText","ChickHealthEdit","ChickHealthText","SnailTimeText","SnailTimeUpDown","ChickTimeText","ChickTimeUpDown","BossConfigHelp","TextLineBosses1","TextLineBosses2","TextLineBosses3","TextBosses1","TextBosses2","TextBosses3"]
@@ -9618,6 +9619,7 @@ nm_toAnyBooster(){
 	global objective, CurrentAction, PreviousAction
 	global MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff
 	global LastShrine, ShrineCheck, ShrineItem1, ShrineItem2, ShrineAmount1, ShrineAmount2, ShrineRot, Shrine, bitmaps, SC_E
+	global StickerPrinterCheck, LastStickerPrinter, StickerPrinterEgg
 	static blueBoosterFields:=["Pine Tree", "Bamboo", "Blue Flower"], redBoosterFields:=["Rose", "Strawberry", "Mushroom"], mountainBoosterfields:=["Cactus", "Pumpkin", "Pineapple", "Spider", "Clover", "Dandelion", "Sunflower"]
 	if(VBState=1)
 		return
@@ -9626,6 +9628,63 @@ nm_toAnyBooster(){
 		return
 	if (QuestGatherField!="None" && QuestGatherField)
 		return
+	; Sticker Printer
+	If (StickerPrinterCheck && (nowUnix()-LastStickerPrinter)>3600) { ;1 hour
+		loop, 2 {
+			nm_Reset()
+			nm_setStatus("Traveling", "Sticker Printer" ((A_Index > 1) ? " (Attempt 2)" : ""))
+
+			nm_gotoCollect("stickerprinter")
+			searchRet := nm_imgSearch("e_button.png",30,"high")
+			If (searchRet[1] = 0) {
+				sendinput {%SC_E% down}
+				Sleep, 100
+				sendinput {%SC_E% up}
+				Sleep, 500 ;//todo: wait for GUI with timeout instead of fixed time
+				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
+				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2+150 "|" windowY+4*windowHeight//10+160 "|100|60")
+				if (Gdip_ImageSearch(pBMScreen, bitmaps["stickerprinterCD"], , , , , , 10) = 1) {
+					Gdip_DisposeImage(pBMScreen)
+					nm_setStatus("Detected", "Sticker Printer on Cooldown")
+					Sleep, 500
+					sendinput {%SC_E% down}
+					Sleep, 100
+					sendinput {%SC_E% up}
+					break
+				}
+				Gdip_DisposeImage(pBMScreen)
+				MouseMove, (StickerPrinterEgg="Basic") ? windowX+windowWidth//2-90 : windowX+windowWidth//2+28, windowY+4*windowHeight//10-20
+				Sleep, 200
+				Click
+				MouseMove, windowX+windowWidth//2+225, windowY+4*windowHeight//10+195
+				Sleep, 200
+				Click
+				i := 0
+				loop 16 {
+					sleep, 250
+					pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+windowHeight//2-52 "|500|150")
+					if (Gdip_ImageSearch(pBMScreen, bitmaps["yes"], pos, , , , , 2, , 2) = 1) {
+						MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1)-50, windowY+windowHeight//2-52+SubStr(pos, InStr(pos, ",")+1)
+						sleep 150
+						Click
+						sleep 100
+						i++
+					} else if (i > 0) {
+						Gdip_DisposeImage(pBMScreen)
+						break
+					}
+					Gdip_DisposeImage(pBMScreen)
+					if (A_Index = 16)
+						break
+				}
+				Sleep, 8000 ; wait for printer to print
+				nm_setStatus("Collected", "Sticker Printer (" StickerPrinterEgg " Egg)")
+				break
+			}
+		}
+		LastStickerPrinter:=nowUnix()
+		IniWrite, %LastStickerPrinter%, settings\nm_config.ini, Boost, LastStickerPrinter
+	}
 	nm_ShrineRotation() ; make sure ShrineRot hasnt changed
 	if (ShrineCheck && (nowUnix()-LastShrine)>3600) { ;1 hour
 		loop, 2 {
@@ -9774,7 +9833,7 @@ nm_toAnyBooster(){
 	}
 }
 nm_Collect(){
-	global FwdKey, BackKey, LeftKey, RightKey, RotLeft, RotRight, KeyDelay, objective, CurrentAction, PreviousAction, MoveSpeedNum, GatherFieldBoostedStart, LastGlitter, MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff, VBState, ClockCheck, LastClock, AntPassCheck, AntPassAction, QuestAnt, LastAntPass, StickerPrinterCheck, LastStickerPrinter, StickerPrinterEgg, HoneyDisCheck, LastHoneyDis, TreatDisCheck, LastTreatDis, BlueberryDisCheck, LastBlueberryDis, StrawberryDisCheck, LastStrawberryDis, CoconutDisCheck, LastCoconutDis, GlueDisCheck, LastGlueDis, RoboPassCheck, LastRoboPass, HoneystormCheck, LastHoneystorm, RoyalJellyDisCheck, LastRoyalJellyDis, StockingsCheck, LastStockings, FeastCheck, RBPDelevelCheck, LastRBPDelevel, LastFeast, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon, beesmasActive, HoneySSCheck, resetTime, bitmaps, SC_E, SC_Space, SC_1, BlenderRot, LastBlenderRot, BlenderEnd, TimerInterval, BlenderIndex1, BlenderIndex2, BlenderIndex3, BlenderItem1, BlenderItem2, BlenderItem3, BlenderTime1, BlenderTime2, BlenderTime3, BlenderAmount1, BlenderAmount2, BlenderAmount3, Blendercheck
+	global FwdKey, BackKey, LeftKey, RightKey, RotLeft, RotRight, KeyDelay, objective, CurrentAction, PreviousAction, MoveSpeedNum, GatherFieldBoostedStart, LastGlitter, MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff, VBState, ClockCheck, LastClock, AntPassCheck, AntPassAction, QuestAnt, LastAntPass, HoneyDisCheck, LastHoneyDis, TreatDisCheck, LastTreatDis, BlueberryDisCheck, LastBlueberryDis, StrawberryDisCheck, LastStrawberryDis, CoconutDisCheck, LastCoconutDis, GlueDisCheck, LastGlueDis, RoboPassCheck, LastRoboPass, HoneystormCheck, LastHoneystorm, RoyalJellyDisCheck, LastRoyalJellyDis, StockingsCheck, LastStockings, FeastCheck, RBPDelevelCheck, LastRBPDelevel, LastFeast, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon, beesmasActive, HoneySSCheck, resetTime, bitmaps, SC_E, SC_Space, SC_1, BlenderRot, LastBlenderRot, BlenderEnd, TimerInterval, BlenderIndex1, BlenderIndex2, BlenderIndex3, BlenderItem1, BlenderItem2, BlenderItem3, BlenderTime1, BlenderTime2, BlenderTime3, BlenderAmount1, BlenderAmount2, BlenderAmount3, Blendercheck
 	static AntPassNum:=2, RoboPassNum:=1, LastHoneyLB:=1
 
 	if(VBState=1)
@@ -10753,46 +10812,6 @@ nm_Collect(){
 		}
 		LastHoneystorm:=nowUnix()
 		IniWrite, %LastHoneystorm%, settings\nm_config.ini, Collect, LastHoneystorm
-	}
-	; Sticker Printer ;//todo: move to Boost, merge with sticker stack
-	If (StickerPrinterCheck && (nowUnix()-LastStickerPrinter)>3600) { ;1 hour
-		loop, 2 {
-			nm_Reset()
-			nm_setStatus("Traveling", "Sticker Printer" ((A_Index > 1) ? " (Attempt 2)" : ""))
-
-			nm_gotoCollect("stickerprinter")
-			searchRet := nm_imgSearch("e_button.png",30,"high")
-			If (searchRet[1] = 0) {
-				sendinput {%SC_E% down}
-				Sleep, 100
-				sendinput {%SC_E% up}
-
-				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
-				MouseMove, (StickerPrinterEgg="Basic") ? windowX+windowWidth//2-90 : windowX+windowWidth//2+28, windowY+4*windowHeight//10-20
-				Sleep, 200
-				Click
-				Sleep, 200
-				If (nm_imgSearch("stickerPrinterCD.png",30,"full")[1] = 0) { ;//todo: change to Gdip_ImageSearch with calculated region
-					nm_setStatus("Error", "Sticker Printer on Cooldown")
-					Sleep, 500
-					sendinput {%SC_E% down}
-					Sleep, 100
-					sendinput {%SC_E% up}
-					break
-				}
-				MouseMove, windowX+windowWidth//2+225, windowY+4*windowHeight//10+195
-				Sleep, 200
-				Click
-				MouseMove, windowX+windowWidth//2-92, WindowY+windowHeight//2+34.5
-				Sleep, 100 ;//todo: wait for yes button instead of unreliable delay-click
-				Click
-				Sleep, 8000 ; wait for printer to print
-				nm_setStatus("Collected", "Sticker Printer (" StickerPrinterEgg " Egg)")
-				break
-			}
-		}
-		LastStickerPrinter:=nowUnix()
-		IniWrite, %LastStickerPrinter%, settings\nm_config.ini, Boost, LastStickerPrinter
 	}
 	;Daily Honey LB
 	if (HoneySSCheck) {
