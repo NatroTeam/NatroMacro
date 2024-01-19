@@ -62,4 +62,5 @@
 	, "BlenderItem1"
 	, "BlenderItem2"
 	, "BlenderItem3"
-	, "StickerStackItem"]
+	, "StickerStackItem"
+	, "StickerPrinterEgg"]

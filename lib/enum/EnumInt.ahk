@@ -269,4 +269,6 @@ arr2 := arr.Push("MPuffMode3" ; 250
 	, "StickerStackCheck"
 	, "LastStickerStack"
 	, "StickerStackMode"
-	, "StickerStackTimer")
+	, "StickerStackTimer"
+	, "StickerPrinterCheck"
+	, "LastStickerPrinter")

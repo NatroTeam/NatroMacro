@@ -692,7 +692,10 @@ config["Boost"] := {"FieldBoostStacks":0
 	, "LastStickerStack":1
 	, "StickerStackItem":"Tickets"
 	, "StickerStackMode":0
-	, "StickerStackTimer":900}
+	, "StickerStackTimer":900
+	, "StickerPrinterCheck":0
+	, "LastStickerPrinter":1
+	, "StickerPrinterEgg":"Basic"}
 
 config["Quests"] := {"QuestGatherMins":5
 	, "QuestGatherReturnBy":"Walk"
@@ -1790,6 +1793,7 @@ bitmaps := {}, shrine := {}, hBitmapsSBT := {}
 #Include gui\blendershrine_bitmaps.ahk
 #Include quests\bitmaps.ahk
 #Include stickerstack\bitmaps.ahk
+#Include stickerprinter\bitmaps.ahk
 
 hBitmapsSB := {}
 for x,y in hBitmapsSBT
@@ -2651,6 +2655,12 @@ Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_StickerStackMode hwndhSSMLeft Disabled,
 Gui, Add, Button, xp+96 yp w12 h16 gnm_StickerStackMode hwndhSSMRight Disabled, >
 Gui, Add, UpDown, % "xp-18 yp h16 -16 Range900-86400 vStickerStackTimer gnm_StickerStackTimer Disabled Hidden" (StickerStackMode = 0), %StickerStackTimer%
 Gui, Add, Button, xp+32 yp+1 w12 h14 gnm_StickerStackModeHelp vStickerStackModeHelp Disabled, ?
+Gui, Add, Checkbox, x305 yp+17 vStickerPrinterCheck gnm_StickerPrinterCheck Checked%StickerPrinterCheck%, Sticker Printer
+Gui, Add, Text, xp+6 yp+14 +BackgroundTrans, \__
+Gui, Add, Text, x+0 yp+4 w36 +Center +BackgroundTrans, Egg:
+Gui, Add, Text, x+12 yp w55 vStickerPrinterEgg +Center +BackgroundTrans, %StickerPrinterEgg%
+Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_StickerPrinterEgg hwndhSPELeft Disabled, <
+Gui, Add, Button, xp+66 yp w12 h16 gnm_StickerPrinterEgg hwndhSPERight Disabled, >
 
 ;QUEST TAB
 ;------------------------
@@ -5409,6 +5419,9 @@ nm_TabBoostLock(){
 	GuiControl, disable, StickerStackTimer
 	GuiControl, disable, StickerStackItemHelp
 	GuiControl, disable, StickerStackModeHelp
+	GuiControl, disable, StickerPrinterCheck
+	GuiControl, disable, % hSPELeft
+	GuiControl, disable, % hSPERight
 }
 nm_TabBoostUnLock(){
 	global
@@ -5455,6 +5468,11 @@ nm_TabBoostUnLock(){
 		GuiControl, enable, StickerStackTimer
 		GuiControl, enable, StickerStackItemHelp
 		GuiControl, enable, StickerStackModeHelp
+	}
+	GuiControl, enable, StickerPrinterCheck
+	if (StickerPrinterCheck = 1) {
+		GuiControl, enable, % hSPELeft
+		GuiControl, enable, % hSPERight
 	}
 }
 nm_FieldBooster(hCtrl:=""){
@@ -7277,6 +7295,24 @@ nm_AntPassAction(hCtrl){
 
 	GuiControl, , AntPassAction, % (AntPassAction := val[(hCtrl = hAPARight) ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)])
 	IniWrite, %AntPassAction%, settings\nm_config.ini, Collect, AntPassAction
+}
+nm_StickerPrinterCheck(){
+	global
+	local c
+	GuiControlGet, StickerPrinterCheck
+	c :=  (StickerPrinterCheck = 1) ? "Enable" : "Disable"
+	GuiControl, %c%, % hSPELeft
+	GuiControl, %c%, % hSPERight
+	IniWrite, %StickerPrinterCheck%, settings\nm_config.ini, Boost, StickerPrinterCheck
+}
+nm_StickerPrinterEgg(hCtrl){
+	global StickerPrinterEgg, hSPELeft, hSPERight
+	static val := ["Basic", "Gold"], l := val.Length()
+
+	i := (StickerPrinterEgg = "Basic") ? 1 : 2
+
+	GuiControl, , StickerPrinterEgg, % (StickerPrinterEgg := val[(hCtrl = hSPERight) ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)])
+	IniWrite, %StickerPrinterEgg%, settings\nm_config.ini, Boost, StickerPrinterEgg
 }
 nm_FieldBoosterMins(){
 	global FieldBoosterMins
@@ -9696,6 +9732,7 @@ nm_toAnyBooster(){
 	global MondoBuffCheck, PMondoGuid, LastGuid, MondoAction, LastMondoBuff
 	global LastShrine, ShrineCheck, ShrineItem1, ShrineItem2, ShrineAmount1, ShrineAmount2, ShrineRot, Shrine, bitmaps, SC_E
 	global StickerStackCheck, LastStickerStack, StickerStackItem, StickerStackMode, StickerStackTimer
+	global StickerPrinterCheck, LastStickerPrinter, StickerPrinterEgg
 	static blueBoosterFields:=["Pine Tree", "Bamboo", "Blue Flower"], redBoosterFields:=["Rose", "Strawberry", "Mushroom"], mountainBoosterfields:=["Cactus", "Pumpkin", "Pineapple", "Spider", "Clover", "Dandelion", "Sunflower"]
 	if(VBState=1)
 		return
@@ -9704,6 +9741,63 @@ nm_toAnyBooster(){
 		return
 	if (QuestGatherField!="None" && QuestGatherField)
 		return
+	; Sticker Printer
+	If (StickerPrinterCheck && (nowUnix()-LastStickerPrinter)>3600) { ;1 hour
+		loop, 2 {
+			nm_Reset()
+			nm_setStatus("Traveling", "Sticker Printer" ((A_Index > 1) ? " (Attempt 2)" : ""))
+
+			nm_gotoCollect("stickerprinter")
+			searchRet := nm_imgSearch("e_button.png",30,"high")
+			If (searchRet[1] = 0) {
+				sendinput {%SC_E% down}
+				Sleep, 100
+				sendinput {%SC_E% up}
+				Sleep, 500 ;//todo: wait for GUI with timeout instead of fixed time
+				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
+				pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2+150 "|" windowY+4*windowHeight//10+160 "|100|60")
+				if (Gdip_ImageSearch(pBMScreen, bitmaps["stickerprinterCD"], , , , , , 10) = 1) {
+					Gdip_DisposeImage(pBMScreen)
+					nm_setStatus("Detected", "Sticker Printer on Cooldown")
+					Sleep, 500
+					sendinput {%SC_E% down}
+					Sleep, 100
+					sendinput {%SC_E% up}
+					break
+				}
+				Gdip_DisposeImage(pBMScreen)
+				MouseMove, (StickerPrinterEgg="Basic") ? windowX+windowWidth//2-90 : windowX+windowWidth//2+28, windowY+4*windowHeight//10-20
+				Sleep, 200
+				Click
+				MouseMove, windowX+windowWidth//2+225, windowY+4*windowHeight//10+195
+				Sleep, 200
+				Click
+				i := 0
+				loop 16 {
+					sleep, 250
+					pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2-250 "|" windowY+windowHeight//2-52 "|500|150")
+					if (Gdip_ImageSearch(pBMScreen, bitmaps["yes"], pos, , , , , 2, , 2) = 1) {
+						MouseMove, windowX+windowWidth//2-250+SubStr(pos, 1, InStr(pos, ",")-1)-50, windowY+windowHeight//2-52+SubStr(pos, InStr(pos, ",")+1)
+						sleep 150
+						Click
+						sleep 100
+						i++
+					} else if (i > 0) {
+						Gdip_DisposeImage(pBMScreen)
+						break
+					}
+					Gdip_DisposeImage(pBMScreen)
+					if (A_Index = 16)
+						break
+				}
+				Sleep, 8000 ; wait for printer to print
+				nm_setStatus("Collected", "Sticker Printer (" StickerPrinterEgg " Egg)")
+				break
+			}
+		}
+		LastStickerPrinter:=nowUnix()
+		IniWrite, %LastStickerPrinter%, settings\nm_config.ini, Boost, LastStickerPrinter
+	}
 	nm_ShrineRotation() ; make sure ShrineRot hasnt changed
 	if (ShrineCheck && (nowUnix()-LastShrine)>3600) { ;1 hour
 		loop, 2 {
@@ -19510,6 +19604,7 @@ nm_gotoCollect(location, waitEnd := 1){
 		#Include gtc-gummybeacon.ahk
 		#Include gtc-rbpdelevel.ahk
 		;other
+		#Include gtc-stickerprinter.ahk
 		#Include gtc-honeystorm.ahk
 		#Include gtc-honeylb.ahk
 		SetMoveMethod := MoveMethod, SetHiveSlot := HiveSlot, SetHiveBees := HiveBees
