@@ -699,7 +699,7 @@ ba_ShrineIndexOption(){
 }
 ba_AddShrineItemButton(hCtrl){
     global hAdd, hfleft, hfright, hAddShrineItem, AddShrineItem, hBitmapsSB
-    static items :=  ["RedExtract", "BlueExtract", "BlueBerry", "Pineapple", "StrawBerry", "Sunflower", "Enzymes", "Oil", "Glue", "TropicalDrink", "Gumdrops", "MoonCharms", "Glitter", "StarJelly", "PurplePotion", "SoftWax", "HardWax", "SwirledWax", "CausticWax", "FieldDice", "SmoothDice", "LoadedDice", "Turpentine"], i := 0, h := 0
+    static items :=  ["RedExtract", "BlueExtract", "BlueBerry", "Pineapple", "StrawBerry", "Sunflower", "Enzymes", "Oil", "Glue", "TropicalDrink", "Gumdrops", "MoonCharms", "Glitter", "StarJelly", "PurplePotion", "AntPass", "CloudVial", "SoftWax", "HardWax", "SwirledWax", "CausticWax", "FieldDice", "SmoothDice", "LoadedDice", "Turpentine"], i := 0, h := 0
     if (h != hAdd)
         i := 0, h := hAdd
     i := Mod(items.Length() + i + ((hCtrl = hfleft) ? -1 : 1), items.Length()), AddShrineItem := items[i+1]

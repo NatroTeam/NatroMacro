@@ -271,4 +271,5 @@ arr2 := arr.Push("MPuffMode3" ; 250
 	, "StickerStackMode"
 	, "StickerStackTimer"
 	, "StickerPrinterCheck"
-	, "LastStickerPrinter")
+	, "LastStickerPrinter"
+	, "AntPassBuyCheck")
