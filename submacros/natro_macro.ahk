@@ -13702,6 +13702,72 @@ nm_GoGather(){
 	global beesmasActive, BeesmasGatherInterruptCheck, StockingsCheck, LastStockings, FeastCheck, LastFeast, RBPDelevelCheck, LastRBPDelevel, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon
 	global GatherStartTime, TotalGatherTime, SessionGatherTime, ConvertStartTime, TotalConvertTime, SessionConvertTime
 	global bitmaps
+	global MoveSpeedNum
+	dist := FieldSprinklerDist%CurrentFieldNum%
+	MoveSpeedFactor:=round(18/MoveSpeedNum, 2)
+	;field dimensions
+	switch FieldName%CurrentFieldNum%
+	{
+		case "sunflower":
+		flen:=1250*dist/10
+		fwid:=2000*dist/10
+
+		case "dandelion":
+		flen:=2500*dist/10
+		fwid:=1000*dist/10
+
+		case "mushroom":
+		flen:=1250*dist/10
+		fwid:=1750*dist/10
+
+		case "blue flower":
+		flen:=2750*dist/10
+		fwid:=750*dist/10
+
+		case "clover":
+		flen:=2000*dist/10
+		fwid:=1500*dist/10
+
+		case "spider":
+		flen:=2000*dist/10
+		fwid:=2000*dist/10
+
+		case "strawberry":
+		flen:=1500*dist/10
+		fwid:=2000*dist/10
+
+		case "bamboo":
+		flen:=3000*dist/10
+		fwid:=1250*dist/10
+
+		case "pineapple":
+		flen:=1750*dist/10
+		fwid:=3000*dist/10
+
+		case "stump":
+		flen:=1500*dist/10
+		fwid:=1500*dist/10
+
+		case "cactus","pumpkin":
+		flen:=1500*dist/10
+		fwid:=2500*dist/10
+
+		case "pine tree":
+		flen:=2500*dist/10
+		fwid:=1750*dist/10
+
+		case "rose":
+		flen:=2500*dist/10
+		fwid:=1500*dist/10
+
+		case "mountain top":
+		flen:=2250*dist/10
+		fwid:=1500*dist/10
+
+		case "pepper","coconut":
+		flen:=1500*dist/10
+		fwid:=2250*dist/10
+	}
 	FormatTime, utc_min, %A_NowUTC%, m
 	if !((nowUnix()-GatherFieldBoostedStart<900) || (nowUnix()-LastGlitter<900) || nm_boostBypassCheck()){
 		;BUGS GatherInterruptCheck
@@ -14056,7 +14122,7 @@ nm_GoGather(){
 	} else {
 		nm_setStatus("Gathering", fieldOverrideReason . " - " . FieldName "`nLimit " field_limit " - " FieldPattern " - " FieldPatternSize " - " FieldSprinklerLoc " " FieldSprinklerDist)
 	}
-	nm_setSprinkler(FieldName, FieldSprinklerLoc, FieldSprinklerDist)
+	nm_setSprinkler(FieldSprinklerLoc)
 	;rotate
 	if (FieldRotateDirection != "None") {
 		direction:=FieldRotateDirection
@@ -15767,77 +15833,11 @@ nm_convert(){
 	;Sleep, 500+((5-Min(HiveBees, 50)/10)**0.5)*10000
 	Sleep, 500+(ConvertDelay ? ConvertDelay : 0)*1000
 }
-nm_setSprinkler(field, loc, dist){
-	global FwdKey, LeftKey, BackKey, RightKey, SC_1, SC_Space, KeyDelay, SprinklerType, MoveSpeedNum
+nm_setSprinkler(loc){
+	global FwdKey, LeftKey, BackKey, RightKey, SC_1, SC_Space, KeyDelay, SprinklerType, MoveSpeedNum, flen, fwid, MoveSpeedFactor
 
 	if (SprinklerType = "None")
 		return
-
-	;field dimensions
-	switch field
-	{
-		case "sunflower":
-		flen:=1250*dist/10
-		fwid:=2000*dist/10
-
-		case "dandelion":
-		flen:=2500*dist/10
-		fwid:=1000*dist/10
-
-		case "mushroom":
-		flen:=1250*dist/10
-		fwid:=1750*dist/10
-
-		case "blue flower":
-		flen:=2750*dist/10
-		fwid:=750*dist/10
-
-		case "clover":
-		flen:=2000*dist/10
-		fwid:=1500*dist/10
-
-		case "spider":
-		flen:=2000*dist/10
-		fwid:=2000*dist/10
-
-		case "strawberry":
-		flen:=1500*dist/10
-		fwid:=2000*dist/10
-
-		case "bamboo":
-		flen:=3000*dist/10
-		fwid:=1250*dist/10
-
-		case "pineapple":
-		flen:=1750*dist/10
-		fwid:=3000*dist/10
-
-		case "stump":
-		flen:=1500*dist/10
-		fwid:=1500*dist/10
-
-		case "cactus","pumpkin":
-		flen:=1500*dist/10
-		fwid:=2500*dist/10
-
-		case "pine tree":
-		flen:=2500*dist/10
-		fwid:=1750*dist/10
-
-		case "rose":
-		flen:=2500*dist/10
-		fwid:=1500*dist/10
-
-		case "mountain top":
-		flen:=2250*dist/10
-		fwid:=1500*dist/10
-
-		case "pepper","coconut":
-		flen:=1500*dist/10
-		fwid:=2250*dist/10
-	}
-
-	MoveSpeedFactor:=round(18/MoveSpeedNum, 2)
 
 	;move to start position
 	if(InStr(loc, "Upper")){
