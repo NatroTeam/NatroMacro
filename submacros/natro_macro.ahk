@@ -13702,9 +13702,9 @@ nm_GoGather(){
 	global beesmasActive, BeesmasGatherInterruptCheck, StockingsCheck, LastStockings, FeastCheck, LastFeast, RBPDelevelCheck, LastRBPDelevel, GingerbreadCheck, LastGingerbread, SnowMachineCheck, LastSnowMachine, CandlesCheck, LastCandles, SamovarCheck, LastSamovar, LidArtCheck, LastLidArt, GummyBeaconCheck, LastGummyBeacon
 	global GatherStartTime, TotalGatherTime, SessionGatherTime, ConvertStartTime, TotalConvertTime, SessionConvertTime
 	global bitmaps
-	global MoveSpeedNum
+	global MoveSpeedNum, flen, fwid
+	global MoveSpeedFactor:=round(18/MoveSpeedNum, 2)
 	dist := FieldSprinklerDist%CurrentFieldNum%
-	MoveSpeedFactor:=round(18/MoveSpeedNum, 2)
 	;field dimensions
 	switch FieldName%CurrentFieldNum%
 	{
