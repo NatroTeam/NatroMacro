@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: download-log
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v3
         with:
           name: STAR_USERS
           if_no_artifact_found: warn
@@ -16,7 +16,7 @@ jobs:
         with:
           webhook_url: ${{secrets.STAR_WEBHOOK_URL}}
       - name: update-log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: STAR_USERS
           path: star_users.json

@@ -8,6 +8,7 @@ jobs:
     steps:
       - name: send-discord-webhook
         id: discord
-        uses: NatroTeam/discord-release-action@v1.2
+        uses: NatroTeam/discord-release-action@v2
         with:
-          webhook_url: ${{secrets.RELEASE_WEBHOOK_URL}}
+          token: "${{ secrets.RELEASE_BOT_TOKEN }}"
+          channel: "1012613971003584602"
