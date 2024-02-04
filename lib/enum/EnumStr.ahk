@@ -63,4 +63,5 @@
 	, "BlenderItem2"
 	, "BlenderItem3"
 	, "StickerStackItem"
-	, "StickerPrinterEgg"]
+	, "StickerPrinterEgg"
+	, "MondoLootDirection"]

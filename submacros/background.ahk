@@ -35,7 +35,7 @@ if (A_Args.Length() = 0)
 ;initialization
 global imgfolder:="..\nm_image_assets"
 resetTime:=LastState:=LastConvertBalloon:=nowUnix()
-DailyReconnect:=VBState:=state:=0
+VBState:=state:=0
 MacroState:=2
 NightLastDetected := A_Args[1]
 VBLastKilled := A_Args[2]
@@ -80,8 +80,8 @@ loop {
 
 nm_setGlobalNum(wParam, lParam){
 	Critical
-	global resetTime, NightLastDetected, VBState, StingerCheck, VBLastKilled, DailyReconnect, LastConvertBalloon
-	static arr:=["resetTime", "NightLastDetected", "VBState", "StingerCheck", "VBLastKilled", "DailyReconnect", "LastConvertBalloon"]
+	global resetTime, NightLastDetected, VBState, StingerCheck, VBLastKilled, LastConvertBalloon
+	static arr:=["resetTime", "NightLastDetected", "VBState", "StingerCheck", "VBLastKilled", "LastConvertBalloon"]
 	
 	var := arr[wParam], %var% := lParam
 	return 0
@@ -408,8 +408,9 @@ nm_guidingStarDetect(){
 }
 
 nm_dailyReconnect(){
-	global ReconnectHour, ReconnectMin, ReconnectInterval, DailyReconnect, MacroState
-	if ((ReconnectHour = "") || (ReconnectMin = "") || (ReconnectInterval = ""))
+	global ReconnectHour, ReconnectMin, ReconnectInterval, MacroState
+	static LastDailyReconnect := 0
+	if ((ReconnectHour = "") || (ReconnectMin = "") || (ReconnectInterval = "") || (nowUnix() - LastDailyReconnect < 60))
 		return
 	FormatTime, RChourUTC, %A_NowUTC%, HH
 	FormatTime, RCminUTC, %A_NowUTC%, mm
@@ -422,12 +423,11 @@ nm_dailyReconnect(){
 			break
 		}
 	}
-	if((ReconnectMin=RCminUTC) && HourReady && (DailyReconnect=0) && (MacroState = 2)) {
-		DailyReconnect:=1
+	if((ReconnectMin=RCminUTC) && HourReady && (MacroState = 2)) {
+		LastDailyReconnect := nowUnix()
 		if WinExist("natro_macro ahk_class AutoHotkey") {
-			PostMessage, 0x5555, 9, 1
 			Send_WM_COPYDATA("Closing: Roblox, Daily Reconnect", "natro_macro ahk_class AutoHotkey")
-			PostMessage, 0x5557
+			PostMessage, 0x5557, 60
 		}
 	}
 }
