@@ -5,7 +5,10 @@
 	;gotoramp
 	" nm_Walk(44.75, BackKey, LeftKey) " ; 47.25
 	" nm_Walk(42.5, LeftKey) "
-	" nm_Walk(8.5, BackKey) "
+	" nm_Walk(16, BackKey) "
+	" nm_Walk(8, LeftKey) "
+	" nm_Walk(1.5, RightKey) "
+	" nm_Walk(4, FwdKey) "
 	" nm_Walk(22.5, LeftKey) "
 	send {" RotLeft " 2}
 	" nm_Walk(40, FwdKey) "
@@ -21,7 +24,7 @@
 	" nm_Walk(5, LeftKey) "
 	" nm_Walk(4, FwdKey) "
 	" nm_Walk(4, RightKey) "
-	" nm_Walk(10, FwdKey) "
+	" nm_Walk(14, FwdKey) "
 	" nm_Walk(4, BackKey) "
 	" nm_Walk(3, LeftKey) "	
 	send {" RotRight " 2}
