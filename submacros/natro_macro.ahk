@@ -799,7 +799,7 @@ global LostPlanters:=""
 global QuestFields:=""
 global nectarnames:=["Comforting", "Refreshing", "Satisfying", "Motivating", "Invigorating"]
 global planternames:=["PlasticPlanter", "CandyPlanter", "BlueClayPlanter", "RedClayPlanter", "TackyPlanter", "PesticidePlanter", "HeatTreatedPlanter", "HydroponicPlanter", "PetalPlanter", "PlanterOfPlenty", "PaperPlanter", "TicketPlanter"]
-global fieldnames:=["dandelion", "sunflower", "mushroom", "blueflower", "clover", "strawberry", "spider", "bamboo", "pineapple", "stump", "cactus", "pumpkin", "pinetree", "rose", "mountaintop", "pepper", "coconut"]
+global fieldnames:=["dandelion", "sunflower", "mushroom", "blueflower", "clover", "strawberry", "spider", "bamboo", "pineapple", "stump", "cactus", "pumpkin", "pinetree", "rose", "mountaintop", "pepper", "coconut", "tradinghub"]
 
 ComfortingFields:=["Dandelion", "Bamboo", "Pine Tree"]
 RefreshingFields:=["Coconut", "Strawberry", "Blue Flower"]
@@ -1288,8 +1288,8 @@ global FieldBooster:={"pine tree":{booster:"blue", stacks:1}
 	, "stump":{booster:"none", stacks:0}
 	, "mountain top":{booster:"none", stacks:0}
 	, "coconut":{booster:"none", stacks:0}
-	, "pepper":{booster:"none", stacks:0}}
-
+	, "pepper":{booster:"none", stacks:0}
+	, "trading hub":{booster:"none", stacks:0}}
 
 global FieldDefault:={}
 
@@ -1548,6 +1548,21 @@ FieldDefault["Pepper"] := {"pattern":"CornerXSnake"
 	, "invertFB":0
 	, "invertLR":0}
 
+FieldDefault["Trading Hub"] := {"pattern":"Squares"
+		, "size":"M"
+		, "width":5
+		, "camera":"None"
+		, "turns":1
+		, "sprinkler":"Center"
+		, "distance":1
+		, "percent":95
+		, "gathertime":10
+		, "convert":"Rejoin"
+		, "drift":0
+		, "shiftlock":0
+		, "invertFB":0
+		, "invertLR":0}
+	
 StandardFieldDefault := ObjFullyClone(FieldDefault)
 
 ObjFullyClone(obj)
@@ -1749,7 +1764,7 @@ global HasPopStar:=0
 global PopStarActive:=0
 global PreviousAction:="None"
 global CurrentAction:="Startup"
-fieldnamelist := "|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower|"
+fieldnamelist := "|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower|Trading Hub|"
 hotbarwhilelist := "|Never|Always|At Hive|Gathering|Attacking|Microconverter|Whirligig|Enzymes|GatherStart|Snowflake|"
 sprinklerImages := ["saturator"]
 state:="Startup"
@@ -2092,9 +2107,15 @@ DllCall("DeleteObject", "ptr", hBM)
 Gui, Add, Checkbox, x65 y83 w50 +BackgroundTrans +Center vFieldDriftCheck1 gnm_SaveGather Checked%FieldDriftCheck1% Disabled,Drift`nComp
 Gui, Add, Checkbox, xp yp+60 wp +BackgroundTrans +Center vFieldDriftCheck2 gnm_SaveGather Checked%FieldDriftCheck2% Disabled,Drift`nComp
 Gui, Add, Checkbox, xp yp+60 wp +BackgroundTrans +Center vFieldDriftCheck3 gnm_SaveGather Checked%FieldDriftCheck3% Disabled,Drift`nComp
+Gui, Add, Text, vFieldDriftDisabled1 x65 y83 w50 Hidden +Center +BackgroundTrans, Option Disabled
+Gui, Add, Text, vFieldDriftDisabled2 xp yp+60 w50 Hidden +Center +BackgroundTrans, Option Disabled
+Gui, Add, Text, vFieldDriftDisabled3 xp yp+60 w50 Hidden +Center +BackgroundTrans, Option Disabled
 Gui, Add, Button, x115 y89 w9 h14 gnm_FDCHelp vFDCHelp1 Disabled, ?
 Gui, Add, Button, xp yp+60 w9 h14 gnm_FDCHelp vFDCHelp2 Disabled, ?
 Gui, Add, Button, xp yp+60 w9 h14 gnm_FDCHelp vFDCHelp3 Disabled, ?
+Gui, Add, Button, x115 y89 w9 h14 gnm_FDCDHelp vFDCDHelp1 Hidden Disabled, ?
+Gui, Add, Button, xp yp+60 w9 h14 gnm_FDCDHelp vFDCDHelp2 Hidden Disabled, ?
+Gui, Add, Button, xp yp+60 w9 h14 gnm_FDCDHelp vFDCDHelp3 Hidden Disabled, ?
 Gui, Add, Button, x22 y82 h14 w40 Disabled vCopyGather1 gnm_CopyGatherSettings, Copy
 Gui, Add, Button, xp yp+15 hp wp Disabled vPasteGather1 gnm_PasteGatherSettings, Paste
 Gui, Add, Button, xp yp+45 hp wp Disabled vCopyGather2 gnm_CopyGatherSettings, Copy
@@ -2182,15 +2203,21 @@ Gui, Add, Button, xp+71 yp w12 h16 gnm_FieldSprinklerLoc hwndhFSL2Right Disabled
 Gui, Add, Text, x427 yp+61 w60 vFieldSprinklerLoc3 +Center +BackgroundTrans,%FieldSprinklerLoc3%
 Gui, Add, Button, xp-12 yp-1 w12 h16 gnm_FieldSprinklerLoc hwndhFSL3Left Disabled, <
 Gui, Add, Button, xp+71 yp w12 h16 gnm_FieldSprinklerLoc hwndhFSL3Right Disabled, >
-Gui, Add, Text, x415 y79 w86 +BackgroundTrans +Center, Distance:
-Gui, Add, Text, xp yp+60 wp +BackgroundTrans +Center, Distance:
-Gui, Add, Text, xp yp+60 wp +BackgroundTrans +Center, Distance:
-Gui, Add, Text, x440 y95 w32 h16 0x201 +Center
+Gui, Add, Text, vDistanceHide1 x415 y79 w86 +BackgroundTrans +Center, Distance:
+Gui, Add, Text, vDistanceHide2 xp yp+60 wp +BackgroundTrans +Center, Distance:
+Gui, Add, Text, vDistanceHide3 xp yp+60 wp +BackgroundTrans +Center, Distance:
+Gui, Add, Text, vSprinklersDisabled1 x415 y60 w86 Hidden +BackgroundTrans +Center, Sprinkler Options Disabled, Change Field to Access
+Gui, Add, Text, vSprinklersDisabled2 x415 yp+60 w86 Hidden +BackgroundTrans +Center, Sprinkler Options Disabled, Change Field to Access
+Gui, Add, Text, vSprinklersDisabled3 x415 yp+60 w86 Hidden +BackgroundTrans +Center, Sprinkler Options Disabled, Change Field to Access
+Gui, Add, Text, vSprinklerDistDisable1 x440 y95 w32 h16 0x201 +Center
 Gui, Add, UpDown, Range1-10 vFieldSprinklerDist1 gnm_SaveGatherVar Disabled, %FieldSprinklerDist1%
-Gui, Add, Text, xp yp+60 wp h16 0x201 +Center
+Gui, Add, Text, vSprinklerDistDisable2 xp yp+60 wp h16 0x201 +Center
 Gui, Add, UpDown, Range1-10 vFieldSprinklerDist2 gnm_SaveGatherVar Disabled, %FieldSprinklerDist2%
-Gui, Add, Text, xp yp+60 wp h16 0x201 +Center
+Gui, Add, Text, vSprinklerDistDisable3 xp yp+60 wp h16 0x201 +Center
 Gui, Add, UpDown, Range1-10 vFieldSprinklerDist3 gnm_SaveGatherVar Disabled, %FieldSprinklerDist3%
+Gui, Add, Button, x435 y98 w40 h14 gnm_FDCDHelp vSprinklerDisabledWhy1 Hidden Disabled, Why?
+Gui, Add, Button, xp yp+60 w40 h14 gnm_FDCDHelp vSprinklerDisabledWhy2 Hidden Disabled, Why?
+Gui, Add, Button, xp yp+60 w40 h14 gnm_FDCDHelp vSprinklerDisabledWhy3 Hidden Disabled, Why?
 SetLoadingProgress(26)
 
 ;Contributors TAB
@@ -3592,7 +3619,48 @@ mp_HarvestPlanter(PlanterIndex) {
 	}
 }
 ;;Manual planters end
-
+if (FieldName1="Trading Hub") {
+	GuiControl, Hide, FieldDriftCheck1
+	GuiControl, Hide, FDCHelp1
+	GuiControl, Hide, FieldSprinklerLoc1
+	GuiControl, Hide, % hFSL1Left
+	GuiControl, Hide, % hFSL1Right
+	GuiControl, Hide, DistanceHide1
+	GuiControl, Hide, SprinklerDistDisable1
+	GuiControl, Hide, FieldSprinklerDist1
+	GuiControl, Show, SprinklersDisabled1
+	GuiControl, Show, FieldDriftDisabled1
+	GuiControl, Show, FDCDHelp1
+	GuiControl, Show, SprinklerDisabledWhy1
+}
+if (FieldName2="Trading Hub") {
+	GuiControl, Hide, FieldDriftCheck2
+	GuiControl, Hide, FDCHelp2
+	GuiControl, Hide, FieldSprinklerLoc2
+	GuiControl, Hide, % hFSL2Left
+	GuiControl, Hide, % hFSL2Right
+	GuiControl, Hide, DistanceHide2
+	GuiControl, Hide, SprinklerDistDisable2
+	GuiControl, Hide, FieldSprinklerDist2
+	GuiControl, Show, SprinklersDisabled2
+	GuiControl, Show, FieldDriftDisabled2
+	GuiControl, Show, FDCDHelp2
+	GuiControl, Show, SprinklerDisabledWhy2
+}
+if (FieldName3="Trading Hub") {
+	GuiControl, Hide, FieldDriftCheck3
+	GuiControl, Hide, FDCHelp3
+	GuiControl, Hide, FieldSprinklerLoc3
+	GuiControl, Hide, % hFSL3Left
+	GuiControl, Hide, % hFSL3Right
+	GuiControl, Hide, DistanceHide3
+	GuiControl, Hide, SprinklerDistDisable3
+	GuiControl, Hide, FieldSprinklerDist3
+	GuiControl, Show, SprinklersDisabled3
+	GuiControl, Show, FieldDriftDisabled3
+	GuiControl, Show, FDCDHelp3
+	GuiControl, Show, SprinklerDisabledWhy3
+}
 if (BuffDetectReset = 1)
 	nm_AdvancedGUI()
 SetLoadingProgress(100)
@@ -4578,7 +4646,7 @@ nm_StatusLogReverseCheck(){
 	GuiControl, Enable, StatusLogReverse
 }
 nm_FieldSelect1(hCtrl:=0){
-	global FieldName1, CurrentFieldNum, CurrentField
+	global FieldName1, CurrentFieldNum, CurrentField, hFSL1Left, hFSL1Right, hFRT1Left, hFRT1Right, FieldDriftCheck1
 	if hCtrl {
 		GuiControlGet, FieldName1
 		nm_FieldDefaults(1)
@@ -4588,6 +4656,39 @@ nm_FieldSelect1(hCtrl:=0){
 	IniWrite, %CurrentFieldNum%, settings\nm_config.ini, Gather, CurrentFieldNum
 	GuiControl,,CurrentField, %FieldName1%
 	CurrentField:=FieldName1
+	if (FieldName1="Trading Hub") {
+		GuiControl, Hide, FieldDriftCheck1
+		GuiControl, Hide, FDCHelp1
+		GuiControl, Hide, FieldSprinklerLoc1
+		GuiControl, Hide, % hFSL1Left
+		GuiControl, Hide, % hFSL1Right
+		GuiControl, Hide, DistanceHide1
+		GuiControl, Hide, FieldSprinklerDist1
+		GuiControl, Hide, SprinklerDistDisable1
+		GuiControl, Show, SprinklersDisabled1
+		GuiControl, Show, FieldDriftDisabled1
+		GuiControl, Show, FDCDHelp1
+		GuiControl, Show, SprinklerDisabledWhy1
+		GuiControl, Disable, % hFRT1Left
+		GuiControl, Disable, % hFRT1Right
+		GuiControl, Hide, FieldDriftCheck1
+		GuiControl, Hide, FDCHelp1
+	} else {
+		GuiControl, Show, FieldDriftCheck1
+		GuiControl, Show, FDCHelp1
+		GuiControl, Show, FieldSprinklerLoc1
+		GuiControl, Show, % hFSL1Left
+		GuiControl, Show, % hFSL1Right
+		GuiControl, Show, DistanceHide1
+		GuiControl, Show, FieldSprinklerDist1
+		GuiControl, Show, SprinklerDistDisable1
+		GuiControl, Hide, SprinklersDisabled1
+		GuiControl, Hide, FieldDriftDisabled1
+		GuiControl, Hide, FDCDHelp1
+		GuiControl, Hide, SprinklerDisabledWhy1
+		GuiControl, Enable, % hFRT1Left
+		GuiControl, Enable, % hFRT1Right
+	}
 	nm_WebhookEasterEgg()
 }
 nm_TabGatherLock(){
@@ -4612,6 +4713,10 @@ nm_TabGatherLock(){
 	GuiControl, Disable, % hFSL1Left
 	GuiControl, Disable, % hFSL1Right
 	GuiControl, Disable, FDCHelp1
+	GuiControl, Disable, FDCDHelp1
+	GuiControl, Disable, FDCDHelp2
+	GuiControl, Disable, FDCDHelp2
+	GuiControl, Disable, SprinklerDisabledWhy1
 	GuiControl, Disable, CopyGather1
 	GuiControl, Disable, PasteGather1
 	GuiControl, Disable, % hSaveFieldDefault1
@@ -4635,6 +4740,7 @@ nm_TabGatherLock(){
 	GuiControl, Disable, % hFSL2Left
 	GuiControl, Disable, % hFSL2Right
 	GuiControl, Disable, FDCHelp2
+	GuiControl, Disable, SprinklerDisabledWhy1
 	GuiControl, Disable, CopyGather2
 	GuiControl, Disable, PasteGather2
 	GuiControl, Disable, % hSaveFieldDefault2
@@ -4658,10 +4764,21 @@ nm_TabGatherLock(){
 	GuiControl, Disable, % hFSL3Left
 	GuiControl, Disable, % hFSL3Right
 	GuiControl, Disable, FDCHelp3
+	GuiControl, Disable, SprinklerDisabledWhy1
 	GuiControl, Disable, CopyGather3
 	GuiControl, Disable, PasteGather3
 	GuiControl, Disable, % hSaveFieldDefault3
 	GuiControl, , % hSaveFieldDefault3, HBITMAP:*%hBM%
+	if (FieldName1="Trading Hub") {
+		GuiControl, Disable, % hFRT1Left
+		GuiControl, Disable, % hFRT1Right
+	} else if (FieldName2="Trading Hub") {
+		GuiControl, Disable, % hFRT2Left
+		GuiControl, Disable, % hFRT2Right
+	} else if (FieldName3="Trading Hub") {
+		GuiControl, Disable, % hFRT3Left
+		GuiControl, Disable, % hFRT3Right
+	}
 }
 nm_TabGatherUnLock(){
 	global
@@ -4686,6 +4803,12 @@ nm_TabGatherUnLock(){
 	GuiControl, Enable, % hFSL1Left
 	GuiControl, Enable, % hFSL1Right
 	GuiControl, Enable, FDCHelp1
+	GuiControl, Enable, FDCDHelp1
+	GuiControl, Enable, FDCDHelp2
+	GuiControl, Enable, FDCDHelp3
+	GuiControl, Enable, SprinklerDisabledWhy1
+	GuiControl, Enable, SprinklerDisabledWhy2
+	GuiControl, Enable, SprinklerDisabledWhy3
 	GuiControl, Enable, CopyGather1
 	GuiControl, Enable, PasteGather1
 	GuiControl, Enable, PasteGather2
@@ -4711,10 +4834,15 @@ nm_TabGatherUnLock(){
 		GuiControl, Enable, % hFSL2Left
 		GuiControl, Enable, % hFSL2Right
 		GuiControl, Enable, FDCHelp2
+		GuiControl, Enable, SprinklerDisabledWhy2
 		GuiControl, Enable, CopyGather2
 		GuiControl, Enable, PasteGather3
 		GuiControl, Enable, % hSaveFieldDefault2
 		GuiControl, , % hSaveFieldDefault2, HBITMAP:*%hBM%
+		if (FieldName2="Trading Hub") {
+			GuiControl, Disable, % hFRT2Left
+			GuiControl, Disable, % hFRT2Right
+		}
 	}
 	if(FieldName3!="none"){
 		GuiControl, Enable, FieldPattern3
@@ -4735,11 +4863,21 @@ nm_TabGatherUnLock(){
 		GuiControl, Enable, % hFSL3Left
 		GuiControl, Enable, % hFSL3Right
 		GuiControl, Enable, FDCHelp3
+		GuiControl, Enable, SprinklerDisabledWhy1
+		GuiControl, Enable, SprinklerDisabledWhy2
 		GuiControl, Enable, CopyGather3
 		GuiControl, Enable, % hSaveFieldDefault3
 		GuiControl, , % hSaveFieldDefault3, HBITMAP:*%hBM%
+		if (FieldName3="Trading Hub") {
+			GuiControl, Disable, % hFRT3Left
+			GuiControl, Disable, % hFRT3Right
+		}
 	}
 	DllCall("DeleteObject", "ptr", hBM)
+	if (FieldName1="Trading Hub") {
+		GuiControl, Disable, % hFRT1Left
+		GuiControl, Disable, % hFRT1Right
+	}
 }
 nm_FieldSelect2(hCtrl:=0){
 	global
@@ -4766,6 +4904,7 @@ nm_FieldSelect2(hCtrl:=0){
 		GuiControl, Enable, % hFSL2Left
 		GuiControl, Enable, % hFSL2Right
 		GuiControl, Enable, FDCHelp2
+		GuiControl, Enable, SprinklerDisabledWhy2
 		GuiControl, Enable, CopyGather2
 		GuiControl, Enable, PasteGather3
 		GuiControl, Enable, % hSaveFieldDefault2
@@ -4796,6 +4935,7 @@ nm_FieldSelect2(hCtrl:=0){
 		GuiControl, Disable, % hFSL2Left
 		GuiControl, Disable, % hFSL2Right
 		GuiControl, Disable, FDCHelp2
+		GuiControl, Disable, SprinklerDisabledWhy2
 		GuiControl, Disable, CopyGather2
 		GuiControl, Disable, PasteGather3
 		GuiControl, Disable, % hSaveFieldDefault2
@@ -4809,6 +4949,37 @@ nm_FieldSelect2(hCtrl:=0){
 	if hCtrl {
 		nm_FieldDefaults(2)
 		IniWrite, %FieldName2%, settings\nm_config.ini, Gather, FieldName2
+	}
+	if (FieldName2 = "Trading Hub") {
+		GuiControl, Hide, FieldDriftCheck2
+		GuiControl, Hide, FDCHelp2
+		GuiControl, Hide, FieldSprinklerLoc2
+		GuiControl, Hide, % hFSL2Left
+		GuiControl, Hide, % hFSL2Right
+		GuiControl, Hide, DistanceHide2
+		GuiControl, Hide, FieldSprinklerDist2
+		GuiControl, Hide, SprinklerDistDisable2
+		GuiControl, Show, SprinklersDisabled2
+		GuiControl, Show, FieldDriftDisabled2
+		GuiControl, Show, FDCDHelp2
+		GuiControl, Show, SprinklerDisabledWhy2
+		GuiControl, Disable, % hFRT2Left
+		GuiControl, Disable, % hFRT2Right
+	} else {
+		GuiControl, Show, FieldDriftCheck2
+		GuiControl, Show, FDCHelp2
+		GuiControl, Show, FieldSprinklerLoc2
+		GuiControl, Show, % hFSL2Left
+		GuiControl, Show, % hFSL2Right
+		GuiControl, Show, DistanceHide2
+		GuiControl, Show, FieldSprinklerDist2
+		GuiControl, Show, SprinklerDistDisable2
+		GuiControl, Hide, SprinklersDisabled2
+		GuiControl, Hide, FieldDriftDisabled2
+		GuiControl, Hide, FDCDHelp2
+		GuiControl, Hide, SprinklerDisabledWhy2
+		GuiControl, Enable, % hFRT2Left
+		GuiControl, Enable, % hFRT2Right
 	}
 	nm_WebhookEasterEgg()
 }
@@ -4836,6 +5007,7 @@ nm_FieldSelect3(hCtrl:=0){
 		GuiControl, Enable, % hFSL3Left
 		GuiControl, Enable, % hFSL3Right
 		GuiControl, Enable, FDCHelp3
+		GuiControl, Enable, SprinklerDisabledWhy3
 		GuiControl, Enable, CopyGather3
 		GuiControl, Enable, % hSaveFieldDefault3
 		hBM := Gdip_CreateHBITMAPFromBitmap(bitmaps["savefield"])
@@ -4865,6 +5037,7 @@ nm_FieldSelect3(hCtrl:=0){
 		GuiControl, Disable, % hFSL3Left
 		GuiControl, Disable, % hFSL3Right
 		GuiControl, Disable, FDCHelp3
+		GuiControl, Disable, SprinklerDisabledWhy3
 		GuiControl, Disable, CopyGather3
 		GuiControl, Disable, % hSaveFieldDefault3
 		hBM := Gdip_CreateHBITMAPFromBitmap(bitmaps["savefielddisabled"])
@@ -4874,6 +5047,37 @@ nm_FieldSelect3(hCtrl:=0){
 	if hCtrl {
 		nm_FieldDefaults(3)
 		IniWrite, %FieldName3%, settings\nm_config.ini, Gather, FieldName3
+	}
+	if (FieldName3 = "Trading Hub") {
+		GuiControl, Hide, FieldDriftCheck3
+		GuiControl, Hide, FDCHelp3
+		GuiControl, Hide, FieldSprinklerLoc3
+		GuiControl, Hide, % hFSL3Left
+		GuiControl, Hide, % hFSL3Right
+		GuiControl, Hide, DistanceHide3
+		GuiControl, Hide, FieldSprinklerDist3
+		GuiControl, Hide, SprinklerDistDisable3
+		GuiControl, Show, SprinklersDisabled3
+		GuiControl, Show, FieldDriftDisabled3
+		GuiControl, Show, FDCDHelp3
+		GuiControl, Show, SprinklerDisabledWhy3
+		GuiControl, Disable, % hFRT3Left
+		GuiControl, Disable, % hFRT3Right
+	} else {
+		GuiControl, Show, FieldDriftCheck3	
+		GuiControl, Show, FDCHelp3
+		GuiControl, Show, FieldSprinklerLoc3
+		GuiControl, Show, % hFSL3Left
+		GuiControl, Show, % hFSL3Right
+		GuiControl, Show, DistanceHide3
+		GuiControl, Show, FieldSprinklerDist3
+		GuiControl, Show, SprinklerDistDisable3
+		GuiControl, Hide, SprinklersDisabled3
+		GuiControl, Hide, FieldDriftDisabled3
+		GuiControl, Hide, FDCDHelp3
+		GuiControl, Hide, SprinklerDisabledWhy3
+		GuiControl, Enable, % hFRT3Left
+		GuiControl, Enable, % hFRT3Right
 	}
 	nm_WebhookEasterEgg()
 }
@@ -7217,7 +7421,7 @@ nm_FieldUntilPack(hCtrl){
 }
 nm_FieldReturnType(hCtrl){
 	global
-	static val := ["Walk", "Reset"], l := val.Length()
+	static val := ["Walk", "Reset", "Rejoin"], l := val.Length()
 	local i, index
 
 	switch hCtrl
@@ -7230,7 +7434,7 @@ nm_FieldReturnType(hCtrl){
 		index := 3
 	}
 
-	i := (FieldReturnType%index% = "Walk") ? 1 : 2
+	i := (FieldReturnType%index% = "Walk") ? 1 : (FieldReturnType%index% = "Reset") ? 2 : 3
 	
 	GuiControl, , FieldReturnType%index%, % (FieldReturnType%index% := val[(hCtrl = hFRT%index%Right) ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)])
 	IniWrite, % FieldReturnType%index%, settings\nm_config.ini, Gather, FieldReturnType%index%
@@ -8464,6 +8668,10 @@ nm_HiveBeesHelp(){
 nm_FDCHelp(){
 	msgbox, 0x40000, Field Drift Compensation, DESCRIPTION:`nField Drift Compensation is a way to stop what we call field drift (AKA falling/running out of the field.) Enabling this checkbox will re-align you to your saturator every so often by searching for the neon blue pixel and moving towards it. `n`nNote that this feature requires The Supreme Saturator, otherwise you will drift more. If you would like more info, join our Discord.
 }
+nm_FDCDHelp(){
+	msgbox, 0x40000, Why is this option disabled?, Sprinklers are disabled in the trading hub, which means you are unable to place them, which also results in field drift compensation not working. If you would like to re-enable these features, please change your gathering field.
+}
+
 nm_ContributorsHandler(req)
 {
 	if (req.readyState != 4)
@@ -14399,7 +14607,7 @@ nm_GoGather(){
 		nm_PlanterTimeUpdate(FieldName)
 		;whirligig
 		if(FieldReturnType="walk") { ;walk back
-			if((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted)){
+			if((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted) && FieldName!="Trading Hub"){
 				if(FieldName="sunflower"){
 					loop 2 {
 						send, {%RotLeft%}
@@ -14547,8 +14755,10 @@ nm_GoGather(){
 				}
 				nm_findHiveSlot()
 			}
+		} else if(FieldReturnType="Rejoin") {
+			Rejoin()
 		} else { ;reset back
-			if ((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted)) {
+			if ((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted) && FieldName!="Trading Hub") {
 				if(FieldName="sunflower"){
 					loop 2 {
 						send, {%RotLeft%}
@@ -15979,7 +16189,9 @@ nm_setSprinkler(field, loc, dist){
 	}
 
 	MoveSpeedFactor:=round(18/MoveSpeedNum, 2)
-
+	if (field="Trading Hub") {
+		return
+	} else {
 	;move to start position
 	if(InStr(loc, "Upper")){
 		nm_Move(flen*MoveSpeedFactor, FwdKey)
@@ -16053,7 +16265,7 @@ nm_setSprinkler(field, loc, dist){
 		} else {
 			nm_Move(1000*MoveSpeedFactor, RightKey)
 		}
-	}
+	}}
 }
 nm_JumpSprinkler(resetDelay := 0){
 	global SC_Space, SC_1, bitmaps
@@ -16261,6 +16473,186 @@ CloseRoblox()
 	; kill any remnant processes
 	for p in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process WHERE Name LIKE '%Roblox%' OR CommandLine LIKE '%ROBLOXCORPORATION%'")
 		Process, Close, % p.ProcessID
+}
+Rejoin()
+{ 
+	CloseRoblox()
+	Sleep, 500
+	; basically a copy of reconnect
+	global LastClock, LastGingerbread, KeyDelay, HiveSlot, CurrentAction, PreviousAction, PrivServer, TotalDisconnects, SessionDisconnects, ReconnectMethod, DailyReconnect, PublicFallback, resetTime, SC_Esc, SC_R, SC_Enter, SC_E, bitmaps, PlanterName1, PlanterName2, PlanterName3, PlanterHarvestTime1, PlanterHarvestTime2, PlanterHarvestTime3, MacroState, ReconnectDelay, FallbackServer1, FallbackServer2, FallbackServer3, beesmasActive
+	static ServerLabels := {0: "Public Server", 1: "Private Server", 2: "Fallback Server 1", 3: "Fallback Server 2", 4: "Fallback Server 3"}
+
+	; end any residual movement and set reconnect start time
+	nm_endWalk()
+	ReconnectStart := nowUnix()
+	PreviousAction:=CurrentAction
+	CurrentAction:="Reconnect"
+	
+	linkCodes := {}
+	for k,v in ["PrivServer", "FallbackServer1", "FallbackServer2", "FallbackServer3"] {
+		if (%v% && (StrLen(%v%) > 0)) {
+			if RegexMatch(%v%, "i)(?<=privateServerLinkCode=)(.{32})", linkCode)
+				linkCodes[k] := linkCode
+			else
+				nm_setStatus("Error", ServerLabels[k] " Invalid")
+		}
+	}
+
+	; main reconnect loop
+	Loop {
+		;Decide Server
+		server := ((A_Index <= 20) && linkCodes.HasKey(n := (A_Index-1)//5 + 1)) ? n : ((PublicFallback = 0) && (n := linkCodes.MinIndex())) ? n : 0
+		
+		;Wait For Success
+		i := A_Index, success := 0
+		Loop, 5 {
+			;START
+			switch % (ReconnectMethod = "Browser") ? 0 : Mod(i, 5) {
+				case 1,2:
+				;Close Roblox
+				CloseRoblox()
+				;Run Server Deeplink
+				nm_setStatus("Rejoining", ServerLabels[server])
+				try Run % """roblox://placeID=1537690962" (server ? ("&linkCode=" linkCodes[server]) : "") """"
+				
+				case 3,4:
+				;Run Server Deeplink (without closing)
+				nm_setStatus("Rejoining", ServerLabels[server])
+				try Run % """roblox://placeID=1537690962" (server ? ("&linkCode=" linkCodes[server]) : "") """"
+				
+				default:
+				if server {
+					;Close Roblox
+					CloseRoblox()
+					;Run Server Link (legacy method w/ browser)
+					nm_setStatus("Rejoining", ServerLabels[server] " (Browser)")
+					if ((success := LegacyReconnect(linkCodes[server], i)) = 1) {
+						if (ReconnectMethod != "Browser") {
+							ReconnectMethod := "Browser"
+							nm_setStatus("Warning", "Deeplink reconnect failed, switched to legacy reconnect (browser) for this session!")
+						}
+						break
+					}
+					else
+						continue 2
+				} else {
+					;Close Roblox
+					(i = 1) ? CloseRoblox()
+					;Run Server Link (spam deeplink method)
+					try Run % """roblox://placeID=1537690962"""
+				}
+			}
+			;STAGE 1 - wait for Roblox window
+			Loop, 240 {
+				if GetRobloxHWND() {
+					WinActivate, Roblox
+					nm_setStatus("Detected", "Roblox Open")
+					break
+				}
+				if (A_Index = 240) {
+					nm_setStatus("Error", "No Roblox Found`nRetry: " i)
+					break 2
+				}
+				sleep, 1000 ; timeout 4 mins, wait for any Roblox update to finish
+			}
+			;STAGE 2 - wait for loading screen (or loaded game)
+			Loop, 180 {
+				WinActivate, Roblox
+				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
+				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+30 "|" windowWidth "|" windowHeight-30)
+				if (Gdip_ImageSearch(pBMScreen, bitmaps["loading"], , , , , 150, 4) = 1) {
+					Gdip_DisposeImage(pBMScreen)
+					nm_setStatus("Detected", "Game Open")
+					break
+				}
+				if (Gdip_ImageSearch(pBMScreen, bitmaps["science"], , , , , 150, 2) = 1) {
+					Gdip_DisposeImage(pBMScreen)
+					nm_setStatus("Detected", "Game Loaded")
+					success := 1
+					break 2
+				}
+				if (Gdip_ImageSearch(pBMScreen, bitmaps["disconnected"], , , , , , 2) = 1) {
+					Gdip_DisposeImage(pBMScreen)
+					nm_setStatus("Warning", "Disconnected during Reconnect")
+					continue 2
+				}
+				Gdip_DisposeImage(pBMScreen)
+				if (A_Index = 180) {
+					nm_setStatus("Error", "No BSS Found`nRetry: " i)
+					break 2
+				}
+				sleep, 1000 ; timeout 3 mins, slow loading
+			}
+			;STAGE 3 - wait for loaded game
+			Loop, 180 {
+				WinActivate, Roblox
+				WinGetClientPos(windowX, windowY, windowWidth, windowHeight, "ahk_id " GetRobloxHWND())
+				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+30 "|" windowWidth "|" windowHeight-30)
+				if ((Gdip_ImageSearch(pBMScreen, bitmaps["loading"], , , , , 150, 4) = 0) || (Gdip_ImageSearch(pBMScreen, bitmaps["science"], , , , , 150, 2) = 1)) {
+					Gdip_DisposeImage(pBMScreen)
+					nm_setStatus("Detected", "Game Loaded")
+					success := 1
+					break 2
+				}
+				if (Gdip_ImageSearch(pBMScreen, bitmaps["disconnected"], , , , , , 2) = 1) {
+					Gdip_DisposeImage(pBMScreen)
+					nm_setStatus("Warning", "Disconnected during Reconnect")
+					continue 2
+				}
+				Gdip_DisposeImage(pBMScreen)
+				if (A_Index = 180) {
+					nm_setStatus("Error", "BSS Load Timeout`nRetry: " i)
+					break 2
+				}
+				sleep, 1000 ; timeout 3 mins, slow loading
+			}
+		}
+		
+		;Successful Reconnect
+		if (success = 1)
+		{
+			WinActivate, Roblox
+			VarSetCapacity(duration,256),DllCall("GetDurationFormatEx","str","!x-sys-default-locale","uint",0,"ptr",0,"int64",(ReconnectDuration := (nowUnix() - ReconnectStart))*10000000,"wstr","mm:ss","str",duration,"int",256)
+			nm_setStatus("Completed", "Rejoin`nTime: " duration " - Attempts: " i)
+			Sleep, 500
+
+			LastClock:=nowUnix()
+			IniWrite, %LastClock%, settings\nm_config.ini, Collect, LastClock
+			if (beesmasActive)
+			{
+				LastGingerbread += ReconnectDuration ? ReconnectDuration : 300
+				IniWrite, %LastGingerbread%, settings\nm_config.ini, Collect, LastGingerbread
+			}
+			Loop, 3 {
+				IniRead, PlanterHarvestTime%A_Index%, settings\nm_config.ini, Planters, PlanterHarvestTime%A_Index%
+				PlanterHarvestTime%A_Index% += PlanterName%A_Index% ? (ReconnectDuration ? ReconnectDuration : 300) : 0
+				IniWrite, % PlanterHarvestTime%A_Index%, settings\nm_config.ini, Planters, PlanterHarvestTime%A_Index%
+			}
+
+			Prev_DetectHiddenWindows := A_DetectHiddenWindows
+			Prev_TitleMatchMode := A_TitleMatchMode
+			DetectHiddenWindows On
+			SetTitleMatchMode 2
+			if (server > 1) ; swap PrivServer and FallbackServer - original PrivServer probably has an issue
+			{
+				n := server - 1
+				temp := PrivServer, PrivServer := FallbackServer%n%, FallbackServer%n% := temp
+				GuiControl, , PrivServer, %PrivServer%
+				GuiControl, , FallbackServer%n%, % FallbackServer%n%
+				IniWrite, %PrivServer%, settings\nm_config.ini, Settings, PrivServer
+				IniWrite, % FallbackServer%n%, settings\nm_config.ini, Settings, FallbackServer%n%
+				if WinExist("Status.ahk ahk_class AutoHotkey")
+					PostMessage, 0x5553, 10, 7
+			}
+			if WinExist("Status.ahk ahk_class AutoHotkey")
+				PostMessage, 0x5552, 221, (server = 0)
+			DetectHiddenWindows %Prev_DetectHiddenWindows%
+			SetTitleMatchMode %Prev_TitleMatchMode%
+
+			if (testCheck || (nm_claimHiveSlot() = 1))
+				return 1 
+		}
+	}
 }
 DisconnectCheck(testCheck := 0)
 {
@@ -19654,6 +20046,7 @@ nm_walkTo(location){
 		#Include wt-strawberry.ahk
 		#Include wt-stump.ahk
 		#Include wt-sunflower.ahk
+		#Include wt-tradinghub.ahk
 		SetHiveSlot := HiveSlot, SetHiveBees := HiveBees
 	}
 
@@ -19692,6 +20085,7 @@ nm_cannonTo(location){
 		#Include ct-strawberry.ahk
 		#Include ct-stump.ahk
 		#Include ct-sunflower.ahk
+		#Include ct-tradinghub.ahk
 		SetHiveSlot := HiveSlot, SetHiveBees := HiveBees
 	}
 
@@ -19779,12 +20173,15 @@ nm_walkFrom(field:="none")
 		msgbox walkFrom(): Invalid fieldname= %field%
 		return
 	}
-
+	if (field="trading hub") {
+		Rejoin()
+	} else {
 	nm_createWalk(paths[field])
 	KeyWait, F14, D T5 L
 	nm_setStatus("Traveling", "Hive")
 	KeyWait, F14, T60 L
 	nm_endWalk()
+	}
 }
 nm_gotoPlanter(location, waitEnd := 1){
 	global
