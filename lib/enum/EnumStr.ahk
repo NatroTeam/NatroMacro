@@ -64,4 +64,16 @@
 	, "BlenderItem3"
 	, "StickerStackItem"
 	, "StickerPrinterEgg"
-	, "MondoLootDirection"]
+	, "MondoLootDirection"
+	, "PlanterName1"
+	, "PlanterName2"
+	, "PlanterName3"
+	, "PlanterField1"
+	, "PlanterField2"
+	, "PlanterField3"
+	, "PlanterNectar1"
+	, "PlanterNectar2"
+	, "PlanterNectar3"
+	, "PlanterHarvestFull1"
+	, "PlanterHarvestFull2"
+	, "PlanterHarvestFull3"]

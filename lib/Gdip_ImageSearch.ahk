@@ -5,6 +5,7 @@
 ; Thanks to guest3456 for helping me ponder some ideas
 ; Requires GDIP, Gdip_SetBitmapTransColor() and Gdip_MultiLockedBitsSearch()
 ; http://www.autohotkey.com/board/topic/71100-gdip-imagesearch/
+; Ported to AHK v2 by SP
 ;
 ; Licensed under CC BY-SA 3.0 -> http://creativecommons.org/licenses/by-sa/3.0/
 ; I waive compliance with the "Share Alike" condition of the license EXCLUSIVELY
@@ -69,26 +70,26 @@
 ;
 ;**********************************************************************************
 
-Gdip_ImageSearch(pBitmapHaystack,pBitmapNeedle,ByRef OutputList=""
-,OuterX1=0,OuterY1=0,OuterX2=0,OuterY2=0,Variation=0,Trans=""
-,SearchDirection=1,Instances=1,LineDelim="`n",CoordDelim=",") {
+Gdip_ImageSearch(pBitmapHaystack,pBitmapNeedle,&OutputList:=""
+,OuterX1:=0,OuterY1:=0,OuterX2:=0,OuterY2:=0,Variation:=0,Trans:=""
+,SearchDirection:=1,Instances:=1,LineDelim:="`n",CoordDelim:=",") {
 
     ; Some validations that can be done before proceeding any further
     If !( pBitmapHaystack && pBitmapNeedle )
         Return -1001
-    If Variation not between 0 and 255
+    If !( ( Variation >= 0 ) && ( Variation <= 255) )
         return -1002
     If ( ( OuterX1 < 0 ) || ( OuterY1 < 0 ) )
         return -1003
-    If SearchDirection not between 1 and 8
+    If !( ( SearchDirection >= 1 ) && ( SearchDirection <= 8) )
         SearchDirection := 1
     If ( Instances < 0 )
         Instances := 0
 
     ; Getting the dimensions and locking the bits [haystack]
-    Gdip_GetImageDimensions(pBitmapHaystack,hWidth,hHeight)
+    Gdip_GetImageDimensions(pBitmapHaystack,&hWidth,&hHeight)
     ; Last parameter being 1 says the LockMode flag is "READ only"
-    If Gdip_LockBits(pBitmapHaystack,0,0,hWidth,hHeight,hStride,hScan,hBitmapData,1)
+    If Gdip_LockBits(pBitmapHaystack,0,0,hWidth,hHeight,&hStride,&hScan,&hBitmapData,1)
     OR !(hWidth := NumGet(hBitmapData,0,"UInt"))
     OR !(hHeight := NumGet(hBitmapData,4,"UInt"))
         Return -1004
@@ -97,12 +98,12 @@ Gdip_ImageSearch(pBitmapHaystack,pBitmapNeedle,ByRef OutputList=""
     ; - unlock haystack bits
 
     ; Getting the dimensions and locking the bits [needle]
-    Gdip_GetImageDimensions(pBitmapNeedle,nWidth,nHeight)
+    Gdip_GetImageDimensions(pBitmapNeedle,&nWidth,&nHeight)
     ; If Trans is correctly specified, create a backup of the original needle bitmap
     ; and modify the current one, setting the desired color as transparent.
     ; Also, since a copy is created, we must remember to dispose the new bitmap later.
     ; This whole thing has to be done before locking the bits.
-    If Trans between 0 and 0xFFFFFF
+    If ( IsNumber(Trans) && ( Trans >= 0 ) && ( Trans <= 0xFFFFFF) )
     {
         pOriginalBmpNeedle := pBitmapNeedle
         pBitmapNeedle := Gdip_CloneBitmapArea(pOriginalBmpNeedle,0,0,nWidth,nHeight)
@@ -114,11 +115,11 @@ Gdip_ImageSearch(pBitmapHaystack,pBitmapNeedle,ByRef OutputList=""
     ; - unlock haystack bits
     ; - dispose current needle bitmap (if necessary)
 
-    If Gdip_LockBits(pBitmapNeedle,0,0,nWidth,nHeight,nStride,nScan,nBitmapData)
+    If Gdip_LockBits(pBitmapNeedle,0,0,nWidth,nHeight,&nStride,&nScan,&nBitmapData)
     OR !(nWidth := NumGet(nBitmapData,0,"UInt"))
     OR !(nHeight := NumGet(nBitmapData,4,"UInt"))
     {
-        If ( DumpCurrentNeedle )
+        If IsSet( DumpCurrentNeedle )
             Gdip_DisposeImage(pBitmapNeedle)
         Gdip_UnlockBits(pBitmapHaystack,hBitmapData)
         Return -1005
@@ -136,12 +137,12 @@ Gdip_ImageSearch(pBitmapHaystack,pBitmapNeedle,ByRef OutputList=""
     OuterY2 := ( !OuterY2 ? hHeight-nHeight+1 : OuterY2-nHeight+1 )
 
     OutputCount := Gdip_MultiLockedBitsSearch(hStride,hScan,hWidth,hHeight
-    ,nStride,nScan,nWidth,nHeight,OutputList,OuterX1,OuterY1,OuterX2,OuterY2
+    ,nStride,nScan,nWidth,nHeight,&OutputList,OuterX1,OuterY1,OuterX2,OuterY2
     ,Variation,SearchDirection,Instances,LineDelim,CoordDelim)
 
-    Gdip_UnlockBits(pBitmapHaystack,hBitmapData)
-    Gdip_UnlockBits(pBitmapNeedle,nBitmapData)
-    If ( DumpCurrentNeedle )
+    Gdip_UnlockBits(pBitmapHaystack,&hBitmapData)
+    Gdip_UnlockBits(pBitmapNeedle,&nBitmapData)
+    If IsSet( DumpCurrentNeedle )
         Gdip_DisposeImage(pBitmapNeedle)
 
     Return OutputCount
@@ -191,7 +192,7 @@ Gdip_ImageSearch(pBitmapHaystack,pBitmapNeedle,ByRef OutputList=""
 
 Gdip_SetBitmapTransColor(pBitmap,TransColor) {
     static _SetBmpTrans, Ptr, PtrA
-    if !( _SetBmpTrans ) {
+    if !IsSet( _SetBmpTrans ) {
         Ptr := A_PtrSize ? "UPtr" : "UInt"
         PtrA := Ptr . "*"
         MCode_SetBmpTrans := "
@@ -207,20 +208,20 @@ Gdip_SetBitmapTransColor(pBitmap,TransColor) {
             MCode_SetBmpTrans := SubStr(MCode_SetBmpTrans,InStr(MCode_SetBmpTrans,",")+1)
         else ; x86, before comma
             MCode_SetBmpTrans := SubStr(MCode_SetBmpTrans,1,InStr(MCode_SetBmpTrans,",")-1)
-        VarSetCapacity(_SetBmpTrans, LEN := StrLen(MCode_SetBmpTrans)//2, 0)
-        Loop, %LEN%
-            NumPut("0x" . SubStr(MCode_SetBmpTrans,(2*A_Index)-1,2), _SetBmpTrans, A_Index-1, "uchar")
+        _SetBmpTrans := Buffer(LEN := StrLen(MCode_SetBmpTrans)//2, 0)
+        Loop LEN
+            NumPut("UChar", "0x" . SubStr(MCode_SetBmpTrans,(2*A_Index)-1,2), _SetBmpTrans, A_Index-1)
         MCode_SetBmpTrans := ""
-        DllCall("VirtualProtect", Ptr,&_SetBmpTrans, Ptr,VarSetCapacity(_SetBmpTrans), "uint",0x40, PtrA,0)
+        DllCall("VirtualProtect", Ptr,_SetBmpTrans.Ptr, Ptr,_SetBmpTrans.Size, "uint",0x40, PtrA,0)
     }
     If !pBitmap
         Return -2001
-    If TransColor not between 0 and 0xFFFFFF
+    If !( ( TransColor >= 0 ) && ( TransColor <= 0xFFFFFF) )
         Return -2002
-    Gdip_GetImageDimensions(pBitmap,W,H)
+    Gdip_GetImageDimensions(pBitmap,&W,&H)
     If !(W && H)
         Return -2003
-    If Gdip_LockBits(pBitmap,0,0,W,H,Stride,Scan,BitmapData)
+    If Gdip_LockBits(pBitmap,0,0,W,H,&Stride,&Scan,&BitmapData)
         Return -2004
     ; The following code should be slower than using the MCode approach,
     ; but will the kept here for now, just for reference.
@@ -237,11 +238,11 @@ Gdip_SetBitmapTransColor(pBitmap,TransColor) {
     }
     */
     ; Thanks guest3456 for helping with the initial solution involving NumPut
-    Gdip_FromARGB(TransColor,A,R,G,B), VarSetCapacity(TransColor,0), VarSetCapacity(TransColor,3,255)
-    NumPut(B,TransColor,0,"UChar"), NumPut(G,TransColor,1,"UChar"), NumPut(R,TransColor,2,"UChar")
+    Gdip_FromARGB(TransColor,&A,&R,&G,&B), TransColor := Buffer(3, 255)
+    NumPut("UChar",B,TransColor,0), NumPut("UChar",G,TransColor,1), NumPut("UChar",R,TransColor,2)
     MCount := 0
-    E := DllCall(&_SetBmpTrans, Ptr,Scan, "int",W, "int",H, "int",Stride, Ptr,&TransColor, "int*",MCount, "cdecl int")
-    Gdip_UnlockBits(pBitmap,BitmapData)
+    E := DllCall(_SetBmpTrans, Ptr,Scan, "int",W, "int",H, "int",Stride, Ptr,TransColor.Ptr, "int*",&MCount, "cdecl int")
+    Gdip_UnlockBits(pBitmap,&BitmapData)
     If ( E != 0 ) {
         ErrorLevel := E
         Return -2005
@@ -276,8 +277,8 @@ Gdip_SetBitmapTransColor(pBitmap,TransColor) {
 ;==================================================================================
 
 Gdip_MultiLockedBitsSearch(hStride,hScan,hWidth,hHeight,nStride,nScan,nWidth,nHeight
-,ByRef OutputList="",OuterX1=0,OuterY1=0,OuterX2=0,OuterY2=0,Variation=0
-,SearchDirection=1,Instances=0,LineDelim="`n",CoordDelim=",")
+,&OutputList:="",OuterX1:=0,OuterY1:=0,OuterX2:=0,OuterY2:=0,Variation:=0
+,SearchDirection:=1,Instances:=0,LineDelim:="`n",CoordDelim:=",")
 {
     OutputList := ""
     OutputCount := !Instances
@@ -310,23 +311,23 @@ Gdip_MultiLockedBitsSearch(hStride,hScan,hWidth,hHeight,nStride,nScan,nWidth,nHe
     If ( SearchDirection > 4 )
         P := "X", N := "Y"
     ; Set the Preference Index and the Nonpreference Index
-    iP := i%P%, iN := i%N%
+    i_P := i%P%, i_N := i%N%
 
     While (!(OutputCount == Instances) && (0 == Gdip_LockedBitsSearch(hStride,hScan,hWidth,hHeight,nStride
-    ,nScan,nWidth,nHeight,FoundX,FoundY,OuterX1,OuterY1,OuterX2,OuterY2,Variation,SearchDirection)))
+    ,nScan,nWidth,nHeight,&FoundX,&FoundY,OuterX1,OuterY1,OuterX2,OuterY2,Variation,SearchDirection)))
     {
         OutputCount++
         OutputList .= LineDelim FoundX CoordDelim FoundY
-        Outer%P%%iP% := Found%P%+step%P%
-        Inner%N%%iN% := Found%N%+step%N%
+        Outer%P%%i_P% := Found%P%+step%P%
+        Inner%N%%i_N% := Found%N%+step%N%
         Inner%P%1 := Found%P%
         Inner%P%2 := Found%P%+1
         While (!(OutputCount == Instances) && (0 == Gdip_LockedBitsSearch(hStride,hScan,hWidth,hHeight,nStride
-        ,nScan,nWidth,nHeight,FoundX,FoundY,InnerX1,InnerY1,InnerX2,InnerY2,Variation,SearchDirection)))
+        ,nScan,nWidth,nHeight,&FoundX,&FoundY,InnerX1,InnerY1,InnerX2,InnerY2,Variation,SearchDirection)))
         {
             OutputCount++
             OutputList .= LineDelim FoundX CoordDelim FoundY
-            Inner%N%%iN% := Found%N%+step%N%
+            Inner%N%%i_N% := Found%N%+step%N%
         }
     }
     OutputList := SubStr(OutputList,1+StrLen(LineDelim))
@@ -402,12 +403,12 @@ Gdip_MultiLockedBitsSearch(hStride,hScan,hWidth,hHeight,nStride,nScan,nWidth,nHe
 ;==================================================================================
 
 Gdip_LockedBitsSearch(hStride,hScan,hWidth,hHeight,nStride,nScan,nWidth,nHeight
-,ByRef x="",ByRef y="",sx1=0,sy1=0,sx2=0,sy2=0,Variation=0,sd=1)
+,&x:="",&y:="",sx1:=0,sy1:=0,sx2:=0,sy2:=0,Variation:=0,sd:=1)
 {
     static _ImageSearch, Ptr, PtrA
 
     ; Initialize all MCode stuff, if necessary
-    if !( _ImageSearch ) {
+    if !IsSet( _ImageSearch ) {
         Ptr := A_PtrSize ? "UPtr" : "UInt"
         PtrA := Ptr . "*"
 
@@ -549,11 +550,11 @@ Gdip_LockedBitsSearch(hStride,hScan,hWidth,hHeight,nStride,nScan,nWidth,nHeight
             MCode_ImageSearch := SubStr(MCode_ImageSearch,InStr(MCode_ImageSearch,",")+1)
         else ; x86, before comma
             MCode_ImageSearch := SubStr(MCode_ImageSearch,1,InStr(MCode_ImageSearch,",")-1)
-        VarSetCapacity(_ImageSearch, LEN := StrLen(MCode_ImageSearch)//2, 0)
-        Loop, %LEN%
-            NumPut("0x" . SubStr(MCode_ImageSearch,(2*A_Index)-1,2), _ImageSearch, A_Index-1, "uchar")
+        _ImageSearch := Buffer(LEN := StrLen(MCode_ImageSearch)//2, 0)
+        Loop LEN
+            NumPut("UChar", "0x" . SubStr(MCode_ImageSearch,(2*A_Index)-1,2), _ImageSearch, A_Index-1)
         MCode_ImageSearch := ""
-        DllCall("VirtualProtect", Ptr,&_ImageSearch, Ptr,VarSetCapacity(_ImageSearch), "uint",0x40, PtrA,0)
+        DllCall("VirtualProtect", Ptr,_ImageSearch.Ptr, Ptr,_ImageSearch.Size, "uint",0x40, PtrA,0)
     }
 
     ; Abort if an initial coordinates is located before a final coordinate
@@ -579,7 +580,7 @@ Gdip_LockedBitsSearch(hStride,hScan,hWidth,hHeight,nStride,nScan,nWidth,nHeight
     ; The DllCall parameters are the same for easier C code modification,
     ; even though they aren't all used on the _ImageSearch version
     x := 0, y := 0
-    , E := DllCall( &_ImageSearch, "int*",x, "int*",y, Ptr,hScan, Ptr,nScan, "int",nWidth, "int",nHeight
+    , E := DllCall( _ImageSearch, "int*",&x, "int*",&y, Ptr,hScan, Ptr,nScan, "int",nWidth, "int",nHeight
     , "int",hStride, "int",nStride, "int",sx1, "int",sy1, "int",sx2, "int",sy2, "int",Variation
     , "int",sd, "cdecl int")
     Return ( E == "" ? -3007 : E )

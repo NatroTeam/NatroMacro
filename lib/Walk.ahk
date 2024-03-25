@@ -1,7 +1,7 @@
 ﻿pToken := Gdip_Startup()
 
 ; buff characters for stack detection
-buff_characters := {}
+buff_characters := Map()
 buff_characters[0] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAAgAAAAKCAAAAACsrEBcAAAAAnRSTlMAAHaTzTgAAAArSURBVHgBY2Rg+MzAwMALxCAaQoDBZyYYmwlMYmXAAFApWPVnBkYIi5cBAJNvCLCTFAy9AAAAAElFTkSuQmCC")
 buff_characters[1] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAAIAAAAMCAAAAABt1zOIAAAAAnRSTlMAAHaTzTgAAAACYktHRAD/h4/MvwAAABZJREFUeAFjYPjM+JmBgeEzEwMDLgQAWo0C7U3u8hAAAAAASUVORK5CYII=")
 buff_characters[2] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAAQAAAALCAAAAAB9zHN3AAAAAnRSTlMAAHaTzTgAAABCSURBVHgBATcAyP8BAPMAAADzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPMAAADzAAAA8wAAAPMAAAAB8wAAAAIAAAAAtc8GqohTl5oAAAAASUVORK5CYII=")
@@ -14,7 +14,7 @@ buff_characters[8] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAAQAAAAKCAA
 buff_characters[9] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAAQAAAAKCAAAAAC2kKDSAAAAAnRSTlMAAHaTzTgAAAA9SURBVHgBATIAzf8BAADzAAAA8wAAAPMAAAAAAPMAAAEAAPMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA87TcBbXcfy3eAAAAAElFTkSuQmCC")
 
 ; bitmaps for buff identification
-bitmaps := {}
+(bitmaps := Map()).CaseSense := 0
 bitmaps["pBMHaste"] := Gdip_CreateBitmap(10,1)
 pGraphics := Gdip_GraphicsFromImage(bitmaps["pBMHaste"]), Gdip_GraphicsClear(pGraphics, 0xfff0f0f0), Gdip_DeleteGraphics(pGraphics)
 bitmaps["pBMMelody"] := Gdip_CreateBitmap(3,2)
@@ -37,29 +37,29 @@ Walk(n, hasteCap:=0)
 {
 	;hasteCap values > 0 will cause all haste values lower than it to be treated as no haste but haste values above it will be treated as the cap value.
 	;In otherwords, no haste compensation up to the cap and then 100% compensation after that.
-	static freq, init := DllCall("QueryPerformanceFrequency", "Int64*", freq) ; obtain frequency on first execution
+	static freq := 0, init := DllCall("QueryPerformanceFrequency", "Int64*", &freq) ; obtain frequency on first execution
 	
 	d := freq // 8, l := n * freq * 4 ; 4 studs in a tile
 	
-	d += (v := DetectMovespeed(s, f, hasteCap)) * (f - s)
+	d += (v := DetectMovespeed(&s, &f, hasteCap)) * (f - s)
 	while (d < l)
-		d += ((v + 0) + (v := DetectMovespeed(s, f, hasteCap)))/2 * (f - s)
+		d += ((v + 0) + (v := DetectMovespeed(&s, &f, hasteCap)))/2 * (f - s)
 }
 
-DetectMovespeed(ByRef s, ByRef f, hasteCap:=0)
+DetectMovespeed(&s, &f, hasteCap:=0)
 {
-	DllCall("QueryPerformanceCounter", "Int64*", s)
+	DllCall("QueryPerformanceCounter", "Int64*", &s := 0)
 	
 	global hasty_guard, gifted_hasty, base_movespeed, buff_characters, bitmaps, offsetY
 	
 	; check roblox window exists
-	WinGetClientPos(_x, _y, _w, _h, "ahk_id " GetRobloxHWND())
-	if (_w = 0)
-		return (10000000, DllCall("QueryPerformanceCounter", "Int64*", f)) ; large number to break walk loop
+	GetRobloxClientPos()
+	if (windowWidth = 0)
+		return (DllCall("QueryPerformanceCounter", "Int64*", &f := 0), 10000000) ; large number to break walk loop
 	
 	; get screen bitmap of buff area from client window
-	chdc := CreateCompatibleDC(), hbm := CreateDIBSection(_w, 30, chdc), obm := SelectObject(chdc, hbm), hhdc := GetDC()
-	BitBlt(chdc, 0, 0, _w, 30, hhdc, _x, _y+offsetY+48)
+	chdc := CreateCompatibleDC(), hbm := CreateDIBSection(windowWidth, 30, chdc), obm := SelectObject(chdc, hbm), hhdc := GetDC()
+	BitBlt(chdc, 0, 0, windowWidth, 30, hhdc, windowX, windowY+offsetY+48)
 	ReleaseDC(hhdc)
 	pBMArea := Gdip_CreateBitmapFromHBITMAP(hbm)
 	SelectObject(chdc, obm), DeleteObject(hbm), DeleteDC(hhdc), DeleteDC(chdc)
@@ -67,9 +67,9 @@ DetectMovespeed(ByRef s, ByRef f, hasteCap:=0)
 	; find haste buffs (haste, coconut haste)
 	x := 0
 	haste := 0 ; initially haste is number of hastes found (since haste = coconut haste icon)
-	Loop, 3 ; melody, haste, coconut haste
+	Loop 3 ; melody, haste, coconut haste
 	{
-		if (Gdip_ImageSearch(pBMArea, bitmaps["pBMHaste"], list, x, 14, , , , , 6) = 0)
+		if (Gdip_ImageSearch(pBMArea, bitmaps["pBMHaste"], &list, x, 14, , , , , 6) != 1)
 			break ; no possibility of haste
 		
 		x := SubStr(list, 1, InStr(list, ",")-1), y := SubStr(list, InStr(list, ",")+1)
@@ -88,7 +88,7 @@ DetectMovespeed(ByRef s, ByRef f, hasteCap:=0)
 	coconut_haste := (haste = 2) ? 1 : 0
 	if haste
 	{
-		Loop, 9 ; look for each digit
+		Loop 9 ; look for each digit
 		{
 			if (Gdip_ImageSearch(pBMArea, buff_characters[10-A_Index], , x1+2*y1-44, Max(0, y1-18), x1+2*y1-14, y1-1) = 1)
 			{
@@ -105,7 +105,7 @@ DetectMovespeed(ByRef s, ByRef f, hasteCap:=0)
 	oil := (Gdip_ImageSearch(pBMArea, bitmaps["pBMOil"], , , 25, , 27, 4, , 2) = 1)
 	smoothie := (Gdip_ImageSearch(pBMArea, bitmaps["pBMSmoothie"], , , 25, , 27, 4, , 2) = 1)
 	bear := 0
-	for k,v in ["Brown","Black","Panda","Polar","Gummy","Science","Mother"]
+	for v in ["Brown","Black","Panda","Polar","Gummy","Science","Mother"]
 	{
 		if (Gdip_ImageSearch(pBMArea, bitmaps["pBMBear" v], , , 25, , 27, 8, , 2) = 1)
 		{
@@ -118,5 +118,5 @@ DetectMovespeed(ByRef s, ByRef f, hasteCap:=0)
 	; use movespeed formula on obtained values
 	v := ((base_movespeed + (coconut_haste ? 10 : 0) + (bear ? 6 : 0)) * (hasty_guard ? 1.1 : 1) * (gifted_hasty ? 1.2 : 1) * (1 + max(0, haste-hasteCap)*0.1) * (haste_plus ? 2 : 1) * (oil ? 1.2 : 1) * (smoothie ? 1.25 : 1))
 	
-	return (v, DllCall("QueryPerformanceCounter", "Int64*", f))
+	return (DllCall("QueryPerformanceCounter", "Int64*", &f := 0), v)
 }

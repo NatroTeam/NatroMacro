@@ -11,42 +11,40 @@ Natro Macro is distributed in the hope that it will be useful. This does not giv
 You should have received a copy of the license along with Natro Macro. If not, please redownload from an official source.
 */
 
-#NoEnv
 #NoTrayIcon
 #SingleInstance Force
 #MaxThreads 255
 
-SetBatchLines -1
-SetWorkingDir %A_ScriptDir%
-OnMessage(0x5552, "nm_SetGlobalInt")
-OnMessage(0x5556, "nm_SetHeartbeat")
+#Include "%A_ScriptDir%\..\lib\nowUnix.ahk"
+
+SetWorkingDir A_ScriptDir
+OnMessage(0x5552, nm_SetGlobalInt)
+OnMessage(0x5556, nm_SetHeartbeat)
 
 LastRobloxWindow := LastStatusHeartbeat := LastMainHeartbeat := LastBackgroundHeartbeat := nowUnix()
 MacroState := 0
-path := ("""" A_AhkPath """ """ A_ScriptDir "\natro_macro.ahk""")
+path := '"' A_AhkPath '" "' A_ScriptDir '\natro_macro.ahk"'
 
 Loop
 {
-	DetectHiddenWindows, Off
-	SetTitleMatchMode, 1
 	time := nowUnix()
+	DetectHiddenWindows 0
 	if (WinExist("Roblox ahk_exe RobloxPlayerBeta.exe") || WinExist("Roblox ahk_exe ApplicationFrameHost.exe"))
 		LastRobloxWindow := time
+	DetectHiddenWindows 1
 	; request heartbeat
-	DetectHiddenWindows, On
-	SetTitleMatchMode, 2
 	if WinExist("natro_macro ahk_class AutoHotkey")
-		PostMessage, 0x5556
+		PostMessage 0x5556
 	if WinExist("Status.ahk ahk_class AutoHotkey")
-		PostMessage, 0x5556
+		PostMessage 0x5556
 	if WinExist("background.ahk ahk_class AutoHotkey")
-		PostMessage, 0x5556
+		PostMessage 0x5556
 	; check for timeouts
 	if (((MacroState = 2) && (((time - LastMainHeartbeat > 120) && (reason := "Macro Unresponsive Timeout!"))
 		|| ((time - LastBackgroundHeartbeat > 120) && (reason := "Background Script Timeout!"))
 		|| ((time - LastStatusHeartbeat > 120) && (reason := "Status Script Timeout!"))
 		|| ((time - LastRobloxWindow > 600) && (reason := "No Roblox Window Timeout!"))))
-		
+
 		|| ((MacroState = 1) && (((time - LastMainHeartbeat > 120) && (reason := "Macro Unresponsive Timeout!"))
 		|| ((time - LastBackgroundHeartbeat > 120) && (reason := "Background Script Timeout!"))
 		|| ((time - LastStatusHeartbeat > 120) && (reason := "Status Script Timeout!"))))) {
@@ -54,22 +52,19 @@ Loop
 		Loop
 		{
 			while WinExist("natro_macro ahk_class AutoHotkey")
-			{
-				WinGet, natroPID, PID
-				Process, Close, % natroPID
-			}
+				ProcessClose WinGetPID()
 			for p in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process WHERE Name LIKE '%Roblox%' OR CommandLine LIKE '%ROBLOXCORPORATION%'")
-				Process, Close, % p.ProcessID
-			
+				ProcessClose p.ProcessID
+
 			ForceStart := (Prev_MacroState = 2)
-			
-			run, %path% "%ForceStart%" "%A_ScriptHwnd%"
-			WinWait, Natro ahk_class AutoHotkeyGUI, , 300
-			if (success := !ErrorLevel)
+
+			run path ' "' ForceStart '" "' A_ScriptHwnd '"'
+
+			if (WinWait("Natro ahk_class AutoHotkeyGUI", , 300) != 0)
 			{
-				Sleep, 2000
+				Sleep 2000
 				Send_WM_COPYDATA("Error: " reason "`nSuccessfully restarted macro!", "natro_macro ahk_class AutoHotkey")
-				Sleep, 1000
+				Sleep 1000
 				LastRobloxWindow := LastStatusHeartbeat := LastMainHeartbeat := LastBackgroundHeartbeat := nowUnix()
 				break
 			}
@@ -77,30 +72,36 @@ Loop
 	}
 	else
 	{
-		switch % MacroState
+		switch MacroState
 		{
 			case 1:
 			LastRobloxWindow += 5
-			
+
 			case 0:
 			LastBackgroundHeartbeat += 5
 			LastRobloxWindow += 5
 		}
 	}
-	Sleep, 5000
+	Sleep 5000
 }
 
-Send_WM_COPYDATA(ByRef StringToSend, ByRef TargetScriptTitle, wParam:=0)
+Send_WM_COPYDATA(StringToSend, TargetScriptTitle, wParam:=0)
 {
-    VarSetCapacity(CopyDataStruct, 3*A_PtrSize, 0)
-    SizeInBytes := (StrLen(StringToSend) + 1) * (A_IsUnicode ? 2 : 1)
-    NumPut(SizeInBytes, CopyDataStruct, A_PtrSize)
-    NumPut(&StringToSend, CopyDataStruct, 2*A_PtrSize)
-    SendMessage, 0x004A, wParam, &CopyDataStruct,, %TargetScriptTitle%
-    return ErrorLevel
+    CopyDataStruct := Buffer(3*A_PtrSize)
+    SizeInBytes := (StrLen(StringToSend) + 1) * 2
+    NumPut("Ptr", SizeInBytes
+		, "Ptr", StrPtr(StringToSend)
+		, CopyDataStruct, A_PtrSize)
+
+	try
+		s := SendMessage(0x004A, wParam, CopyDataStruct,, TargetScriptTitle)
+	catch
+		return -1
+	else
+		return s
 }
 
-nm_SetHeartbeat(wParam)
+nm_SetHeartbeat(wParam, *)
 {
 	global
 	Critical
@@ -108,20 +109,14 @@ nm_SetHeartbeat(wParam)
 	script := arr[wParam], Last%script%Heartbeat := nowUnix()
 }
 
-nm_SetGlobalInt(wParam, lParam)
+nm_SetGlobalInt(wParam, lParam, *)
 {
 	global
 	Critical
 	local var
 	; enumeration
-	static arr := {23: "MacroState"}
-	
+	static arr := Map(23, "MacroState")
+
 	var := arr[wParam], %var% := lParam
 	return 0
-}
-
-nowUnix(){
-    Time := A_NowUTC
-    EnvSub, Time, 19700101000000, Seconds
-    return Time
 }

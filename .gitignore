@@ -44,3 +44,4 @@ node_modules
 lib-cov
 /coverage
 /test/test-apps/*/dist
+MMScreenshots/*

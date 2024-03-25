@@ -1,5 +1,5 @@
 ﻿; font: Inconsolata, weight: Bold, color: #F0F7FB, background: #2257A8
-bitmaps["stickerstackdigits"] := {}
+bitmaps["stickerstackdigits"] := Map()
 bitmaps["stickerstackdigits"][0] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAJCAMAAADNcxasAAAAYFBMVEUiV6grXqwsX6w8a7I9bLNAbrRCcLVFcrZRe7tSfLtWf71agr5bg79jisKgudulvd2+0Oe/0efB0+jH1+rI2OvJ2evK2ezN3O3U4e/U4vDX4/Hb5/Lo8fjp8fjv9vvw9/trcMbSAAAAN0lEQVR42gWAhxGAIBAEV8UcebMC13+XDM6HreLc5+NCA4tQ2f8iuadN6J0KoZVOfH60m8ai1RlT6AMh2ovQUgAAAABJRU5ErkJggg==")
 bitmaps["stickerstackdigits"][1] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAAQAAAAJBAMAAADnQZCTAAAAHlBMVEUiV6gzZK81ZrA7arKJp9KWsdfT4O/Z5fLr8/nw9/twEhiVAAAAFUlEQVR42mMQbWFIn8JgNIWBCR0BAFHsBd+hwNd7AAAAAElFTkSuQmCC")
 bitmaps["stickerstackdigits"][2] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAAUAAAAJCAMAAADNcxasAAAAV1BMVEUiV6gvYa0wYq46arI9bLNVfrxbhL9chL9dhcBehcBfh8Fqj8V+ns2Eo8+kvNymvd27zeXG1urH1+rI2OvL2uzT4O/c5/Ph6/Xk7fbp8fjt9fru9vrw9/uvytfPAAAAM0lEQVR42gWAhRGAMAADn+IOdcn+c/Y4/uJn6nN+mQV2AdwNGNMLxgfDYOMErl3rhiSpAzmcAlSgBPpzAAAAAElFTkSuQmCC")
