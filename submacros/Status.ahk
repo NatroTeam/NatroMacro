@@ -714,7 +714,7 @@ nm_status(status)
 		}
 
 		status_buffer.RemoveAt(1)
-		discord.SendEmbed(message, color, content, pBM?, channel?), IsSet(pBM) && Gdip_DisposeImage(pBM)
+		discord.SendEmbed(message, color, content, pBM?, channel?), IsSet(pBM) && pBM > 0 && Gdip_DisposeImage(pBM)
 
 		; extra: honey update
 		if (ssCheck = 1)
@@ -766,6 +766,8 @@ nm_honey()
 		discord.CreateFormData(&postdata, &contentType
 			, [Map("name","payload_json", "content-type","application/json", "content",payload_json)
 			, Map("name","files[0]", "filename","honey.png", "content-type","image/png", "pBitmap",pBM:=CreateHoneyBitmap())])
+		if pBM <= 0
+			return
 		Gdip_DisposeImage(pBM)
 		try id ? discord.EditMessageAPI(id, postdata, contentType) : ((message := JSON.parse(discord.SendMessageAPI(postdata, contentType))).Has("id") && (id := message["id"]))
 	}

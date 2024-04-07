@@ -180,6 +180,14 @@ nm_importPatterns()
 	Loop Files A_WorkingDir "\patterns\*.ahk"
 	{
 		file := FileOpen(A_LoopFilePath, "r"), pattern := file.Read(), file.Close()
+		if RegexMatch(pattern, "im)patterns\[")
+    		MsgBox
+			(
+			"Pattern '" A_LoopFileName "' seems to be deprecated!
+			This means the pattern will NOT work!
+			Check for an updated version of the pattern
+			or ask the creator to update it"
+			), "Error", 0x40010 " T60"
 		if !InStr(imported, imported_pattern := '("' (pattern_name := StrReplace(A_LoopFileName, "." A_LoopFileExt)) '")`r`n' pattern '`r`n`r`n')
 		{
 			script :=
@@ -256,8 +264,17 @@ nm_importPaths()
 		(paths[k] := Map()).CaseSense := 0
 		for v in list
 		{
-			try
+			try {
 				file := FileOpen(A_WorkingDir "\paths\" k "-" v ".ahk", "r"), paths[k][v] := file.Read(), file.Close()
+				if regexMatch(paths[k][v], "im)paths\[")
+    				MsgBox
+					(
+					"Path '" k '-' v "' seems to be deprecated!
+					This means the macro will NOT work correctly!
+					Check for an updated version of the path or
+					restore the default path"
+					), "Error", 0x40010 " T60"
+			}
 			catch
 				MsgBox
 				(
@@ -8010,7 +8027,7 @@ nm_BondCalculatorButton(*)
 nm_AutoClickerButton(*)
 {
 	global
-	local GuiCtrl
+	local GuiCtrl,GuiCtrlDuration, GuiCtrlDelay
 	GuiClose(*){
 		if (IsSet(AutoClickerGui) && IsObject(AutoClickerGui))
 			AutoClickerGui.Destroy(), AutoClickerGui := ""
@@ -8027,11 +8044,11 @@ nm_AutoClickerButton(*)
 	(GuiCtrl := AutoClickerGui.Add("UpDown", "vClickCount Range0-9999999 Disabled" ClickMode, ClickCount)).Section := "Settings", GuiCtrl.OnEvent("Change", nm_saveConfig)
 	AutoClickerGui.Add("Text", "x133 y21", "times")
 	AutoClickerGui.Add("Text", "x10 y41", "Click Interval (ms):")
-	AutoClickerGui.Add("Edit", "x100 y39 w61 h18 Number Limit5", ClickDelay)
-	(GuiCtrl := AutoClickerGui.Add("UpDown", "vClickDelay Range0-99999", ClickDelay)).Section := "Settings", GuiCtrl.OnEvent("Change", nm_saveConfig)
+	AutoClickerGui.Add("Edit", "x100 y39 w61 h18 Number Limit5", ClickDelay).OnEvent("Change", (*) => nm_saveConfig(GuiCtrlDelay))
+	(GuiCtrlDelay := AutoClickerGui.Add("UpDown", "vClickDelay Range0-99999", ClickDelay)).Section := "Settings", GuiCtrlDelay.OnEvent("Change", nm_saveConfig)
 	AutoClickerGui.Add("Text", "x10 y61", "Click Duration (ms):")
-	AutoClickerGui.Add("Edit", "x104 y59 w57 h18 Number Limit4", ClickDuration)
-	(GuiCtrl := AutoClickerGui.Add("UpDown", "vClickDuration Range0-9999", ClickDuration)).Section := "Settings", GuiCtrl.OnEvent("Change", nm_saveConfig)
+	AutoClickerGui.Add("Edit", "x104 y59 w57 h18 Number Limit4", ClickDuration).OnEvent("Change", (*) => nm_saveConfig(GuiCtrlDuration))
+	(GuiCtrlDuration := AutoClickerGui.Add("UpDown", "vClickDuration Range0-9999", ClickDuration)).Section := "Settings", GuiCtrlDuration.OnEvent("Change", nm_saveConfig)
 	AutoClickerGui.Add("Button", "x45 y88 w80 h20", "Start (" AutoClickerHotkey ")").OnEvent("Click", nm_StartAutoClicker)
 	AutoClickerGui.Show("w160 h104")
 	nm_StartAutoClicker(*){
@@ -14555,7 +14572,8 @@ nm_GoGather(){
 		nm_setShiftLock(1)
 	}
 	while(((nowUnix()-gatherStart)<(FieldUntilMins*60)) || (PFieldBoosted && (nowUnix()-GatherFieldBoostedStart)<840) || (PFieldBoostExtend && (nowUnix()-GatherFieldBoostedStart)<1800 && (nowUnix()-LastGlitter)<900) || (PFieldGuidExtend && FieldGuidDetected && (nowUnix()-gatherStart)<(FieldUntilMins*60+PFieldGuidExtend*60) && (nowUnix()-GatherFieldBoostedStart)>900 && (nowUnix()-LastGlitter)>900) || (PPopStarExtend && HasPopStar && PopStarActive)){
-		MouseMove windowX+350, windowY+GetYOffset()+100
+		if !fieldPatternShift
+			MouseMove windowX+350, windowY+GetYOffset()+100
 		if(!DisableToolUse)
 			Click "Down"
 		nm_gather(FieldPattern, A_Index, FieldPatternSize, FieldPatternReps, FacingFieldCorner)
@@ -15058,7 +15076,14 @@ nm_createWalk(movement, name:="", vars:="") ; this function generates the 'walk'
 	gifted_hasty := ((Mod(base_movespeed*10, 12) = 0) && base_movespeed != 18 && base_movespeed != 24 && base_movespeed != 30) ? 1 : 0
 	base_movespeed /= (gifted_hasty ? 1.2 : 1)
 	'
-	) : '(bitmaps := Map()).CaseSense := 0')
+	) :
+	(
+	'
+	(bitmaps := Map()).CaseSense := 0
+	pToken := Gdip_Startup()
+	Walk(param, *) => HyperSleep(4000/' MoveSpeedNum '*param)
+	'
+	))
 
 	. (
 	(
@@ -15074,7 +15099,7 @@ nm_createWalk(movement, name:="", vars:="") ; this function generates the 'walk'
 	nm_Walk(tiles, MoveKey1, MoveKey2:=0)
 	{
 		Send "{" MoveKey1 " down}" (MoveKey2 ? "{" MoveKey2 " down}" : "")
-		' (NewWalk ? 'Walk(tiles)' : ('HyperSleep(4000/' MoveSpeedNum '*tiles')) '
+		' (NewWalk ? 'Walk(tiles)' : ('HyperSleep(4000/' MoveSpeedNum '*tiles)')) '
 		Send "{" MoveKey1 " up}" (MoveKey2 ? "{" MoveKey2 " up}" : "")
 	}
 
@@ -15082,7 +15107,7 @@ nm_createWalk(movement, name:="", vars:="") ; this function generates the 'walk'
 		start(hk?)
 		{
 			Send "{F14 down}"
-			' (NewWalk ? movement : RegExReplace(movement, "im)Walk\((?<param>.+?)(?:\,|\)(?=[^()]*(?:\(|$)))(?:.*\))?", "HyperSleep(4000/" MoveSpeedNum "*(${param}))")) '
+			' movement '
 			Send "{F14 up}"
 		}
 
@@ -18581,10 +18606,9 @@ nm_PathVars(){
 			Send "{" SC_Space " down}{" RightKey " down}"
 			Sleep 100
 			Send "{" SC_Space " up}"
-			Walk(2)
-			Send "{" FwdKey " down}"
-			Walk(1.5)
-			Send "{" FwdKey " up}"
+			nm_Walk(2, RightKey)
+			nm_Walk(1.5, FwdKey, RightKey)
+			Send "{" RightKey " down}"
 
 			DllCall("GetSystemTimeAsFileTime","int64p",&s:=0)
 			n := s, f := s+100000000
