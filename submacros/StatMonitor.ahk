@@ -260,6 +260,7 @@ OnMessage(0x5557, SetBackpack, 255)
 
 ; OBTAIN DATA
 ; detect OS version
+os_version := "cant detect os"
 for objItem in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_OperatingSystem")
 	os_version := Trim(StrReplace(StrReplace(StrReplace(StrReplace(objItem.Caption, "Microsoft"), "Майкрософт"), "مايكروسوفت"), "微软"))
 
@@ -1026,7 +1027,7 @@ SendHourlyReport()
 
 			case "honey12h":
 			Loop 5
-				Gdip_TextToGraphics(G, FormatNumber(max_12h-(range_12h*(A_Index-1))//4), "s28 Right Bold cffffffff x" v[1]-310 " y" v[2]+v[4]*(A_Index-1)//4-20, "Segoe UI", 240)
+				Gdip_TextToGraphics(G, FormatNumber(max_12h-Floor((range_12h*(A_Index-1))/4)), "s28 Right Bold cffffffff x" v[1]-310 " y" v[2]+v[4]*(A_Index-1)//4-20, "Segoe UI", 240)
 
 			points := []
 			honey_12h.__Enum().Call(&x), points.Push([4+v[3]*x/180, 4+v[4]])
