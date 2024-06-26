@@ -4983,7 +4983,7 @@ nm_BossConfigHelp(*){ ; monster respawn time information
 
 	Boss health/time settings:
 	Enter the boss's health in the text box.
-	The health needs to be written in wihtout commas seperating the health and it will automatically be converted into a percentage.
+	The health needs to be written in without commas separating the health and it will automatically be converted into a percentage.
 	As for the time, the time options are in 5,10,15 minutes with another option being the kill option.
 	The Kill option will basically attack the boss until the boss dies or if you die.
 	The only bosses with this feature are Stump Snail and Commando Chick.
