@@ -24,11 +24,20 @@
 	Walk(6)
 	send "{" FwdKey " up}"
 	nm_Walk(6, RightKey)
-	nm_Walk(7, FwdKey)
-	nm_Walk(6, LeftKey)
-	nm_Walk(3, RightKey)
-	nm_Walk(32, FwdKey)
-	nm_Walk(8.5, BackKey)
+	nm_Walk(42, FwdKey)
+	send "{" LeftKey " down}"
+	Walk(7)
+	send "{space down}"
+	Sleep(100)
+	send "{space up}"
+	Walk(7)
+	send "{space down}"
+	Sleep(100)
+	send "{space up}"
+	Walk(10)
+	send "{" LeftKey " up}"
+	nm_Walk(3.75, RightKey)
+	nm_Walk(6, BackKey)
 }
 else
 {
@@ -46,7 +55,10 @@ else
 	Sleep 2200
 	send "{" RotRight " 4}"
 	nm_Walk(14, LeftKey)
-	nm_Walk(4, FwdKey)
-	nm_Walk(3, BackKey)
-	nm_Walk(11, RightKey)
+	nm_Walk(4, FwdKey, LeftKey)
+	send "{space down}"
+	Sleep 500
+	send "{space up}{" LeftKey "	down}"
+	Walk(8.5)
+	send "{" LeftKey " up}"
 }

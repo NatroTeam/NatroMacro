@@ -109,7 +109,7 @@ OnMessage(0x5557, nm_ForceReconnect)
 OnMessage(0x5558, nm_AmuletPrompt)
 
 ; set version identifier
-VersionID := "1.0.0"
+VersionID := "1.0.0.2"
 
 ;initial load warnings
 if (A_ScreenDPI != 96)
@@ -4983,7 +4983,7 @@ nm_BossConfigHelp(*){ ; monster respawn time information
 
 	Boss health/time settings:
 	Enter the boss's health in the text box.
-	The health needs to be written in wihtout commas seperating the health and it will automatically be converted into a percentage.
+	The health needs to be written in without commas separating the health and it will automatically be converted into a percentage.
 	As for the time, the time options are in 5,10,15 minutes with another option being the kill option.
 	The Kill option will basically attack the boss until the boss dies or if you die.
 	The only bosses with this feature are Stump Snail and Commando Chick.
@@ -8445,7 +8445,7 @@ nm_ContributorsImage(page:=1, contributors:=""){
 			, ["axetar",0xffec8fd0,"487989990937198602"]
 			, ["mis.c",0xffa174fe,"996025853286817815"]]
 
-		testers := [["fhl09",0xffff00ff,"334634052361650177"]
+		testers := [["thatcasualkiwi",0xffff00ff,"334634052361650177"]
 			, ["ziz_jake",0xffa45ee9,"227604929806729217"]
 			, ["nick9",0xffdfdfdf,"700353887512690759"]
 			, ["heatsky",0xff3f8d4d,"725444258835726407"]
@@ -14356,17 +14356,17 @@ nm_GoGather(){
 				; find next eligible field and slot
 				if 		((eligible.Has(1)) && (((LastPlanterGatherSlot=1) && (!eligible.Has(2)) && (!eligible.Has(3))) || ((LastPlanterGatherSlot=2) && (!eligible.Has(3))) || (LastPlanterGatherSlot=3)))
 						{
-						slot:= 1
+						LastPlanterGatherSlot:= 1
 						field := PlanterField1
 						}
 				else if ((eligible.Has(2)) && (((LastPlanterGatherSlot=2) && (!eligible.Has(3)) && (!eligible.Has(1))) || ((LastPlanterGatherSlot=3) && (!eligible.Has(1))) || (LastPlanterGatherSlot=1)))
 						{
-						slot:= 2
+						LastPlanterGatherSlot:= 2
 						field := PlanterField2
 						}
 				else if ((eligible.Has(3)) && (((LastPlanterGatherSlot=3) && (!eligible.Has(1)) && (!eligible.Has(2))) || ((LastPlanterGatherSlot=1) && (!eligible.Has(2))) || (LastPlanterGatherSlot=2)))
 						{
-						slot:= 3
+						LastPlanterGatherSlot:= 3
 						field := PlanterField3
 						}
 
@@ -14390,7 +14390,7 @@ nm_GoGather(){
 				MPlanterGatherDetectionTime:=0
 
 				; write currentfield to file as LastPlanterGatherSlot, to read on next loop
-				IniWrite slot, "settings\nm_config.ini", "Planters", "LastPlanterGatherSlot"
+				IniWrite LastPlanterGatherSlot, "settings\nm_config.ini", "Planters", "LastPlanterGatherSlot"
 
 				break
 			}
@@ -15069,12 +15069,12 @@ nm_createWalk(movement, name:="", vars:="") ; this function generates the 'walk'
 	(
 	'
 	#Include "Walk.ahk"
-
+	
 	movespeed := ' MoveSpeedNum '
-	hasty_guard := (Mod(movespeed*10, 11) = 0) ? 1 : 0
-	base_movespeed := movespeed / (hasty_guard ? 1.1 : 1)
-	gifted_hasty := ((Mod(base_movespeed*10, 12) = 0) && base_movespeed != 18 && base_movespeed != 24 && base_movespeed != 30) ? 1 : 0
-	base_movespeed /= (gifted_hasty ? 1.2 : 1)
+	both            := (Mod(movespeed*1000, 1265) = 0) || (Mod(Round((movespeed+0.005)*1000), 1265) = 0)
+    hasty_guard     := (both || Mod(movespeed*1000, 1100) < 0.00001)
+    gifted_hasty    := (both || Mod(movespeed*1000, 1150) < 0.00001)
+    base_movespeed  := round(movespeed / (both ? 1.265 : (hasty_guard ? 1.1 : (gifted_hasty ? 1.15 : 1))), 0)
 	'
 	) :
 	(

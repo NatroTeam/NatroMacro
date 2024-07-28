@@ -29,13 +29,13 @@ else
 	Walk(1.8)
 	Send "{" FwdKey " up}"
 	Walk(30)
-	send "{" RightKey " up}{space down}"
-	HyperSleep(300)
-	send "{space up}"
-	nm_Walk(6, RightKey)
-	HyperSleep(500)
-	send "{" RotRight " 2}"
 	send "{space down}"
+	HyperSleep(300)
+	send "{space up}{" FwdKey " down}"
+	Walk(4)
+	send "{" FwdKey " up}"
+	Walk(3)
+	send "{" RightKey " up}{" RotRight " 2}{space down}"
 	HyperSleep(100)
 	send "{space up}"
 	nm_Walk(3, FwdKey)
@@ -47,10 +47,13 @@ else
 	send "{space}{" RightKey " up}"
 	HyperSleep(1000)
 	nm_Walk(8, FwdKey, RightKey)
+	nm_Walk(1, FwdKey)
 	nm_Walk(6.75, RightKey)
 	HyperSleep(1000)
 	send "{" RotRight " 4}"
 	HyperSleep(100)
-	nm_Walk(20, FwdKey)
+	nm_Walk(9, FwdKey)
+	nm_Walk(3, FwdKey, LeftKey)
+	nm_Walk(5, FwdKey, RightKey)
 }
 ;path 230629 noobyguy

@@ -116,7 +116,7 @@ DetectMovespeed(&s, &f, hasteCap:=0)
 	Gdip_DisposeImage(pBMArea)
 	
 	; use movespeed formula on obtained values
-	v := ((base_movespeed + (coconut_haste ? 10 : 0) + (bear ? 6 : 0)) * (hasty_guard ? 1.1 : 1) * (gifted_hasty ? 1.2 : 1) * (1 + max(0, haste-hasteCap)*0.1) * (haste_plus ? 2 : 1) * (oil ? 1.2 : 1) * (smoothie ? 1.25 : 1))
+	v := ((base_movespeed + (coconut_haste ? 10 : 0) + (bear ? 4 : 0)) * (hasty_guard ? 1.1 : 1) * (gifted_hasty ? 1.15 : 1) * (1 + max(0, haste-hasteCap)*0.1) * (haste_plus ? 2 : 1) * (oil ? 1.2 : 1) * (smoothie ? 1.25 : 1))
 	
 	return (DllCall("QueryPerformanceCounter", "Int64*", &f := 0), v)
 }
