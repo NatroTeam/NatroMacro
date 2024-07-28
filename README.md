@@ -39,13 +39,11 @@ The only official sources are:
 An open-source Bee Swarm Simulator macro written in AutoHotkey!<br>
 </div>
 
-
 <a name="installation"><h2>🛠️ Installation</h2></a>
 
 1. Download `Natro_Macro_v#.#.#.zip` from the [latest release][latest-release-link]
 2. Open `Natro_Macro_v#.#.#` and double-click the folder inside
 3. Run `START.bat` and wait for the macro to load
-
 
 <a name="community"><h2>🌎 Community</h2></a>
 
@@ -62,7 +60,6 @@ Discord is our main platform for troubleshooting and update news!
   </picture>
 </a>
 
-
 <a name="contributing"><h2>⌨️ Contributing</h2></a>
 
 Natro Macro is an open-source project. We greatly appreciate all contributions, whether you are helping us fix bugs or suggesting new features. If you want to get started, read our [Contributing Guidelines][contributing-link] first.
@@ -72,14 +69,12 @@ Natro Macro is an open-source project. We greatly appreciate all contributions, 
 
 For discussions, please join us on [Discord][discord-link] instead!
 
-
 <a name="credits"><h2>💝 Credits</h2></a>
 
 Natro Macro wouldn't be possible without the help and inspiration of many extraordinary individuals.<br>
 We want to show our gratitude to all of you, so please check out our [list of credits][credits-link]!
 
 Thank you all for your hard work and support!
-
 
 <a name="stars"><h2>🌠 Stars</h2></a>
 
@@ -92,7 +87,6 @@ You can do this by scrolling up and clicking the Star button at the top of the p
     <img alt="stargazer-widget" src="http://reporoster.com/stars/dark/NatroTeam/NatroMacro"> <!-- dark theme -->
   </picture>
 </a>
-
 
 <a name="license"><details><summary><h4>📝 License</h4></summary></a>
 Copyright © 2022-2024 [Natro Team][github-profile-link]<br>
@@ -114,4 +108,3 @@ This project is licensed under [GNU GPL v3.0](./LICENSE.md)
 [bug-report-link]: https://github.com/NatroTeam/NatroMacro/issues/new?assignees=&labels=bug%2Cneeds+triage&projects=&template=bug.yml
 [suggestion-link]: https://github.com/NatroTeam/NatroMacro/issues/new?assignees=&labels=suggestion%2Cneeds+triage&projects=&template=suggestion.yml
 [github-profile-link]: http://github.com/NatroTeam
-[discord-banner-link]: https://invidget.switchblade.xyz/natromacro
