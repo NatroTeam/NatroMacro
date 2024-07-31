@@ -692,6 +692,7 @@ nm_importConfig()
 		, "MushroomBoosterCheck", 1
 		, "StrawberryBoosterCheck", 1
 		, "RoseBoosterCheck", 1
+		, "PepperBoosterCheck", 1
 		, "CoconutBoosterCheck", 0
 		, "StickerStackCheck", 0
 		, "LastStickerStack", 1
@@ -5534,6 +5535,7 @@ nm_BoostedFieldSelectButton(*){
 	(GuiCtrl := BoostedFieldSelectGui.Add("CheckBox", "xp-2 yp+18 vMushroomBoosterCheck Checked" MushroomBoosterCheck, "Mushroom")).Section := "Boost", GuiCtrl.OnEvent("Click", nm_saveConfig)
 	(GuiCtrl := BoostedFieldSelectGui.Add("CheckBox", "xp yp+14 vStrawberryBoosterCheck Checked" StrawberryBoosterCheck, "Strawberry")).Section := "Boost", GuiCtrl.OnEvent("Click", nm_saveConfig)
 	(GuiCtrl := BoostedFieldSelectGui.Add("CheckBox", "xp yp+14 vRoseBoosterCheck Checked" RoseBoosterCheck, "Rose")).Section := "Boost", GuiCtrl.OnEvent("Click", nm_saveConfig)
+	(GuiCtrl := BoostedFieldSelectGui.Add("CheckBox", "xp yp+14 vPepperBoosterCheck Checked" PepperBoosterCheck, "Pepper")).Section := "Boost", GuiCtrl.OnEvent("Click", nm_saveConfig)
 	BoostedFieldSelectGui.Show("w335 h175")
 }
 nm_coconutBoosterCheck(*){
@@ -11522,7 +11524,7 @@ nm_ShrineRotation() {
 nm_toAnyBooster(){
 	global LastBlueBoost, QuestBlueBoost, LastRedBoost, QuestRedBoost, LastMountainBoost, LastCoconutDis, CoconutBoosterCheck, CoconutDisCheck, BoostChaserCheck
 		, FieldBooster1, FieldBooster2, FieldBooster3, FieldBoosterMins
-	static blueBoosterFields:=["Pine Tree", "Bamboo", "Blue Flower"], redBoosterFields:=["Rose", "Strawberry", "Mushroom"], mountainBoosterfields:=["Cactus", "Pumpkin", "Pineapple", "Spider", "Clover", "Dandelion", "Sunflower"], coconutBoosterfields:=["Coconut"]
+	static blueBoosterFields:=["Pine Tree", "Bamboo", "Blue Flower"], redBoosterFields:=["Rose", "Strawberry", "Mushroom, "Pepper"], mountainBoosterfields:=["Cactus", "Pumpkin", "Pineapple", "Spider", "Clover", "Dandelion", "Sunflower"], coconutBoosterfields:=["Coconut"]
 
 	;Coconut field booster; prioritise every 4 hours if enabled
 	LastBooster:=max(LastBlueBoost, LastRedBoost, LastMountainBoost, (BoostChaserCheck && CoconutBoosterCheck && CoconutDisCheck) ? LastCoconutDis : 1)
@@ -11556,7 +11558,7 @@ nm_toAnyBooster(){
 nm_toBooster(location){
 	global FwdKey, LeftKey, BackKey, RightKey, RotLeft, RotRight, KeyDelay, MoveSpeedNum, MoveMethod, SC_E
 	global LastBlueBoost, LastRedBoost, LastMountainBoost, LastCoconutDis, RecentFBoost, objective
-	static blueBoosterFields:=["Pine Tree", "Bamboo", "Blue Flower"], redBoosterFields:=["Rose", "Strawberry", "Mushroom"], mountainBoosterfields:=["Cactus", "Pumpkin", "Pineapple", "Spider", "Clover", "Dandelion", "Sunflower"], coconutBoosterfields:=["Coconut"]
+	static blueBoosterFields:=["Pine Tree", "Bamboo", "Blue Flower"], redBoosterFields:=["Rose", "Strawberry", "Mushroom", "Pepper"], mountainBoosterfields:=["Cactus", "Pumpkin", "Pineapple", "Spider", "Clover", "Dandelion", "Sunflower"], coconutBoosterfields:=["Coconut"]
 
 	success:=0
 	Loop 2 {
@@ -14207,7 +14209,7 @@ nm_GoGather(){
 		, WhirligigKey, PFieldBoosted, GlitterKey, GatherFieldBoosted, GatherFieldBoostedStart, LastGlitter, PMondoGuidComplete, LastGuid, PMondoGuid, PFieldGuidExtend, PFieldGuidExtendMins, PFieldBoostExtend, PPopStarExtend, HasPopStar, PopStarActive, FieldGuidDetected, ConvertGatherFlag
 		, LastWhirligig
 		, BoostChaserCheck, LastBlueBoost, LastRedBoost, LastMountainBoost, FieldBooster3, FieldBooster2, FieldBooster1, FieldDefault, LastMicroConverter, HiveConfirmed, LastWreath, WreathCheck
-		, BlueFlowerBoosterCheck, BambooBoosterCheck, PineTreeBoosterCheck, DandelionBoosterCheck, SunflowerBoosterCheck, CloverBoosterCheck, SpiderBoosterCheck, PineappleBoosterCheck, CactusBoosterCheck, PumpkinBoosterCheck, MushroomBoosterCheck, StrawberryBoosterCheck, RoseBoosterCheck, CoconutBoosterCheck
+		, BlueFlowerBoosterCheck, BambooBoosterCheck, PineTreeBoosterCheck, DandelionBoosterCheck, SunflowerBoosterCheck, CloverBoosterCheck, SpiderBoosterCheck, PineappleBoosterCheck, CactusBoosterCheck, PumpkinBoosterCheck, MushroomBoosterCheck, StrawberryBoosterCheck, RoseBoosterCheck, PepperBoosterCheck, CoconutBoosterCheck
 		, FieldName1, FieldPattern1, FieldPatternSize1, FieldPatternReps1, FieldPatternShift1, FieldPatternInvertFB1, FieldPatternInvertLR1, FieldUntilMins1, FieldUntilPack1, FieldReturnType1, FieldSprinklerLoc1, FieldSprinklerDist1, FieldRotateDirection1, FieldRotateTimes1, FieldDriftCheck1
 		, FieldName2, FieldPattern2, FieldPatternSize2, FieldPatternReps2, FieldPatternShift2, FieldPatternInvertFB2, FieldPatternInvertLR2, FieldUntilMins2, FieldUntilPack2, FieldReturnType2, FieldSprinklerLoc2, FieldSprinklerDist2, FieldRotateDirection2, FieldRotateTimes2, FieldDriftCheck2
 		, FieldName3, FieldPattern3, FieldPatternSize3, FieldPatternReps3, FieldPatternShift3, FieldPatternInvertFB3, FieldPatternInvertLR3, FieldUntilMins3, FieldUntilPack3, FieldReturnType3, FieldSprinklerLoc3, FieldSprinklerDist3, FieldRotateDirection3, FieldRotateTimes3, FieldDriftCheck3
@@ -14248,7 +14250,7 @@ nm_GoGather(){
 
 			BoostChaserField:="None"
 			blueBoosterFields		:=Map("PineTreeBoosterCheck","Pine Tree", "BambooBoosterCheck","Bamboo", "BlueFlowerBoosterCheck","Blue Flower")
-			redBoosterFields		:=Map("RoseBoosterCheck","Rose", "StrawberryBoosterCheck","Strawberry", "MushroomBoosterCheck","Mushroom")
+			redBoosterFields		:=Map("RoseBoosterCheck","Rose", "StrawberryBoosterCheck","Strawberry", "MushroomBoosterCheck","Mushroom", "PepperBoosterCheck","Pepper")
 			mountainBoosterfields	:=Map("CactusBoosterCheck","Cactus", "PumpkinBoosterCheck","Pumpkin", "PineappleBoosterCheck","Pineapple", "SpiderBoosterCheck","Spider", "CloverBoosterCheck","Clover", "DandelionBoosterCheck","Dandelion", "SunflowerBoosterCheck","Sunflower")
 			coconutBoosterfields	:=Map("CoconutBoosterCheck","Coconut")
 			otherFields				:=["Stump", "Mountain Top", "Pepper"]
@@ -14446,7 +14448,7 @@ nm_GoGather(){
 		nm_Reset(2)
 		;check if gathering field is boosted
 		blueBoosterFields:=["Pine Tree", "Bamboo", "Blue Flower"]
-		redBoosterFields:=["Rose", "Strawberry", "Mushroom"]
+		redBoosterFields:=["Rose", "Strawberry", "Mushroom", "Pepper"]
 		mountainBoosterfields:=["Cactus", "Pumpkin", "Pineapple", "Spider", "Clover", "Dandelion", "Sunflower"]
 		otherFields:=["Stump", "Coconut", "Mountain Top", "Pepper"]
 		loop 1 {
@@ -16347,6 +16349,7 @@ nm_boostBypassCheck(){
 		, "Rose", "red"
 		, "Strawberry", "red"
 		, "Mushroom", "red"
+		, "Pepper", "red"
 		, "Cactus", "mountain"
 		, "Pumpkin", "mountain"
 		, "Pineapple", "mountain"
