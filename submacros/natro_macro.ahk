@@ -248,7 +248,7 @@ nm_importPaths()
 				"stockings", "wreath", "feast", "gingerbread", "snowmachine", "candles", "samovar", "lidart", "gummybeacon", "rbpdelevel", ; beesmas
 				"honeylb", "honeystorm", "stickerstack", "stickerprinter", "normalmm", "megamm", "nightmm", "extrememm", "wintermm"], ; other
 		"gtf", ["bamboo", "blueflower", "cactus", "clover", "coconut", "dandelion", "mountaintop", "mushroom", "pepper", "pinetree", "pineapple", "pumpkin",
-				"rose", "spider", "strawberry", "stump", "sunflower"], ; go to field
+				"rose", "spider", "strawberry", "stump", "sunflower", "tradinghub"], ; go to field
 		"gtp", ["bamboo", "blueflower", "cactus", "clover", "coconut", "dandelion", "mountaintop", "mushroom", "pepper", "pinetree", "pineapple", "pumpkin",
 				"rose", "spider", "strawberry", "stump", "sunflower"], ; go to planter
 		"gtq", ["black", "brown", "bucko", "honey", "polar", "riley"], ; go to questgiver
@@ -881,7 +881,7 @@ nm_ReadIni(path)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 nectarnames:=["Comforting", "Refreshing", "Satisfying", "Motivating", "Invigorating"]
 planternames:=["PlasticPlanter", "CandyPlanter", "BlueClayPlanter", "RedClayPlanter", "TackyPlanter", "PesticidePlanter", "HeatTreatedPlanter", "HydroponicPlanter", "PetalPlanter", "PlanterOfPlenty", "PaperPlanter", "TicketPlanter"]
-fieldnames:=["dandelion", "sunflower", "mushroom", "blueflower", "clover", "strawberry", "spider", "bamboo", "pineapple", "stump", "cactus", "pumpkin", "pinetree", "rose", "mountaintop", "pepper", "coconut"]
+fieldnames:=["dandelion", "sunflower", "mushroom", "blueflower", "clover", "strawberry", "spider", "bamboo", "pineapple", "stump", "cactus", "pumpkin", "pinetree", "rose", "mountaintop", "pepper", "coconut", "tradinghub"]
 
 ComfortingFields:=["Dandelion", "Bamboo", "Pine Tree"]
 RefreshingFields:=["Coconut", "Strawberry", "Blue Flower"]
@@ -1438,7 +1438,8 @@ FieldBooster:=Map("pine tree", {booster:"blue", stacks:1}
 	, "stump", {booster:"none", stacks:0}
 	, "mountain top", {booster:"none", stacks:0}
 	, "coconut", {booster:"none", stacks:0}
-	, "pepper", {booster:"none", stacks:0})
+	, "pepper", {booster:"none", stacks:0}
+	, "trading hub", {booster:"none", stacks:0})
 
 ;Gumdrops carried me, they so pro
 CommandoChickHealth := Map(3, 150
@@ -1724,6 +1725,21 @@ nm_importFieldDefaults()
 		, "invertFB", 0
 		, "invertLR", 0)
 
+	FieldDefault["Trading Hub"] := Map("pattern", "Squares"
+		, "size","M"
+		, "width",5
+		, "camera","None"
+		, "turns",1
+		, "sprinkler","Center"
+		, "distance",1
+		, "percent",95
+		, "gathertime",10
+		, "convert","Rejoin"
+		, "drift",0
+		, "shiftlock",0
+		, "invertFB",0
+		, "invertLR",0)
+
 	global StandardFieldDefault := ObjFullyClone(FieldDefault)
 
 	inipath := A_WorkingDir "\settings\field_config.ini"
@@ -1969,7 +1985,7 @@ HasPopStar:=0
 PopStarActive:=0
 PreviousAction:="None"
 CurrentAction:="Startup"
-fieldnamelist := ["Bamboo","Blue Flower","Cactus","Clover","Coconut","Dandelion","Mountain Top","Mushroom","Pepper","Pine Tree","Pineapple","Pumpkin","Rose","Spider","Strawberry","Stump","Sunflower"]
+fieldnamelist := ["Bamboo","Blue Flower","Cactus","Clover","Coconut","Dandelion","Mountain Top","Mushroom","Pepper","Pine Tree","Pineapple","Pumpkin","Rose","Spider","Strawberry","Stump","Sunflower", "Trading Hub"]
 hotbarwhilelist := ["Never","Always","At Hive","Gathering","Attacking","Microconverter","Whirligig","Enzymes","GatherStart","Snowflake"]
 sprinklerImages := ["saturator"]
 ReconnectDelay:=0
@@ -3435,6 +3451,34 @@ nm_TabGatherUnLock(){
 		MainGui["SaveFieldDefault3"].Enabled := 1
 		MainGui["SaveFieldDefault3"].Value := "HBITMAP:*" hBM
 	}
+
+	if (FieldName1="Trading Hub") {
+		MainGui["FieldDriftCheck1"].Enabled := 0
+		MainGui["FDCHelp1"].Enabled := 0
+		MainGui["FSL1Left"].Enabled := 0
+		MainGui["FSL1Right"].Enabled := 0
+		MainGui["DistanceHide1"].Enabled := 0
+		MainGui["SprinklerDistDisable1"].Enabled := 0
+		MainGui["FieldSprinklerDist1"].Enabled := 0
+	}
+	if (FieldName2="Trading Hub") {
+		MainGui["FieldDriftCheck2"].Enabled := 0
+		MainGui["FDCHelp2"].Enabled := 0
+		MainGui["FSL2Left"].Enabled := 0
+		MainGui["FSL2Right"].Enabled := 0
+		MainGui["DistanceHide2"].Enabled := 0
+		MainGui["SprinklerDistDisable2"].Enabled := 0
+		MainGui["FieldSprinklerDist2"].Enabled := 0
+	}
+	if (FieldName3="Trading Hub") {
+		MainGui["FieldDriftCheck3"].Enabled := 0
+		MainGui["FDCHelp3"].Enabled := 0
+		MainGui["FSL3Left"].Enabled := 0
+		MainGui["FSL3Right"].Enabled := 0
+		MainGui["DistanceHide3"].Enabled := 0
+		MainGui["SprinklerDistDisable3"].Enabled := 0
+		MainGui["FieldSprinklerDist3"].Enabled := 0
+	}
 	DllCall("DeleteObject", "ptr", hBM)
 }
 nm_TabCollectLock(){
@@ -4162,6 +4206,25 @@ nm_FieldSelect1(GuiCtrl?, *){
 	IniWrite CurrentFieldNum, "settings\nm_config.ini", "Gather", "CurrentFieldNum"
 	MainGui["CurrentField"].Text := FieldName1
 	CurrentField:=FieldName1
+	if (FieldName1="Trading Hub") {
+		MainGui["FieldDriftCheck1"].Enabled := 0
+		MainGui["FDCHelp1"].Enabled := 0
+		MainGui["FSL1Left"].Enabled := 0
+		MainGui["FSL1Right"].Enabled := 0
+		MainGui["SprinklerLocHelp1"].Enabled := 0
+		MainGui["DistanceHide1"].Enabled := 0
+		MainGui["SprinklerDistDisable1"].Enabled := 0
+		MainGui["FieldSprinklerDist1"].Enabled := 0
+	} else {
+		MainGui["FieldDriftCheck1"].Enabled := 1
+		MainGui["FDCHelp1"].Enabled := 1
+		MainGui["FSL1Left"].Enabled := 1
+		MainGui["FSL1Right"].Enabled := 1
+		MainGui["SprinklerLocHelp1"].Enabled := 1
+		MainGui["DistanceHide1"].Enabled := 1
+		MainGui["SprinklerDistDisable1"].Enabled := 1
+		MainGui["FieldSprinklerDist1"].Enabled := 1
+	}
 	nm_WebhookEasterEgg()
 }
 nm_FieldSelect2(GuiCtrl?, *){
@@ -4233,6 +4296,25 @@ nm_FieldSelect2(GuiCtrl?, *){
 		nm_FieldDefaults(2)
 		IniWrite FieldName2, "settings\nm_config.ini", "Gather", "FieldName2"
 	}
+	if (FieldName2="Trading Hub") {
+		MainGui["FieldDriftCheck2"].Enabled := 0
+		MainGui["FDCHelp2"].Enabled := 0
+		MainGui["FSL2Left"].Enabled := 0
+		MainGui["FSL2Right"].Enabled := 0
+		MainGui["SprinklerLocHelp2"].Enabled := 0
+		MainGui["DistanceHide2"].Enabled := 0
+		MainGui["SprinklerDistDisable2"].Enabled := 0
+		MainGui["FieldSprinklerDist2"].Enabled := 0
+	} else {
+		MainGui["FieldDriftCheck2"].Enabled := 1
+		MainGui["FDCHelp2"].Enabled := 1
+		MainGui["FSL2Left"].Enabled := 1
+		MainGui["FSL2Right"].Enabled := 1
+		MainGui["SprinklerLocHelp2"].Enabled := 1
+		MainGui["DistanceHide2"].Enabled := 1
+		MainGui["SprinklerDistDisable2"].Enabled := 1
+		MainGui["FieldSprinklerDist2"].Enabled := 1
+	}
 	nm_WebhookEasterEgg()
 }
 nm_FieldSelect3(GuiCtrl?, *){
@@ -4297,6 +4379,25 @@ nm_FieldSelect3(GuiCtrl?, *){
 	if IsSet(GuiCtrl) {
 		nm_FieldDefaults(3)
 		IniWrite FieldName3, "settings\nm_config.ini", "Gather", "FieldName3"
+	}
+	if (FieldName3="Trading Hub") {
+		MainGui["FieldDriftCheck3"].Enabled := 0
+		MainGui["FDCHelp3"].Enabled := 0
+		MainGui["FSL3Left"].Enabled := 0
+		MainGui["FSL3Right"].Enabled := 0
+		MainGui["SprinklerLocHelp3"].Enabled := 0
+		MainGui["DistanceHide3"].Enabled := 0
+		MainGui["SprinklerDistDisable3"].Enabled := 0
+		MainGui["FieldSprinklerDist3"].Enabled := 0
+	} else {
+		MainGui["FieldDriftCheck3"].Enabled := 1
+		MainGui["FDCHelp3"].Enabled := 1
+		MainGui["FSL3Left"].Enabled := 1
+		MainGui["FSL3Right"].Enabled := 1
+		MainGui["SprinklerLocHelp3"].Enabled := 1
+		MainGui["DistanceHide3"].Enabled := 1
+		MainGui["SprinklerDistDisable3"].Enabled := 1
+		MainGui["FieldSprinklerDist3"].Enabled := 1
 	}
 	nm_WebhookEasterEgg()
 }
@@ -4428,7 +4529,7 @@ nm_FieldUntilPack(GuiCtrl, *){
 }
 nm_FieldReturnType(GuiCtrl, *){
 	global
-	static val := ["Walk", "Reset"], l := val.Length
+	static val := ["Walk", "Reset", "Rejoin"], l := val.Length
 	local i, index
 
 	switch GuiCtrl.Name, 0
@@ -4441,7 +4542,7 @@ nm_FieldReturnType(GuiCtrl, *){
 		index := 3
 	}
 
-	i := (FieldReturnType%index% = "Walk") ? 1 : 2
+	i := (FieldReturnType%index% = "Walk") ? 1 : (FieldReturnType%index% = "Reset") ? 2 : 3
 
 	MainGui["FieldReturnType" index].Text := FieldReturnType%index% := val[(GuiCtrl.Name = "FRT" index "Right") ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)]
 	IniWrite FieldReturnType%index%, "settings\nm_config.ini", "Gather", "FieldReturnType" index
@@ -14727,7 +14828,7 @@ nm_GoGather(){
 		nm_PlanterTimeUpdate(FieldName)
 		;whirligig //todo: needs a major rework!
 		if(FieldReturnType="walk") { ;walk back
-			if((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted)){
+			if((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted) && FieldName!="Trading Hub"){
 				if(FieldName="sunflower"){
 					Send "{" RotLeft " 2}"
 				}
@@ -14849,8 +14950,10 @@ nm_GoGather(){
 				}
 				nm_findHiveSlot()
 			}
+		} else if(FieldReturnType="Rejoin") {
+			Rejoin()
 		} else { ;reset back
-			if ((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted)) {
+			if ((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted) && FieldName!="Trading Hub"){
 				if(FieldName="sunflower"){
 					loop 2 {
 						Send "{" RotLeft "}"
@@ -15427,6 +15530,10 @@ nm_setSprinkler(field, loc, dist){
 
 	MoveSpeedFactor:=round(18/MoveSpeedNum, 2)
 
+	if (field="Trading Hub") {
+		return
+	}
+
 	;move to start position
 	if(InStr(loc, "Upper")){
 		nm_Move(flen*MoveSpeedFactor, FwdKey)
@@ -15709,6 +15816,204 @@ CloseRoblox()
 	; kill any remnant processes
 	for p in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process WHERE Name LIKE '%Roblox%' OR CommandLine LIKE '%ROBLOXCORPORATION%'")
 		ProcessClose p.ProcessID
+}
+Rejoin()
+{
+	CloseRoblox()
+	Sleep 500
+	; basically a copy of reconnect
+	global LastClock, LastGingerbread, HiveSlot, PrivServer, TotalDisconnects, SessionDisconnects, ReconnectMethod, PublicFallback, resetTime
+		, PlanterName1, PlanterName2, PlanterName3, PlanterHarvestTime1, PlanterHarvestTime2, PlanterHarvestTime3
+		, MacroState, ReconnectDelay
+		, FallbackServer1, FallbackServer2, FallbackServer3, beesmasActive
+	static ServerLabels := Map(0,"Public Server", 1,"Private Server", 2,"Fallback Server 1", 3,"Fallback Server 2", 4,"Fallback Server 3")
+
+	; end any residual movement and set reconnect start time
+	Click "Up"
+	nm_endWalk()
+	ReconnectStart := nowUnix()
+	nm_updateAction("Reconnect")
+
+	; wait for any requested delay time (e.g. from remote control or daily reconnect)
+	if (ReconnectDelay) {
+		nm_setStatus("Waiting", ReconnectDelay " seconds before Reconnect")
+		Sleep 1000*ReconnectDelay
+		ReconnectDelay := 0
+	}
+	else if (MacroState = 2) {
+		TotalDisconnects:=TotalDisconnects+1
+		SessionDisconnects:=SessionDisconnects+1
+		PostSubmacroMessage("StatMonitor", 0x5555, 6, 1)
+		IniWrite TotalDisconnects, "settings\nm_config.ini", "Status", "TotalDisconnects"
+		IniWrite SessionDisconnects, "settings\nm_config.ini", "Status", "SessionDisconnects"
+		nm_setStatus("Disconnected", "Reconnecting")
+	}
+
+	; obtain link codes from Private Server and Fallback Server links
+	linkCodes := Map()
+	for k,v in ["PrivServer", "FallbackServer1", "FallbackServer2", "FallbackServer3"] {
+		if (%v% && (StrLen(%v%) > 0)) {
+			if RegexMatch(%v%, "i)(?<=privateServerLinkCode=)(.{32})", &linkCode)
+				linkCodes[k] := linkCode[0]
+			else
+				nm_setStatus("Error", ServerLabels[k] " Invalid")
+		}
+	}
+
+	; main reconnect loop
+	Loop {
+		;Decide Server
+		server := ((A_Index <= 20) && linkCodes.Has(n := (A_Index-1)//5 + 1)) ? n : ((PublicFallback = 0) && (n := ObjMinIndex(linkcodes))) ? n : 0
+
+		;Wait For Success
+		i := A_Index, success := 0
+		Loop 5 {
+			;START
+			switch (ReconnectMethod = "Browser") ? 0 : Mod(i, 5) {
+				case 1,2:
+				;Close Roblox
+				CloseRoblox()
+				;Run Server Deeplink
+				nm_setStatus("Attempting", ServerLabels[server])
+				try Run '"roblox://placeID=1537690962' (server ? ("&linkCode=" linkCodes[server]) : "") '"'
+
+				case 3,4:
+				;Run Server Deeplink (without closing)
+				nm_setStatus("Attempting", ServerLabels[server])
+				try Run '"roblox://placeID=1537690962' (server ? ("&linkCode=" linkCodes[server]) : "") '"'
+
+				default:
+				if server {
+					;Close Roblox
+					CloseRoblox()
+					;Run Server Link (legacy method w/ browser)
+					nm_setStatus("Attempting", ServerLabels[server] " (Browser)")
+					if ((success := LegacyReconnect(linkCodes[server], i)) = 1) {
+						if (ReconnectMethod != "Browser") {
+							ReconnectMethod := "Browser"
+							nm_setStatus("Warning", "Deeplink reconnect failed, switched to legacy reconnect (browser) for this session!")
+						}
+						break
+					}
+					else
+						continue 2
+				} else {
+					;Close Roblox
+					(i = 1) && CloseRoblox()
+					;Run Server Link (spam deeplink method)
+					try Run '"roblox://placeID=1537690962"'
+				}
+			}
+			;STAGE 1 - wait for Roblox window
+			Loop 240 {
+				if GetRobloxHWND() {
+					ActivateRoblox()
+					nm_setStatus("Detected", "Roblox Open")
+					break
+				}
+				if (A_Index = 240) {
+					nm_setStatus("Error", "No Roblox Found`nRetry: " i)
+					break 2
+				}
+				Sleep 1000 ; timeout 4 mins, wait for any Roblox update to finish
+			}
+			;STAGE 2 - wait for loading screen (or loaded game)
+			Loop 180 {
+				ActivateRoblox()
+				if !GetRobloxClientPos() {
+					nm_setStatus("Warning", "Disconnected during Reconnect")
+					continue 2
+				}
+				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+30 "|" windowWidth "|" windowHeight-30)
+				if (Gdip_ImageSearch(pBMScreen, bitmaps["loading"], , , , , 150, 4) = 1) {
+					Gdip_DisposeImage(pBMScreen)
+					nm_setStatus("Detected", "Game Open")
+					break
+				}
+				if (Gdip_ImageSearch(pBMScreen, bitmaps["science"], , , , , 150, 2) = 1) {
+					Gdip_DisposeImage(pBMScreen)
+					nm_setStatus("Detected", "Game Loaded")
+					success := 1
+					break 2
+				}
+				if (Gdip_ImageSearch(pBMScreen, bitmaps["disconnected"], , , , , , 2) = 1) {
+					Gdip_DisposeImage(pBMScreen)
+					nm_setStatus("Warning", "Disconnected during Reconnect")
+					continue 2
+				}
+				Gdip_DisposeImage(pBMScreen)
+				if (A_Index = 180) {
+					nm_setStatus("Error", "No BSS Found`nRetry: " i)
+					break 2
+				}
+				Sleep 1000 ; timeout 3 mins, slow loading
+			}
+			;STAGE 3 - wait for loaded game
+			Loop 180 {
+				ActivateRoblox()
+				if !GetRobloxClientPos() {
+					nm_setStatus("Warning", "Disconnected during Reconnect")
+					continue 2
+				}
+				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+30 "|" windowWidth "|" windowHeight-30)
+				if ((Gdip_ImageSearch(pBMScreen, bitmaps["loading"], , , , , 150, 4) = 0) || (Gdip_ImageSearch(pBMScreen, bitmaps["science"], , , , , 150, 2) = 1)) {
+					Gdip_DisposeImage(pBMScreen)
+					nm_setStatus("Detected", "Game Loaded")
+					success := 1
+					break 2
+				}
+				if (Gdip_ImageSearch(pBMScreen, bitmaps["disconnected"], , , , , , 2) = 1) {
+					Gdip_DisposeImage(pBMScreen)
+					nm_setStatus("Warning", "Disconnected during Reconnect")
+					continue 2
+				}
+				Gdip_DisposeImage(pBMScreen)
+				if (A_Index = 180) {
+					nm_setStatus("Error", "BSS Load Timeout`nRetry: " i)
+					break 2
+				}
+				Sleep 1000 ; timeout 3 mins, slow loading
+			}
+		}
+
+		;Successful Reconnect
+		if (success = 1)
+		{
+			ActivateRoblox()
+			GetRobloxClientPos()
+			MouseMove windowX + windowWidth//2, windowY + windowHeight//2
+			duration := DurationFromSeconds(ReconnectDuration := (nowUnix() - ReconnectStart), "mm:ss")
+			nm_setStatus("Completed", "Reconnect`nTime: " duration " - Attempts: " i)
+			Sleep 500
+
+			LastClock:=nowUnix()
+			IniWrite LastClock, "settings\nm_config.ini", "Collect", "LastClock"
+			if (beesmasActive)
+			{
+				LastGingerbread += ReconnectDuration ? ReconnectDuration : 300
+				IniWrite LastGingerbread, "settings\nm_config.ini", "Collect", "LastGingerbread"
+			}
+			Loop 3 {
+				PlanterHarvestTime%A_Index% += PlanterName%A_Index% ? (ReconnectDuration ? ReconnectDuration : 300) : 0
+				IniWrite PlanterHarvestTime%A_Index%, "settings\nm_config.ini", "Planters", "PlanterHarvestTime" A_Index
+			}
+
+			if (server > 1) ; swap PrivServer and FallbackServer - original PrivServer probably has an issue
+			{
+				n := server - 1
+				temp := PrivServer, PrivServer := FallbackServer%n%, FallbackServer%n% := temp
+				MainGui["PrivServer"].Value := PrivServer
+				MainGui["FallbackServer" n].Value := FallbackServer%n%
+				IniWrite PrivServer, "settings\nm_config.ini", "Settings", "PrivServer"
+				IniWrite FallbackServer%n%, "settings\nm_config.ini", "Settings", "FallbackServer" n
+				PostSubmacroMessage("Status", 0x5553, 10, 6)
+			}
+			PostSubmacroMessage("Status", 0x5552, 221, (server = 0))
+
+			if (testCheck || (nm_claimHiveSlot() = 1))
+				return 1
+		}
+	}
 }
 DisconnectCheck(testCheck := 0)
 {
@@ -18750,15 +19055,19 @@ nm_gotoField(location){
 	nm_endWalk()
 }
 nm_walkFrom(field){
-	path := paths["wf"][StrReplace(field, " ")]
+	if (field="trading hub") {
+		Rejoin()
+	} else {
+		path := paths["wf"][StrReplace(field, " ")]
 
-	nm_setShiftLock(0)
+		nm_setShiftLock(0)
 
-	nm_createPath(path)
-	KeyWait "F14", "D T5 L"
-	nm_setStatus("Traveling", "Hive")
-	KeyWait "F14", "T120 L"
-	nm_endWalk()
+		nm_createPath(path)
+		KeyWait "F14", "D T5 L"
+		nm_setStatus("Traveling", "Hive")
+		KeyWait "F14", "T120 L"
+		nm_endWalk()
+	}
 }
 nm_gotoPlanter(location, waitEnd := 1){
 	global HiveConfirmed:=0
