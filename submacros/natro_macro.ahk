@@ -1,4 +1,4 @@
-﻿/*
+/*
 Natro Macro (https://github.com/NatroTeam/NatroMacro)
 Copyright © Natro Team (https://github.com/NatroTeam)
 
@@ -4428,7 +4428,7 @@ nm_FieldUntilPack(GuiCtrl, *){
 }
 nm_FieldReturnType(GuiCtrl, *){
 	global
-	static val := ["Walk", "Reset"], l := val.Length
+	static val := ["Walk", "Reset", "Rejoin"], l := val.Length
 	local i, index
 
 	switch GuiCtrl.Name, 0
@@ -4441,9 +4441,18 @@ nm_FieldReturnType(GuiCtrl, *){
 		index := 3
 	}
 
-	i := (FieldReturnType%index% = "Walk") ? 1 : 2
+	;i := (FieldReturnType%index% = "Walk") ? 1 : 2
+	switch(FieldReturnType%index%){
+		case "Walk":
+			i := 1
+		case "Reset":
+			i := 2
+		case "Rejoin":
+			i := 3
+	}
+	FieldReturnType%index% := val[(GuiCtrl.Name = "FRT" index "Right") ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)]
 
-	MainGui["FieldReturnType" index].Text := FieldReturnType%index% := val[(GuiCtrl.Name = "FRT" index "Right") ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)]
+	MainGui["FieldReturnType" index].Text := FieldReturnType%index%
 	IniWrite FieldReturnType%index%, "settings\nm_config.ini", "Gather", "FieldReturnType" index
 }
 nm_FieldSprinklerLoc(GuiCtrl, *){
@@ -14848,6 +14857,239 @@ nm_GoGather(){
 					nm_endWalk()
 				}
 				nm_findHiveSlot()
+			}
+		} else if(FieldReturnType="Rejoin") {
+			if((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted)){
+				if(FieldName="sunflower"){
+					Send "{" RotLeft " 2}"
+				}
+				else if(FieldName="dandelion"){
+					Send "{" RotRight " 2}"
+				}
+				else if(FieldName="mushroom"){
+					Send "{" RotLeft " 4}"
+				}
+				else if(FieldName="blue flower"){
+					Send "{" RotRight " 2}"
+				}
+				else if(FieldName="spider"){
+					Send "{" RotLeft " 4}"
+				}
+				else if(FieldName="strawberry"){
+					Send "{" RotLeft " 2}"
+				}
+				else if(FieldName="bamboo"){
+					Send "{" RotRight " 2}"
+				}
+				else if(FieldName="pineapple"){
+					Send "{" RotLeft " 4}"
+				}
+				else if(FieldName="stump"){
+					Send "{" RotRight " 2}"
+				}
+				else if(FieldName="pumpkin"){
+					Send "{" RotLeft " 4}"
+				}
+				else if(FieldName="pine tree"){
+					Send "{" RotLeft " 4}"
+				}
+				else if(FieldName="rose"){
+					Send "{" RotLeft " 2}"
+				}
+				else if(FieldName="pepper"){
+					Send "{" RotLeft " 2}"
+				}
+				Send "{" WhirligigKey "}"
+				sleep (2500+KeyDelay)
+				;Confirm hive
+				send "{PgUp 4}"
+				loop 8 {
+					Send "{" ZoomOut "}"
+				}
+				loop 4
+				{
+					If ((nm_imgSearch("hive4.png",20,"actionbar")[1] = 0) || (nm_imgSearch("hive_honeystorm.png",20,"actionbar")[1] = 0) || (nm_imgSearch("hive_snowstorm.png",20,"actionbar")[1] = 0))
+					{
+						send "{" RotRight " 4}{" RotDown " 4}"
+						HiveConfirmed:=1
+						LastWhirligig:=nowUnix()
+						IniWrite LastWhirligig, "settings\nm_config.ini", "Boost", "LastWhirligig"
+						Sleep 1000
+						break
+					}
+					SendInput "{" RotRight " 4}"
+					sleep (250+KeyDelay)
+					If (A_Index=4)
+					{
+						nm_setStatus("Warning", "No Whirligigs")
+						WhirligigKey:="None"
+					}
+				}
+			} else { ;rejoin and find hive
+				Click "Up"
+				nm_endWalk()
+				ReconnectStart := nowUnix()
+				; main reconnect loop
+				Loop {
+					Sleep 10
+					;Decide Server
+					server := ((A_Index <= 20) && linkCodes.Has(n := (A_Index-1)//5 + 1)) ? n : ((PublicFallback = 0) && (n := ObjMinIndex(linkcodes))) ? n : 0
+
+					;Wait For Success
+					i := A_Index, success := 0
+					Loop 5 {
+						Sleep 100
+						;START
+						switch (ReconnectMethod = "Browser") ? 0 : Mod(i, 5) {
+							case 1,2:
+							;Close Roblox
+							CloseRoblox()
+							;Run Server Deeplink
+							nm_setStatus("Attempting", ServerLabels[server])
+							try Run '"roblox://placeID=1537690962' (server ? ("&linkCode=" linkCodes[server]) : "") '"'
+
+							case 3,4:
+							;Run Server Deeplink (without closing)
+							nm_setStatus("Attempting", ServerLabels[server])
+							try Run '"roblox://placeID=1537690962' (server ? ("&linkCode=" linkCodes[server]) : "") '"'
+
+							default:
+							if server {
+								;Close Roblox
+								CloseRoblox()
+								;Run Server Link (legacy method w/ browser)
+								nm_setStatus("Attempting", ServerLabels[server] " (Browser)")
+								if ((success := LegacyReconnect(linkCodes[server], i)) = 1) {
+									if (ReconnectMethod != "Browser") {
+										ReconnectMethod := "Browser"
+										nm_setStatus("Warning", "Deeplink reconnect failed, switched to legacy reconnect (browser) for this session!")
+									}
+									break
+								}
+								else
+									continue 2
+							} else {
+								;Close Roblox
+								(i = 1) && CloseRoblox()
+								;Run Server Link (spam deeplink method)
+								try Run '"roblox://placeID=1537690962"'
+							}
+						}
+						;STAGE 1 - wait for Roblox window
+						Loop 240 {
+							if GetRobloxHWND() {
+								ActivateRoblox()
+								nm_setStatus("Detected", "Roblox Open")
+								break
+							}
+							if (A_Index = 240) {
+								nm_setStatus("Error", "No Roblox Found`nRetry: " i)
+								break 2
+							}
+							Sleep 1000 ; timeout 4 mins, wait for any Roblox update to finish
+						}
+						;STAGE 2 - wait for loading screen (or loaded game)
+						Loop 180 {
+							ActivateRoblox()
+							if !GetRobloxClientPos() {
+								nm_setStatus("Warning", "Disconnected during Reconnect")
+								continue 2
+							}
+							pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+30 "|" windowWidth "|" windowHeight-30)
+							if (Gdip_ImageSearch(pBMScreen, bitmaps["loading"], , , , , 150, 4) = 1) {
+								Gdip_DisposeImage(pBMScreen)
+								nm_setStatus("Detected", "Game Open")
+								break
+							}
+							if (Gdip_ImageSearch(pBMScreen, bitmaps["science"], , , , , 150, 2) = 1) {
+								Gdip_DisposeImage(pBMScreen)
+								nm_setStatus("Detected", "Game Loaded")
+								success := 1
+								break 2
+							}
+							if (Gdip_ImageSearch(pBMScreen, bitmaps["disconnected"], , , , , , 2) = 1) {
+								Gdip_DisposeImage(pBMScreen)
+								nm_setStatus("Warning", "Disconnected during Reconnect")
+								continue 2
+							}
+							Gdip_DisposeImage(pBMScreen)
+							if (A_Index = 180) {
+								nm_setStatus("Error", "No BSS Found`nRetry: " i)
+								break 2
+							}
+							Sleep 1000 ; timeout 3 mins, slow loading
+						}
+						;STAGE 3 - wait for loaded game
+						Loop 180 {
+							ActivateRoblox()
+							if !GetRobloxClientPos() {
+								nm_setStatus("Warning", "Disconnected during Reconnect")
+								continue 2
+							}
+							pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+30 "|" windowWidth "|" windowHeight-30)
+							if ((Gdip_ImageSearch(pBMScreen, bitmaps["loading"], , , , , 150, 4) = 0) || (Gdip_ImageSearch(pBMScreen, bitmaps["science"], , , , , 150, 2) = 1)) {
+								Gdip_DisposeImage(pBMScreen)
+								nm_setStatus("Detected", "Game Loaded")
+								success := 1
+								break 2
+							}
+							if (Gdip_ImageSearch(pBMScreen, bitmaps["disconnected"], , , , , , 2) = 1) {
+								Gdip_DisposeImage(pBMScreen)
+								nm_setStatus("Warning", "Disconnected during Reconnect")
+								continue 2
+							}
+							Gdip_DisposeImage(pBMScreen)
+							if (A_Index = 180) {
+								nm_setStatus("Error", "BSS Load Timeout`nRetry: " i)
+								break 2
+							}
+							Sleep 1000 ; timeout 3 mins, slow loading
+						}
+					}
+
+					;Successful Reconnect
+					Sleep 50
+					if (success = 1)
+					{
+						Sleep 100
+						ActivateRoblox()
+						GetRobloxClientPos()
+						MouseMove windowX + windowWidth//2, windowY + windowHeight//2
+						duration := DurationFromSeconds(ReconnectDuration := (nowUnix() - ReconnectStart), "mm:ss")
+						nm_setStatus("Completed", "Reconnect`nTime: " duration " - Attempts: " i)
+						Sleep 500
+
+						LastClock:=nowUnix()
+						IniWrite LastClock, "settings\nm_config.ini", "Collect", "LastClock"
+						if (beesmasActive)
+						{
+							LastGingerbread += ReconnectDuration ? ReconnectDuration : 300
+							IniWrite LastGingerbread, "settings\nm_config.ini", "Collect", "LastGingerbread"
+						}
+						Loop 3 {
+							PlanterHarvestTime%A_Index% += PlanterName%A_Index% ? (ReconnectDuration ? ReconnectDuration : 300) : 0
+							IniWrite PlanterHarvestTime%A_Index%, "settings\nm_config.ini", "Planters", "PlanterHarvestTime" A_Index
+						}
+
+						if (server > 1) ; swap PrivServer and FallbackServer - original PrivServer probably has an issue
+						{
+							n := server - 1
+							temp := PrivServer, PrivServer := FallbackServer%n%, FallbackServer%n% := temp
+							MainGui["PrivServer"].Value := PrivServer
+							MainGui["FallbackServer" n].Value := FallbackServer%n%
+							IniWrite PrivServer, "settings\nm_config.ini", "Settings", "PrivServer"
+							IniWrite FallbackServer%n%, "settings\nm_config.ini", "Settings", "FallbackServer" n
+							PostSubmacroMessage("Status", 0x5553, 10, 6)
+						}
+						PostSubmacroMessage("Status", 0x5552, 221, (server = 0))
+						sleep 100
+						if ((nm_claimHiveSlot() = 1))
+						{
+							Sleep 10
+							return 1
+						}
+					}
+				}
 			}
 		} else { ;reset back
 			if ((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted)) {
