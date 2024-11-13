@@ -9397,7 +9397,7 @@ nm_Reset(checkAll:=1, wait:=2000, convert:=1, force:=0){
 			GetRobloxClientPos()
 			send "{" SC_Esc "}{" SC_R "}{" SC_Enter "}"
 			n := 0
-			while ((n < 2) && (A_Index <= 200))
+			while ((n < 2) && (A_Index <= 80))
 			{
 				Sleep 100
 				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY "|" windowWidth "|50")
@@ -9416,7 +9416,7 @@ nm_Reset(checkAll:=1, wait:=2000, convert:=1, force:=0){
 		loop 4 {
 			sleep 250+KeyDelay
 			pBMScreen := Gdip_BitmapFromScreen(region), s := 0
-			for i, k in ["day", "night", "day-gifted", "night-gifted", "noshadow-gifted", "noshadow-day", "noshadow-night", "wing"] {
+			for i, k in ["day", "night", "day-altUI", "night-altUI", "day-gifted", "night-gifted", "noshadow-gifted", "noshadow-day", "noshadow-night", "wing"] {
 				s := Max(s, Gdip_ImageSearch(pBMScreen, bitmaps["hive"][k], , , , , , 4, , , sconf))
 				if (s >= sconf) {
 					Gdip_DisposeImage(pBMScreen)
@@ -11537,17 +11537,17 @@ nm_toAnyBooster(){
 			break
 		LastBooster:=max(LastBlueBoost, LastRedBoost, LastMountainBoost, (BoostChaserCheck && CoconutBoosterCheck && CoconutDisCheck) ? LastCoconutDis : 1)
 		;Blue Field Booster
-		if((FieldBooster%A_Index%="blue" && (nowUnix()-LastBlueBoost)>3600 && (nowUnix()-LastBooster)>(FieldBoosterMins*60)) || (QuestBlueBoost && (nowUnix()-LastBlueBoost)>3600)){
+		if((FieldBooster%A_Index%="blue" && (nowUnix()-LastBlueBoost)>2700 && (nowUnix()-LastBooster)>(FieldBoosterMins*60)) || (QuestBlueBoost && (nowUnix()-LastBlueBoost)>2700)){
 			nm_updateAction("Booster")
 			nm_toBooster("blue")
 		}
 		;Red Field Booster
-		else if((FieldBooster%A_Index%="red" && (nowUnix()-LastRedBoost)>3600 && (nowUnix()-LastBooster)>(FieldBoosterMins*60)) || (QuestRedBoost && (nowUnix()-LastRedBoost)>3600)){
+		else if((FieldBooster%A_Index%="red" && (nowUnix()-LastRedBoost)>2700 && (nowUnix()-LastBooster)>(FieldBoosterMins*60)) || (QuestRedBoost && (nowUnix()-LastRedBoost)>2700)){
 			nm_updateAction("Booster")
 			nm_toBooster("red")
 		}
 		;Mountain Top Field Booster
-		else if(FieldBooster%A_Index%="mountain"  && (nowUnix()-LastMountainBoost)>3600 && (nowUnix()-LastBooster)>(FieldBoosterMins*60)){ ;1 hour
+		else if(FieldBooster%A_Index%="mountain"  && (nowUnix()-LastMountainBoost)>2700 && (nowUnix()-LastBooster)>(FieldBoosterMins*60)){ ;45'
 			nm_updateAction("Booster")
 			nm_toBooster("mountain")
 		}
@@ -11637,7 +11637,7 @@ nm_AutoFieldBoost(fieldName){
 			;determine which booster applies
 			if((booster := FieldBooster[StrLower(fieldName)].booster)!="none") {
 				boosterTimer := Last%booster%Boost
-				if (nowUnix() - boosterTimer > 3600){
+				if (nowUnix() - boosterTimer > 2700){
 					AFBuseBooster:=1
 				}
 			}
@@ -11754,7 +11754,7 @@ nm_fieldBoostDice(){
 			boosterName:="mbooster"
 			boostTimer := LastMountainBoost
 		}
-		if(AFBFieldEnable && (nowUnix()-boostTimer)>(3600-AutoFieldBoostRefresh*60)) {
+		if(AFBFieldEnable && (nowUnix()-boostTimer)>(2700-AutoFieldBoostRefresh*60)) {
 			FieldNextBoostedBy:=boosterName
 			IniWrite FieldNextBoostedBy, "settings\nm_config.ini", "Boost", "FieldNextBoostedBy"
 		}
@@ -16124,7 +16124,7 @@ nm_claimHiveSlot(){
 			send "{" SC_Esc "}{" SC_R "}{" SC_Enter "}"
 			SetKeyDelay PrevKeyDelay
 			n := 0
-			while ((n < 2) && (A_Index <= 200))
+			while ((n < 2) && (A_Index <= 80))
 			{
 				Sleep 100
 				GetRobloxClientPos(hwnd)
@@ -18665,6 +18665,8 @@ nm_PathVars(){
 		hive_bitmaps := Map()
 		hive_bitmaps["day"] := Gdip_CreateBitmap(16, 4), G := Gdip_GraphicsFromImage(hive_bitmaps["day"]), Gdip_GraphicsClear(G, 0xffd28f0c), Gdip_DeleteGraphics(G)
 		hive_bitmaps["night"] := Gdip_CreateBitmap(16, 4), G := Gdip_GraphicsFromImage(hive_bitmaps["night"]), Gdip_GraphicsClear(G, 0xffc08200), Gdip_DeleteGraphics(G)
+		hive_bitmaps["day-altUI"] := Gdip_CreateBitmap(16, 4), G := Gdip_GraphicsFromImage(hive_bitmaps["day-altUI"]), Gdip_GraphicsClear(G, 0xff916507), Gdip_DeleteGraphics(G)
+		hive_bitmaps["night-altUI"] := Gdip_CreateBitmap(16, 4), G := Gdip_GraphicsFromImage(hive_bitmaps["night-altUI"]), Gdip_GraphicsClear(G, 0xff845c00), Gdip_DeleteGraphics(G)
 		hive_bitmaps["day-gifted"] := Gdip_CreateBitmap(16, 4), G := Gdip_GraphicsFromImage(hive_bitmaps["day-gifted"]), Gdip_GraphicsClear(G, 0xffb97e03), Gdip_DeleteGraphics(G)
 		hive_bitmaps["night-gifted"] := Gdip_CreateBitmap(16, 4), G := Gdip_GraphicsFromImage(hive_bitmaps["night-gifted"]), Gdip_GraphicsClear(G, 0xffaa7400), Gdip_DeleteGraphics(G)
 		hive_bitmaps["noshadow-day"] := Gdip_CreateBitmap(16, 4), G := Gdip_GraphicsFromImage(hive_bitmaps["noshadow-day"]), Gdip_GraphicsClear(G, 0xffffb325), Gdip_DeleteGraphics(G)
@@ -18691,7 +18693,7 @@ nm_PathVars(){
 			SetKeyDelay 100+KeyDelay
 
 			n := 0
-			while ((n < 2) && (A_Index <= 200))
+			while ((n < 2) && (A_Index <= 80))
 			{
 				Sleep 100
 				pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY "|" windowWidth "|50")
@@ -18707,7 +18709,7 @@ nm_PathVars(){
 			Loop 4 {
 				sleep 250
 				pBMScreen := Gdip_BitmapFromScreen(region), s := 0
-				for i, k in ["day", "night", "day-gifted", "night-gifted", "noshadow-gifted", "noshadow-day", "noshadow-night", "wing"] {
+				for i, k in ["day", "night", "day-altUI", "night-altUI", "day-gifted", "night-gifted", "noshadow-gifted", "noshadow-day", "noshadow-night", "wing"] {
 					s := Max(s, Gdip_ImageSearch(pBMScreen, hive_bitmaps[k], , , , , , 4, , , sconf))
 					if (s >= sconf) {
 						Gdip_DisposeImage(pBMScreen)
