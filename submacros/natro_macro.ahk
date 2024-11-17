@@ -3214,6 +3214,8 @@ SetTimer Background, 2000
 if (A_Args.Has(1) && (A_Args[1] = 1))
 	SetTimer start, -1000
 
+
+ForceLabelStart := false
 return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -20582,7 +20584,6 @@ Background(){
 	nm_setStats()
 }
 
-ForceLabelStart := false
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; HOTKEYS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
