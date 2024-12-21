@@ -248,7 +248,7 @@ nm_importPaths()
 				"stockings", "wreath", "feast", "gingerbread", "snowmachine", "candles", "samovar", "lidart", "gummybeacon", "rbpdelevel", ; beesmas
 				"honeylb", "honeystorm", "stickerstack", "stickerprinter", "normalmm", "megamm", "nightmm", "extrememm", "wintermm"], ; other
 		"gtf", ["bamboo", "blueflower", "cactus", "clover", "coconut", "dandelion", "mountaintop", "mushroom", "pepper", "pinetree", "pineapple", "pumpkin",
-				"rose", "spider", "strawberry", "stump", "sunflower"], ; go to field
+				"rose", "spider", "strawberry", "stump", "sunflower", "tradinghub"], ; go to field
 		"gtp", ["bamboo", "blueflower", "cactus", "clover", "coconut", "dandelion", "mountaintop", "mushroom", "pepper", "pinetree", "pineapple", "pumpkin",
 				"rose", "spider", "strawberry", "stump", "sunflower"], ; go to planter
 		"gtq", ["black", "brown", "bucko", "honey", "polar", "riley"], ; go to questgiver
@@ -881,7 +881,7 @@ nm_ReadIni(path)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 nectarnames:=["Comforting", "Refreshing", "Satisfying", "Motivating", "Invigorating"]
 planternames:=["PlasticPlanter", "CandyPlanter", "BlueClayPlanter", "RedClayPlanter", "TackyPlanter", "PesticidePlanter", "HeatTreatedPlanter", "HydroponicPlanter", "PetalPlanter", "PlanterOfPlenty", "PaperPlanter", "TicketPlanter"]
-fieldnames:=["dandelion", "sunflower", "mushroom", "blueflower", "clover", "strawberry", "spider", "bamboo", "pineapple", "stump", "cactus", "pumpkin", "pinetree", "rose", "mountaintop", "pepper", "coconut"]
+fieldnames:=["dandelion", "sunflower", "mushroom", "blueflower", "clover", "strawberry", "spider", "bamboo", "pineapple", "stump", "cactus", "pumpkin", "pinetree", "rose", "mountaintop", "pepper", "coconut", "tradinghub"]
 
 ComfortingFields:=["Dandelion", "Bamboo", "Pine Tree"]
 RefreshingFields:=["Coconut", "Strawberry", "Blue Flower"]
@@ -1438,7 +1438,8 @@ FieldBooster:=Map("pine tree", {booster:"blue", stacks:1}
 	, "stump", {booster:"none", stacks:0}
 	, "mountain top", {booster:"none", stacks:0}
 	, "coconut", {booster:"none", stacks:0}
-	, "pepper", {booster:"none", stacks:0})
+	, "pepper", {booster:"none", stacks:0}
+	, "trading hub", {booster:"none", stacks:0})
 
 ;Gumdrops carried me, they so pro
 CommandoChickHealth := Map(3, 150
@@ -1724,6 +1725,21 @@ nm_importFieldDefaults()
 		, "invertFB", 0
 		, "invertLR", 0)
 
+	FieldDefault["Trading Hub"] := Map("pattern", "Squares"
+		, "size","M"
+		, "width",5
+		, "camera","None"
+		, "turns",1
+		, "sprinkler","Center"
+		, "distance",1
+		, "percent",95
+		, "gathertime",300
+		, "convert","Rejoin"
+		, "drift",0
+		, "shiftlock",0
+		, "invertFB",0
+		, "invertLR",0)
+
 	global StandardFieldDefault := ObjFullyClone(FieldDefault)
 
 	inipath := A_WorkingDir "\settings\field_config.ini"
@@ -1969,7 +1985,7 @@ HasPopStar:=0
 PopStarActive:=0
 PreviousAction:="None"
 CurrentAction:="Startup"
-fieldnamelist := ["Bamboo","Blue Flower","Cactus","Clover","Coconut","Dandelion","Mountain Top","Mushroom","Pepper","Pine Tree","Pineapple","Pumpkin","Rose","Spider","Strawberry","Stump","Sunflower"]
+fieldnamelist := ["Bamboo","Blue Flower","Cactus","Clover","Coconut","Dandelion","Mountain Top","Mushroom","Pepper","Pine Tree","Pineapple","Pumpkin","Rose","Spider","Strawberry","Stump","Sunflower", "Trading Hub"]
 hotbarwhilelist := ["Never","Always","At Hive","Gathering","Attacking","Microconverter","Whirligig","Enzymes","GatherStart","Snowflake"]
 sprinklerImages := ["saturator"]
 ReconnectDelay:=0
@@ -3435,6 +3451,34 @@ nm_TabGatherUnLock(){
 		MainGui["SaveFieldDefault3"].Enabled := 1
 		MainGui["SaveFieldDefault3"].Value := "HBITMAP:*" hBM
 	}
+
+	if (FieldName1="Trading Hub") {
+		MainGui["FieldDriftCheck1"].Enabled := 0
+		MainGui["FDCHelp1"].Enabled := 0
+		MainGui["FSL1Left"].Enabled := 0
+		MainGui["FSL1Right"].Enabled := 0
+		MainGui["DistanceHide1"].Enabled := 0
+		MainGui["SprinklerDistDisable1"].Enabled := 0
+		MainGui["FieldSprinklerDist1"].Enabled := 0
+	}
+	if (FieldName2="Trading Hub") {
+		MainGui["FieldDriftCheck2"].Enabled := 0
+		MainGui["FDCHelp2"].Enabled := 0
+		MainGui["FSL2Left"].Enabled := 0
+		MainGui["FSL2Right"].Enabled := 0
+		MainGui["DistanceHide2"].Enabled := 0
+		MainGui["SprinklerDistDisable2"].Enabled := 0
+		MainGui["FieldSprinklerDist2"].Enabled := 0
+	}
+	if (FieldName3="Trading Hub") {
+		MainGui["FieldDriftCheck3"].Enabled := 0
+		MainGui["FDCHelp3"].Enabled := 0
+		MainGui["FSL3Left"].Enabled := 0
+		MainGui["FSL3Right"].Enabled := 0
+		MainGui["DistanceHide3"].Enabled := 0
+		MainGui["SprinklerDistDisable3"].Enabled := 0
+		MainGui["FieldSprinklerDist3"].Enabled := 0
+	}
 	DllCall("DeleteObject", "ptr", hBM)
 }
 nm_TabCollectLock(){
@@ -4162,6 +4206,25 @@ nm_FieldSelect1(GuiCtrl?, *){
 	IniWrite CurrentFieldNum, "settings\nm_config.ini", "Gather", "CurrentFieldNum"
 	MainGui["CurrentField"].Text := FieldName1
 	CurrentField:=FieldName1
+	if (FieldName1="Trading Hub") {
+		MainGui["FieldDriftCheck1"].Enabled := 0
+		MainGui["FDCHelp1"].Enabled := 0
+		MainGui["FSL1Left"].Enabled := 0
+		MainGui["FSL1Right"].Enabled := 0
+		MainGui["SprinklerLocHelp1"].Enabled := 0
+		MainGui["DistanceHide1"].Enabled := 0
+		MainGui["SprinklerDistDisable1"].Enabled := 0
+		MainGui["FieldSprinklerDist1"].Enabled := 0
+	} else {
+		MainGui["FieldDriftCheck1"].Enabled := 1
+		MainGui["FDCHelp1"].Enabled := 1
+		MainGui["FSL1Left"].Enabled := 1
+		MainGui["FSL1Right"].Enabled := 1
+		MainGui["SprinklerLocHelp1"].Enabled := 1
+		MainGui["DistanceHide1"].Enabled := 1
+		MainGui["SprinklerDistDisable1"].Enabled := 1
+		MainGui["FieldSprinklerDist1"].Enabled := 1
+	}
 	nm_WebhookEasterEgg()
 }
 nm_FieldSelect2(GuiCtrl?, *){
@@ -4233,6 +4296,25 @@ nm_FieldSelect2(GuiCtrl?, *){
 		nm_FieldDefaults(2)
 		IniWrite FieldName2, "settings\nm_config.ini", "Gather", "FieldName2"
 	}
+	if (FieldName2="Trading Hub") {
+		MainGui["FieldDriftCheck2"].Enabled := 0
+		MainGui["FDCHelp2"].Enabled := 0
+		MainGui["FSL2Left"].Enabled := 0
+		MainGui["FSL2Right"].Enabled := 0
+		MainGui["SprinklerLocHelp2"].Enabled := 0
+		MainGui["DistanceHide2"].Enabled := 0
+		MainGui["SprinklerDistDisable2"].Enabled := 0
+		MainGui["FieldSprinklerDist2"].Enabled := 0
+	} else {
+		MainGui["FieldDriftCheck2"].Enabled := 1
+		MainGui["FDCHelp2"].Enabled := 1
+		MainGui["FSL2Left"].Enabled := 1
+		MainGui["FSL2Right"].Enabled := 1
+		MainGui["SprinklerLocHelp2"].Enabled := 1
+		MainGui["DistanceHide2"].Enabled := 1
+		MainGui["SprinklerDistDisable2"].Enabled := 1
+		MainGui["FieldSprinklerDist2"].Enabled := 1
+	}
 	nm_WebhookEasterEgg()
 }
 nm_FieldSelect3(GuiCtrl?, *){
@@ -4297,6 +4379,25 @@ nm_FieldSelect3(GuiCtrl?, *){
 	if IsSet(GuiCtrl) {
 		nm_FieldDefaults(3)
 		IniWrite FieldName3, "settings\nm_config.ini", "Gather", "FieldName3"
+	}
+	if (FieldName3="Trading Hub") {
+		MainGui["FieldDriftCheck3"].Enabled := 0
+		MainGui["FDCHelp3"].Enabled := 0
+		MainGui["FSL3Left"].Enabled := 0
+		MainGui["FSL3Right"].Enabled := 0
+		MainGui["SprinklerLocHelp3"].Enabled := 0
+		MainGui["DistanceHide3"].Enabled := 0
+		MainGui["SprinklerDistDisable3"].Enabled := 0
+		MainGui["FieldSprinklerDist3"].Enabled := 0
+	} else {
+		MainGui["FieldDriftCheck3"].Enabled := 1
+		MainGui["FDCHelp3"].Enabled := 1
+		MainGui["FSL3Left"].Enabled := 1
+		MainGui["FSL3Right"].Enabled := 1
+		MainGui["SprinklerLocHelp3"].Enabled := 1
+		MainGui["DistanceHide3"].Enabled := 1
+		MainGui["SprinklerDistDisable3"].Enabled := 1
+		MainGui["FieldSprinklerDist3"].Enabled := 1
 	}
 	nm_WebhookEasterEgg()
 }
@@ -4428,7 +4529,7 @@ nm_FieldUntilPack(GuiCtrl, *){
 }
 nm_FieldReturnType(GuiCtrl, *){
 	global
-	static val := ["Walk", "Reset"], l := val.Length
+	static val := ["Walk", "Reset", "Rejoin"], l := val.Length
 	local i, index
 
 	switch GuiCtrl.Name, 0
@@ -4441,7 +4542,7 @@ nm_FieldReturnType(GuiCtrl, *){
 		index := 3
 	}
 
-	i := (FieldReturnType%index% = "Walk") ? 1 : 2
+	i := (FieldReturnType%index% = "Walk") ? 1 : (FieldReturnType%index% = "Reset") ? 2 : 3
 
 	MainGui["FieldReturnType" index].Text := FieldReturnType%index% := val[(GuiCtrl.Name = "FRT" index "Right") ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)]
 	IniWrite FieldReturnType%index%, "settings\nm_config.ini", "Gather", "FieldReturnType" index
@@ -14727,7 +14828,7 @@ nm_GoGather(){
 		nm_PlanterTimeUpdate(FieldName)
 		;whirligig //todo: needs a major rework!
 		if(FieldReturnType="walk") { ;walk back
-			if((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted)){
+			if((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted) && FieldName!="Trading Hub"){
 				if(FieldName="sunflower"){
 					Send "{" RotLeft " 2}"
 				}
@@ -14849,8 +14950,10 @@ nm_GoGather(){
 				}
 				nm_findHiveSlot()
 			}
+		} else if(FieldReturnType="Rejoin") {
+			Rejoin()
 		} else { ;reset back
-			if ((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted)) {
+			if ((WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && !PFieldBoosted) || (WhirligigKey!="None" && (nowUnix()-LastWhirligig)>180 && PFieldBoosted && GatherFieldBoosted) && FieldName!="Trading Hub"){
 				if(FieldName="sunflower"){
 					loop 2 {
 						Send "{" RotLeft "}"
@@ -15427,6 +15530,10 @@ nm_setSprinkler(field, loc, dist){
 
 	MoveSpeedFactor:=round(18/MoveSpeedNum, 2)
 
+	if (field="Trading Hub") {
+		return
+	}
+
 	;move to start position
 	if(InStr(loc, "Upper")){
 		nm_Move(flen*MoveSpeedFactor, FwdKey)
@@ -15709,6 +15816,12 @@ CloseRoblox()
 	; kill any remnant processes
 	for p in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process WHERE Name LIKE '%Roblox%' OR CommandLine LIKE '%ROBLOXCORPORATION%'")
 		ProcessClose p.ProcessID
+}
+Rejoin()
+{
+	CloseRoblox()
+	Sleep 500
+	DisconnectCheck()
 }
 DisconnectCheck(testCheck := 0)
 {
@@ -18750,15 +18863,19 @@ nm_gotoField(location){
 	nm_endWalk()
 }
 nm_walkFrom(field){
-	path := paths["wf"][StrReplace(field, " ")]
+	if (field="trading hub") {
+		Rejoin()
+	} else {
+		path := paths["wf"][StrReplace(field, " ")]
 
-	nm_setShiftLock(0)
+		nm_setShiftLock(0)
 
-	nm_createPath(path)
-	KeyWait "F14", "D T5 L"
-	nm_setStatus("Traveling", "Hive")
-	KeyWait "F14", "T120 L"
-	nm_endWalk()
+		nm_createPath(path)
+		KeyWait "F14", "D T5 L"
+		nm_setStatus("Traveling", "Hive")
+		KeyWait "F14", "T120 L"
+		nm_endWalk()
+	}
 }
 nm_gotoPlanter(location, waitEnd := 1){
 	global HiveConfirmed:=0
