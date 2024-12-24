@@ -2,9 +2,13 @@
 	nm_Walk(31, FwdKey)
 	nm_Walk(75, RightKey)
 	send "{" RotLeft " 4}"
-	nm_Walk(42, FwdKey)
+	Sleep(50)
+	nm_Walk(20, FwdKey)
+	nm_Walk(3, FwdKey, LeftKey)
+	nm_Walk(18, FwdKey)
 	nm_Walk(6, FwdKey, RightKey)
-	nm_Walk(4, RightKey)
+	nm_Walk(10, RightKey)
+	nm_Walk(2, LeftKey)
 	send "{" FwdKey " down}"
 	Walk(6)
 	send "{" SC_Space " down}"
@@ -28,22 +32,26 @@ else {
 	nm_Walk(31, FwdKey)
 	nm_Walk(75, RightKey)
 	send "{" RotLeft " 4}"
-	nm_Walk(42, FwdKey)
+	Sleep(50)
+	nm_Walk(20, FwdKey)
+	nm_Walk(3, FwdKey, LeftKey)
+	nm_Walk(18, FwdKey)
 	nm_Walk(6, FwdKey, RightKey)
-	nm_Walk(4, RightKey)
+	nm_Walk(10, RightKey)
+	nm_Walk(2, LeftKey)
 	send "{" FwdKey " down}"
 	Walk(6)
 	send "{" SC_Space " down}"
 	HyperSleep(200)
 	send "{" SC_Space " up}"
-	HyperSleep(150)
+	HyperSleep(200)
 	send "{" SC_Space " down}"
 	HyperSleep(200)
 	send "{" SC_Space " up}"
 	HyperSleep(3000)
 	send "{" FwdKey " up}"
 	HyperSleep(2600)
-	nm_Walk(13, FwdKey)
+	nm_Walk(15, FwdKey)
 
 	switch HiveSlot
 		{

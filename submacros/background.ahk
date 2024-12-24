@@ -195,18 +195,29 @@ nm_dayOrNight(){
 	}
 	Gdip_DisposeImage(pBMScreen)
 
-	try
-		result := ImageSearch(&FoundX, &FoundY, windowX, windowY + windowHeight//2, windowX + windowWidth, windowY + windowHeight, "*5 nm_image_assets\grassD.png")
-	catch
+	try {
+		for i in ["ground", "dande", "stump", "pa", "clov", "ant"]
+			if ImageSearch(&FoundX, &FoundY, windowX, windowY + 2*windowHeight//5, windowX + windowWidth, windowY + windowHeight, "*5 nm_image_assets\grassatday" i ".png") = 1 
+			{
+				result := 1
+				break
+			}
+	} catch
 		return
-	if (result = 1) {
+	if result {
 		dayOrNight:="Day"
 	} else {
-		try
-			result := ImageSearch(&FoundX, &FoundY, windowX, windowY + windowHeight//2, windowX + windowWidth, windowY + windowHeight, "*5 nm_image_assets\grassN.png")
-		catch
+		try {
+			for i in ["a", "b"] {
+				if ImageSearch(&FoundX, &FoundY, windowX, windowY + windowHeight//2, windowX + windowWidth, windowY + windowHeight, "*5 nm_image_assets\grassatnight" i ".png") = 1
+				{
+					result := 1
+					break
+				}
+			}		
+		} catch
 			return
-		if (result = 1) {
+		if result  {
 			dayOrNight:="Dusk"
 		} else {
 			dayOrNight:="Day"
