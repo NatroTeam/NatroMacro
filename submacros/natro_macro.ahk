@@ -4696,9 +4696,19 @@ nm_MondoAction(GuiCtrl?, *){
 }
 nm_MondoLootDirection(GuiCtrl, *){
 	global MondoLootDirection
-	static val := ["Left", "Right", "Random"], l := val.Length
+	static val := ["Left", "Right", "Random", "Ignore"], l := val.Length
 
-	i := (MondoLootDirection = "Left") ? 1 : (MondoLootDirection = "Right") ? 2 : 3
+	switch MondoLootDirection, 0
+	{
+		case "Left":
+		i := 1
+		case "Right":
+		i := 2
+		case "Random":
+		i := 3
+		default:
+		i := 4
+	}
 
 	MainGui["MondoLootDirection"].Text := MondoLootDirection := val[(GuiCtrl.Name = "MLDRight") ? (Mod(i, l) + 1) : (Mod(l + i - 2, l) + 1)]
 	IniWrite MondoLootDirection, "settings\nm_config.ini", "Collect", "MondoLootDirection"
@@ -14279,25 +14289,27 @@ nm_Mondo(){
 						}
 						if (success = 1) {
 							repeat := 0
-							;loot mondo after death
-							if (MondoLootDirection = "Random")
-								dir := Random(0, 1)
-							else
-								dir := (MondoLootDirection = "Right")
+							if (MondoLootDirection != "Ignore") {
+									;loot mondo after death
+									if (MondoLootDirection = "Random")
+										dir := Random(0, 1)
+									else
+										dir := (MondoLootDirection = "Right")
 
-							if (dir = 0)
-								tc := "left", afc := "right"
-							else
-								tc := "right", afc := "left"
+									if (dir = 0)
+										tc := "left", afc := "right"
+									else
+										tc := "right", afc := "left"
 
-							nm_setStatus("Looting")
-							movement :=
-							(
-							"send '{" RotLeft "}'
-							" nm_Walk(7.5, FwdKey, RightKey) "
-							" nm_Walk(7.5, %tc%Key)
-							)
-							nm_createWalk(movement)
+									nm_setStatus("Looting")
+									movement :=
+									(
+									"send '{" RotLeft "}'
+									" nm_Walk(7.5, FwdKey, RightKey) "
+									" nm_Walk(7.5, %tc%Key)
+									)
+									nm_createWalk(movement)
+								}
 							KeyWait "F14", "D T5 L"
 							KeyWait "F14", "T30 L"
 							nm_endWalk()
