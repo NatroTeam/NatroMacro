@@ -14290,26 +14290,26 @@ nm_Mondo(){
 						if (success = 1) {
 							repeat := 0
 							if (MondoLootDirection != "Ignore") {
-									;loot mondo after death
-									if (MondoLootDirection = "Random")
-										dir := Random(0, 1)
-									else
-										dir := (MondoLootDirection = "Right")
+								;loot mondo after death
+								if (MondoLootDirection = "Random")
+									dir := Random(0, 1)
+								else
+									dir := (MondoLootDirection = "Right")
 
-									if (dir = 0)
-										tc := "left", afc := "right"
-									else
-										tc := "right", afc := "left"
+								if (dir = 0)
+									tc := "left", afc := "right"
+								else
+									tc := "right", afc := "left"
 
-									nm_setStatus("Looting")
-									movement :=
-									(
-									"send '{" RotLeft "}'
-									" nm_Walk(7.5, FwdKey, RightKey) "
-									" nm_Walk(7.5, %tc%Key)
-									)
-									nm_createWalk(movement)
-								}
+								nm_setStatus("Looting")
+								movement :=
+								(
+								"send '{" RotLeft "}'
+								" nm_Walk(7.5, FwdKey, RightKey) "
+								" nm_Walk(7.5, %tc%Key)
+								)
+								nm_createWalk(movement)
+							}
 							KeyWait "F14", "D T5 L"
 							KeyWait "F14", "T30 L"
 							nm_endWalk()
