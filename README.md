@@ -21,6 +21,10 @@ The only official sources are:
 >>> IGNORE BELOW THIS LINE <<<
 -->
 
+<!-- no offical site warning -->
+> [!CAUTION]
+> We do **not** have a website. The only offical place to download Natro Macro is this repoistry and [discord.gg/natromacro][discord-link].
+
 <div align="center">
 
 <!-- logo banner -->

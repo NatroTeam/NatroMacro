@@ -72,7 +72,7 @@ OnExit(ba_timersExit)
 hBitmapsSBT := Map()
 #Include "%A_ScriptDir%\..\nm_image_assets\gui\blendershrine_bitmaps.ahk"
 
-hBitmapsSB := Map()
+(hBitmapsSB := Map()).CaseSense := false
 for x,y in hBitmapsSBT
 	hBitmapsSB[x] := Gdip_CreateHBITMAPFromBitmap(y), Gdip_DisposeImage(y)
 hBitmapsSB["None"] := 0
