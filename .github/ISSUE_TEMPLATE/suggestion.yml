@@ -19,7 +19,7 @@ body:
   - type: dropdown
     attributes:
       label: Have you searched the existing suggestions?
-      description: Please search [here](../labels/suggestion) to see if a suggestion already exists for the feature you are requesting.
+      description: Please search [here](https://github.com/NatroTeam/NatroMacro/issues?q=is%3Aissue%20state%3Aopen%20label%3Asuggestion) to see if a suggestion already exists for the feature you are requesting.
       options:
         - 'No'
         - 'Yes'
