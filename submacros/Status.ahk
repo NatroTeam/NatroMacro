@@ -22,6 +22,10 @@ You should have received a copy of the license along with Natro Macro. If not, p
 #Include "JSON.ahk"
 #Include "DurationFromSeconds.ahk"
 #Include "Roblox.ahk"
+#Include "nowUnix.ahk"
+#Include "enum\EnumInt.ahk"
+#Include "enum\EnumStr.ahk"
+#Include "*i %A_ScriptDir%\..\settings\personal_commands.ahk"
 
 OnError (e, mode) => (mode = "Return") ? -1 : 0
 SetWorkingDir A_ScriptDir "\.."
@@ -82,6 +86,12 @@ DebugLogEnabled := A_Args[34]
 MonsterRespawnTime := A_Args[35]
 
 HoneyUpdateSSCheck := A_Args[36]
+
+; Initialize missing global variables
+windowX := 0, windowY := 0, windowWidth := 0, windowHeight := 0
+shrine := Map()
+priorityListNumeric := []
+ShrineRot := 1
 
 pToken := Gdip_Startup()
 OnExit(ExitFunc)
@@ -167,9 +177,9 @@ timers.beesmas.values[9] := {varname: "GummyBeacon", name: "Gummy Beacon", coold
 timers.beesmas.values[10] := {varname: "WinterMemoryMatch", name: "Winter Memory Match", cooldown: 14400, regex: "i)^winter(mm|memorymatch)?"}
 
 #Include "data\memorymatch.ahk"
+#Include "%A_ScriptDir%\..\nm_image_assets\gui\blendershrine_bitmaps.ahk"
 
 hBitmapsSBT := Map()
-#Include "%A_ScriptDir%\..\nm_image_assets\gui\blendershrine_bitmaps.ahk"
 
 blender := Map()
 blender["BlueExtract"] := {bitmap: hBitmapsSBT["BlueExtract"], name: "Blue Extract", color: 2703225}
@@ -2124,7 +2134,7 @@ nm_command(command)
 					"color": "5066239",
 					"fields": [{
 						"name": "Current Donation",
-						"value": "' vars["ShrineItem" ShrineRot] '",
+						"value": "' vars["ShrineItem" vars["ShrineRot"]] '",
 						"inline": true
 					},
 					{
@@ -2397,10 +2407,6 @@ nm_command(command)
 			if WinExist("natro_macro ahk_class AutoHotkey")
 				SendMessage(0x5559, ObjHasValue(items,closestItem.item),,,,,,,2000)	
 			DetectHiddenWindows 0
-
-
-		#Include "*i %A_ScriptDir%\..\settings\personal_commands.ahk"
-
 
 		default:
 		discord.SendEmbed("``" commandPrefix name "`` is not a valid command!\nUse ``" commandPrefix "help`` for a list of commonly used commands.", 16711731, , , , id)
@@ -2754,8 +2760,6 @@ nm_sendPostData(wParam, lParam, *) ; currently only ReportChannelID
 	return 0
 }
 
-nowUnix() => DateDiff(A_NowUTC, "19700101000000", "Seconds")
-
 UpdateStr(var, value, section)
 {
 	global
@@ -2787,8 +2791,6 @@ nm_setGlobalInt(wParam, lParam, *)
 	Critical
 	local var
 	; enumeration
-	#Include %A_ScriptDir%\..\lib\enum\EnumInt.ahk
-
 	var := arr[wParam], %var% := lParam
 	return 0
 }
@@ -2799,7 +2801,6 @@ nm_setGlobalStr(wParam, lParam, *)
 	Critical
 	local var
 	; enumeration
-	#Include %A_ScriptDir%\..\lib\enum\EnumStr.ahk
 	static sections := ["Boost","Collect","Gather","Planters","Quests","Settings","Status","Blender","Shrine"]
 
 	var := arr[wParam], section := sections[lParam]
