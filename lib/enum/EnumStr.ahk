@@ -1,4 +1,4 @@
-﻿static arr:=["webhook" ; 1
+﻿arr := ["webhook" ; 1
 	, "bottoken" ; 2
 	, "MainChannelID" ; 3
 	, "ReportChannelID"

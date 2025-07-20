@@ -1,4 +1,4 @@
-﻿static arr:=["discordMode" ; 1
+﻿arr := ["discordMode" ; 1
 	, "discordCheck" ; 2
 	, "MainChannelCheck" ; 3
 	, "ReportChannelCheck"

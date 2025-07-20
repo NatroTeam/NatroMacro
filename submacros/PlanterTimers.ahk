@@ -14,10 +14,11 @@ You should have received a copy of the license along with Natro Macro. If not, p
 #SingleInstance Force
 #NoTrayIcon
 
-#Include "%A_ScriptDir%\..\lib"
-#Include "Gdip_All.ahk"
-#Include "DurationFromSeconds.ahk"
-#Include "nowUnix.ahk"
+#Include "%A_ScriptDir%\..\lib\Gdip_All.ahk"
+#Include "%A_ScriptDir%\..\lib\Gdip_ImageSearch.ahk"
+#Include "%A_ScriptDir%\..\lib\Roblox.ahk"
+#Include "%A_ScriptDir%\..\lib\DurationFromSeconds.ahk"
+#Include "%A_ScriptDir%\..\lib\nowUnix.ahk"
 
 OnError (e, mode) => (mode = "Return") ? -1 : 0
 DetectHiddenWindows 1
@@ -181,28 +182,28 @@ TimersGui.Add("text", "x392 y13 w104 h56 vpstatus +left +BackgroundTrans", "unkn
 
 TimersGui.Show("x" TimerX " y" TimerY "w490 h208 NoActivate")
 
-global PlanterField1, PlanterField2, PlanterField3
-    , PlanterNectar1, PlanterNectar2, PlanterNectar3
-    , PlanterEstPercent1, PlanterEstPercent2, PlanterEstPercent3
-    , LastPlanterField1, LastPlanterField2, LastPlanterField3
-    , LastPlanterName1, LastPlanterName2, LastPlanterName3
-    , LastPlanterNectar1, LastPlanterNectar2, LastPlanterNectar3
-    , MPlanterHold1, MPlanterHold2, MPlanterHold3
-    , MPlanterSmoking1, MPlanterSmoking2, MPlanterSmoking3
-    , p1timer, p2timer, p3timer
-
-    , BlenderIndex1, BlenderIndex2, BlenderIndex3
-    , BlenderTime1, BlenderTime2, BlenderTime3
-    , BlenderCount1, BlenderCount2, BlenderCount3
-    , LastBlenderItem1, LastBlenderItem2, LastBlenderItem3
-    , b1timer, b2timer, b3timer
-
-    , ShrineIndex1, ShrineIndex2
-    , LastShrineItem1, LastShrineItem2
-    , s1timer, s2timer
-
-    , LastKing, LastTunnel, LastWolf
-    , pkingtimer, ptunneltimer, pwolftimer
+global PlanterName1 := "None", PlanterName2 := "None", PlanterName3 := "None"
+    , PlanterHarvestTime1 := 0, PlanterHarvestTime2 := 0, PlanterHarvestTime3 := 0
+    , BlenderAmount1 := 0, BlenderAmount2 := 0, BlenderAmount3 := 0
+    , BlenderItem1 := "None", BlenderItem2 := "None", BlenderItem3 := "None"
+    , ShrineAmount1 := 0, ShrineAmount2 := 0
+    , ShrineItem1 := "None", ShrineItem2 := "None", ShrineItem3 := "None"
+    , PlanterField1 := "None", PlanterField2 := "None", PlanterField3 := "None"
+    , PlanterNectar1 := "None", PlanterNectar2 := "None", PlanterNectar3 := "None"
+    , PlanterEstPercent1 := 0, PlanterEstPercent2 := 0, PlanterEstPercent3 := 0
+    , LastPlanterField1 := "None", LastPlanterField2 := "None", LastPlanterField3 := "None"
+    , LastPlanterName1 := "None", LastPlanterName2 := "None", LastPlanterName3 := "None"
+    , LastPlanterNectar1 := "None", LastPlanterNectar2 := "None", LastPlanterNectar3 := "None"
+    , MPlanterHold1 := 0, MPlanterHold2 := 0, MPlanterHold3 := 0
+    , MPlanterSmoking1 := 0, MPlanterSmoking2 := 0, MPlanterSmoking3 := 0
+    , p1timer := 0, p2timer := 0, p3timer := 0
+    , BlenderIndex1 := "None", BlenderIndex2 := "None", BlenderIndex3 := "None"
+    , BlenderTime1 := 0, BlenderTime2 := 0, BlenderTime3 := 0
+    , ShrineIndex1 := "None", ShrineIndex2 := "None"
+    , LastShrineItem1 := "None", LastShrineItem2 := "None"
+    , s1timer := 0, s2timer := 0
+    , LastKing := 0, LastTunnel := 0, LastWolf := 0
+    , pkingtimer := 0, ptunneltimer := 0, pwolftimer := 0
 
 
 Loop {
