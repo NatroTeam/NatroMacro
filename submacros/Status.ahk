@@ -16,15 +16,14 @@ You should have received a copy of the license along with Natro Macro. If not, p
 #MaxThreads 255
 #Warn VarUnset, Off
 
-#Include "%A_ScriptDir%\..\lib"
-#Include "Gdip_All.ahk"
-#Include "Gdip_ImageSearch.ahk"
-#Include "JSON.ahk"
-#Include "DurationFromSeconds.ahk"
-#Include "Roblox.ahk"
-#Include "nowUnix.ahk"
-#Include "enum\EnumInt.ahk"
-#Include "enum\EnumStr.ahk"
+#Include "%A_ScriptDir%\..\lib\Gdip_All.ahk"
+#Include "%A_ScriptDir%\..\lib\Gdip_ImageSearch.ahk"
+#Include "%A_ScriptDir%\..\lib\JSON.ahk"
+#Include "%A_ScriptDir%\..\lib\DurationFromSeconds.ahk"
+#Include "%A_ScriptDir%\..\lib\Roblox.ahk"
+#Include "%A_ScriptDir%\..\lib\nowUnix.ahk"
+#Include "%A_ScriptDir%\..\lib\enum\EnumInt.ahk"
+#Include "%A_ScriptDir%\..\lib\enum\EnumStr.ahk"
 #Include "*i %A_ScriptDir%\..\settings\personal_commands.ahk"
 
 OnError (e, mode) => (mode = "Return") ? -1 : 0
@@ -176,7 +175,7 @@ timers.beesmas.values[8] := {varname: "LidArt", name: "Lid Art", cooldown: 28800
 timers.beesmas.values[9] := {varname: "GummyBeacon", name: "Gummy Beacon", cooldown: 28800, regex: "i)^(gummy)?beacon"}
 timers.beesmas.values[10] := {varname: "WinterMemoryMatch", name: "Winter Memory Match", cooldown: 14400, regex: "i)^winter(mm|memorymatch)?"}
 
-#Include "data\memorymatch.ahk"
+#Include "%A_ScriptDir%\..\lib\data\memorymatch.ahk"
 #Include "%A_ScriptDir%\..\nm_image_assets\gui\blendershrine_bitmaps.ahk"
 
 hBitmapsSBT := Map()
