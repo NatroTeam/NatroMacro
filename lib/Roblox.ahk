@@ -3,6 +3,9 @@
 * @author SP
 ***********************************************************/
 
+; Ensure global bitmaps variable is accessible
+global bitmaps
+
 ; Updates global variables windowX, windowY, windowWidth, windowHeight
 ; Optionally takes a known window handle to skip GetRobloxHWND call
 ; Returns: 1 = successful; 0 = TargetError

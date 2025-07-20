@@ -30,10 +30,41 @@ You should have received a copy of the license along with Natro Macro. If not, p
 ; Initialize unassigned variables to prevent errors.
 global windowX := 0, windowY := 0, windowWidth := 0, windowHeight := 0, offsetY := 0
 
+; Initialize command line parameters
+global NightLastDetected := 0, VBLastKilled := 0, StingerCheck := 0, StingerDailyBonusCheck := 0
+global AnnounceGuidingStar := 0, ReconnectInterval := 0, ReconnectHour := 0, ReconnectMin := 0
+global EmergencyBalloonPingCheck := 0, ConvertBalloon := 0, NightMemoryMatchCheck := 0, LastNightMemoryMatch := 0
+global MacroState := 0  ; 0=stopped, 1=paused, 2=running
+
+; Process command line arguments if provided
+if (A_Args.Length >= 4) {
+    NightLastDetected := A_Args[1]
+    VBLastKilled := A_Args[2] 
+    StingerCheck := A_Args[3]
+    StingerDailyBonusCheck := A_Args[4]
+}
+if (A_Args.Length >= 8) {
+    AnnounceGuidingStar := A_Args[5]
+    ReconnectInterval := A_Args[6]
+    ReconnectHour := A_Args[7]
+    ReconnectMin := A_Args[8]
+}
+if (A_Args.Length >= 12) {
+    EmergencyBalloonPingCheck := A_Args[9]
+    ConvertBalloon := A_Args[10]
+    NightMemoryMatchCheck := A_Args[11]
+    LastNightMemoryMatch := A_Args[12]
+}
+
 ; Ensure required functions and variables are defined.
 resetTime := LastState := LastConvertBalloon := nowUnix()
 pToken := Gdip_Startup()
 bitmaps := Map(), bitmaps.CaseSense := 0
+Shrine := Map(), Shrine.CaseSense := 0
+
+; Load bitmap files needed for image detection
+#Include "%A_ScriptDir%\..\nm_image_assets\offset\bitmaps.ahk"
+#Include "%A_ScriptDir%\..\nm_image_assets\general\bitmaps.ahk"
 
 ; Added initialization for variables and fixed include paths.
 

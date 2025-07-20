@@ -120,10 +120,11 @@ global regions := Map()
 global stat_regions := Map()
 global backpack_values := Map()
 global status_changes := Map()
-global start_time := A_TickCount
+global start_time := A_Now
 global stats := []
 global graph_regions := Map()
 global pBM := 0
+global start_honey := 0
 
 ; Field names for gather configuration
 global FieldName1 := ""
