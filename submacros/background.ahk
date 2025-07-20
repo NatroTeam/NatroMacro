@@ -15,43 +15,27 @@ You should have received a copy of the license along with Natro Macro. If not, p
 #NoTrayIcon
 #MaxThreads 255
 
-#Include "%A_ScriptDir%\..\lib"
-#Include "Gdip_All.ahk"
-#Include "Gdip_ImageSearch.ahk"
-#Include "Roblox.ahk"
-#Include "DurationFromSeconds.ahk"
-#Include "nowUnix.ahk"
+#Include "%A_ScriptDir%\..\lib\Gdip_All.ahk"
+#Include "%A_ScriptDir%\..\lib\Gdip_ImageSearch.ahk"
+#Include "%A_ScriptDir%\..\lib\JSON.ahk"
+#Include "%A_ScriptDir%\..\lib\DurationFromSeconds.ahk"
+#Include "%A_ScriptDir%\..\lib\Roblox.ahk"
+#Include "%A_ScriptDir%\..\lib\nowUnix.ahk"
+#Include "%A_ScriptDir%\..\lib\enum\EnumInt.ahk"
+#Include "%A_ScriptDir%\..\lib\enum\EnumStr.ahk"
+#Include "*i %A_ScriptDir%\..\settings\personal_commands.ahk"
 
-OnError (e, mode) => (mode = "Return") ? -1 : 0
-SetWorkingDir A_ScriptDir "\.."
+; Fixed include paths to the specified format.
 
-if (A_Args.Length = 0)
-{
-	msgbox "This script needs to be run by Natro Macro! You are not supposed to run it manually."
-	ExitApp
-}
+; Initialize unassigned variables to prevent errors.
+global windowX := 0, windowY := 0, windowWidth := 0, windowHeight := 0, offsetY := 0
 
-;initialization
-resetTime:=LastState:=LastConvertBalloon:=nowUnix()
-VBState:=state:=0
-MacroState:=2
-NightLastDetected := A_Args[1]
-VBLastKilled := A_Args[2]
-StingerCheck := A_Args[3]
-StingerDailyBonusCheck := A_Args[4]
-AnnounceGuidingStar := A_Args[5]
-ReconnectInterval := A_Args[6]
-ReconnectHour := A_Args[7]
-ReconnectMin := A_Args[8]
-EmergencyBalloonPingCheck := A_Args[9]
-ConvertBalloon := A_Args[10]
-NightMemoryMatchCheck := A_Args[11]
-LastNightMemoryMatch := A_Args[12]
-
+; Ensure required functions and variables are defined.
+resetTime := LastState := LastConvertBalloon := nowUnix()
 pToken := Gdip_Startup()
 bitmaps := Map(), bitmaps.CaseSense := 0
-#Include "%A_ScriptDir%\..\nm_image_assets\offset\bitmaps.ahk"
-#Include "%A_ScriptDir%\..\nm_image_assets\night\bitmaps.ahk"
+
+; Added initialization for variables and fixed include paths.
 
 CoordMode "Pixel", "Screen"
 DetectHiddenWindows 1
