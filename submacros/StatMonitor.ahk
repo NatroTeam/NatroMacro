@@ -14,12 +14,11 @@ You should have received a copy of the license along with Natro Macro. If not, p
 #SingleInstance Force
 #Requires AutoHotkey v2.0
 
-#Include "%A_ScriptDir%\..\lib"
-#Include "Gdip_All.ahk"
-#Include "Gdip_ImageSearch.ahk"
-#Include "Roblox.ahk"
-#Include "DurationFromSeconds.ahk"
-#Include "nowUnix.ahk"
+#Include "%A_ScriptDir%\..\lib\Gdip_All.ahk"
+#Include "%A_ScriptDir%\..\lib\Gdip_ImageSearch.ahk"
+#Include "%A_ScriptDir%\..\lib\Roblox.ahk"
+#Include "%A_ScriptDir%\..\lib\DurationFromSeconds.ahk"
+#Include "%A_ScriptDir%\..\lib\nowUnix.ahk"
 
 #Warn VarUnset, Off
 
@@ -107,6 +106,61 @@ bitmaps["pBMNatroLogo"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAFAAAA
 ; ▰▰▰▰▰▰▰▰▰▰▰▰
 ; INITIALISE VARIABLES
 ; ▰▰▰▰▰▰▰▰▰▰▰▰
+
+; GLOBAL VARIABLE DECLARATIONS
+; Initialize missing global variables to fix compilation errors
+global buff_colors := Map()
+global latest_boost := Map()
+global latest_winds := Map()
+global windowX := 0
+global windowY := 0
+global windowWidth := 0
+global windowHeight := 0
+global regions := Map()
+global stat_regions := Map()
+global backpack_values := Map()
+global status_changes := Map()
+global start_time := A_TickCount
+global stats := []
+global graph_regions := Map()
+global pBM := 0
+
+; Field names for gather configuration
+global FieldName1 := ""
+global FieldName2 := ""
+global FieldName3 := ""
+
+; Planter variables
+global PlanterName1 := ""
+global PlanterName2 := ""
+global PlanterName3 := ""
+global PlanterField1 := ""
+global PlanterField2 := ""
+global PlanterField3 := ""
+
+; Hotkey variables
+global HotkeyWhile2 := ""
+global HotkeyWhile3 := ""
+global HotkeyWhile4 := ""
+global HotkeyWhile5 := ""
+global HotkeyWhile6 := ""
+global HotkeyWhile7 := ""
+
+; Configuration variables
+global consumables := ""
+global PlanterMode := 0
+global MaxAllowedPlanters := 0
+global HiveSlot := ""
+global natro_version := ""
+global os_version := ""
+
+; Additional variables for statistics
+global Gather_time := 0
+global Convert_time := 0
+global Other_time := 0
+global honey_average := 0
+global honey_earned := 0
+global start_time_formatted := ""
 
 
 ; OCR TEST
@@ -1219,9 +1273,9 @@ SendHourlyReport()
 	time := DateAdd(DateAdd(A_Now, -A_Min, "Minutes"), -A_Sec, "Seconds")
 	session_time := DateDiff(time, start_time, "Seconds")
 
-	local hour_gather_time, hour_convert_time, hour_other_time
-		, hour_gather_percent, hour_convert_percent, hour_other_percent
-		, gather_percent, convert_percent, other_percent
+	local hour_gather_time := 0, hour_convert_time := 0, hour_other_time := 0
+		, hour_gather_percent := "0%", hour_convert_percent := "0%", hour_other_percent := "0%"
+		, gather_percent := "0%", convert_percent := "0%", other_percent := "0%"
 
 	status_list := ["Gather","Convert","Other"]
 	for i,j in status_list
@@ -1361,13 +1415,13 @@ SendHourlyReport()
 
 	planters := 0
 
-	local PlanterName1, PlanterName2, PlanterName3
-		, PlanterField1, PlanterField2, PlanterField3
-		, PlanterHarvestTime1, PlanterHarvestTime2, PlanterHarvestTime3
-		, PlanterNectar1, PlanterNectar2, PlanterNectar3
-		, PlanterEstPercent1, PlanterEstPercent2, PlanterEstPercent3
-		, MPlanterHold1, MPlanterHold2, MPlanterHold3
-		, MPlanterSmoking1, MPlanterSmoking2, MPlanterSmoking3
+	local PlanterName1 := "", PlanterName2 := "", PlanterName3 := ""
+		, PlanterField1 := "", PlanterField2 := "", PlanterField3 := ""
+		, PlanterHarvestTime1 := 0, PlanterHarvestTime2 := 0, PlanterHarvestTime3 := 0
+		, PlanterNectar1 := "", PlanterNectar2 := "", PlanterNectar3 := ""
+		, PlanterEstPercent1 := 0, PlanterEstPercent2 := 0, PlanterEstPercent3 := 0
+		, MPlanterHold1 := 0, MPlanterHold2 := 0, MPlanterHold3 := 0
+		, MPlanterSmoking1 := 0, MPlanterSmoking2 := 0, MPlanterSmoking3 := 0
 
 	Loop 3
 	{
