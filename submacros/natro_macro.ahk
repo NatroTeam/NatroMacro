@@ -249,7 +249,7 @@ nm_importPaths()
 				"stockings", "wreath", "feast", "gingerbread", "snowmachine", "candles", "samovar", "lidart", "gummybeacon", "rbpdelevel", ; beesmas
 				"honeylb", "honeystorm", "stickerstack", "stickerprinter", "normalmm", "megamm", "nightmm", "extrememm", "wintermm"], ; other
 		"gtf", ["bamboo", "blueflower", "cactus", "clover", "coconut", "dandelion", "mountaintop", "mushroom", "pepper", "pinetree", "pineapple", "pumpkin",
-				"rose", "spider", "strawberry", "stump", "sunflower"], ; go to field
+				"rose", "spider", "strawberry", "stump", "sunflower", "tradinghub"], ; go to field
 		"gtp", ["bamboo", "blueflower", "cactus", "clover", "coconut", "dandelion", "mountaintop", "mushroom", "pepper", "pinetree", "pineapple", "pumpkin",
 				"rose", "spider", "strawberry", "stump", "sunflower"], ; go to planter
 		"gtq", ["black", "brown", "bucko", "honey", "polar", "riley"], ; go to questgiver
@@ -1445,7 +1445,8 @@ FieldBooster:=Map("pine tree", {booster:"blue", stacks:1}
 	, "pumpkin", {booster:"mountain", stacks:1}
 	, "cactus", {booster:"mountain", stacks:1}
 	, "mountain top", {booster:"none", stacks:0}
-	, "coconut", {booster:"none", stacks:0})
+	, "coconut", {booster:"none", stacks:0}
+	, "trading hub", {booster:"none", stacks:0})
 
 ;Gumdrops carried me, they so pro
 CommandoChickHealth := Map(3, 150
@@ -1731,6 +1732,21 @@ nm_importFieldDefaults()
 		, "invertFB", 0
 		, "invertLR", 0)
 
+	FieldDefault["Trading Hub"] := Map("pattern", "Squares"
+		, "size", "M"
+		, "width", 3
+		, "camera", "None"
+		, "turns", 1
+		, "sprinkler", "Center"
+		, "distance", 5
+		, "percent", 95
+		, "gathertime", 12
+		, "convert", "Rejoin"
+		, "drift", 0
+		, "shiftlock", 0
+		, "invertFB", 0
+		, "invertLR", 0)
+
 	global StandardFieldDefault := ObjFullyClone(FieldDefault)
 
 	inipath := A_WorkingDir "\settings\field_config.ini"
@@ -1980,7 +1996,7 @@ HasPopStar:=0
 PopStarActive:=0
 PreviousAction:="None"
 CurrentAction:="Startup"
-fieldnamelist := ["Bamboo","Blue Flower","Cactus","Clover","Coconut","Dandelion","Mountain Top","Mushroom","Pepper","Pine Tree","Pineapple","Pumpkin","Rose","Spider","Strawberry","Stump","Sunflower"]
+fieldnamelist := ["Bamboo","Blue Flower","Cactus","Clover","Coconut","Dandelion","Mountain Top","Mushroom","Pepper","Pine Tree","Pineapple","Pumpkin","Rose","Spider","Strawberry","Stump","Sunflower","Trading Hub"]
 hotbarwhilelist := ["Never","Always","At Hive","Gathering","Attacking","Microconverter","Whirligig","Enzymes","GatherStart","Snowflake"]
 sprinklerImages := ["saturator"]
 ReconnectDelay:=0
@@ -15361,7 +15377,7 @@ nm_GoGather(){
 			redBoosterFields		:=Map("RoseBoosterCheck","Rose", "StrawberryBoosterCheck","Strawberry", "MushroomBoosterCheck","Mushroom", "PepperBoosterCheck","Pepper")
 			mountainBoosterfields	:=Map("CactusBoosterCheck","Cactus", "PumpkinBoosterCheck","Pumpkin", "PineappleBoosterCheck","Pineapple", "SpiderBoosterCheck","Spider", "CloverBoosterCheck","Clover", "DandelionBoosterCheck","Dandelion", "SunflowerBoosterCheck","Sunflower")
 			coconutBoosterfields	:=Map("CoconutBoosterCheck","Coconut")
-			otherFields				:=["Mountain Top"]
+			otherFields				:=["Mountain Top", "Trading Hub"]
 
 			loop 1 {
 				for i, location in ["blue", "mountain", "red", "coconut"] {
@@ -15558,7 +15574,7 @@ nm_GoGather(){
 		blueBoosterFields:=["Pine Tree", "Bamboo", "Blue Flower", "Stump"]
 		redBoosterFields:=["Rose", "Strawberry", "Mushroom", "Pepper"]
 		mountainBoosterfields:=["Cactus", "Pumpkin", "Pineapple", "Spider", "Clover", "Dandelion", "Sunflower"]
-		otherFields:=["Coconut", "Mountain Top"]
+		otherFields:=["Coconut", "Mountain Top", "Trading Hub"]
 		loop 1 {
 			GatherFieldBoosted:=0
 			;blue
