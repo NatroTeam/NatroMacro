@@ -17478,7 +17478,7 @@ nm_ViciousCheck(){
 			IniWrite VBLastKilled, "settings\nm_config.ini", "Collect", "VBLastKilled"
 		}
 		;check if VB was already killed by someone else
-		if(nm_imgSearch("VBdeadSymbol2.png",1, "highright")[1]=0){
+		if(nm_imgSearch("VBdeadSymbol2.png",50, "highright")[1]=0){
 			VBState:=0
 			VBLastKilled:=nowUnix()
 			;send VBState to background.ahk
@@ -17492,7 +17492,7 @@ nm_ViciousCheck(){
 	if(VBState=2){
 	;temp:=(nowUnix()-VBLastKilled)
 		if((nowUnix()-VBLastKilled)<(600)) { ;it has been less than 10 minutes since VB was found
-			if(nm_imgSearch("VBdeadSymbol2.png",1, "highright")[1]=0){
+			if(nm_imgSearch("VBdeadSymbol2.png",50, "highright")[1]=0){
 				VBState:=0
 				VBLastKilled:=nowUnix()
 				;send VBState to background.ahk
