@@ -364,6 +364,9 @@ nm_importConfig()
 		, "DiscordCheck", 0
 		, "Webhook", ""
 		, "BotToken", ""
+		, "TeleMode", 0 ; 0 = Disabled ; 1 = Enabled
+		, "TeleBotToken", ""
+		, "TeleChatID", ""
 		, "MainChannelCheck", 1
 		, "MainChannelID", ""
 		, "ReportChannelCheck", 1
@@ -2018,7 +2021,7 @@ Run
 '"' WebhookEasterEgg '" "' ssCheck '" "' ssDebugging '" "' CriticalSSCheck '" "' AmuletSSCheck '" "' MachineSSCheck '" "' BalloonSSCheck '" "' ViciousSSCheck '" '
 '"' DeathSSCheck '" "' PlanterSSCheck '" "' HoneySSCheck '" "' criticalCheck '" "' discordUID '" "' CriticalErrorPingCheck '" "' DisconnectPingCheck '" "' GameFrozenPingCheck '" '
 '"' PhantomPingCheck '" "' UnexpectedDeathPingCheck '" "' EmergencyBalloonPingCheck '" "' commandPrefix '" "' NightAnnouncementCheck '" "' NightAnnouncementName '" '
-'"' NightAnnouncementPingID '" "' NightAnnouncementWebhook '" "' PrivServer '" "' DebugLogEnabled '" "' MonsterRespawnTime '" "' HoneyUpdateSSCheck '"'
+'"' NightAnnouncementPingID '" "' NightAnnouncementWebhook '" "' PrivServer '" "' DebugLogEnabled '" "' MonsterRespawnTime '" "' HoneyUpdateSSCheck '" "' TeleMode '" "' TeleBotToken '" "' TeleChatID '"'
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2523,7 +2526,7 @@ TabCtrl.UseTab("Status")
 MainGui.SetFont("w700")
 MainGui.Add("GroupBox", "x5 y23 w240 h210", "Status Log")
 MainGui.Add("GroupBox", "x250 y23 w245 h160", "Stats")
-MainGui.Add("GroupBox", "x250 y185 w245 h48", "Discord Integration")
+MainGui.Add("GroupBox", "x250 y185 w245 h48", "Integration")
 MainGui.SetFont("s8 cDefault Norm", "Tahoma")
 
 MainGui.Add("CheckBox", "x85 y23 Disabled vStatusLogReverse Checked" StatusLogReverse, "Reverse Order").OnEvent("Click", nm_StatusLogReverseCheck)
@@ -2537,7 +2540,8 @@ MainGui.SetFont("s8 cDefault Norm", "Tahoma")
 MainGui.Add("Text", "x255 y55 w119 h120 -Wrap vTotalStats")
 MainGui.Add("Text", "x375 y55 w119 h120 -Wrap vSessionStats")
 MainGui.Add("Button", "x290 y39 w50 h15 vResetTotalStats Disabled", "Reset").OnEvent("Click", nm_ResetTotalStats)
-MainGui.Add("Button", "x265 y202 w215 h24 vWebhookGUI Disabled", "Change Discord Settings").OnEvent("Click", nm_WebhookGUI)
+MainGui.Add("Button", "x318 y202 w161 h24 vWebhookGUI Disabled", "Change Discord").OnEvent("Click", nm_WebhookGUI)
+MainGui.Add("Button", "x265 y202 w53 h24 vTeleWebhookGUI Disabled", "Telegram").OnEvent("Click", nm_TeleGUI)
 nm_setStats()
 SetLoadingProgress(28)
 
@@ -3928,11 +3932,13 @@ nm_TabStatusLock(){
 	MainGui["StatusLogReverse"].Enabled := 0
 	MainGui["ResetTotalStats"].Enabled := 0
 	MainGui["WebhookGUI"].Enabled := 0
+	MainGui["TeleWebhookGUI"].Enabled := 0
 }
 nm_TabStatusUnLock(){
 	MainGui["StatusLogReverse"].Enabled := 1
 	MainGui["ResetTotalStats"].Enabled := 1
 	MainGui["WebhookGUI"].Enabled := 1
+	MainGui["TeleWebhookGUI"].Enabled := 1
 }
 nm_TabSettingsLock(){
 	global
@@ -7190,6 +7196,38 @@ nm_WebhookGUI(*){
 
 	return (WGUIPID := exec.ProcessID)
 }
+
+nm_TeleGUI(*) {
+    TeleGUI := Gui("", "Change Telegram Settings")
+    TeleGUI.BackColor := "b0b0b0"
+    TeleGUI.MarginX := 10
+    TeleGUI.MarginY := 10
+    TeleGUI.SetFont("s9", "Segoe UI")
+
+    TeleGUI.Add("GroupBox", "w360 h120", "Telegram Settings")
+
+	BtnText := (TeleMode = 1 ? "Disable" : "Enable")
+    ToggleBtn := TeleGUI.Add("Button", "x20 y40 w80 h25 vTeleBtn", BtnText)
+
+    ShortBox := TeleGUI.Add("Edit", "x110 y40 w220 h25 vShortBox", "Chat ID")
+    LongBox  := TeleGUI.Add("Edit", "x20 y80 w310 h25 vLongBox", "Bot Token")
+
+	ToggleTeleMode() {
+		TeleMode := !TeleMode
+		ToggleBtn.Text := (TeleMode = 1 ? "Disable" : "Enable")
+	}
+	ToggleBtn.OnEvent("Click", ToggleTeleMode)
+
+    ShortBox.OnEvent("Focus", (*) => (ShortBox.Text = "Chat ID" ? ShortBox.Text := "" : 0))
+    ShortBox.OnEvent("LoseFocus", (*) => (ShortBox.Text = "" ? ShortBox.Text := "Chat ID" : 0))
+
+    LongBox.OnEvent("Focus", (*) => (LongBox.Text = "Bot Token" ? LongBox.Text := "" : 0))
+    LongBox.OnEvent("LoseFocus", (*) => (LongBox.Text = "" ? LongBox.Text := "Bot Token" : 0))
+
+    TeleGUI.Show("w380 h220")
+}
+
+
 
 ; SETTINGS TAB
 ; ------------------------

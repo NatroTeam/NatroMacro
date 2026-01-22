@@ -83,6 +83,10 @@ MonsterRespawnTime := A_Args[35]
 
 HoneyUpdateSSCheck := A_Args[36]
 
+TeleMode := A_Args[37]
+TeleBotToken := A_Args[38]
+TeleChatID := A_Args[39]
+
 pToken := Gdip_Startup()
 OnExit(ExitFunc)
 OnMessage(0x004A, nm_sendPostData, 255)
@@ -91,6 +95,7 @@ OnMessage(0x5552, nm_setGlobalInt, 255)
 OnMessage(0x5553, nm_setGlobalStr, 255)
 OnMessage(0x5556, nm_sendHeartbeat)
 OnMessage(0x5559, nm_sendItemPicture)
+OnMessage(0x5560, nm_updateTele)
 
 discord.SendEmbed("Connected to Discord!", 5066239)
 
@@ -2442,12 +2447,79 @@ nm_command(command)
 	}
 }
 
+QueryString(obj) {
+    qs := ""
+    
+    if (obj is Map) {
+        for key, value in obj {
+            qs .= (qs != "" ? "&" : "") . key . "=" . value
+        }
+    }
+    else if (obj is Object) {
+        for key in obj.OwnProps() {
+            value := obj.%key%
+            qs .= (qs != "" ? "&" : "") . key . "=" . value
+        }
+    }
+    else {
+        throw TypeError("Expected Map or Object, got " . Type(obj))
+    }
+    
+    return qs
+}
+
+URIEncode(Url, Flags := 0x000C3000) {
+	Local CC := 4096, Esc := "", Result := ""
+	Loop
+		VarSetStrCapacity(&Esc, CC), Result := DllCall("Shlwapi.dll\UrlEscapeW", "Str", Url, "Str", &Esc, "UIntP", &CC, "UInt", Flags, "UInt")
+	Until Result != 0x80004003 ; E_POINTER
+	Return Esc
+}
+
+nm_updateTele(*) {
+	global TeleMode
+	
+}
+
 class discord
 {
 	static baseURL := "https://discord.com/api/v10/"
+	static baseTele := "https://api.telegram.org/bot" TeleBotToken "/"
+
+	static Tele_sendEmbed(message, color, content, pBitmap, channel, replyID)
+	{
+		; TODO: add color support for tele
+		wr := ComObject("WinHttp.WinHttpRequest.5.1")
+		wr.Option[9] := 2720
+
+		url := discord.baseTele "sendMessage?"
+
+		text := "<b>Title:</b> " content "`n<code>" message "</code>"
+		text := URIEncode(text)
+
+		qs_args := {}
+		qs_args.text := text
+		qs_args.chat_id := TeleChatID
+		qs_args.parse_mode := "HTML"
+		url .= QueryString(qs_args)
+
+		wr.Open("POST", url, true)
+		wr.SetTimeouts(0, 60000, 120000, 30000)
+		wr.Send()
+		wr.WaitForResponse()
+
+		if (wr.Status != 200) {
+			throw Error("HTTP Error: " wr.Status " - " wr.StatusText)
+		}
+
+		return wr.ResponseText
+	}
 
 	static SendEmbed(message, color:=3223350, content:="", pBitmap:=0, channel:="", replyID:=0)
 	{
+		if (TeleMode = 1) {
+			return discord.Tele_sendEmbed(message, color, content, pBitmap, channel, replyID)
+		}
 		payload_json :=
 		(
 		'
