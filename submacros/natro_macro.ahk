@@ -2496,7 +2496,7 @@ MainGui.Add("GroupBox", "x335 y168 w160 h62", "Bugs and Suggestions")
 MainGui.SetFont("s9 cDefault Norm", "Tahoma")
 ;hive tools
 MainGui.Add("Button", "x10 y40 w150 h40 vBasicEggHatcherButton Disabled", "Gifted Basic Bee`nAuto-Hatcher").OnEvent("Click", nm_BasicEggHatcher)
-MainGui.Add("Button", "x10 y82 w150 h40 vBitterberryFeederButton Disabled", "Bitterberry`nAuto-Feeder").OnEvent("Click", nm_BitterberryFeeder)
+MainGui.Add("Button", "x10 y82 w150 h40 vBitterberryFeederButton Disabled", "Bitterberry`nAuto-Mutator").OnEvent("Click", nm_BitterberryFeeder)
 MainGui.Add("Button", "x10 y124 w150 h40 vAutoMutatorButton Disabled", "Auto-Jelly").OnEvent("Click", blc_mutations)
 ;other tools
 MainGui.Add("Button", "x10 y184 w150 h42 vGenerateBeeListButton Disabled", "Export Hive Bee List`n(for Hive Builder)").OnEvent("Click", nm_GenerateBeeList)
@@ -7635,7 +7635,7 @@ nm_BitterberryFeeder(*)
 {
 	if !GetRobloxHWND()
 	{
-		MsgBox "You must have Bee Swarm Simulator open to use this!", "Bitterberry Auto-Feeder", 0x40030 " T20"
+		MsgBox "You must have Bee Swarm Simulator open to use this!", "Bitterberry Auto-Mutator", 0x40030 " T20"
 		return
 	}
 
