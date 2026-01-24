@@ -3234,6 +3234,8 @@ SetTimer Background, 2000
 if (A_Args.Has(1) && (A_Args[1] = 1))
 	SetTimer start, -1000
 
+
+ForceLabelStart := false
 return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -21741,7 +21743,7 @@ start(*){
 				return
 		}
 	}
-	if !ForceStart {
+	if !ForceStart && !ForceLabelStart {
 		;Field drift compensation warning
 		Loop 3 {
 			;if gathering in a field with FDC on and without supreme set in settings, warn user
@@ -22116,8 +22118,10 @@ nm_ForceLabel(wParam, *){
 	{
 		case 1:
 		if (MainGui["StartButton"].Enabled = 1)
+		{
+			global ForceLabelStart := true
 			SetTimer start, -500
-
+		}
 		case 2:
 		nm_pause()
 
