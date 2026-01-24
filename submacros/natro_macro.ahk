@@ -7797,8 +7797,40 @@ nm_BitterberryFeeder(*)
 	}
 	Sleep 250
 
+	; Helper function to feed one neonberry to maintain radioactive status
+	FeedNeonberry() {
+		global bitmaps, hwnd, windowX, windowY, windowWidth, windowHeight, offsetY, beeX, beeY
+		if ((neoPos := nm_InventorySearch("neonberry", "down", , , , 40)) = 0) {
+			MsgBox "You ran out of Neonberries!", "Bitterberry Auto-Mutator", 0x40010
+			return false
+		}
+		GetRobloxClientPos(hwnd)
+		SendEvent "{Click " windowX+neoPos[1] " " windowY+neoPos[2] " 0}"
+		Send "{Click Down}"
+		Sleep 100
+		SendEvent "{Click " beeX " " beeY " 0}"
+		Sleep 100
+		Send "{Click Up}"
+		Loop 10 {
+			Sleep 100
+			pBMScreen := Gdip_BitmapFromScreen(windowX+(54*windowWidth)//100-300 "|" windowY+offsetY+(46*windowHeight)//100-59 "|250|100")
+			if (Gdip_ImageSearch(pBMScreen, bitmaps["feed"], &feedPos, , , , , 2, , 2) = 1) {
+				Gdip_DisposeImage(pBMScreen)
+				SendEvent "{Click " windowX+(54*windowWidth)//100-300+SubStr(feedPos, 1, InStr(feedPos, ",")-1)+140 " " windowY+offsetY+(46*windowHeight)//100-59+SubStr(feedPos, InStr(feedPos, ",")+1)+5 "}"
+				Sleep 100
+				SendEvent "{Text}1"
+				Sleep 100
+				SendEvent "{Click " windowX+(54*windowWidth)//100-300+SubStr(feedPos, 1, InStr(feedPos, ",")-1) " " windowY+offsetY+(46*windowHeight)//100-59+SubStr(feedPos, InStr(feedPos, ",")+1) "}"
+				Sleep 500
+				return true
+			}
+			Gdip_DisposeImage(pBMScreen)
+		}
+		return false
+	}
+
 	; Feed a neonberry at the beginning to ensure radioactive status
-	nm_Feed("neonberry")
+	FeedNeonberry()
 	lastNeonberryTime := A_TickCount
 
 	Loop
@@ -7887,7 +7919,7 @@ nm_BitterberryFeeder(*)
 				; Check if 10 minutes have passed without a match - feed neonberry to maintain radioactive
 				if (A_TickCount - lastNeonberryTime >= 600000) {
 					Sleep 500
-					nm_Feed("neonberry")
+					FeedNeonberry()
 					lastNeonberryTime := A_TickCount
 				}
 			}
@@ -7896,7 +7928,7 @@ nm_BitterberryFeeder(*)
 			Gdip_DisposeImage(pBMScreen)
 			; Check if 10 minutes have passed without a match - feed neonberry to maintain radioactive
 			if (A_TickCount - lastNeonberryTime >= 600000) {
-				nm_Feed("neonberry")
+				FeedNeonberry()
 				lastNeonberryTime := A_TickCount
 			}
 		}
