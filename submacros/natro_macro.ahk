@@ -7667,11 +7667,17 @@ nm_BitterberryFeeder(*)
 	bitmaps["greensuccess"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAA4AAAALCAYAAABPhbxiAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAhdEVYdENyZWF0aW9uIFRpbWUAMjAyMzowMzowOCAxNToyMzo1N/c+ABwAAAAdSURBVChTY3T+H/6fgQzABKVJBqMa8YDhr5GBAQBwxAKu5PiUjAAAAA5lWElmTU0AKgAAAAgAAAAAAAAA0lOTAAAAAElFTkSuQmCC")
 	#Include "%A_ScriptDir%\nm_image_assets\offset\bitmaps.ahk"
 
-	; Mutation triggers for Movespeed and Ability (same as blc_mutations)
-	mutationTriggers := [
-		{name:"Ability", triggers:["rate", "abil", "ity"]},
-		{name:"Movespeed", triggers:["movespeed", "speed", "move"]}
-	]
+	; All available mutation types with their OCR triggers
+	allMutations := Map(
+		"Ability", ["rate", "abil", "ity"],
+		"Gather", ["gather", "gath"],
+		"Convert", ["convert", "conv"],
+		"Energy", ["energy", "ener"],
+		"Movespeed", ["movespeed", "speed", "move"],
+		"Crit", ["crit", "critical"],
+		"Instant", ["instant", "inst"],
+		"Attack", ["attack", "atk"]
+	)
 
 	; Check OCR availability
 	ocr_enabled := 1
@@ -7707,8 +7713,55 @@ nm_BitterberryFeeder(*)
 			}
 	}
 
-	if (MsgBox("BITTERBERRY AUTO-MUTATOR v0.3 by fermentingpotato#9567, anniespony#8135``nMake sure BEE SLOT TO MUTATE is always visible``nDO NOT MOVE THE SCREEN OR RESIZE WINDOW FROM NOW ON.``n``n" (ocr_enabled ? "Mutation detection ENABLED: Will auto-feed until Movespeed or Ability mutation is found." : "Mutation detection DISABLED: Will prompt for every successful mutation."), "Bitterberry Auto-Mutator", 0x40001) = "Cancel")
+	; Create mutation selection GUI
+	MutationGui := Gui("+AlwaysOnTop -MaximizeBox -MinimizeBox", "Bitterberry Auto-Mutator v0.3")
+	MutationGui.SetFont("s9", "Tahoma")
+	MutationGui.Add("Text", "x10 y10 w340", "by fermentingpotato#9567, anniespony#8135 (v0.2)``nMake sure BEE SLOT TO MUTATE is always visible``nDO NOT MOVE THE SCREEN OR RESIZE WINDOW FROM NOW ON.")
+	
+	if (ocr_enabled) {
+		MutationGui.Add("Text", "x10 y+15 w340 cGreen", "Mutation detection ENABLED")
+		MutationGui.Add("Text", "x10 y+5 w340", "Select which mutation types to stop on:")
+		
+		; Checkboxes for mutation types (2 columns)
+		MutationGui.Add("CheckBox", "x20 y+10 w100 vAbilityCheck Checked", "Ability")
+		MutationGui.Add("CheckBox", "x180 yp w100 vGatherCheck", "Gather")
+		MutationGui.Add("CheckBox", "x20 y+5 w100 vConvertCheck", "Convert")
+		MutationGui.Add("CheckBox", "x180 yp w100 vEnergyCheck", "Energy")
+		MutationGui.Add("CheckBox", "x20 y+5 w100 vMovespeedCheck Checked", "Movespeed")
+		MutationGui.Add("CheckBox", "x180 yp w100 vCritCheck", "Crit")
+		MutationGui.Add("CheckBox", "x20 y+5 w100 vInstantCheck", "Instant")
+		MutationGui.Add("CheckBox", "x180 yp w100 vAttackCheck", "Attack")
+	} else {
+		MutationGui.Add("Text", "x10 y+15 w340 cRed", "Mutation detection DISABLED: Will prompt for every successful mutation.")
+	}
+	
+	StartMutator(*) {
+		MutationGui.Hide()
+	}
+	CancelMutator(*) {
 		ExitApp
+	}
+	
+	MutationGui.Add("Button", "x70 y+20 w100 h30 vStartBtn Default", "Start").OnEvent("Click", StartMutator)
+	MutationGui.Add("Button", "x180 yp w100 h30", "Cancel").OnEvent("Click", CancelMutator)
+	MutationGui.OnEvent("Close", CancelMutator)
+	MutationGui.Show("w360")
+	WinWaitClose(MutationGui.Hwnd)
+	
+	; Build mutationTriggers based on selected checkboxes
+	mutationTriggers := []
+	if (ocr_enabled) {
+		for name, triggers in allMutations {
+			try {
+				if (MutationGui[name "Check"].Value = 1)
+					mutationTriggers.Push({name: name, triggers: triggers})
+			}
+		}
+		if (mutationTriggers.Length = 0) {
+			MsgBox "You must select at least one mutation type!``nStopping Feeder!", "Bitterberry Auto-Mutator", 0x40010
+			ExitApp
+		}
+	}
 
 	bitterberrynos := InputBox("Enter the amount of bitterberry used each time", "How many bitterberry?", "w320 h180 T60").Value
 	if IsInteger(bitterberrynos) {
@@ -7753,43 +7806,8 @@ nm_BitterberryFeeder(*)
 	}
 	Sleep 250
 
-	; Helper function to feed one neonberry to maintain radioactive status
-	FeedNeonberry() {
-		global bitmaps, hwnd, windowX, windowY, windowWidth, windowHeight, offsetY, beeX, beeY
-		if ((neoPos := nm_InventorySearch("neonberry", "down", , , , 40)) = 0)
-		{
-			MsgBox "You ran out of Neonberries!", "Bitterberry Auto-Feeder v0.2", 0x40010
-			return false
-		}
-		GetRobloxClientPos(hwnd)
-		SendEvent "{Click " windowX+neoPos[1] " " windowY+neoPos[2] " 0}"
-		Send "{Click Down}"
-		Sleep 100
-		SendEvent "{Click " beeX " " beeY " 0}"
-		Sleep 100
-		Send "{Click Up}"
-		Loop 10
-		{
-			Sleep 100
-			pBMScreen := Gdip_BitmapFromScreen(windowX+(54*windowWidth)//100-300 "|" windowY+offsetY+(46*windowHeight)//100-59 "|250|100")
-			if (Gdip_ImageSearch(pBMScreen, bitmaps["feed"], &feedPos, , , , , 2, , 2) = 1)
-			{
-				Gdip_DisposeImage(pBMScreen)
-				SendEvent "{Click " windowX+(54*windowWidth)//100-300+SubStr(feedPos, 1, InStr(feedPos, ",")-1)+140 " " windowY+offsetY+(46*windowHeight)//100-59+SubStr(feedPos, InStr(feedPos, ",")+1)+5 "}" ; Click Number
-				Sleep 100
-				SendEvent "{Text}1"
-				Sleep 100
-				SendEvent "{Click " windowX+(54*windowWidth)//100-300+SubStr(feedPos, 1, InStr(feedPos, ",")-1) " " windowY+offsetY+(46*windowHeight)//100-59+SubStr(feedPos, InStr(feedPos, ",")+1) "}" ; Click Feed
-				Sleep 500
-				return true
-			}
-			Gdip_DisposeImage(pBMScreen)
-		}
-		return false
-	}
-
 	; Feed a neonberry at the beginning to ensure radioactive status
-	FeedNeonberry()
+	nm_Feed("neonberry")
 	lastNeonberryTime := A_TickCount
 
 	Loop
@@ -7878,7 +7896,7 @@ nm_BitterberryFeeder(*)
 				; Check if 10 minutes have passed without a match - feed neonberry to maintain radioactive
 				if (A_TickCount - lastNeonberryTime >= 600000) {
 					Sleep 500
-					FeedNeonberry()
+					nm_Feed("neonberry")
 					lastNeonberryTime := A_TickCount
 				}
 			}
@@ -7887,7 +7905,7 @@ nm_BitterberryFeeder(*)
 			Gdip_DisposeImage(pBMScreen)
 			; Check if 10 minutes have passed without a match - feed neonberry to maintain radioactive
 			if (A_TickCount - lastNeonberryTime >= 600000) {
-				FeedNeonberry()
+				nm_Feed("neonberry")
 				lastNeonberryTime := A_TickCount
 			}
 		}
