@@ -7668,16 +7668,7 @@ nm_BitterberryFeeder(*)
 	#Include "%A_ScriptDir%\nm_image_assets\offset\bitmaps.ahk"
 
 	; All available mutation types with their OCR triggers
-	allMutations := Map(
-		"Ability", ["rate", "abil", "ity"],
-		"Gather", ["gather", "gath"],
-		"Convert", ["convert", "conv"],
-		"Energy", ["energy", "ener"],
-		"Movespeed", ["movespeed", "speed", "move"],
-		"Crit", ["crit", "critical"],
-		"Instant", ["instant", "inst"],
-		"Attack", ["attack", "atk"]
-	)
+	allMutations := Map("Ability", ["rate", "abil", "ity"], "Gather", ["gather", "gath"], "Convert", ["convert", "conv"], "Energy", ["energy", "ener"], "Movespeed", ["movespeed", "speed", "move"], "Crit", ["crit", "critical"], "Instant", ["instant", "inst"], "Attack", ["attack", "atk"])
 
 	; Check OCR availability
 	ocr_enabled := 1
