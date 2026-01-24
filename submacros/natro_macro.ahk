@@ -7662,7 +7662,6 @@ nm_BitterberryFeeder(*)
 	bitmaps["beemenu"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAACsAAAAsAQAAAADUI3zVAAAAAnRSTlMAAHaTzTgAAACaSURBVHjadc5BDgIhDAXQT9U4y1m6G24inkyO4lGaOUm9AW7MzMY6HyQxJjaBFwotxdW3UAEjNhCc+/1z+mXGmgCH22Ti/S5bIRoXSMgtmTASBeOFsx6td/lDIgGIJ8Czl6kVRAguGL4mW9NcC8zJUjRvlCXXZH3kxiUYW+sBgewhRPq3exIwEOhYiZHl/nS3HdIBePQBlfvtDUnsNfflK46tAAAAAElFTkSuQmCC")
 	bitmaps["item"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAAMAAAAUAQMAAAByNRXfAAAAA1BMVEXU3dp/aiCuAAAAC0lEQVR42mMgEgAAACgAAU1752oAAAAASUVORK5CYII=")
 	bitmaps["bitterberry"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAG8AAAAbCAMAAABFqCGFAAAB11BMVEUbKjUcKzYdLDceLDceLTgfLjkgLzohMDoiMDsjMTwkMj0kMz0lND4mND8oNkApN0EqOEMrOUMsOkQtO0UuPEYvPUcwPkgyQEkzQUo0QUs1Q0w3RU44RU85Rk86SFE8SVM9SlM+S1Q/TFVATVZCT1hDUFlEUVlFUVpGU1xHVFxJVV5KVl9LV19NWWJPW2NRXWVSXmZUYGhVYWhWYWlXYmpXY2tbZm5cZ29daG9eanFibXRibnVkb3ZlcHdoc3ptd35ueX9veoBweoFzfYN0foR1f4V2gIZ4god6hIp7hYt+h41/iY6Aio+FjpSGj5SHkJWKk5iLlJmMlZqNlpqOl5uQmJ2QmZ2Rmp6Sm5+UnKCVnaGZoaWbo6ecpKigp6uhqKyjq66mrbCnrrGnr7Kor7OrsrWss7avtrmwt7myuLu2vL+4v8G5wMK6wMO8wsS+xMa/xcfAxsjBx8nDyMrEyszGzM3HzM7Izc/Jzs/Jz9DK0NHN0tPP1NXQ1dbR1tfS19jV2drX3NzY3N3Z3d7b4ODc4OHe4uLf4+Pg5OTg5eXi5ubj5+fm6urn6+vo7Ovp7ezq7e3r7u7r7+7s8O/t8fDu8fHv8vHw8/Lx9PPx9fTy9fTz9vX09/ZX5XClAAACKElEQVR42u3W61NMYQDH8W9iu7uEhAhJURIphYRci0QiFXKJXAttQnIPXdVWK/3+WHvK6dnZfaY3O443fm9+L34zz2fmzDPnHORt+O/9BS8HJ6mlL2Xys6XJlCVTLbUxepDQJaln9b5ZSXs4J7dsKeZIzB45kvzpRY6XHYLcsiU/Ju+YpOHD8NEdPPDUD8+kL52dwcW9K2kF3cazzqYX8d5Ar9QMQ7qMk/o/JU3WZfnWnx2RVEpWPLSFvJ1FKekVvZIss9v10C9JfXAy0hsswTdu937tx0nepHMgkDCifHPFLLPbn5dQI0k18NpyX05r3ot8nq2sejz+dCVNcwfeDAwq5CW1TzzPZLttNl3CmqA0k0G+or3kd7J7uTRIqqNw7oFJcrwKSbfhvWU2fRfuSw+h1eKxdsjqBeKYT6pz0G4Z7yt0WGbTkys4IFWSPKpwr1rSjzPQbPW+4SYY4U1Dm3V2WyeIHxhOpEpRnoJJnLJ6E3BJ84nwQlS7bTaeHxquwwuLN5XIeRmvVgu1iTJJ09FeB7wys83TNjYXslXR3mg1+Be8XeTe8bt1gbgbga6Msu5wL+lWoG8L62ZkZpt3FeCa/f15VAteLfDJrYkdOFn+NtybS9w9ycw27/tS8A1ZvGXZjTPGGzuYvNfUaM0GX2bVB5mDqgoOFaWkFT+SrLPxVA6VXn5vG+GJl14eG2c99Hrgojz0jhM/4KE3lkK5PPRa4cG/+x/8DdlCsT+3EwaSAAAAAElFTkSuQmCC")
-	bitmaps["neonberry"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAG8AAAAbCAMAAABFqCGFAAAB4FBMVEUhRyAiSCEiSCAoTiROdz1llE1klUxyolZyqFN0qlV2q1d6q1x8rl19sV2AsWF/s1+CtGGCtGCGt2WHuWWHumWJvGeLvGiLvGeLvWiOv2qPwGuPwWyRwm2Tw26SxG6TxW6Uxm+Wx3GXyHKeznqeznmj0X+k0YKj0n+o1Iio1Iep1Yaq1Yqp1omv246y25Ky3JC435m64Zu84Z294qG94p++5J/C5qXH6avG6qnH6qvJ66zK66/L7LHN7LPV7b/O7rTR8LbR8LfT8LrW877X87/Z88HY9L/h9M7Z9cDc9sXf+Mng+Mnh+Mzl+dHk+s/o+tPp+9bt/dvw/d/0/uT1/+VS3WjiAAAAc0lEQVR42mPg4BWRVnMPCQkJYuDkF5XXsAsGMbkExRW0jW1dfQMZuATEFHRMbFx8AhjYeMQVNI2snb38GRhZhORUDcydPP0YmJj5ZJT1zOzdvBkYmLgllbQMLR09gEx2CVkVXVMrBwYmJlZhKUV1fVMLALmVEDMRNW5OAAAAAElFTkSuQmCC")
 	bitmaps["feed"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAADwAAAAUAQMAAADrzcxqAAAABlBMVEUAAAD3//lCqWtQAAAAAXRSTlMAQObYZgAAAE1JREFUeNqNzbENwCAMRNHfpYxLSo/ACB4pG8SjMkImIAiwRIe46lX3+QtzAcE5wQ1cHeKQHhw10EwFwISK6YAvvCVg7LBamuM5fRGFBk/MFx8u1mbtAAAAAElFTkSuQmCC")
 	bitmaps["greensuccess"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAAA4AAAALCAYAAABPhbxiAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAhdEVYdENyZWF0aW9uIFRpbWUAMjAyMzowMzowOCAxNToyMzo1N/c+ABwAAAAdSURBVChTY3T+H/6fgQzABKVJBqMa8YDhr5GBAQBwxAKu5PiUjAAAAA5lWElmTU0AKgAAAAgAAAAAAAAA0lOTAAAAAElFTkSuQmCC")
 	#Include "%A_ScriptDir%\nm_image_assets\offset\bitmaps.ahk"
@@ -7797,42 +7796,6 @@ nm_BitterberryFeeder(*)
 	}
 	Sleep 250
 
-	; Helper function to feed one neonberry to maintain radioactive status
-	FeedNeonberry() {
-		global bitmaps, hwnd, windowX, windowY, windowWidth, windowHeight, offsetY, beeX, beeY
-		if ((neoPos := nm_InventorySearch("neonberry", "down", , , , 40)) = 0) {
-			MsgBox "You ran out of Neonberries!", "Bitterberry Auto-Mutator", 0x40010
-			return false
-		}
-		GetRobloxClientPos(hwnd)
-		SendEvent "{Click " windowX+neoPos[1] " " windowY+neoPos[2] " 0}"
-		Send "{Click Down}"
-		Sleep 100
-		SendEvent "{Click " beeX " " beeY " 0}"
-		Sleep 100
-		Send "{Click Up}"
-		Loop 10 {
-			Sleep 100
-			pBMScreen := Gdip_BitmapFromScreen(windowX+(54*windowWidth)//100-300 "|" windowY+offsetY+(46*windowHeight)//100-59 "|250|100")
-			if (Gdip_ImageSearch(pBMScreen, bitmaps["feed"], &feedPos, , , , , 2, , 2) = 1) {
-				Gdip_DisposeImage(pBMScreen)
-				SendEvent "{Click " windowX+(54*windowWidth)//100-300+SubStr(feedPos, 1, InStr(feedPos, ",")-1)+140 " " windowY+offsetY+(46*windowHeight)//100-59+SubStr(feedPos, InStr(feedPos, ",")+1)+5 "}"
-				Sleep 100
-				SendEvent "{Text}1"
-				Sleep 100
-				SendEvent "{Click " windowX+(54*windowWidth)//100-300+SubStr(feedPos, 1, InStr(feedPos, ",")-1) " " windowY+offsetY+(46*windowHeight)//100-59+SubStr(feedPos, InStr(feedPos, ",")+1) "}"
-				Sleep 500
-				return true
-			}
-			Gdip_DisposeImage(pBMScreen)
-		}
-		return false
-	}
-
-	; Feed a neonberry at the beginning to ensure radioactive status
-	FeedNeonberry()
-	lastNeonberryTime := A_TickCount
-
 	Loop
 	{
 		if ((pos := nm_InventorySearch("bitterberry", "down", , , , (A_Index = 1) ? 40 : 4)) = 0)
@@ -7916,21 +7879,10 @@ nm_BitterberryFeeder(*)
 			else {
 				ActivateRoblox()
 				SendEvent "{Click " windowX + (windowWidth//2 - 132) " " windowY + offsetY + ((4*windowHeight)//10 - 150) "}" ; Close Bee
-				; Check if 10 minutes have passed without a match - feed neonberry to maintain radioactive
-				if (A_TickCount - lastNeonberryTime >= 600000) {
-					Sleep 500
-					FeedNeonberry()
-					lastNeonberryTime := A_TickCount
-				}
 			}
 		}
 		else {
 			Gdip_DisposeImage(pBMScreen)
-			; Check if 10 minutes have passed without a match - feed neonberry to maintain radioactive
-			if (A_TickCount - lastNeonberryTime >= 600000) {
-				FeedNeonberry()
-				lastNeonberryTime := A_TickCount
-			}
 		}
 	}
 	ExitApp
