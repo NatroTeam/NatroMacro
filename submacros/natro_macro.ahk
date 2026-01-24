@@ -7706,7 +7706,7 @@ nm_BitterberryFeeder(*)
 	; Create mutation selection GUI
 	MutationGui := Gui("+AlwaysOnTop -MaximizeBox -MinimizeBox", "Bitterberry Auto-Mutator v0.3")
 	MutationGui.SetFont("s9", "Tahoma")
-	MutationGui.Add("Text", "x10 y10 w340", "by fermentingpotato#9567, anniespony#8135 (v0.2)``nMake sure BEE SLOT TO MUTATE is always visible``nDO NOT MOVE THE SCREEN OR RESIZE WINDOW FROM NOW ON.")
+	MutationGui.Add("Text", "x10 y10 w340", "by fermentingpotato#9567, anniespony#8135 (v0.2)``nMake sure BEE SLOT TO MUTATE is always visible and radioactive``nDO NOT MOVE THE SCREEN OR RESIZE WINDOW FROM NOW ON.")
 	
 	if (ocr_enabled) {
 		MutationGui.Add("Text", "x10 y+15 w340 cGreen", "Mutation detection ENABLED")
