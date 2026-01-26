@@ -2,7 +2,7 @@ if (MoveMethod = "walk")
 {
     nm_gotoramp()
     nm_Walk(67.5, BackKey, LeftKey)
-    send "{" RotRight " 4}"
+    nm_CameraRotation("Right", 4)
     nm_Walk(31.5, FwdKey)
     nm_Walk(9, LeftKey)
     nm_Walk(9, BackKey)
@@ -29,7 +29,8 @@ else
     HyperSleep(1100)
     send "{" LeftKey " up}"
     HyperSleep(650)
-    send "{" BackKey " up}{" SC_Space "}{" RotRight " 4}"
+    send "{" BackKey " up}{" SC_Space "}"
+    nm_CameraRotation("Right", 4)
     Sleep 1500
     nm_Walk(4, RightKey, FwdKey)
     nm_Walk(23, FwdKey)
@@ -43,15 +44,15 @@ send "{" SC_Space " down}"
 HyperSleep(100)
 send "{" SC_Space " up}"
 nm_Walk(8.8, FwdKey)
-send "{" RotRight " 2}"
+nm_CameraRotation("Right", 2)
 nm_Walk(25.6, FwdKey)
 
 ; moon jumps
 Jump([5, FwdKey])
-send "{" RotRight "}"
+nm_CameraRotation("Right", 1)
 nm_Walk(2, FwdKey)
 Jump([5, FwdKey])
-send "{" RotRight "}"
+nm_CameraRotation("Right", 1)
 nm_Walk(1.5, FwdKey, LeftKey)
 nm_Walk(2, FwdKey)
 Jump([2.5, FwdKey], [2.5, FwdKey, LeftKey])
@@ -59,20 +60,20 @@ nm_Walk(2, FwdKey)
 Jump([5, FwdKey])
 nm_Walk(2, FwdKey)
 Jump([2, FwdKey, RightKey], [3, FwdKey])
-send "{" RotRight "}"
+nm_CameraRotation("Right", 1)
 nm_Walk(2, FwdKey)
 Jump([2.5, FwdKey, LeftKey], [2, FwdKey])
 nm_Walk(2, FwdKey)
 Jump([5, FwdKey])
 nm_Walk(2, FwdKey)
 Jump([4, FwdKey])
-send "{" RotRight "}"
+nm_CameraRotation("Right", 1)
 nm_Walk(2, FwdKey)
 Jump([8, FwdKey])
 nm_Walk(4, FwdKey)
 nm_Walk(8, FwdKey, LeftKey)
 nm_Walk(7, RightKey)
-send "{" RotLeft " 2}"
+nm_CameraRotation("Left", 2)
 nm_Walk(3, BackKey, RightKey)
 nm_Walk(10, RightKey)
 nm_Walk(6, FwdKey, RightKey)

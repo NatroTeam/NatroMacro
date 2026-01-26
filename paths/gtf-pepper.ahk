@@ -45,7 +45,8 @@ send "{space down}"
 HyperSleep(300)
 send "{space up}"
 Walk(4)
-send "{" RightKey " up}{" FwdKey " up}{" RotRight " 2}"
+send "{" RightKey " up}{" FwdKey " up}"
+nm_CameraRotation("Right", 2)
 nm_Walk(9, FwdKey)
 nm_Walk(1.5, RightKey)
 ;path 230212 zaappiix

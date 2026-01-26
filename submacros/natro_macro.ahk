@@ -19704,6 +19704,17 @@ nm_PathVars(){
 	CoordMode "Mouse", "Screen"
 	CoordMode "Pixel", "Screen"
 
+	nm_CameraRotation(Dir, count) {
+		Static LR := 0, UD := 0, init := OnExit((*) => send("{" Rot%(LR > 0 ? "Left" : "Right")% " " Mod(Abs(LR), 8) "}{" Rot%(UD > 0 ? "Up" : "Down")% " " Abs(UD) "}"), -1)
+		send "{" Rot%Dir% " " count "}"
+		Switch Dir,0 {
+			Case "Left": LR -= count
+			Case "Right": LR += count
+			Case "Up": UD -= count
+			Case "Down": UD += count
+		}
+	}
+
 	nm_gotoRamp() {
 		nm_Walk(5, FwdKey)
 		nm_Walk(9.2*HiveSlot-4, RightKey)
