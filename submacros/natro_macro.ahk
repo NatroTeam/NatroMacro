@@ -21914,8 +21914,8 @@ start(*){
 	)
 	;(re)start stat monitor
 	global SessionTotalHoney, HoneyAverage
-	if (discordCheck && (((discordMode = 0) && RegExMatch(webhook, "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$"))
-		|| ((discordMode = 1) && (ReportChannelCheck = 1) && (ReportChannelID || MainChannelID))))
+	;if (discordCheck && (((discordMode = 0) && RegExMatch(webhook, "i)^https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-z0-9_-]+)$"))
+		;|| ((discordMode = 1) && (ReportChannelCheck = 1) && (ReportChannelID || MainChannelID))))
 		run '"' exe_path64 '" /script "' A_WorkingDir '\submacros\StatMonitor.ahk" "' VersionID '"'
 	;start main loop
 	nm_setStatus("Begin", "Main Loop")

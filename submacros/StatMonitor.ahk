@@ -859,10 +859,10 @@ DetectHoney()
 		return 0
 }
 
-/********************************************************************************************************
-* @description: creates an hourly report (image) from the honey and buff arrays, then sends it to Discord
+/*******************************************************************************************************************************************
+* @description: creates an hourly report (image) from the honey and buff arrays, then sends it to Discord and saves it to the hourly folder
 * @author SP
-********************************************************************************************************/
+********************************************************************************************************************************************/
 SendHourlyReport()
 {
 	global pBM, regions, stat_regions, honey_values, honey_12h, backpack_values, buff_values, buff_colors, status_changes, start_time, start_honey, stats, latest_boost, latest_winds, graph_regions, version, natro_version, os_version, bitmaps, ocr_enabled, ocr_language
@@ -1653,6 +1653,29 @@ SendHourlyReport()
 		}
 		'
 		)
+
+		hourlyPath := A_ScriptDir "\..\hourly"
+
+		if !DirExist(hourlyPath) {
+			DirCreate(hourlydir)
+		}
+
+		; Create filename with timestamp
+		timestamp := FormatTime(A_Now, "yyyy-MM-dd_HH-mm-ss")
+		filePath := hourlyDir . "\HourlyReport_" . timestamp . ".png"
+
+		; Verify pBMReport is valid
+		if !pBMReport
+			throw Error("pbMReport is not valid - bitmap not created")
+
+		; Save bitmap to file
+		result := Gdip_SaveBitmapToFile(pBMReport, filePath)
+		if (result != 0)
+			throw Error("Gdip_SaveBitmapToFile failed", , result)
+
+		; Check if the file was actually created
+		if !FileExist(filePath)
+			throw Error("File was not created at: " filePath)
 
 		Send_WM_COPYDATA(postdata, "Status.ahk ahk_class AutoHotkey")
 	}
