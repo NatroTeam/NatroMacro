@@ -357,4 +357,10 @@
 	, "SilverEggMatchIgnore"
 	, "GoldEggMatchIgnore"
 	, "DiamondEggMatchIgnore"
-	, "CoconutBoosterCheck"]
+	, "CoconutBoosterCheck"
+	, "StumpBoosterCheck"
+	, "PepperBoosterCheck"
+	, "HoneyUpdateSSCheck"
+	, "StickerStackVoucher"
+	, "MGatherPlanterLoot"
+	, "prioritylistnumeric"]

@@ -19,7 +19,7 @@ body:
   - type: dropdown
     attributes:
       label: Have you searched the existing bug reports?
-      description: Please search [here](../labels/bug) to see if an issue already exists for the bug you encountered.
+      description: Please search [here](https://github.com/NatroTeam/NatroMacro/issues?q=is%3Aissue%20state%3Aopen%20label%3Abug) to see if an issue already exists for the bug you encountered.
       options:
         - 'No'
         - 'Yes'

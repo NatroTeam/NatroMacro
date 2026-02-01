@@ -1,0 +1,12 @@
+
+bitmaps["hive"] := Map()
+bitmaps["hive"]["day"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["hive"]["day"]), Gdip_GraphicsClear(G, 0xffd28f0c), Gdip_DeleteGraphics(G)
+bitmaps["hive"]["night"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["hive"]["night"]), Gdip_GraphicsClear(G, 0xffc08200), Gdip_DeleteGraphics(G)
+bitmaps["hive"]["day-altUI"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["hive"]["day-altUI"]), Gdip_GraphicsClear(G, 0xff916507), Gdip_DeleteGraphics(G)
+bitmaps["hive"]["night-altUI"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["hive"]["night-altUI"]), Gdip_GraphicsClear(G, 0xff845c00), Gdip_DeleteGraphics(G)
+bitmaps["hive"]["day-gifted"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["hive"]["day-gifted"]), Gdip_GraphicsClear(G, 0xffb97e03), Gdip_DeleteGraphics(G)
+bitmaps["hive"]["night-gifted"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["hive"]["night-gifted"]), Gdip_GraphicsClear(G, 0xffaa7400), Gdip_DeleteGraphics(G)
+bitmaps["hive"]["noshadow-day"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["hive"]["noshadow-day"]), Gdip_GraphicsClear(G, 0xffffb325), Gdip_DeleteGraphics(G)
+bitmaps["hive"]["noshadow-night"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["hive"]["noshadow-night"]), Gdip_GraphicsClear(G, 0xff694a00), Gdip_DeleteGraphics(G)
+bitmaps["hive"]["noshadow-gifted"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["hive"]["noshadow-gifted"]), Gdip_GraphicsClear(G, 0xffe39d1f), Gdip_DeleteGraphics(G)
+bitmaps["hive"]["wing"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["hive"]["wing"]), Gdip_GraphicsClear(G, 0xffa28645), Gdip_DeleteGraphics(G)

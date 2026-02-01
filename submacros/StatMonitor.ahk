@@ -1518,13 +1518,13 @@ SendHourlyReport()
 
 	; row 3: OCR status
 	y := stat_regions["info"][2]+220
-	pos := Gdip_TextToGraphics(G, "OCR: " (ocr_enabled ? ("Enabled (" ocr_language ")") : ("Disabled (" ((A_OSVersion < "WIN") ? "Debloated" : "Not Installed") ")")), "s56 Center Bold c00ffffff x" stat_regions["info"][1]+stat_regions["info"][3]//2 " y" y, "Segoe UI")
+	pos := Gdip_TextToGraphics(G, "OCR: " (ocr_enabled ? ("Enabled (" ocr_language ")") : ("Disabled")), "s56 Center Bold c00ffffff x" stat_regions["info"][1]+stat_regions["info"][3]//2 " y" y, "Segoe UI")
 	x := SubStr(pos, 1, InStr(pos, "|", , , 1)-1)
 
 	pos := Gdip_TextToGraphics(G, "OCR: ", "s56 Left Bold cafffffff x" x " y" y, "Segoe UI")
 	x := SubStr(pos, 1, InStr(pos, "|", , , 1)-1)+SubStr(pos, InStr(pos, "|", , , 2)+1, InStr(pos, "|", , , 3)-InStr(pos, "|", , , 2)-1)
 
-	Gdip_TextToGraphics(G, ocr_enabled ? ("Enabled (" ocr_language ")") : ("Disabled (" ((A_OSVersion < "WIN") ? "Debloated" : "Not Installed") ")"), "s56 Left Bold c" (ocr_enabled ? "ff4fdf26" : "ffcc0000") " x" x " y" y, "Segoe UI")
+	Gdip_TextToGraphics(G, (ocr_enabled ? ("Enabled (" ocr_language ")") : ("Disabled")), "s56 Left Bold c" (ocr_enabled ? "ff4fdf26" : "ffcc0000") " x" x " y" y, "Segoe UI")
 
 	; row 4: windows version
 	y := stat_regions["info"][2]+300

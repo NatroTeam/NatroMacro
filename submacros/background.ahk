@@ -51,6 +51,7 @@ LastNightMemoryMatch := A_Args[12]
 pToken := Gdip_Startup()
 bitmaps := Map(), bitmaps.CaseSense := 0
 #Include "%A_ScriptDir%\..\nm_image_assets\offset\bitmaps.ahk"
+#Include "%A_ScriptDir%\..\nm_image_assets\night\bitmaps.ahk"
 
 CoordMode "Pixel", "Screen"
 DetectHiddenWindows 1
@@ -195,18 +196,35 @@ nm_dayOrNight(){
 	}
 	Gdip_DisposeImage(pBMScreen)
 
-	try
-		result := ImageSearch(&FoundX, &FoundY, windowX, windowY + windowHeight//2, windowX + windowWidth, windowY + windowHeight, "*5 nm_image_assets\grassD.png")
-	catch
+	try {
+		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY + 2*windowHeight//5 "|" windowWidth "|" 3*windowHeight//5)
+		for k, v in bitmaps["day"] {
+			if (Gdip_ImageSearch(pBMScreen, v, , , , , , 6) = 1) {
+				result := 1
+				Gdip_DisposeImage(pBMScreen)
+				break
+			}
+		}
+		Gdip_DisposeImage(pBMScreen)
+	} catch
 		return
-	if (result = 1) {
+	if result {
 		dayOrNight:="Day"
 	} else {
-		try
-			result := ImageSearch(&FoundX, &FoundY, windowX, windowY + windowHeight//2, windowX + windowWidth, windowY + windowHeight, "*5 nm_image_assets\grassN.png")
-		catch
+		try {
+			pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY + windowHeight//2 "|" windowWidth "|" windowHeight//2)
+			for k, v in bitmaps["night"] {
+				if (Gdip_ImageSearch(pBMScreen, v, , , , , , 4) = 1)
+				{
+					result := 1
+					Gdip_DisposeImage(pBMScreen)
+					break
+				}
+			}		
+			Gdip_DisposeImage(pBMScreen)
+		} catch
 			return
-		if (result = 1) {
+		if result  {
 			dayOrNight:="Dusk"
 		} else {
 			dayOrNight:="Day"
