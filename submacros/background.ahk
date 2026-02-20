@@ -213,16 +213,15 @@ nm_CheckNight() {
 	LastNightState := night
 
 	CheckBitmap(time, variation){
-		try {
-			pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY + windowHeight//2 "|" windowWidth "|" windowHeight//2)
-			for , v in bitmaps[time] {
-				if (Gdip_ImageSearch(pBMScreen, v,,,,,,4) = 1) {
-					Gdip_DisposeImage(pBMScreen)
-					return 1
-				}
+		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY + windowHeight//2 "|" windowWidth "|" windowHeight//2)
+		
+		for , v in bitmaps[time] 
+			if (Gdip_ImageSearch(pBMScreen, v,,,,,,4) = 1) {
+				Gdip_DisposeImage(pBMScreen)
+				return 1
 			}
-			Gdip_DisposeImage(pBMScreen)
-		}
+		
+		Gdip_DisposeImage(pBMScreen)
 		return 0
 	}
 }

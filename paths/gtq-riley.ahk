@@ -22,7 +22,6 @@ send "{space}{" RightKey " up}"
 sleep 100
 send "{space up}"
 sleep 1000
-nm_Walk(1, FwdKey, RightKey)
 nm_Walk(20, RightKey)
 nm_Walk(2, FwdKey)
 nm_Walk(12, FwdKey, RightKey)
