@@ -56,13 +56,13 @@ GetYOffset(hwnd?, &fail?)
 	}
 	else if WinExist("ahk_id " hwnd)
 	{
-		try WinActivate "Roblox"
-		GetRobloxClientPos(hwnd)
-
 		if true {
 			fail := 0
 			return 22
 		}
+		/*
+		try WinActivate "Roblox"
+		GetRobloxClientPos(hwnd)
 
 		Loop 20 ; for red vignette effect
 		{
@@ -79,6 +79,7 @@ GetYOffset(hwnd?, &fail?)
 				}				
 			}
 		}
+		*/
 	}
 	else
 		return 0
