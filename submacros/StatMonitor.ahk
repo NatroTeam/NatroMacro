@@ -144,6 +144,7 @@ if (ocr_enabled = 1)
 			msgbox "No OCR supporting languages are installed on your system! Please follow the Knowledge Base guide to install a supported language as a secondary language on Windows.", "WARNING!!", 0x1030
 }
 
+global background, regionBorder, regionBackground, statRegionBorder, statRegionBackground, graphLine, graphBackground, ocrDisabled
 
 ; HONEY MONITORING
 ; honey_values format: (A_Min):value
@@ -265,7 +266,7 @@ for objItem in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_OperatingSy
 	os_version := Trim(StrReplace(StrReplace(StrReplace(StrReplace(objItem.Caption, "Microsoft"), "Майкрософт"), "مايكروسوفت"), "微软"))
 
 ; obtain natro version and other options (if exist)
-if ((A_Args.Length > 0) && (natro_version := A_Args[1]))
+if ((A_Args.Length <= 1) && (natro_version := A_Args[1]))
 {
 	; read information from settings\nm_config.ini
 	Loop 3
@@ -317,7 +318,86 @@ postdata :=
 ; post to status
 Send_WM_COPYDATA(postdata, "Status.ahk ahk_class AutoHotkey")
 
+; ▰▰▰▰▰▰▰▰▰
+; LOAD COLOR CONFIG
+; ▰▰▰▰▰▰▰▰▰
 
+nm_CreateFolder(folder) {
+	if !FileExist(folder)
+	{
+		try
+			DirCreate folder
+		catch
+			MsgBox
+			(
+			'Could not create the ' folder ' directory!
+			This means the macro will NOT work correctly!
+			Try moving the macro to a different folder (e.g. Downloads, Desktop)'
+			), "Error", 0x40010 " T60"
+	}
+}
+nm_CreateFolder("settings")
+
+nm_importConfig()
+{
+	global
+	local config := Map() ; store default values, these are loaded initially
+
+	config["Colors"] := Map(
+		"background", "0xff121212",
+		"regionBorder", "0xff282628",
+		"regionBackground", "0xff201e20",
+		"statRegionBorder", "0xff353335",
+		"statRegionBackground", "0xff2c2a2c",
+		"graphLine", "0x40c0c0f0",
+		"graphBackground", "0x80141414",
+		"ocrDisabled", "0x40cc0000"
+	)
+
+	local k, v, i, j
+	for k,v in config ; load the default values as globals, will be overwritten if a new value exists when reading
+		for i,j in v
+			%i% := j
+
+	local inipath := A_WorkingDir "\settings\statmonitorColors.ini"
+
+	if FileExist(inipath) ; update default values with new ones read from any existing .ini
+		nm_ReadIni(inipath)
+
+	local ini := ""
+	for k,v in config ; overwrite any existing .ini with updated one with all new keys and old values
+	{
+		ini .= "[" k "]`r`n"
+		for i in v
+			ini .= i "=" %i% "`r`n"
+		ini .= "`r`n"
+	}
+
+	local file := FileOpen(inipath, "w-d")
+	file.Write(ini), file.Close()
+}
+nm_importConfig()
+
+nm_ReadIni(path)
+{
+	global
+	local ini, str, c, p, k, v
+
+	ini := FileOpen(path, "r"), str := ini.Read(), ini.Close()
+	Loop Parse str, "`n", "`r" A_Space A_Tab
+	{
+		switch (c := SubStr(A_LoopField, 1, 1))
+		{
+			; ignore comments and section names
+			case "[",";":
+			continue
+
+			default:
+			if (p := InStr(A_LoopField, "="))
+				try k := SubStr(A_LoopField, 1, p-1), %k% := IsInteger(v := SubStr(A_LoopField, p+1)) ? Integer(v) : v
+		}
+	}
+}
 
 ; ▰▰▰▰▰▰▰▰▰
 ; CREATE TEMPLATE
@@ -326,7 +406,7 @@ Send_WM_COPYDATA(postdata, "Status.ahk ahk_class AutoHotkey")
 
 ; DRAW REGIONS
 ; draw background (fill with rounded dark grey rectangle)
-pBrush := Gdip_BrushCreateSolid(0xff121212), Gdip_FillRoundedRectangle(G, pBrush, -1, -1, w+1, h+1, 60), Gdip_DeleteBrush(pBrush)
+pBrush := Gdip_BrushCreateSolid(background), Gdip_FillRoundedRectangle(G, pBrush, -1, -1, w+1, h+1, 60), Gdip_DeleteBrush(pBrush)
 
 ; regions format: region_name:[x,y,w,h]
 regions := Map("honey/sec", [120,120,4080,1080]
@@ -344,13 +424,13 @@ stat_regions := Map("lasthour", [regions["stats"][1]+100,regions["stats"][2]+100
 ; draw region backgrounds (dark grey background for each region)
 for k,v in regions
 {
-	pPen := Gdip_CreatePen(0xff282628, 10), Gdip_DrawRoundedRectangle(G, pPen, v[1], v[2], v[3], v[4], 20), Gdip_DeletePen(pPen)
-	pBrush := Gdip_BrushCreateSolid(0xff201e20), Gdip_FillRoundedRectangle(G, pBrush, v[1], v[2], v[3], v[4], 20), Gdip_DeleteBrush(pBrush)
+	pPen := Gdip_CreatePen(regionBorder, 10), Gdip_DrawRoundedRectangle(G, pPen, v[1], v[2], v[3], v[4], 20), Gdip_DeletePen(pPen)
+	pBrush := Gdip_BrushCreateSolid(regionBackground), Gdip_FillRoundedRectangle(G, pBrush, v[1], v[2], v[3], v[4], 20), Gdip_DeleteBrush(pBrush)
 }
 for k,v in stat_regions
 {
-	pPen := Gdip_CreatePen(0xff353335, 10), Gdip_DrawRoundedRectangle(G, pPen, v[1], v[2], v[3], v[4], 20), Gdip_DeletePen(pPen)
-	pBrush := Gdip_BrushCreateSolid(0xff2c2a2c), Gdip_FillRoundedRectangle(G, pBrush, v[1], v[2], v[3], v[4], 20), Gdip_DeleteBrush(pBrush)
+	pPen := Gdip_CreatePen(statRegionBorder, 10), Gdip_DrawRoundedRectangle(G, pPen, v[1], v[2], v[3], v[4], 20), Gdip_DeletePen(pPen)
+	pBrush := Gdip_BrushCreateSolid(statRegionBackground), Gdip_FillRoundedRectangle(G, pBrush, v[1], v[2], v[3], v[4], 20), Gdip_DeleteBrush(pBrush)
 }
 
 ; draw region titles
@@ -383,7 +463,7 @@ graph_regions := Map("honey/sec", [regions["honey/sec"][1]+320,regions["honey/se
 	, "honey12h", [stat_regions["session"][1]+200,stat_regions["session"][2]+734,1080,480])
 
 ; draw graph grids and axes
-pPen := Gdip_CreatePen(0x40c0c0f0, 4)
+pPen := Gdip_CreatePen(graphLine, 4)
 Loop 61
 {
 	n := (Mod(A_Index, 10) = 1) ? 45 : 25
@@ -411,7 +491,7 @@ for k,v in graph_regions
 }
 
 ; draw buff images and graph backgrounds
-pBrush := Gdip_BrushCreateSolid(0x80141414)
+pBrush := Gdip_BrushCreateSolid(graphBackground)
 for k,v in graph_regions
 {
 	Gdip_FillRectangle(G, pBrush, v[1]-60, v[2], v[3]+120, v[4])
@@ -425,7 +505,7 @@ for k,v in graph_regions
 Gdip_DeleteBrush(pBrush), Gdip_DeletePen(pPen)
 if (ocr_enabled = 0)
 {
-	pBrush := Gdip_BrushCreateSolid(0x40cc0000)
+	pBrush := Gdip_BrushCreateSolid(ocrDisabled)
 	for k,v in ["honey/sec","honey","honey12h"]
 		Gdip_FillRectangle(G, pBrush, graph_regions[v][1], graph_regions[v][2], graph_regions[v][3], graph_regions[v][4])
 	Gdip_DeleteBrush(pBrush)
@@ -437,6 +517,12 @@ for k,v in ["clock","blessing","bloat","tideblessing","mondo"]
 
 ; leave pBM as final graph template
 Gdip_DeleteGraphics(G)
+
+if A_Args.Length == 2 and A_Args[2] == "ForceTemplate" {
+	Gdip_SaveBitmapToFile(pBM, "template.png")
+	Gdip_DisposeImage(pBM)
+	ExitApp
+}
 
 ; ▰▰▰▰
 ; TESTING
