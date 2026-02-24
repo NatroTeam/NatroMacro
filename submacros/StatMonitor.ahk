@@ -369,7 +369,11 @@ nm_importConfig()
 	{
 		ini .= "[" k "]`r`n"
 		for i in v
-			ini .= i "=" %i% "`r`n"
+			if IsInteger(%i%) {
+				ini .= i "=" Format("0x{:08X}", %i%) "`r`n"
+			} else {
+				ini .= i "=" %i% "`r`n"
+			}
 		ini .= "`r`n"
 	}
 
@@ -406,7 +410,15 @@ nm_ReadIni(path)
 
 ; DRAW REGIONS
 ; draw background (fill with rounded dark grey rectangle)
-pBrush := Gdip_BrushCreateSolid(background), Gdip_FillRoundedRectangle(G, pBrush, -1, -1, w+1, h+1, 60), Gdip_DeleteBrush(pBrush)
+if Type(background) == "String" && FileExist(background) {
+	pBMBackground := Gdip_CreateBitmapFromFile(background)
+	Gdip_DrawImage(G, pBMBackground, 0, 0, w, h)
+	Gdip_DisposeImage(pBMBackground)
+} else {
+	pBrush := Gdip_BrushCreateSolid(background)
+	Gdip_FillRoundedRectangle(G, pBrush, -1, -1, w+1, h+1, 60)
+	Gdip_DeleteBrush(pBrush)
+}
 
 ; regions format: region_name:[x,y,w,h]
 regions := Map("honey/sec", [120,120,4080,1080]
