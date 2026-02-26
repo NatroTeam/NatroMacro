@@ -1038,8 +1038,8 @@ nm_command(command)
 						"inline": true
 					},
 					{
-						"name": "' commandPrefix 'bitmap",
-						"value": "Updates image on hourly reports. Must be a valid bitmap",
+						"name": "' commandPrefix 'newlogo",
+						"value": "Updates the bottom right logo on hourly reports. Must be a bitmap or image.",
 						"inline": true
 					},
 					{
@@ -1095,33 +1095,46 @@ nm_command(command)
 			Gdip_DisposeImage(pBM)
 		}
 
-		case "bm", "bitmap": ; CUSTOM STUFF bitmaps rendering
-		; Accepts 1 to 3 parameters: params[2] (bitmap/base64), params[3] (width), params[4] (height)
-		if (params.Length >= 2) {
-			CustomBitmap := params[2]
-			IniWrite CustomBitmap, "settings\nm_config.ini", "Settings", "CustomBitmap"
-			
-			; Optionally store width/height if provided
-			if (params.Length >= 4) {
-				CustomBitmap_Width := params[3]
-				CustomBitmap_Height := params[4]
-				; For now, just store or log them (no further action)
-			}
-			
-			; Load the bitmap from Base64 string
-			try {
-				pBM := Gdip_BitmapFromBase64(CustomBitmap)
-			}
-			catch {
-				discord.SendEmbed("Failed to load bitmap from provided data!", 16711731, , , , id)
-			}
-			
-			; Send the bitmap as an image via Discord
-			try {
-				discord.SendImage(pBM, "custom_bitmap.png", id)
-				Gdip_DisposeImage(pBM)
-			} catch {
-				discord.SendEmbed("Failed to send Image! Contact Developer!", 16711731, , , , id)
+		case "nl", "newlogo": ; CUSTOM STUFF bitmaps rendering
+		; Accepts 1 to 3 parameters: params[2] (bitmap/base64)
+		if (params.Length >= 2 or command.url) {
+			local bitmap
+			if command.url {
+				SplitPath command.url, &filename,,&ext
+				MsgBox filename " " ext
+				filename := StrSplit(filename, ".")[1] "." StrSplit(ext, "?")[1]
+				MsgBox filename
+				Download command.url, filename
+
+				try {
+					pBM := Gdip_CreateBitmapFromFile(filename)
+					Gdip_DisposeImage(pBM)
+				} catch {
+					MsgBox "failed"
+					DirDelete filename
+					discord.SendEmbed("Couldn't convert image.", 16711731, , , , id)
+					return
+				}
+
+				IniWrite(filename, "settings\statmonitorColors.ini", "ini", "CustomLogo")
+				discord.SendEmbed("Sucessfully updated the logo.", 16711731)
+			} else {
+				; Load the bitmap from Base64 string
+				CustomBitmap := params[2]
+				try {
+					pBM := Gdip_BitmapFromBase64(CustomBitmap)
+				}
+				catch {
+					discord.SendEmbed("Failed to load bitmap from provided data!", 16711731, , , , id)
+					return
+				}
+				; Send the bitmap as an image via Discord
+				try {
+					discord.SendImage(pBM, "custom_bitmap.png", id)
+					Gdip_DisposeImage(pBM)
+				} catch {
+					discord.SendEmbed("Failed to send Image! Contact Developer!", 16711731, , , , id)
+				}
 			}
 		} else {
 			discord.SendEmbed("Invalid data provided!", 16711731, , , , id)

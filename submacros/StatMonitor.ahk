@@ -100,7 +100,7 @@ global backgroundAlpha, regionAlpha, graphAlpha, honeyAlpha, rightTabRegionAlpha
 global lasthourAlpha, sessionAlpha, buffsAlpha, plantersAlpha, generalstatsAlpha, infoAlpha
 global regionBorder, rightBarRegionBorder, graphLines, ocrDisabled
 
-global DEBUG_LOG, SaveImagesLocally, SavePath ; Debug/misc features
+global DEBUG_LOG, SaveImagesLocally, SavePath, CustomLogo, CustomLogoAlpha ; Debug/misc features
 
 extArray := Array("BMP", "DIB", "RLE", "JPG", "JPEG", "JPE", "JFIF", "GIF", "TIF", "TIFF", "PNG")
 
@@ -309,8 +309,6 @@ defaultConfig.Push("Images", "These can be images or color values.`n" .
 	"regionAlpha", "", 255,
 	"rightTabRegionBackground", "Color", 0xff2c2a2c,
 	"rightTabRegionAlpha", "", 255,
-	; "statRegionBackground", "Color", 0xff2c2a2c,
-	; "statRegionAlpha", "", 255,
 	"graphBackground", "Color", 0x80141414,
 	"graphAlpha", "", 255,
 	"honeyBackground", "ParentColor", "",
@@ -342,6 +340,11 @@ defaultConfig.Push("RightBar", "Images/Colors accepted`nEvery thing here is in t
 	"infoBackground", "ParentColor", "",
 	"infoDisableRender", "", false,
 	"infoAlpha", "", 255
+))
+
+defaultConfig.Push("ImagesOnly", "Images only section (currently only one xd)", Array(
+	"CustomLogo", "", "",
+	"CustomLogoAlpha", "", 255
 ))
 
 defaultConfig.Push("Colors", "Colors only.`nBorders won't render if you use an image!", Array(
@@ -406,7 +409,7 @@ nm_importConfig()
 		nm_ReadIni(inipath)
 	}
 
-	local ini := ""
+	local ini := "[ini]"
 	for idx, arry in defaultConfig { ; overwrite any existing .ini with updated one with all new keys and old values
 		curMod := Mod(idx, 3)
 		if curMod != 0 {
@@ -530,11 +533,27 @@ pngExists(path) {
 	return
 }
 
-load_Image(variable, alpha, section, region) {
+load_Image(variable, alpha, section, region, keepRatio := false) {
 	global
-	path := %variable%
+	path := IniRead("settings/statmonitorColors.ini", "ini", variable)
 	if pngExists(&path) {
 		pBMBackground := gdip_CreateBitmapFromFile(path)
+		if keepRatio {
+			imageWidth := Gdip_GetImageWidth(pBMBackground)
+			imageHeight := Gdip_GetImageHeight(pBMBackground)
+			imageRatio  := imageWidth / imageHeight
+    		regionRatio := region[3] / region[4]
+			if (imageRatio > regionRatio) { ; Maintain the ratio of the image, also adjusts the x to keep it in the same spot if width was changed.
+    		    newWidth  := region[3]
+    		    newHeight := region[3] / imageRatio
+    		} else {
+    		    newHeight := region[4]
+    		    newWidth  := region[4] * imageRatio
+    		}
+
+			region := [region[1] + (region[3] - newWidth) / 2, region[2], newWidth, newHeight]
+		}
+
 		Gdip_DrawImage(G, pBMBackground, region[1], region[2], region[3], region[4],,,,,alpha / 255)
 		Gdip_DisposeImage(pBMBackground)
 		return
@@ -547,7 +566,7 @@ load_Image(variable, alpha, section, region) {
 
 renderDisabled(stat) {
 	try {
-		if %stat "DisableRender"% {
+		if IniRead("settings/statmonitorColors.ini", "ini", stat "DisableRender") {
 			return true
 		}
 	}
@@ -1152,7 +1171,7 @@ DetectHoney()
 ********************************************************************************************************/
 SendHourlyReport(generateTemplate:=false)
 {
-	global pBM, regions, stat_regions, honey_values, honey_12h, backpack_values, buff_values, buff_colors, status_changes, start_time, start_honey, stats, latest_boost, latest_winds, graph_regions, version, natro_version, os_version, bitmaps, ocr_enabled, ocr_language, polar_image, SavePath, SaveImagesLocally
+	global pBM, regions, stat_regions, honey_values, honey_12h, backpack_values, buff_values, buff_colors, status_changes, start_time, start_honey, stats, latest_boost, latest_winds, graph_regions, version, natro_version, os_version, bitmaps, ocr_enabled, ocr_language, polar_image, SavePath, SaveImagesLocally, G
 	static honey_average := 0, honey_earned := 0, convert_time := 0, gather_time := 0, other_time := 0, stats_old := [["Total Boss Kills",0],["Total Vic Kills",0],["Total Bug Kills",0],["Total Planters",0],["Quests Done",0],["Disconnects",0]]
 
 	if (honey_values.Count > 0)
@@ -1880,28 +1899,12 @@ SendHourlyReport(generateTemplate:=false)
 		}
 	}
 	; row 6: Custom Bitmaps
-	CustomBitmapData := "" ; IniRead("settings\statmonitorColors.ini", "Settings", "CustomBitmap")
-	if (CustomBitmapData == "") {
-		; Render default image in center (900x900) if bitmap loading fails
-		DefaultBitmap := bitmaps["pBMNatroLogo"], defaultWidth := 900, defaultHeight := 900
-		targetX := halfX - defaultWidth//2
-		targetY := y+200 + (880 - defaultHeight) // 2 - 40
-		Gdip_DrawImage(G, DefaultBitmap, targetX, targetY, defaultWidth, defaultHeight)
-	} else {
-		try {
-			CustomBitmap := Gdip_BitmapFromBase64(CustomBitmapData)
-			bitmapWidth := Gdip_GetImageWidth(CustomBitmap)
-			bitmapHeight := Gdip_GetImageHeight(CustomBitmap)
-			targetX := halfX-650 + (1300 - bitmapWidth) // 2
-			targetY := y+200 + (880 - bitmapHeight) // 2 - 40
-			Gdip_DrawImage(G, CustomBitmap, targetX, targetY, bitmapWidth, bitmapHeight)
-		} catch {
-			; Render default image in center (900x900) if bitmap loading fails
-			DefaultBitmap := bitmaps["pBMNatroLogo"], defaultWidth := 900, defaultHeight := 900
-			targetX := halfX - defaultWidth//2
-			targetY := y+200 + (880 - defaultHeight) // 2 - 40
-			Gdip_DrawImage(G, DefaultBitmap, targetX, targetY, defaultWidth, defaultHeight)
-		}
+	defaultWidth := 900, defaultHeight := 900
+	targetX := halfX - defaultWidth//2
+	targetY := y+200 + (880 - defaultHeight) // 2 - 40
+	if load_Image("CustomLogo", CustomLogoAlpha, "ImagesOnly", [targetX, targetY, 900, 900], true) {
+		DefaultBitmap := bitmaps["pBMNatroLogo"],
+		Gdip_DrawImage(G, DefaultBitmap, targetX, targetY, defaultWidth, defaultHeight,,,,,CustomLogoAlpha / 255)
 	}
 	Gdip_DeleteGraphics(G)
 

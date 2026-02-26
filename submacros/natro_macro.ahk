@@ -8432,7 +8432,6 @@ nm_showAdvancedSettings(*){
 		i := 1, t1 := t2
 }
 nm_AdvancedGUI(init:=0){
-	global CustomBitmap
 	local hBM, GuiCtrl
 	TabCtrl.UseTab("Advanced")
 	MainGui.SetFont("s8 cDefault Norm", "Tahoma")
@@ -8454,7 +8453,7 @@ nm_AdvancedGUI(init:=0){
 	MainGui.Add("CheckBox", "x10 y155 vAnnounceGuidingStar Checked" AnnounceGuidingStar, "Announce Guiding Star").OnEvent("Click", nm_AnnounceGuidWarn)
 	MainGui.Add("CheckBox", "x10 yp+15 vHideErrors Checked" HideErrors, "Hide Errors").OnEvent("Click", nm_HideErrorsWarn)
 		; --- Bitmap GUI Controls ---
-	MainGui.Add("Text", "x15 y134", "Bitmap:")
+	MainGui.Add("Text", "x15 y134", "Change logo:")
 	MainGui.Add("Edit", "x55 y132 w70 h18 vCustomBitmap", CustomBitmap).OnEvent("Change", nm_saveCustomBitmap)
 	BitmapTestBtn := MainGui.Add("Button", "x130 y130 w50 h20 vBitmapTestingGUI", "Display")
 	BitmapTestBtn.OnEvent("Click", nm_BitmapTestingGUI)
@@ -16989,7 +16988,7 @@ nm_saveCustomBitmap(GuiCtrl, *) {
 	global CustomBitmap
 	p := EditGetCurrentCol(GuiCtrl)
 	CustomBitmap := GuiCtrl.Value
-	IniWrite CustomBitmap, "settings\nm_config.ini", "Settings", "CustomBitmap"
+	IniWrite CustomBitmap, "settings\statmonitorColors.ini", "", "CustomLogo"
 }
 nm_BitmapTestingGUI(*){
 	global CustomBitmap, bitmaps
