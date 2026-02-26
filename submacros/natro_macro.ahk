@@ -9648,28 +9648,12 @@ nm_FindItem(chosenItem, *) {
 		return 0
 	}
 	MouseMove windowX+46, windowY+yOffset+219
-	Loop 60 {
-		pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY+150 "|306|" windowHeight-300)
-		if (Gdip_ImageSearch(pBMScreen, bitmaps[items[chosenitem]], &itemCoords,,,,,5)) {
-			Gdip_DisposeImage(pBMScreen)
-			break
-		}
-		for k,v in items {
-			if (Gdip_ImageSearch(pBMScreen, bitmaps[v], , , , , , 5)) {
-				Send "{Wheel" (k > chosenItem ? "Up" : "Down") " 1}"
-				break
-			}
-			if A_Index = items.length
-				Send "{WheelUp 1}"
-		}
-		Gdip_DisposeImage(pBMScreen)
-		sleep 300
-	}
+	itemPos := nm_InventorySearch(items[chosenItem])
 	DetectHiddenWindows 1
-	if !itemCoords
+	if !itemPos
 		WinExist("Status.ahk ahk_class AutoHotkey") ? SendMessage(0x5559, 0, 1, , , , , , 2000) : ""
 	else
-		WinExist("Status.ahk ahk_class AutoHotkey") ? SendMessage(0x5559, StrSplit(itemCoords,",")[2]+windowY+140, , , , , , , 2000) : ""
+		WinExist("Status.ahk ahk_class AutoHotkey") ? SendMessage(0x5559, windowY+itemPos[3]-40, , , , , , , 2000) : ""
 	sleep 1000
 	DetectHiddenWindows 0
 	nm_OpenMenu()
@@ -10475,11 +10459,12 @@ nm_GlueDis(){
 				nm_OpenMenu()
 				continue
 			}
-			MouseMove windowX+gumdropPos[1], windowY+gumdropPos[2]
+			windowYPos := windowY+gumdropPos[3]+gumdropPos[4]
+			MouseMove windowX+30, windowYPos
 			KeyWait "F14", "T120 L"
 			nm_endWalk()
 
-			MouseClickDrag "Left", windowX+gumdropPos[1], windowY+gumdropPos[2], windowX+(windowWidth//2), windowY+(windowHeight//2), 5
+			MouseClickDrag "Left", windowX+30, windowYPos, windowX+(windowWidth//2), windowY+(windowHeight//2), 5
 			;close inventory
 			nm_OpenMenu()
 			Sleep 500
@@ -19954,7 +19939,7 @@ ba_placePlanter(fieldName, planter, planterNum, atField:=0){
 	else
 	{
 		GetRobloxClientPos()
-		MouseMove windowX+30, planterPos[2]
+		MouseMove windowX+30, planterPos[3]+planterPos[4]
 	}
 
 	KeyWait "F14", "T120 L" ; wait for gotoPlanter finish
@@ -20372,7 +20357,7 @@ mp_PlantPlanter(PlanterIndex) {
 		return 0
 	}
 	else
-		MouseMove windowX+planterPos[1], windowY+planterPos[2]
+		MouseMove windowX+30, windowY+planterPos[3]+planterPos[4]
 
 	KeyWait "F14", "T120 L" ; wait for gotoPlanter finish
 	nm_endWalk()
@@ -20440,7 +20425,7 @@ mp_UseGlitter(PlanterIndex, atField:=0) {
 	else
 	{
 		GetRobloxClientPos()
-		MouseMove windowX+glitterPos[1], windowY+glitterPos[2]
+		MouseMove windowX+30, windowY+glitterPos[3]+glitterPos[4]
 	}
 
 	KeyWait "F14", "T120 L" ; wait for gotoPlanter finish
