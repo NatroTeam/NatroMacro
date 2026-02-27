@@ -3411,6 +3411,15 @@ Gdip_DrawOrientedString(pGraphics, String, FontName, Size, Style, X, Y, Width, H
 	Return E
 }
 
+Gdip_GetBitmapSize(pBitmap) {
+	pFileStream := Gdip_SaveBitmapToStream(pBitmap)
+	DllCall("shlwapi\IStream_Size"
+      , "Ptr", pFileStream
+      , "UInt64P", &size := 0          ; <- size in bytes
+      , "UInt")
+	return size
+}
+
 Gdip_ResizeBitmap(pBitmap, ResizedW, ResizedH, InterpolationMode:=0, checkTooLarge:=0, bgrColor:=0) {
 ; The function returns a pointer to a new pBitmap.
 ; Default is 0 = 32-ARGB.

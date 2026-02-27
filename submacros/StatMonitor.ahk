@@ -1845,6 +1845,26 @@ SendHourlyReport(generateTemplate:=false)
 	}
 	Gdip_DeleteGraphics(G)
 
+	mb := 1048576
+	bitmapMBSize := Gdip_GetBitmapSize(pBMReport) / mb
+	if bitmapMBSize > 8 {
+		scale := Sqrt(bitmapMBSize / 8)
+		width := Gdip_GetImageWidth(pBMReport)
+		height := Gdip_GetImageHeight(pBMReport)
+    	newW := width / scale
+    	newH := height / scale
+    	pBMReport := Gdip_ResizeBitmap(pBMReport, newW, newH)
+
+		bitmapMBSize := Gdip_GetBitmapSize(pBMReport) / mb
+		while bitmapMBSize > 8 {
+			scale += .05
+    		newW := width / scale
+    		newH := height / scale
+    		pBMReport := Gdip_ResizeBitmap(pBMReport, newW, newH)
+			bitmapMBSize := Gdip_GetBitmapSize(pBMReport) / mb
+		}
+	}
+
 	if generateTemplate {
 		Gdip_SaveBitmapToFile(pBMReport, "template.png")
 		return
