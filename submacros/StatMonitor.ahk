@@ -101,6 +101,7 @@ global lasthourAlpha, sessionAlpha, buffsAlpha, plantersAlpha, generalstatsAlpha
 global regionBorder, rightBarRegionBorder, graphLines, ocrDisabled
 
 global DEBUG_LOG, SaveImagesLocally, SavePath, CustomLogo, CustomLogoAlpha ; Debug/misc features
+global scale
 
 extArray := Array("BMP", "DIB", "RLE", "JPG", "JPEG", "JPE", "JFIF", "GIF", "TIF", "TIFF", "PNG")
 
@@ -122,15 +123,6 @@ honey_12h[180] := start_honey
 for v in ["haste","melody","redboost","blueboost","whiteboost","focus","bombcombo","balloonaura","clock","jbshare","babylove","inspire","bear","pollenmark","honeymark","festivemark","popstar","comforting","motivating","satisfying","refreshing","invigorating","blessing","bloat","guiding","mondo","reindeerfetch","tideblessing", "snowflake", "puppylove", "fieldcorruption", "cloudbuff"]
 	buff_values[v] := Map()
 
-; buff_characters format: character:pBM
-buff_characters := Map()
-
-; buff_bitmaps format: pBMBuff:pBM
-;0xffe81a06:"flames",0xfff99d27:"tabby",0xff86ebff:"polar"
-(buff_bitmaps := Map()).CaseSense := 0
-
-#Include %A_ScriptDir%\..\nm_image_assets\statmonitor\bitmaps.ahk
-
 ; INFO FROM MAIN SCRIPT
 ; status_changes format: (A_Min*60+A_Sec+1):status_number (0 = other, 1 = gathering, 2 = converting)
 status_changes := Map()
@@ -146,6 +138,7 @@ OnMessage(0x5554, SetStatus, 255)
 OnMessage(0x5555, IncrementStat, 255)
 OnMessage(0x5556, SetAbility, 255)
 OnMessage(0x5557, SetBackpack, 255)
+OnMessage(0x5558, forceReport, 255)
 
 
 
@@ -509,6 +502,10 @@ renderDisabled(stat) {
 	}
 }
 
+forceReport(*) {
+	SendHourlyReport(,true)
+}
+
 ; ▰▰▰▰▰▰▰▰▰
 ; CREATE TEMPLATE
 ; ▰▰▰▰▰▰▰▰▰
@@ -702,7 +699,7 @@ if A_Args.Length == 2 and A_Args[2] == "ForceTemplate" {
 	start_honey := 170000000000000
 	start_time := DateAdd(start_time, -1, "Hours")
 
-	SendHourlyReport(true)
+	SendHourlyReport(true, true)
 	ExitApp
 }
 
@@ -1106,7 +1103,7 @@ DetectHoney()
 * @description: creates an hourly report (image) from the honey and buff arrays, then sends it to Discord
 * @author SP
 ********************************************************************************************************/
-SendHourlyReport(generateTemplate:=false)
+SendHourlyReport(generateTemplate:=false, keepStats:=false)
 {
 	global pBM, regions, stat_regions, honey_values, honey_12h, backpack_values, buff_values, buff_colors, status_changes, start_time, start_honey, stats, latest_boost, latest_winds, graph_regions, version, natro_version, os_version, bitmaps, ocr_enabled, ocr_language, polar_image, SavePath, SaveImagesLocally, G
 	static honey_average := 0, honey_earned := 0, convert_time := 0, gather_time := 0, other_time := 0, stats_old := [["Total Boss Kills",0],["Total Vic Kills",0],["Total Bug Kills",0],["Total Planters",0],["Quests Done",0],["Disconnects",0]]
@@ -1479,6 +1476,7 @@ SendHourlyReport(generateTemplate:=false)
 		Gdip_DisposeImage(pBMGraph)
 	}
 
+
 	; calculate times
 	time := DateAdd(DateAdd(A_Now, -A_Min, "Minutes"), -A_Sec, "Seconds")
 	session_time := DateDiff(time, start_time, "Seconds")
@@ -1847,6 +1845,7 @@ SendHourlyReport(generateTemplate:=false)
 
 	mb := 1048576
 	bitmapMBSize := Gdip_GetBitmapSize(pBMReport) / mb
+	; downsize image if its to large
 	if bitmapMBSize > 8 {
 		scale := Sqrt(bitmapMBSize / 8)
 		width := Gdip_GetImageWidth(pBMReport)
@@ -1866,7 +1865,9 @@ SendHourlyReport(generateTemplate:=false)
 	}
 
 	if generateTemplate {
-		Gdip_SaveBitmapToFile(pBMReport, "template.png")
+		if keepStats {
+			Gdip_SaveBitmapToFile(pBMReport, "template.png")
+		}
 		return
 	} else if SaveImagesLocally {
 		path := SavePath = "" ? A_Hour "h " A_Mon "_" A_MDay "_" A_Year " Hourly.png" : SavePath
@@ -1986,27 +1987,29 @@ SendHourlyReport(generateTemplate:=false)
 
 	Gdip_DisposeImage(pBMReport)
 
-	; save old stats for comparison
-	for k,v in stats_old
-		v[2] := stats[k][2]
-	; reset honey values map
-	honey_values.Clear()
-	honey_values[0] := current_honey
-	; reset backpack values map
-	for k,v in backpack_values
-		if (A_Index = backpack_values.Count)
-			current_backpack := v
-	backpack_values.Clear()
-	backpack_values[0] := current_backpack
-	; reset status changes array
-	for k,v in status_changes
-		if (A_Index = status_changes.Count)
-			current_status := v
-	status_changes.Clear()
-	status_changes[0] := current_status
-	; reset buff values array
-	for k,v in buff_values
-		v.Clear()
+	if not keepStats {
+		; save old stats for comparison
+		for k,v in stats_old
+			v[2] := stats[k][2]
+		; reset honey values map
+		honey_values.Clear()
+		honey_values[0] := current_honey
+		; reset backpack values map
+		for k,v in backpack_values
+			if (A_Index = backpack_values.Count)
+				current_backpack := v
+		backpack_values.Clear()
+		backpack_values[0] := current_backpack
+		; reset status changes array
+		for k,v in status_changes
+			if (A_Index = status_changes.Count)
+				current_status := v
+		status_changes.Clear()
+		status_changes[0] := current_status
+		; reset buff values array
+		for k,v in buff_values
+			v.Clear()
+	}
 }
 
 /*************************************************************************************************************
