@@ -908,7 +908,7 @@ nm_ReadIni(path)
 ; GAME DATA
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 nectarnames:=["Comforting", "Refreshing", "Satisfying", "Motivating", "Invigorating"]
-planternames:=["PlasticPlanter", "CandyPlanter", "BlueClayPlanter", "RedClayPlanter", "TackyPlanter", "PesticidePlanter", "Heat-TreatedPlanter", "HydroponicPlanter", "PetalPlanter", "PlanterOfPlenty", "PaperPlanter", "TicketPlanter"]
+planternames:=["PlasticPlanter", "CandyPlanter", "BlueClayPlanter", "RedClayPlanter", "TackyPlanter", "PesticidePlanter", "HeatTreatedPlanter", "HydroponicPlanter", "PetalPlanter", "PlanterOfPlenty", "PaperPlanter", "TicketPlanter"]
 fieldnames:=["dandelion", "sunflower", "mushroom", "blueflower", "clover", "strawberry", "spider", "bamboo", "pineapple", "stump", "cactus", "pumpkin", "pinetree", "rose", "mountaintop", "pepper", "coconut"]
 
 ComfortingFields:=["Dandelion", "Bamboo", "Pine Tree"]
@@ -930,7 +930,7 @@ BambooPlanters:=[["HydroponicPlanter", 1.4, 1.375, 8.73] ; 1.925
 	, ["PlasticPlanter", 1, 1, 2] ; 1
 	, ["CandyPlanter", 1, 1, 4] ; 1
 	, ["RedClayPlanter", 1, 1, 6] ; 1
-	, ["Heat-TreatedPlanter", 1, 1, 12] ; 1
+	, ["HeatTreatedPlanter", 1, 1, 12] ; 1
 	, ["PaperPlanter", .75, 1, 1] ; 0.75
 	, ["TicketPlanter", 2, 1, 2]] ; 2
 
@@ -943,11 +943,11 @@ BlueFlowerPlanters:=[["HydroponicPlanter", 1.4, 1.345, 8.93] ; 1.883
 	, ["CandyPlanter", 1, 1, 4] ; 1
 	, ["RedClayPlanter", 1, 1, 6] ; 1
 	, ["PesticidePlanter", 1, 1, 10] ; 1
-	, ["Heat-TreatedPlanter", 1, 1, 12] ; 1
+	, ["HeatTreatedPlanter", 1, 1, 12] ; 1
 	, ["PaperPlanter", .75, 1, 1] ; 0.75
 	, ["TicketPlanter", 2, 1, 2]] ; 1
 
-CactusPlanters:=[["Heat-TreatedPlanter", 1.4, 1.215, 9.88] ; 1.701
+CactusPlanters:=[["HeatTreatedPlanter", 1.4, 1.215, 9.88] ; 1.701
 	, ["PlanterOfPlenty", 1.5, 1, 16] ; 1.5
 	, ["RedClayPlanter", 1.2, 1.1075, 5.42] ; 1.29
 	, ["HydroponicPlanter", 1, 1.25, 9.6] ; 1.25
@@ -960,7 +960,7 @@ CactusPlanters:=[["Heat-TreatedPlanter", 1.4, 1.215, 9.88] ; 1.701
 	, ["PaperPlanter", .75, 1, 1] ; 0.75
 	, ["TicketPlanter", 2, 1, 2]] ; 2
 
-CloverPlanters:=[["Heat-TreatedPlanter", 1.4, 1.17, 10.26] ; 1.638
+CloverPlanters:=[["HeatTreatedPlanter", 1.4, 1.17, 10.26] ; 1.638
 	, ["TackyPlanter", 1, 1.5, 5.34] ; 1.5
 	, ["PlanterOfPlenty", 1.5, 1, 16] ; 1.5
 	, ["RedClayPlanter", 1.2, 1.085, 5.53] ; 1.302
@@ -978,7 +978,7 @@ CoconutPlanters:=[["PlanterOfPlenty", 1.5, 1.5, 10.67] ; 2.25
 	, ["PetalPlanter", 1, 1.447, 9.68] ; 1.447
 	, ["HydroponicPlanter", 1.4, 1.023, 11.74] ; 1.4322
 	, ["BlueClayPlanter", 1.2, 1.0115, 5.94] ; 1.2138
-	, ["Heat-TreatedPlanter", 1, 1.03, 11.66] ; 1.03
+	, ["HeatTreatedPlanter", 1, 1.03, 11.66] ; 1.03
 	, ["RedClayPlanter", 1, 1.015, 5.92] ; 1.015
 	, ["PlasticPlanter", 1, 1, 2] ; 1
 	, ["TackyPlanter", 1, 1, 8] ; 1
@@ -991,7 +991,7 @@ DandelionPlanters:=[["PetalPlanter", 1.5, 1.4235, 9.84] ; 2.13525
 	, ["PlanterOfPlenty", 1.5, 1, 16] ; 1.5
 	, ["HydroponicPlanter", 1.4, 1.0485, 11.45] ; 1.4679
 	, ["BlueClayPlanter", 1.2, 1.02425, 5.86] ; 1.2291
-	, ["Heat-TreatedPlanter", 1, 1.028, 11.68] ; 1.028
+	, ["HeatTreatedPlanter", 1, 1.028, 11.68] ; 1.028
 	, ["RedClayPlanter", 1, 1.014, 5.92] ; 1.014
 	, ["PlasticPlanter", 1, 1, 2] ; 1
 	, ["CandyPlanter", 1, 1, 4] ; 1
@@ -1000,7 +1000,7 @@ DandelionPlanters:=[["PetalPlanter", 1.5, 1.4235, 9.84] ; 2.13525
 	, ["TicketPlanter", 2, 1, 2]] ; 2
 
 MountainTopPlanters:=[["PlanterOfPlenty", 1.5, 1.5, 10.67] ; 2.25
-	, ["Heat-TreatedPlanter", 1.4, 1.25, 9.6] ; 1.75
+	, ["HeatTreatedPlanter", 1.4, 1.25, 9.6] ; 1.75
 	, ["RedClayPlanter", 1.2, 1.125, 5.34] ; 1.35
 	, ["HydroponicPlanter", 1, 1.25, 9.6] ; 1.25
 	, ["BlueClayPlanter", 1, 1.125, 5.34] ; 1.125
@@ -1012,7 +1012,7 @@ MountainTopPlanters:=[["PlanterOfPlenty", 1.5, 1.5, 10.67] ; 2.25
 	, ["PaperPlanter", .75, 1, 1] ; 0.75
 	, ["TicketPlanter", 2, 1, 2]] ; 2
 
-MushroomPlanters:=[["Heat-TreatedPlanter", 1.4, 1.3425, 8.94] ; 1.8795
+MushroomPlanters:=[["HeatTreatedPlanter", 1.4, 1.3425, 8.94] ; 1.8795
 	, ["TackyPlanter", 1, 1.5, 5.34] ; 1.5
 	, ["PlanterOfPlenty", 1.5, 1, 16] ; 1.5
 	, ["PesticidePlanter", 1.3, 1, 10] ; 1.3
@@ -1026,7 +1026,7 @@ MushroomPlanters:=[["Heat-TreatedPlanter", 1.4, 1.3425, 8.94] ; 1.8795
 	, ["TicketPlanter", 2, 1, 2]] ; 1
 
 PepperPlanters:=[["PlanterOfPlenty", 1.5, 1.5, 10.67] ; 2.25
-	, ["Heat-TreatedPlanter", 1.4, 1.46, 8.22] ; 2.044
+	, ["HeatTreatedPlanter", 1.4, 1.46, 8.22] ; 2.044
 	, ["RedClayPlanter", 1.2, 1.23, 4.88] ; 1.476
 	, ["PetalPlanter", 1, 1.04, 13.47] ; 1.04
 	, ["PlasticPlanter", 1, 1, 2] ; 1
@@ -1047,7 +1047,7 @@ PineTreePlanters:=[["HydroponicPlanter", 1.4, 1.42, 8.46] ; 1.988
 	, ["CandyPlanter", 1, 1, 4] ; 1
 	, ["RedClayPlanter", 1, 1, 6] ; 1
 	, ["PesticidePlanter", 1, 1, 10] ; 1
-	, ["Heat-TreatedPlanter", 1, 1, 12] ; 1
+	, ["HeatTreatedPlanter", 1, 1, 12] ; 1
 	, ["PaperPlanter", .75, 1, 1] ; 0.75
 	, ["TicketPlanter", 2, 1, 2]] ; 2
 
@@ -1057,7 +1057,7 @@ PineapplePlanters:=[["PetalPlanter", 1.5, 1.445, 9.69] ; 2.1675
 	, ["PesticidePlanter", 1.3, 1, 10] ; 1.3
 	, ["TackyPlanter", 1.25, 1, 8] ; 1.25
 	, ["RedClayPlanter", 1.2, 1.015, 5.92] ; 1.218
-	, ["Heat-TreatedPlanter", 1, 1.03, 11.66] ; 1.03
+	, ["HeatTreatedPlanter", 1, 1.03, 11.66] ; 1.03
 	, ["HydroponicPlanter", 1, 1.025, 11.71] ; 1.025
 	, ["BlueClayPlanter", 1, 1.0125, 5.93] ; 1.0125
 	, ["PlasticPlanter", 1, 1, 2] ; 1
@@ -1069,7 +1069,7 @@ PumpkinPlanters:=[["PetalPlanter", 1.5, 1.285, 10.9] ; 1.9275
 	, ["PesticidePlanter", 1.3, 1, 10] ; 1.3
 	, ["RedClayPlanter", 1.2, 1.055, 5.69] ; 1.266
 	, ["TackyPlanter", 1.25, 1, 8] ; 1.25
-	, ["Heat-TreatedPlanter", 1, 1.11, 10.82] ; 1.11
+	, ["HeatTreatedPlanter", 1, 1.11, 10.82] ; 1.11
 	, ["HydroponicPlanter", 1, 1.105, 10.86] ; 1.105
 	, ["BlueClayPlanter", 1, 1.0525, 5.71] ; 1.0525
 	, ["PlasticPlanter", 1, 1, 2] ; 1
@@ -1077,7 +1077,7 @@ PumpkinPlanters:=[["PetalPlanter", 1.5, 1.285, 10.9] ; 1.9275
 	, ["PaperPlanter", .75, 1, 1] ; 0.75
 	, ["TicketPlanter", 2, 1, 2]] ; 2
 
-RosePlanters:=[["Heat-TreatedPlanter", 1.4, 1.41, 8.52] ; 1.974
+RosePlanters:=[["HeatTreatedPlanter", 1.4, 1.41, 8.52] ; 1.974
 	, ["PlanterOfPlenty", 1.5, 1, 16] ; 1.5
 	, ["PesticidePlanter", 1.3, 1, 10] ; 1.3
 	, ["RedClayPlanter", 1, 1.205, 4.98] ; 1.205
@@ -1093,7 +1093,7 @@ RosePlanters:=[["Heat-TreatedPlanter", 1.4, 1.41, 8.52] ; 1.974
 SpiderPlanters:=[["PesticidePlanter", 1.3, 1.6, 6.25] ; 2.08
 	, ["PetalPlanter", 1, 1.5, 9.33] ; 1.5
 	, ["PlanterOfPlenty", 1.5, 1, 16] ; 1.5
-	, ["Heat-TreatedPlanter", 1.4, 1, 12] ; 1.4
+	, ["HeatTreatedPlanter", 1.4, 1, 12] ; 1.4
 	, ["CandyPlanter", 1.2, 1, 4] ; 1.2
 	, ["PlasticPlanter", 1, 1, 2] ; 1
 	, ["BlueClayPlanter", 1, 1, 6] ; 1
@@ -1107,7 +1107,7 @@ StrawberryPlanters:=[["PesticidePlanter", 1, 1.6, 6.25] ; 1.6
 	, ["CandyPlanter", 1, 1.5, 2.67] ; 1.5
 	, ["PlanterOfPlenty", 1.5, 1, 16] ; 1.5
 	, ["HydroponicPlanter", 1.4, 1, 12] ; 1.3
-	, ["Heat-TreatedPlanter", 1, 1.345, 8.93] ; 1.345
+	, ["HeatTreatedPlanter", 1, 1.345, 8.93] ; 1.345
 	, ["BlueClayPlanter", 1.2, 1, 6] ; 1.2
 	, ["RedClayPlanter", 1, 1.1725, 5.12] ; 1.1725
 	, ["PetalPlanter", 1, 1.155, 12.13] ; 1.155
@@ -1117,7 +1117,7 @@ StrawberryPlanters:=[["PesticidePlanter", 1, 1.6, 6.25] ; 1.6
 	, ["TicketPlanter", 2, 1, 2]] ; 2
 
 StumpPlanters:=[["PlanterOfPlenty", 1.5, 1.5, 10.67] ; 2.25
-	, ["Heat-TreatedPlanter", 1.4, 1.03, 11.65] ; 1.442
+	, ["HeatTreatedPlanter", 1.4, 1.03, 11.65] ; 1.442
 	, ["HydroponicPlanter", 1, 1.375, 8.73] ; 1.375
 	, ["PesticidePlanter", 1.3, 1, 10] ; 1.3
 	, ["CandyPlanter", 1.2, 1, 4] ; 1.2
@@ -1134,7 +1134,7 @@ SunflowerPlanters:=[["PetalPlanter", 1.5, 1.3415, 10.44] ; 2.01225
 	, ["PlanterOfPlenty", 1.5, 1, 16] ; 1.5
 	, ["PesticidePlanter", 1.3, 1, 10] ; 1.3
 	, ["RedClayPlanter", 1.2, 1.04175, 5.76] ; 1.2501
-	, ["Heat-TreatedPlanter", 1, 1.0835, 11.08] ; 1.0835
+	, ["HeatTreatedPlanter", 1, 1.0835, 11.08] ; 1.0835
 	, ["HydroponicPlanter", 1, 1.075, 11.17] ; 1.075
 	, ["BlueClayPlanter", 1, 1.0375, 5.79] ; 1.0375
 	, ["PlasticPlanter", 1, 1, 2] ; 1
@@ -9644,7 +9644,7 @@ nm_AmuletPrompt(decision:=0, type:=0, *){
 }
 nm_FindItem(chosenItem, *) {
 	global shiftLockEnabled, bitmaps
-	static items := ["Cog", "Ticket", "SprinklerBuilder", "BeequipCase", "Gumdrops", "Coconut", "Stinger", "Snowflake", "MicroConverter", "Honeysuckle", "Whirligig", "FieldDice", "SmoothDice", "LoadedDice", "JellyBeans", "RedExtract", "BlueExtract", "Glitter", "Glue", "Oil", "Enzymes", "TropicalDrink", "PurplePotion", "SuperSmoothie", "MarshmallowBee", "Sprout", "MagicBean", "FestiveBean", "CloudVial", "NightBell", "BoxOFrogs", "AntPass", "BrokenDrive", "7ProngedCog", "RoboPass", "Translator", "SpiritPetal", "Present", "Treat", "StarTreat", "AtomicTreat", "SunflowerSeed", "Strawberry", "Pineapple", "Blueberry", "Bitterberry", "Neonberry", "MoonCharm", "GingerbreadBear", "AgedGingerbreadBear", "WhiteDrive", "RedDrive", "BlueDrive", "GlitchedDrive", "ComfortingVial", "InvigoratingVial", "MotivatingVial", "RefreshingVial", "SatisfyingVial", "PinkBalloon", "RedBalloon", "WhiteBalloon", "BlackBalloon", "SoftWax", "HardWax", "CausticWax", "SwirledWax", "Turpentine", "PaperPlanter", "TicketPlanter", "FestivePlanter", "PlasticPlanter", "CandyPlanter", "RedClayPlanter", "BlueClayPlanter", "TackyPlanter", "PesticidePlanter", "Heat-TreatedPlanter", "HydroponicPlanter", "PetalPlanter", "ThePlanterOfPlenty", "BasicEgg", "SilverEgg", "GoldEgg", "DiamondEgg", "MythicEgg", "StarEgg", "GiftedSilverEgg", "GiftedGoldEgg", "GiftedDiamondEgg", "GiftedMythicEgg", "RoyalJelly", "StarJelly", "BumbleBeeEgg", "BumbleBeeJelly", "RageBeeJelly", "ShockedBeeJelly"]
+	static items := ["Cog", "Ticket", "SprinklerBuilder", "BeequipCase", "Gumdrops", "Coconut", "Stinger", "Snowflake", "MicroConverter", "Honeysuckle", "Whirligig", "FieldDice", "SmoothDice", "LoadedDice", "JellyBeans", "RedExtract", "BlueExtract", "Glitter", "Glue", "Oil", "Enzymes", "TropicalDrink", "PurplePotion", "SuperSmoothie", "MarshmallowBee", "Sprout", "MagicBean", "FestiveBean", "CloudVial", "NightBell", "BoxOFrogs", "AntPass", "BrokenDrive", "7ProngedCog", "RoboPass", "Translator", "SpiritPetal", "Present", "Treat", "StarTreat", "AtomicTreat", "SunflowerSeed", "Strawberry", "Pineapple", "Blueberry", "Bitterberry", "Neonberry", "MoonCharm", "GingerbreadBear", "AgedGingerbreadBear", "WhiteDrive", "RedDrive", "BlueDrive", "GlitchedDrive", "ComfortingVial", "InvigoratingVial", "MotivatingVial", "RefreshingVial", "SatisfyingVial", "PinkBalloon", "RedBalloon", "WhiteBalloon", "BlackBalloon", "SoftWax", "HardWax", "CausticWax", "SwirledWax", "Turpentine", "PaperPlanter", "TicketPlanter", "FestivePlanter", "PlasticPlanter", "CandyPlanter", "RedClayPlanter", "BlueClayPlanter", "TackyPlanter", "PesticidePlanter", "HeatTreatedPlanter", "HydroponicPlanter", "PetalPlanter", "ThePlanterOfPlenty", "BasicEgg", "SilverEgg", "GoldEgg", "DiamondEgg", "MythicEgg", "StarEgg", "GiftedSilverEgg", "GiftedGoldEgg", "GiftedDiamondEgg", "GiftedMythicEgg", "RoyalJelly", "StarJelly", "BumbleBeeEgg", "BumbleBeeJelly", "RageBeeJelly", "ShockedBeeJelly"]
 	GetRobloxClientPos()
 	DetectHiddenWindows 1
 	if windowWidth == 0 {

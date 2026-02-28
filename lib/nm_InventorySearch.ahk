@@ -12,6 +12,9 @@ Scroll(direction:="Down", repeat:=1) {
 ; scrolltoend: set 0 to omit scrolling to top/bottom after prescrolls
 ; max: number of scrolls in total
 nm_InventorySearch(item, direction:="down", prescroll:=0, prescrolldir:="", scrolltoend:=1, max:=70){
+	if item == "HeatTreatedPlanter" {
+		item := "Heat-TreatedPlanter"
+	}
 	global bitmaps
 	static hRoblox:=0
 	pos := 0
