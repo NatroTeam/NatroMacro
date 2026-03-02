@@ -112,7 +112,7 @@ OnMessage(0x5560, nm_copyDebugLog)
 OnMessage(0x0020, nm_WM_SETCURSOR)
 
 ; set version identifier
-VersionID := "1.1.0"
+VersionID := "1.1.1"
 
 ;initial load warnings
 if (A_ScreenDPI != 96)
@@ -179,7 +179,7 @@ nm_importPatterns()
 	if FileExist("settings\imported\patterns.ahk")
 		file := FileOpen("settings\imported\patterns.ahk", "r"), imported := file.Read(), file.Close()
 	else
-		imported := ""
+		imported := "", hashDefaults()
 
 	import := ""
 	Loop Files A_WorkingDir "\patterns\*.ahk"
@@ -197,7 +197,7 @@ nm_importPatterns()
 		if !InStr(imported, imported_pattern := '("' (pattern_name := StrReplace(A_LoopFileName, "." A_LoopFileExt)) '")`r`n' pattern '`r`n`r`n') 
 		{
 			patternhash := HashFile(A_LoopFilePath, 6)
-			for hash in defaultPatternHashes {
+			for hash in installedPatternHashes {
 				if patternhash = hash {
 					bypassWarning := 1
 				}
@@ -275,6 +275,22 @@ nm_importPatterns()
 
 	if (import != imported)
 		file := FileOpen(A_WorkingDir "\settings\imported\patterns.ahk", "w-d"), file.Write(import), file.Close()
+
+	hashDefaults(){
+		outputPath := "lib\data\patternHashes.ahk"
+		hashes := []
+
+		output := FileOpen(outputPath, "w")
+
+		loop files "patterns/*.ahk" {
+			fileHash := HashFile(A_LoopFileFullPath, 6)
+			hashes.push(fileHash)
+		}
+
+		output.Write("installedPatternHashes := " JSON.stringify(hashes))
+		output.Close()
+		installedPatternHashes := hashes
+	}
 }
 nm_importPatterns()
 
