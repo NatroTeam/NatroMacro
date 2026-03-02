@@ -1,16 +1,15 @@
 ﻿if (MoveMethod = "Cannon") {
     nm_gotoramp()
     nm_gotocannon()
-    send "{e down}"
+    send "{" RotRight " 2}"
+    send "{e down}{" FwdKey " down}"
     HyperSleep(100)
-    send "{e up}{" RightKey " down}"
-    HyperSleep(550)
-    send "{space 2}"
+    send "{e up}"
+    HyperSleep(580)
+    send "{space 2}{" FwdKey " up}"
+    HyperSleep(3050)
+    send "{space}"
     HyperSleep(2000)
-    send "{" RightKey " up}"
-    HyperSleep(1000)
-    send "{space}{" RotRight " 2}"
-    Sleep 1000
 } else {
     nm_gotoramp()
     nm_Walk(67.5, BackKey, LeftKey)
@@ -32,4 +31,5 @@
     nm_Walk(49, FwdKey)
     send "{" RotRight " 2}"
     ;path 230630 noobyguy
+    ;path 250927 dully176 - calibrated cannon path
 }

@@ -1,17 +1,22 @@
-# Git ignore
-# https://git-scm.com/docs/gitignore
+# Git ignore (https://git-scm.com/docs/gitignore)
+######## START NATRO ########
 
 # Settings
 settings/*
 
-# Miscellaneous
-*~
-*#
-.DS_STORE
-Thumbs.db
-.netbeans
-nbproject
-.node_history
+# Debug output
+MMScreenshots/*
+
+######## NartoTeam/NatroMacro EXCLUSIVE ########
+
+# github scripts
+.github/*
+.gitattributes
+
+# Dev Tools
+tools/*
+
+######## END NATRO ########
 
 # IDEs & Text Editors
 .idea
@@ -32,16 +37,5 @@ nbproject
 /logs
 *.log
 
-# Runtime data
-pids
-*.pid
-*.seed
-
 # Dependencies
 node_modules
-
-# Test output
-lib-cov
-/coverage
-/test/test-apps/*/dist
-MMScreenshots/*

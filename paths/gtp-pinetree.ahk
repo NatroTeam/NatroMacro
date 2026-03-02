@@ -9,15 +9,15 @@
     nm_Walk(5, RightKey)
     nm_Walk(1.5, FwdKey)
     nm_Walk(60, LeftKey)
-    nm_Walk(3.75, RightKey)
     nm_Walk(45, FwdKey)
+    nm_walk(3, BackKey)
+    nm_Walk(3, LeftKey)
     nm_Walk(47, LeftKey, FwdKey)
     send "{" RotLeft " 2}"
     nm_Walk(9, RightKey)
     nm_Walk(9, FwdKey)
-    nm_walk(16, LeftKey)
-    nm_walk(5, BackKey)
-    send "{" RotRight " 2}"
+    nm_walk(3, LeftKey)
+    nm_walk(3, BackKey)
 }
 else {
     nm_gotoramp()
@@ -38,9 +38,9 @@ else {
     send "{" FwdKey " up}{" RotLeft " 1}"
     nm_Walk(15, RightKey)
     nm_Walk(15, FwdKey)
-    nm_walk(16, LeftKey)
-    nm_walk(5, BackKey)
-    send "{" RotRight " 2}"
+    nm_walk(3, LeftKey)
+    nm_walk(3, BackKey)
 }
 ;path 230212 zaappiix
 ;path 230729 noobyguy
+; edited by Lorddrak

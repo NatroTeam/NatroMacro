@@ -59,7 +59,7 @@
 	, "StrawberryFieldCheck"
 	, "StumpFieldCheck"
 	, "SunflowerFieldCheck"
-	, "MultiReset"
+	, ""
 	, "ConvertMins"
 	, "LastConvertBalloon"
 	, "DisableToolUse"
@@ -221,7 +221,7 @@
 	, "PublicJoined"
 	, "DebugLogEnabled"
 	, "StingerDailyBonusCheck"
-	, "GatherDoubleReset"
+	, ""
 	, "HoneystormCheck"
 	, "LastHoneystorm"
 	, "RBPDelevelCheck"
@@ -363,4 +363,7 @@
 	, "HoneyUpdateSSCheck"
 	, "StickerStackVoucher"
 	, "MGatherPlanterLoot"
-	, "prioritylistnumeric"]
+	, "prioritylistnumeric"
+	, "dayOrNight"
+	, "CheckNight"
+]

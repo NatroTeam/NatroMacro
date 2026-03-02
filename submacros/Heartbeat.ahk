@@ -46,7 +46,6 @@ Loop
 		|| ((time - LastRobloxWindow > 600) && (reason := "No Roblox Window Timeout!"))))
 
 		|| ((MacroState = 1) && (((time - LastMainHeartbeat > 120) && (reason := "Macro Unresponsive Timeout!"))
-		|| ((time - LastBackgroundHeartbeat > 120) && (reason := "Background Script Timeout!"))
 		|| ((time - LastStatusHeartbeat > 120) && (reason := "Status Script Timeout!"))))) {
 		Prev_MacroState := MacroState, MacroState := 0
 		Loop
@@ -72,12 +71,7 @@ Loop
 	}
 	else
 	{
-		switch MacroState
-		{
-			case 1:
-			LastRobloxWindow += 5
-
-			case 0:
+		if MacroState != 2 {
 			LastBackgroundHeartbeat += 5
 			LastRobloxWindow += 5
 		}

@@ -1,3 +1,4 @@
+bitmaps["emptyhealth"] := Gdip_BitmapFromBase64("iVBORw0KGgoAAAANSUhEUgAAACgAAAAGCAAAAACUM4P3AAAAAnRSTlMAAHaTzTgAAAAXdEVYdFNvZnR3YXJlAFBob3RvRGVtb24gOS4wzRzYMQAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0n77u/JyBpZD0nVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkJz8+Cjx4OnhtcG1ldGEgeG1sbnM6eD0nYWRvYmU6bnM6bWV0YS8nIHg6eG1wdGs9J0ltYWdlOjpFeGlmVG9vbCAxMi40NCc+CjxyZGY6UkRGIHhtbG5zOnJkZj0naHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyc+CgogPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9JycKICB4bWxuczpleGlmPSdodHRwOi8vbnMuYWRvYmUuY29tL2V4aWYvMS4wLyc+CiAgPGV4aWY6UGl4ZWxYRGltZW5zaW9uPjQwPC9leGlmOlBpeGVsWERpbWVuc2lvbj4KICA8ZXhpZjpQaXhlbFlEaW1lbnNpb24+NjwvZXhpZjpQaXhlbFlEaW1lbnNpb24+CiA8L3JkZjpEZXNjcmlwdGlvbj4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOnRpZmY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvJz4KICA8dGlmZjpJbWFnZUxlbmd0aD42PC90aWZmOkltYWdlTGVuZ3RoPgogIDx0aWZmOkltYWdlV2lkdGg+NDA8L3RpZmY6SW1hZ2VXaWR0aD4KICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogIDx0aWZmOlJlc29sdXRpb25Vbml0PjI8L3RpZmY6UmVzb2x1dGlvblVuaXQ+CiAgPHRpZmY6WFJlc29sdXRpb24+OTYvMTwvdGlmZjpYUmVzb2x1dGlvbj4KICA8dGlmZjpZUmVzb2x1dGlvbj45Ni8xPC90aWZmOllSZXNvbHV0aW9uPgogPC9yZGY6RGVzY3JpcHRpb24+CjwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9J3InPz77yGiWAAAAI0lEQVR42mNUYyAOMDJggOUMDAyRmAqXMxAHmBiobjWxngEAj7gC+wwAe1AAAAAASUVORK5CYII=")
 
 bitmaps["hive"] := Map()
 bitmaps["hive"]["day"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["hive"]["day"]), Gdip_GraphicsClear(G, 0xffd28f0c), Gdip_DeleteGraphics(G)
@@ -10,3 +11,14 @@ bitmaps["hive"]["noshadow-day"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsF
 bitmaps["hive"]["noshadow-night"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["hive"]["noshadow-night"]), Gdip_GraphicsClear(G, 0xff694a00), Gdip_DeleteGraphics(G)
 bitmaps["hive"]["noshadow-gifted"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["hive"]["noshadow-gifted"]), Gdip_GraphicsClear(G, 0xffe39d1f), Gdip_DeleteGraphics(G)
 bitmaps["hive"]["wing"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["hive"]["wing"]), Gdip_GraphicsClear(G, 0xffa28645), Gdip_DeleteGraphics(G)
+
+; night honey/meteor currently missing. snow(storm) currently not possible until beesmas.
+bitmaps["spawn"] := Map()
+bitmaps["spawn"]["day"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["spawn"]["day"]), Gdip_GraphicsClear(G, 0xff937B1F), Gdip_DeleteGraphics(G)
+bitmaps["spawn"]["night"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["spawn"]["night"]), Gdip_GraphicsClear(G, 0xff796615), Gdip_DeleteGraphics(G)
+bitmaps["spawn"]["day-honey"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["spawn"]["day-honey"]), Gdip_GraphicsClear(G, 0xffC1AE55), Gdip_DeleteGraphics(G)
+;bitmaps["spawn"]["night-honey"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["spawn"]["night-honey"]), Gdip_GraphicsClear(G, 0xff000000), Gdip_DeleteGraphics(G)
+bitmaps["spawn"]["day-meteor"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["spawn"]["day-meteor"]), Gdip_GraphicsClear(G, 0xff957A70), Gdip_DeleteGraphics(G)
+;bitmaps["spawn"]["night-meteor"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["spawn"]["night-meteor"]), Gdip_GraphicsClear(G, 0xff000000), Gdip_DeleteGraphics(G)
+bitmaps["spawn"]["day-snow"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["spawn"]["day-snow"]), Gdip_GraphicsClear(G, 0xff988a55), Gdip_DeleteGraphics(G)
+bitmaps["spawn"]["day-snow-storm"] := Gdip_CreateBitmap(22, 4), G := Gdip_GraphicsFromImage(bitmaps["spawn"]["day-snow-storm"]), Gdip_GraphicsClear(G, 0xffc3bca5), Gdip_DeleteGraphics(G)

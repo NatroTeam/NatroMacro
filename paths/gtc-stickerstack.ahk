@@ -9,7 +9,8 @@ if (MoveMethod = "cannon")
 	send "{space 2}"
 	send "{" RightKey " up}"
 	HyperSleep(6000)
-	nm_Walk(7, RightKey)
+	nm_Walk(22, RightKey)
+	nm_Walk(7, LeftKey)
 	nm_Walk(11, BackKey)
 	send "{space down}"
 	nm_Walk(1.5, BackKey)
@@ -18,7 +19,8 @@ if (MoveMethod = "cannon")
 	send "{space down}"
 	nm_Walk(1.5, BackKey)
 	send "{space up}"
-	nm_Walk(2, BackKey)
+	nm_Walk(9, BackKey)
+	nm_Walk(9, LeftKey)
 	HyperSleep(2000)
 }
 else
@@ -70,3 +72,5 @@ else
     nm_Walk(14, FwdKey, LeftKey)
     nm_Walk(3, FwdKey)
 }
+
+; edited by Lorddrak

@@ -11,9 +11,9 @@
     nm_Walk(60, LeftKey)
     nm_Walk(3.75, RightKey)
     nm_Walk(45, FwdKey)
-    nm_Walk(34, RightKey, FwdKey)
+    nm_Walk(40, RightKey, FwdKey)
     nm_Walk(10, RightKey)
-    nm_Walk(12, LeftKey) 
+    nm_Walk(3, LeftKey) 
     nm_Walk(3, BackKey)
 }
 else {
@@ -29,9 +29,10 @@ else {
     HyperSleep(1100)
     send "{" BackKey " up}{space}{" RotLeft " 4}"
     HyperSleep(600)
-    nm_Walk(15, FwdKey)
-    nm_Walk(24, RightKey)
-    nm_Walk(12, LeftKey) 
+    nm_Walk(35, FwdKey)
+    nm_Walk(30, RightKey)
+    nm_Walk(3, LeftKey) 
     nm_Walk(3, BackKey)
 }
 ;path 230729 noobyguy
+; edited by Lordrak

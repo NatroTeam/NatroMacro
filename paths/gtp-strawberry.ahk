@@ -5,9 +5,8 @@
     nm_Walk(31, FwdKey)
     nm_Walk(7, FwdKey, LeftKey)
     nm_Walk(30.25, LeftKey)
-    nm_Walk(30, FwdKey, LeftKey)
-    send "{" RotLeft " 2}"
-    nm_Walk(10, BackKey, LeftKey)
+    nm_Walk(35, FwdKey, LeftKey)
+    nm_Walk(3, BackKey, RightKey)
 }
 else {
     nm_gotoramp()
@@ -25,6 +24,7 @@ else {
     nm_Walk(10, FwdKey, RightKey)
     nm_Walk(15, RightKey)
     nm_Walk(15, FwdKey)
-    nm_Walk(10, BackKey, LeftKey)
+    nm_Walk(3, BackKey, LeftKey)
 }
 ;path 230729 noobyguy
+; edited by Lorddrak
