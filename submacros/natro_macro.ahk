@@ -29,7 +29,8 @@ You should have received a copy of the license along with Natro Macro. If not, p
 #Include "Roblox.ahk"
 #Include "DurationFromSeconds.ahk"
 #Include "nowUnix.ahk"
-#include "ErrorHandling.ahk"
+#Include "ErrorHandling.ahk"
+#Include "HashFile.ahk"
 
 #Warn VarUnset, Off
 
@@ -111,7 +112,7 @@ OnMessage(0x5560, nm_copyDebugLog)
 OnMessage(0x0020, nm_WM_SETCURSOR)
 
 ; set version identifier
-VersionID := "1.1.0-B3"
+VersionID := "1.1.0"
 
 ;initial load warnings
 if (A_ScreenDPI != 96)
@@ -167,15 +168,13 @@ SC_Space:="sc039" ; Space
 SC_1:="sc002" ; 1
 SC_Slash  := "sc035" ; /
 
+#include "../lib/data/patternHashes.ahk" 
 ; import patterns and syntax check
 nm_importPatterns()
 {
 	global patterns := Map()
 	patterns.CaseSense := 0
 	global patternlist := []
-	defaultpatterns := [
-		"Auryn", "CornerXSnake", "Diamonds", "e_lol", "Fork", "Lines", "Slimline", "Snake", "Squares", "Stationary", "SuperCat", "XSnake"
-	]
 
 	if FileExist("settings\imported\patterns.ahk")
 		file := FileOpen("settings\imported\patterns.ahk", "r"), imported := file.Read(), file.Close()
@@ -197,8 +196,9 @@ nm_importPatterns()
 			), "Error", 0x40010 " T60"
 		if !InStr(imported, imported_pattern := '("' (pattern_name := StrReplace(A_LoopFileName, "." A_LoopFileExt)) '")`r`n' pattern '`r`n`r`n') 
 		{
-			for name in defaultpatterns {
-				if pattern_name = name {
+			patternhash := HashFile(A_LoopFilePath, 6)
+			for hash in defaultPatternHashes {
+				if patternhash = hash {
 					bypassWarning := 1
 				}
 			}
@@ -9756,7 +9756,7 @@ nm_ContributorsImage(page:=1, contributors:=""){
 			, ["mis.c",0xffa174fe,"https://github.com/misc-et"]
 			, ["ninju",0xffe6a157,"727937385274540046"]
 			, ["Dully176",0xff138718,"522940239904243712"]
-			, ["nooby", 0xff915dd5, "https://n-by.me"]
+			, ["nooby", 0xff915dd5,"https://n-by.me"]
 		]
 
 		testers := [
@@ -9772,6 +9772,9 @@ nm_ContributorsImage(page:=1, contributors:=""){
 			, ["idote",0xfff47fff,"350433227380621322"]
 			, ["mahirishere",0xffa3bded,"724740667158429747"]
 			, ["Pinwheel",0xfff49fbc,"849962858774003712"]
+			, ["symbol_101", 0xffa42d2d,"1210002709894266911"]
+			, ["data ^-^", 0xfffcb1ff,"https://www.roblox.com/users/841425386/profile"]
+			, ["Trystar001", 0xff15199e,""]
 		]
 
 		pBM := Gdip_CreateBitmap(244,212)
@@ -9842,10 +9845,12 @@ nm_ContributorsImage(page:=1, contributors:=""){
 			{
 				if ((x >= v[4][1]) && (x <= v[4][3]) && (y >= v[4][2]) && (y <= v[4][4]))
 				{
-					if InStr(v[3], "http")
-						Run(v[3])
-					else
-						nm_RunDiscord("users/" v[3])
+					if v[3] {
+						if InStr(v[3], "http")
+							Run(v[3])
+						else
+							nm_RunDiscord("users/" v[3])
+					}
 					break
 				}
 			}
