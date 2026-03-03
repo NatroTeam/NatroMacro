@@ -168,7 +168,6 @@ SC_Space:="sc039" ; Space
 SC_1:="sc002" ; 1
 SC_Slash  := "sc035" ; /
 
-#include "../lib/data/patternHashes.ahk" 
 ; import patterns and syntax check
 nm_importPatterns()
 {
@@ -176,10 +175,19 @@ nm_importPatterns()
 	patterns.CaseSense := 0
 	global patternlist := []
 
+	installedPatternHashes := []
+
+
+
 	if FileExist("settings\imported\patterns.ahk")
 		file := FileOpen("settings\imported\patterns.ahk", "r"), imported := file.Read(), file.Close()
 	else
-		imported := "", hashDefaults()
+		imported := ""
+
+	if FileExist("settings\imported\patternHashes.ahk")
+		getHashes()
+	else
+		hashDefaults()
 
 	import := ""
 	Loop Files A_WorkingDir "\patterns\*.ahk"
@@ -276,21 +284,22 @@ nm_importPatterns()
 	if (import != imported)
 		file := FileOpen(A_WorkingDir "\settings\imported\patterns.ahk", "w-d"), file.Write(import), file.Close()
 
+
 	hashDefaults(){
-		outputPath := "lib\data\patternHashes.ahk"
 		hashes := []
 
-		output := FileOpen(outputPath, "w")
+		output := FileOpen(A_WorkingDir "\settings\imported\patternHashes.ahk", "w-d")
 
 		loop files "patterns/*.ahk" {
 			fileHash := HashFile(A_LoopFileFullPath, 6)
 			hashes.push(fileHash)
 		}
 
-		output.Write("installedPatternHashes := " JSON.stringify(hashes))
+		output.Write(JSON.stringify(hashes))
 		output.Close()
 		installedPatternHashes := hashes
 	}
+	getHashes() => (installedPatternHashes := JSON.parse(FileRead("settings\imported\patternHashes.ahk")))
 }
 nm_importPatterns()
 
