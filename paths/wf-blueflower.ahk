@@ -16,9 +16,11 @@ HyperSleep(1500)
 
 ; going to hive
 nm_Walk(5, RightKey)
+nm_walk(2, LeftKey)
+nm_Walk(5, BackKey, LeftKey)
+nm_Walk(22, LeftKey)
+nm_Walk(3, RightKey)
 nm_Walk(8, BackKey)
-nm_Walk(18.5, LeftKey)
-nm_Walk(4, BackKey)
 nm_Walk(10, LeftKey)
 
 ; hive

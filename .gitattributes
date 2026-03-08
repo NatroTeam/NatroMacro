@@ -1,0 +1,11 @@
+# ahk files
+*.ahk text eol=crlf
+*.ahk2 text eol=crlf
+
+# batch files
+*.bat text eol=crlf
+
+# config and data files
+*.ini text eol=crlf
+*.txt text eol=lf
+*.log text eol=lf

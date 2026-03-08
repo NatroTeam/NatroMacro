@@ -34,16 +34,15 @@ else {
 	nm_Walk(2, FwdKey)
 	nm_Walk(30, BackKey)
 	nm_Walk(23, BackKey, RightKey)
-	nm_Walk(3, BackKey)
-	nm_Walk(5, RightKey)
-	nm_Walk(13, BackKey)
-	send "{" SC_Space " down}"
-	nm_Walk(5, BackKey)
-	HyperSleep(200)
-	send "{" SC_Space " up}"
-	nm_Walk(3.5, RightKey)
-	nm_Walk(5, FwdKey)
 	nm_Walk(7, BackKey)
+	nm_Walk(5, RightKey)
+	nm_Walk(12, BackKey)
+	SendInput "{" SC_Space " down}"
+	Sleep(100)
+	SendInput "{" SC_Space " up}"
+	nm_Walk(9.5, BackKey)
+	nm_Walk(4, RightKey)
+	HyperSleep(200)
 
 	; cannon
 	SetKeyDelay 150+A_KeyDelay
@@ -65,7 +64,9 @@ else {
 	send "{" SC_LShift "}"
 	; hive
 	nm_Walk(3.3, BackKey)
-	nm_Walk(35, RightKey)
+	nm_Walk(3, RightKey)
+	nm_Walk(1, FwdKey)
+	nm_Walk(32, RightKey)
 	nm_Walk(5, FwdKey)
 	nm_Walk(4, BackKey)
 }
