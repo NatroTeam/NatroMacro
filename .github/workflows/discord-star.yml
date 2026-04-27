@@ -2,6 +2,9 @@ on:
   watch:
     types: [started]
 
+permissions:
+  contents: read
+  
 jobs:
   star-to-discord:
     runs-on: ubuntu-latest
